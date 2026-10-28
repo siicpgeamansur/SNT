@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulateur de réseau — SNT (Filius-like)</title>
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1a1a1a;
+  --card: #f8f9fa;
+  --bd: #c8cdd4;
+  --ac: #2b6cb0;
+  --mut: #5a6577;
+  --err: #c53030;
+  --ok: #276749;
+  --hl: #ebf8ff;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg); color: var(--fg);
+  font: 14px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; }
+body { display: flex; flex-direction: column; max-width: 1280px; margin: 0 auto; padding: 8px 12px 16px; min-height: 100vh; }
+header { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between;
+  border-bottom: 2px solid var(--bd); padding-bottom: 8px; margin-bottom: 8px; }
+h1 { font-size: 1.25rem; margin: 0; font-weight: 700; color: var(--ac); }
+.bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+button, select, input, textarea {
+  font: inherit; color: var(--fg); background: #fff; border: 1px solid var(--bd);
+  border-radius: 6px; padding: 5px 10px; }
+button { cursor: pointer; }
+button:hover { border-color: var(--ac); background: var(--hl); }
+button.on { background: var(--ac); color: #fff; border-color: var(--ac); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+main { display: grid; grid-template-columns: 1fr 300px; gap: 12px; flex: 1; min-height: 0; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+#canvas-wrap { background: #fff; border: 1px solid var(--bd); border-radius: 10px;
+  overflow: hidden; position: relative; min-height: 420px; }
+#svg { width: 100%; height: 100%; min-height: 420px; touch-action: none; user-select: none; display: block; }
+#panel { background: var(--card); border: 1px solid var(--bd); border-radius: 10px;
+  padding: 12px; overflow: auto; max-height: 520px; }
+#panel h3 { margin: 0 0 8px; font-size: .95rem; display: flex; gap: 6px; align-items: center; color: var(--ac); }
+#panel label { display: block; font-size: .78rem; color: var(--mut); margin-top: 7px; font-weight: 500; }
+#panel input, #panel textarea { width: 100%; display: block; margin-top: 2px; }
+#panel .r { display: grid; grid-template-columns: 1.4fr 1fr; gap: 4px; }
+.mut { color: var(--mut); font-size: .82rem; }
+hr { border: 0; border-top: 1px solid var(--bd); margin: 10px 0; }
+.nd rect { fill: #fff; stroke: var(--bd); stroke-width: 2; }
+.nd.s rect { stroke: var(--ac); stroke-width: 3; }
+.nd.f rect { stroke: var(--ok); stroke-width: 3; }
+.nd text { fill: var(--fg); text-anchor: middle; pointer-events: none; }
+.nd .ip { font-size: 9.5px; fill: var(--mut); }
+.lk { stroke: #94a3b8; stroke-width: 2.5; }
+.lt { font-size: 9.5px; fill: var(--ac); text-anchor: middle; font-weight: 600; }
+#log-wrap { margin-top: 10px; }
+.lh { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 4px; }
+#log { background: #fafbfc; border: 1px solid var(--bd); border-radius: 8px;
+  padding: 8px 10px; height: 180px; overflow: auto; font-size: .82rem; font-family: ui-monospace, Consolas, monospace; }
+#log div { padding: 1px 0; }
+#log .h { font-weight: 700; margin-top: 5px; color: var(--ac); }
+#log .err { color: var(--err); }
+#log .ok { color: var(--ok); font-weight: 600; }
+.help { font-size: .8rem; color: var(--mut); margin: 4px 0 0; max-width: 80ch; }
+footer { margin-top: 8px; font-size: .75rem; color: var(--mut); text-align: center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌐 Simulateur de réseau — SNT</h1>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <select id="sc" title="Charger un scénario">
+      <option value="">— Choisir un scénario TP —</option>
+      <optgroup label="Partie 1">
+        <option value="p2p">Étape 1 · Deux ordinateurs (câble direct)</option>
+        <option value="lan">Étape 2 · Switch + serveur</option>
+        <option value="rt">Étape 3 · Deux réseaux + routeur</option>
+        <option value="dns">Étape 4-5 · DNS + serveur Web</option>
+        <option value="complexe">À faire · Réseau complexe (traceroute)</option>
+        <option value="peer">Étape 6 · Peer-to-peer (principe)</option>
+      </optgroup>
+      <optgroup label="Partie 2">
+        <option value="dhcp">Étape 7 · DHCP</option>
+        <option value="mail">Étape 8 · Serveurs mails (schéma)</option>
+        <option value="modem">Étape 9 · Modem / réseaux liés</option>
+      </optgroup>
+      <option value="vide">Réseau vide</option>
+    </select>
+  </div>
+</header>
+
+<div class="bar">
+  <button data-m="sel" class="on">✋ Sélectionner</button>
+  <button data-m="link">🔗 Relier</button>
+  <button data-m="del">🗑 Supprimer</button>
+  <span style="width:8px"></span>
+  <button data-add="pc">+ 💻 PC</button>
+  <button data-add="sw">+ 🔀 Switch</button>
+  <button data-add="rt">+ 📡 Routeur</button>
+  <button data-add="srv">+ 🖥️ Serveur</button>
+  <button data-add="modem">+ 📶 Modem</button>
+</div>
+<p class="help" id="hint">Choisis un scénario en haut, sélectionne un équipement pour le configurer, puis lance un <b>ping</b> ou ouvre une page web. Les paquets s’animent sur le graphe.</p>
+
+<main>
+  <div id="canvas-wrap"><svg id="svg" viewBox="0 0 860 480"><g id="Lg"></g></svg></div>
+  <aside id="panel"></aside>
+</main>
+
+<div id="log-wrap">
+  <div class="lh">
+    <b>Journal des paquets</b>
+    <label>Lent <input type="range" id="spd" min="120" max="1100" value="650"> Rapide</label>
+    <button id="clr">Effacer</button>
+  </div>
+  <div id="log"></div>
+</div>
+<footer>Simulateur pédagogique inspiré de Filius — adapté aux TP SNT (réseaux, DNS, DHCP, web, peer-to-peer). Style clair type GeoGebra.</footer>
+
+<script>
+const $ = s => document.querySelector(s), svg = $('#svg'), NS = 'http://www.w3.org/2000/svg';
+const ICON = { pc:'💻', sw:'🔀', rt:'📡', srv:'🖥️', modem:'📶' };
+const NAME = { pc:'PC', sw:'Switch', rt:'Routeur', srv:'Serveur', modem:'Modem' };
+let nodes = [], links = [], sel = null, mode = 'sel', first = null, nid = 1, busy = false, drag = null;
+
+const isH = n => n.t === 'pc' || n.t === 'srv' || n.t === 'modem';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ip2n = s => { const p = String(s).trim().split('.'); if (p.length !== 4 || p.some(x => !/^\d{1,3}$/.test(x) || +x > 255)) return null; return ((+p[0]<<24)>>>0) + (+p[1]<<16) + (+p[2]<<8) + +p[3]; };
+const n2ip = n => [(n>>>24)&255, (n>>>16)&255, (n>>>8)&255, n&255].join('.');
+const net = (a, m) => ((a & m) >>> 0);
+const same = (a, b, m) => { a = ip2n(a); b = ip2n(b); m = ip2n(m); return a != null && b != null && m != null && net(a, m) === net(b, m); };
+const netStr = (ip, m) => { const a = ip2n(ip), b = ip2n(m); return a == null || b == null ? '?' : n2ip(net(a, b)) + '/' + b.toString(2).replace(/0/g, '').length; };
+const other = (l, id) => nodes.find(n => n.id === (l.a === id ? l.b : l.a));
+const myLinks = n => links.filter(k => k.a === n.id || k.b === n.id);
+const ifc = (n, lid) => isH(n) ? { ip: n.ip, mask: n.mask } : (n.ifs[lid] || { ip: '', mask: '' });
+const owns = (n, ip) => isH(n) ? ip2n(n.ip) === ip2n(ip) : Object.values(n.ifs).some(f => ip2n(f.ip) === ip2n(ip));
+
+function add(t, x, y, name) {
+  const n = { id: nid++, t, name: name || NAME[t] + (nodes.filter(k => k.t === t).length + 1),
+    x, y, ip: '', mask: '255.255.255.0', gw: '', dns: '', ifs: {}, routes: '', recs: '', page: '', dhcp: false, dhcpRange: '', dhcpClient: false };
+  nodes.push(n); return n;
+}
+function say(t, c) {
+  const d = document.createElement('div'); d.textContent = t; if (c) d.className = c;
+  $('#log').appendChild(d); $('#log').scrollTop = 1e9;
+}
+
+function seg(n, lid) {
+  const out = [], seen = new Set([n.id]), l = links.find(k => k.id === lid), q = [[other(l, n.id), lid, [n.id]]];
+  while (q.length) {
+    const [c, via, p] = q.shift(); if (seen.has(c.id)) continue; seen.add(c.id);
+    const pp = [...p, c.id];
+    if (c.t === 'sw') myLinks(c).forEach(k => { const o = other(k, c.id); if (!seen.has(o.id)) q.push([o, k.id, pp]); });
+    else out.push({ n: c, lid: via, path: pp });
+  }
+  return out;
+}
+
+function trace(src, dst) {
+  const hops = []; let pend = [], cur = src, ttl = 10;
+  const L = t => pend.push(t), F = t => { L(t); return { ok: false, hops, tail: pend }; };
+  if (ip2n(dst) == null) return F('Adresse IP invalide : « ' + dst + ' »');
+  for (;;) {
+    if (cur !== src) {
+      if (owns(cur, dst)) { L(cur.name + ' : ce paquet m\'est destiné ✔'); return { ok: true, hops, tail: pend, node: cur }; }
+      if (isH(cur) && cur.t !== 'modem') return F(cur.name + ' : ce paquet n\'est pas pour moi (un hôte ne route pas).');
+    }
+    let nh, lid;
+    if (isH(cur)) {
+      const ls = myLinks(cur); if (!ls.length) return F(cur.name + ' n\'est relié à aucun équipement.');
+      lid = ls[0].id;
+      if (ip2n(cur.ip) == null || ip2n(cur.mask) == null) return F(cur.name + ' n\'a pas d\'IP / masque valide.');
+      const ns = netStr(cur.ip, cur.mask);
+      if (same(cur.ip, dst, cur.mask)) { nh = dst; L(cur.name + ' : ' + dst + ' est dans mon réseau (' + ns + ') → envoi direct.'); }
+      else if (ip2n(cur.gw) != null) { nh = cur.gw; L(cur.name + ' : ' + dst + ' hors réseau (' + ns + ') → passerelle ' + nh + '.'); }
+      else return F(cur.name + ' : ' + dst + ' hors réseau (' + ns + ') et pas de passerelle. Abandon.');
+    } else {
+      if (--ttl < 0) return F(cur.name + ' : TTL épuisé — paquet détruit.');
+      let b = null;
+      for (const k of myLinks(cur)) {
+        const f = cur.ifs[k.id];
+        if (f && same(f.ip, dst, f.mask)) b = { lid: k.id, nh: dst, w: 'réseau direct (' + netStr(f.ip, f.mask) + ')' };
+      }
+      if (!b) for (const ln of (cur.routes || '').split('\n')) {
+        const parts = ln.trim().split(/\s+/);
+        const r = parts[0], m = parts[1], via = parts[2];
+        if (via && same(r, dst, m) && (!b || !b.m || ip2n(m) > b.m))
+          for (const k of myLinks(cur)) {
+            const f = cur.ifs[k.id];
+            if (f && same(f.ip, via, f.mask)) b = { lid: k.id, nh: via, m: ip2n(m), w: 'route ' + r + '/' + m + ' via ' + via };
+          }
+      }
+      if (!b) return F(cur.name + ' : aucune route vers ' + dst + '. Abandon.');
+      nh = b.nh; lid = b.lid; L(cur.name + ' (routeur) : ' + dst + ' → ' + b.w + '. Prochain saut : ' + nh + '.');
+    }
+    const e = seg(cur, lid).find(x => owns(x.n, nh) && ip2n(ifc(x.n, x.lid).ip) === ip2n(nh));
+    if (!e) return F(cur.name + ' : ARP « qui a ' + nh + ' ? » → aucune réponse.');
+    L('ARP : ' + e.n.name + ' répond (' + nh + ').');
+    const sw = e.path.slice(1, -1).map(i => nodes.find(k => k.id === i).name);
+    if (sw.length) L('Traverse : ' + sw.join(', ') + '.');
+    hops.push({ p: e.path, t: pend }); pend = []; cur = e.n;
+  }
+}
+
+function anim(ids, col, label) {
+  return new Promise(res => {
+    const pts = ids.map(i => nodes.find(n => n.id === i)), g = document.createElementNS(NS, 'g');
+    const D = 1200 - $('#spd').value;
+    g.innerHTML = '<circle r="7" fill="' + col + '"/><text y="-12" text-anchor="middle" font-size="10" font-weight="700" fill="' + col + '">' + esc(label) + '</text>';
+    svg.appendChild(g);
+    let i = 0, t0 = 0;
+    const step = t => {
+      if (!t0) t0 = t; let k = (t - t0) / D;
+      if (k >= 1) { i++; t0 = t; k = 0; if (i >= pts.length - 1) { g.remove(); return res(); } }
+      const a = pts[i], b = pts[i + 1];
+      g.setAttribute('transform', 'translate(' + (a.x + (b.x - a.x) * k) + ',' + (a.y + (b.y - a.y) * k) + ')');
+      requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+async function send(src, dst, label, col) {
+  const r = trace(src, dst);
+  for (const h of r.hops) { h.t.forEach(x => say(x)); await anim(h.p, col, label); }
+  r.tail.forEach((x, i) => say(x, !r.ok && i === r.tail.length - 1 ? 'err' : ''));
+  return r;
+}
+async function ping(src, dst) {
+  say('── Ping de ' + src.name + ' → ' + dst, 'h');
+  let r = await send(src, dst, 'Ping', '#2b6cb0');
+  if (!r.ok) return say('✖ Échec : pas de réponse.', 'err');
+  say('↩ ' + r.node.name + ' renvoie une réponse à ' + src.ip, 'h');
+  r = await send(r.node, src.ip, 'Réponse', '#276749');
+  say(r.ok ? '✔ Ping réussi : ' + dst + ' répond.' : '✖ La réponse ne revient pas.', r.ok ? 'ok' : 'err');
+}
+async function web(src, url) {
+  let host = url.trim().replace(/^https?:\/\//, '').split('/')[0], ip = host;
+  say('── ' + src.name + ' ouvre http://' + host, 'h');
+  if (ip2n(host) == null) {
+    if (ip2n(src.dns) == null) return say('✖ ' + src.name + ' n\'a pas de DNS configuré.', 'err');
+    say('🔎 DNS : ' + src.name + ' interroge ' + src.dns + ' pour « ' + host + ' »');
+    let r = await send(src, src.dns, 'DNS ?', '#38a169');
+    if (!r.ok) return;
+    const s = r.node;
+    const rec = (s.recs || '').split('\n').map(l => l.trim().split(/\s+/)).find(x => x[0] && x[0].toLowerCase() === host.toLowerCase());
+    if (!(s.recs || '').trim()) return say('✖ ' + s.name + ' n\'est pas un serveur DNS (aucun enregistrement).', 'err');
+    if (!rec) return say('✖ ' + s.name + ' : domaine inconnu « ' + host + ' » (NXDOMAIN).', 'err');
+    ip = rec[1]; say(s.name + ' : ' + host + ' → ' + ip);
+    r = await send(s, src.ip, host + '=' + ip, '#38a169');
+    if (!r.ok) return;
+  }
+  say('🌍 HTTP GET → ' + ip);
+  let r = await send(src, ip, 'HTTP GET', '#dd6b20');
+  if (!r.ok) return;
+  if (!(r.node.page || '').trim()) return say('✖ ' + r.node.name + ' n\'héberge pas de site (port 80 fermé).', 'err');
+  r = await send(r.node, src.ip, 'Page', '#dd6b20');
+  if (r.ok) {
+    const pg = (nodes.find(n => owns(n, ip)) || { page: '' }).page.trim();
+    say('✔ Page reçue : « ' + pg + ' »', 'ok');
+  }
+}
+
+function draw() {
+  let h = '';
+  for (const l of links) {
+    const a = nodes.find(n => n.id === l.a), b = nodes.find(n => n.id === l.b);
+    h += '<line class="lk" data-l="' + l.id + '" x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '"/>';
+    for (const pair of [[a, b], [b, a]]) {
+      const n = pair[0], o = pair[1];
+      if (n.t === 'rt' && n.ifs[l.id] && n.ifs[l.id].ip)
+        h += '<text class="lt" x="' + (n.x + (o.x - n.x) * .32) + '" y="' + (n.y + (o.y - n.y) * .32 - 6) + '">' + esc(n.ifs[l.id].ip) + '</text>';
+    }
+  }
+  for (const n of nodes)
+    h += '<g class="nd' + (n.id === sel ? ' s' : '') + (n.id === first ? ' f' : '') + '" data-id="' + n.id + '" transform="translate(' + n.x + ',' + n.y + ')">' +
+      '<rect x="-34" y="-28" width="68" height="56" rx="10"/>' +
+      '<text font-size="26" y="8">' + ICON[n.t] + '</text>' +
+      '<text y="40" font-size="11" font-weight="700">' + esc(n.name) + '</text>' +
+      (isH(n) && n.ip ? '<text class="ip" y="52">' + esc(n.ip) + '</text>' : '') +
+      '</g>';
+  $('#Lg').innerHTML = h;
+}
+
+function panel() {
+  const n = nodes.find(k => k.id === sel), P = $('#panel');
+  if (!n) {
+    P.innerHTML = '<p class="mut">Clique sur un équipement pour le configurer.<br><br>' +
+      '<b>Astuces TP</b><br>' +
+      '• Étape 1 : deux PC + câble, ping direct.<br>' +
+      '• Étape 3 : configure les passerelles sur les PC et les IP d’interfaces du routeur.<br>' +
+      '• Étape 4-5 : enregistrements DNS (nom IP) + page web sur le serveur.<br>' +
+      '• DHCP : active « Adressage auto » et une plage sur le serveur.<br>' +
+      '• Traceroute : utilise plusieurs pings et observe les sauts dans le journal.</p>';
+    return;
+  }
+  let h = '<h3>' + ICON[n.t] + ' <input data-k="name" value="' + esc(n.name) + '" style="flex:1"></h3>';
+  if (isH(n)) {
+    h += '<label>Adresse IP <input data-k="ip" value="' + esc(n.ip) + '"></label>';
+    h += '<label>Masque <input data-k="mask" value="' + esc(n.mask) + '"></label>';
+    h += '<label>Passerelle par défaut <input data-k="gw" value="' + esc(n.gw) + '"></label>';
+    h += '<label>Serveur DNS <input data-k="dns" value="' + esc(n.dns) + '"></label>';
+    if (n.t === 'srv') {
+      h += '<label><input type="checkbox" data-k="dhcp" ' + (n.dhcp ? 'checked' : '') + '> Activer serveur DHCP</label>';
+      h += '<label>Plage DHCP (début-fin) <input data-k="dhcpRange" placeholder="192.168.0.100-192.168.0.200" value="' + esc(n.dhcpRange || '') + '"></label>';
+    }
+    h += '<p class="mut" id="info"></p>';
+  }
+  if (n.t === 'rt') {
+    h += '<p class="mut">Une IP par interface (câble) :</p>';
+    for (const k of myLinks(n)) {
+      const f = n.ifs[k.id] || { ip: '', mask: '255.255.255.0' };
+      h += '<label>Vers ' + esc(other(k, n.id).name) + '</label>' +
+        '<div class="r"><input data-i="' + k.id + '" data-j="ip" placeholder="IP" value="' + esc(f.ip) + '">' +
+        '<input data-i="' + k.id + '" data-j="mask" value="' + esc(f.mask) + '"></div>';
+    }
+    h += '<label>Table de routage (réseau masque via)</label>' +
+      '<textarea rows="3" data-k="routes" placeholder="192.168.2.0 255.255.255.0 10.0.0.2">' + esc(n.routes) + '</textarea>';
+  }
+  if (n.t === 'srv') {
+    h += '<label>Enregistrements DNS (nom IP, un par ligne)</label>' +
+      '<textarea rows="3" data-k="recs" placeholder="www.snt.com 192.168.0.30">' + esc(n.recs) + '</textarea>';
+    h += '<label>Page web (texte affiché)</label>' +
+      '<textarea rows="2" data-k="page">' + esc(n.page) + '</textarea>';
+  }
+  if (n.t === 'sw') h += '<p class="mut">Le switch relie les machines d’un même réseau local (pas d’IP).</p>';
+  if (n.t === 'modem') h += '<p class="mut">Le modem agit comme un pont vers un autre réseau Filius / physique. Même partie réseau requise.</p>';
+  if (isH(n)) {
+    h += '<hr>' +
+      '<label>Ping vers (IP)</label><input id="tg" placeholder="192.168.1.2">' +
+      '<button data-a="ping" style="margin-top:6px;width:100%">📶 Lancer le ping</button>' +
+      '<label>Ouvrir une page web (nom ou IP)</label><input id="ul" placeholder="www.snt.com">' +
+      '<button data-a="web" style="margin-top:6px;width:100%">🌐 Ouvrir</button>';
+    if (n.t === 'srv' && n.dhcp) {
+      h += '<button data-a="dhcp" style="margin-top:8px;width:100%" class="ok">📡 Distribuer adresses DHCP</button>';
+    }
+  }
+  P.innerHTML = h; info();
+}
+function info() {
+  const n = nodes.find(k => k.id === sel), e = $('#info');
+  if (n && e) e.textContent = 'Réseau : ' + netStr(n.ip, n.mask);
+}
+
+$('#panel').addEventListener('input', e => {
+  const n = nodes.find(k => k.id === sel), t = e.target; if (!n) return;
+  if (t.dataset.k) {
+    if (t.type === 'checkbox') n[t.dataset.k] = t.checked;
+    else n[t.dataset.k] = t.value;
+    draw(); info();
+  } else if (t.dataset.i) {
+    const f = n.ifs[t.dataset.i] = n.ifs[t.dataset.i] || { ip: '', mask: '255.255.255.0' };
+    f[t.dataset.j] = t.value; draw();
+  }
+});
+$('#panel').addEventListener('click', async e => {
+  const a = e.target.dataset.a, n = nodes.find(k => k.id === sel);
+  if (!a || busy || !n) return;
+  busy = true; document.querySelectorAll('button').forEach(b => b.disabled = true);
+  try {
+    if (a === 'ping') await ping(n, $('#tg').value.trim());
+    else if (a === 'web') await web(n, $('#ul').value);
+    else if (a === 'dhcp') {
+      const range = (n.dhcpRange || '192.168.0.100-192.168.0.200').split('-');
+      const start = ip2n(range[0].trim()), end = ip2n((range[1] || range[0]).trim());
+      if (start == null) { say('Plage DHCP invalide.', 'err'); return; }
+      let cur = start;
+      nodes.filter(x => isH(x) && x !== n && (x.dhcpClient || !x.ip)).forEach(x => {
+        x.ip = n2ip(cur); x.mask = n.mask; x.gw = n.gw || n.ip; x.dns = n.dns || n.ip;
+        x.dhcpClient = true; say('DHCP : ' + x.name + ' reçoit ' + x.ip, 'ok');
+        cur++; if (end != null && cur > end) cur = start;
+      });
+      draw(); panel();
+    }
+  } finally { busy = false; document.querySelectorAll('button').forEach(b => b.disabled = false); }
+});
+
+const pos = e => { const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY; return p.matrixTransform(svg.getScreenCTM().inverse()); };
+svg.addEventListener('pointerdown', e => {
+  if (busy) return;
+  const g = e.target.closest('.nd'), l = e.target.closest('.lk');
+  if (mode === 'del') {
+    if (g) { const id = +g.dataset.id; nodes = nodes.filter(n => n.id !== id); links = links.filter(k => k.a !== id && k.b !== id); if (sel === id) sel = null; }
+    else if (l) links = links.filter(k => k.id !== +l.dataset.l);
+    draw(); panel(); return;
+  }
+  if (!g) { if (mode === 'link') { first = null; draw(); } return; }
+  const id = +g.dataset.id, n = nodes.find(k => k.id === id);
+  if (mode === 'link') {
+    if (!first) first = id;
+    else if (first !== id) {
+      if (links.some(k => (k.a === first && k.b === id) || (k.a === id && k.b === first))) say('Déjà reliés.', 'err');
+      else if ((isH(nodes.find(k => k.id === first)) && myLinks(nodes.find(k => k.id === first)).length) ||
+               (isH(n) && myLinks(n).length))
+        say('Un PC/serveur/modem n’a qu’une seule interface : un seul câble.', 'err');
+      else links.push({ id: nid++, a: first, b: id });
+      first = null;
+    }
+    draw(); return;
+  }
+  sel = id; drag = n; svg.setPointerCapture(e.pointerId); draw(); panel();
+});
+svg.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const p = pos(e);
+  drag.x = Math.max(40, Math.min(820, p.x));
+  drag.y = Math.max(40, Math.min(440, p.y));
+  draw();
+});
+svg.addEventListener('pointerup', () => drag = null);
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+  mode = b.dataset.m; first = null;
+  document.querySelectorAll('[data-m]').forEach(x => x.classList.toggle('on', x === b));
+  draw();
+});
+document.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+  const n = add(b.dataset.add, 80 + Math.random() * 700, 60 + Math.random() * 360);
+  sel = n.id; draw(); panel();
+});
+$('#clr').onclick = () => $('#log').innerHTML = '';
+
+const P = (ip, gw, extra) => Object.assign({ ip: ip || '', gw: gw || '' }, extra || {});
+const SC = {
+  p2p: {
+    N: [['pc', 'Ordinateur A', P('192.168.0.10'), 220, 220],
+        ['pc', 'Ordinateur B', P('192.168.0.20'), 640, 220]],
+    L: [[0, 1]],
+    m: 'Étape 1 — Deux PC reliés par câble (équivalent RJ45 croisé). Sélectionne A, ping vers 192.168.0.20.'
+  },
+  lan: {
+    N: [['sw', 'Switch', 0, 400, 220],
+        ['pc', 'Ordinateur A', P('192.168.0.10'), 180, 100],
+        ['pc', 'Ordinateur B', P('192.168.0.20'), 180, 340],
+        ['srv', 'Serveur', P('192.168.0.30', '', { page: 'Echo / Hello from server' }), 620, 220]],
+    L: [[0, 1], [0, 2], [0, 3]],
+    m: 'Étape 2 — Switch + serveur. Ping A → 192.168.0.30.'
+  },
+  rt: {
+    N: [['pc', '192.168.0.10', P('192.168.0.10', '192.168.0.1'), 100, 80],
+        ['pc', '192.168.0.20', P('192.168.0.20', '192.168.0.1'), 100, 200],
+        ['pc', '192.168.0.30', P('192.168.0.30', '192.168.0.1'), 100, 320],
+        ['sw', 'Switch R0', 0, 260, 200],
+        ['rt', 'Routeur', { i: { 3: '192.168.0.1', 4: '192.168.1.1' } }, 430, 200],
+        ['sw', 'Switch R1', 0, 600, 200],
+        ['pc', '192.168.1.10', P('192.168.1.10', '192.168.1.1'), 760, 80],
+        ['pc', '192.168.1.20', P('192.168.1.20', '192.168.1.1'), 760, 200],
+        ['pc', '192.168.1.30', P('192.168.1.30', '192.168.1.1'), 760, 320]],
+    L: [[0, 3], [1, 3], [2, 3], [3, 4], [4, 5], [5, 6], [5, 7], [5, 8]],
+    m: 'Étape 3 — Deux réseaux + routeur. Ping 192.168.0.10 → 192.168.1.30 et observe les sauts.'
+  },
+  dns: {
+    N: [['pc', 'PC1', P('192.168.0.10', '192.168.0.1', { dns: '192.168.2.10' }), 80, 100],
+        ['pc', 'PC2', P('192.168.1.10', '192.168.1.1', { dns: '192.168.2.10' }), 80, 320],
+        ['sw', 'Switch0', 0, 220, 100],
+        ['sw', 'Switch1', 0, 220, 320],
+        ['rt', 'Routeur', { i: { 2: '192.168.0.1', 3: '192.168.1.1', 5: '192.168.2.1' } }, 400, 210],
+        ['sw', 'Switch2', 0, 580, 210],
+        ['srv', 'DNS', P('192.168.2.10', '192.168.2.1', { recs: 'www.snt.com 192.168.0.30' }), 720, 80],
+        ['srv', 'Web', P('192.168.0.30', '192.168.0.1', { page: 'Bienvenue sur www.snt.com — SNT' }), 720, 320]],
+    L: [[0, 2], [1, 3], [2, 4], [3, 4], [4, 5], [5, 6], [2, 7]],
+    m: 'Étapes 4-5 — DNS + Web. Sur PC1 ouvre « www.snt.com ». Observe DNS puis HTTP.'
+  },
+  complexe: {
+    N: [['pc', 'M1', P('10.0.1.10', '10.0.1.1'), 80, 80],
+        ['pc', 'M4', P('10.0.2.10', '10.0.2.1'), 80, 240],
+        ['pc', 'M5', P('10.0.2.20', '10.0.2.1'), 80, 380],
+        ['sw', 'S1', 0, 200, 80],
+        ['sw', 'S2', 0, 200, 310],
+        ['rt', 'A', { i: { 3: '10.0.1.1', 5: '10.1.0.1' }, routes: '10.0.2.0 255.255.255.0 10.1.0.2\n10.0.3.0 255.255.255.0 10.1.0.2' }, 340, 80],
+        ['rt', 'B', { i: { 4: '10.0.2.1', 5: '10.1.0.2', 6: '10.1.1.1' },
+          routes: '10.0.1.0 255.255.255.0 10.1.0.1\n10.0.3.0 255.255.255.0 10.1.1.2' }, 340, 310],
+        ['rt', 'C', { i: { 6: '10.1.1.2', 7: '10.0.3.1' }, routes: '10.0.1.0 255.255.255.0 10.1.1.1\n10.0.2.0 255.255.255.0 10.1.1.1' }, 520, 310],
+        ['sw', 'S3', 0, 680, 310],
+        ['pc', 'M9', P('10.0.3.10', '10.0.3.1'), 780, 240],
+        ['pc', 'M11', P('10.0.3.20', '10.0.3.1'), 780, 380]],
+    L: [[0, 3], [3, 5], [1, 4], [2, 4], [4, 6], [5, 6], [6, 7], [7, 8], [8, 9], [8, 10]],
+    m: 'Réseau complexe — Pings (équivalent traceroute) : M1→M9, M11→M4. Observe les sauts. Supprime un lien pour simuler une panne.'
+  },
+  peer: {
+    N: [['sw', 'Switch', 0, 400, 220],
+        ['pc', 'PC-A (192.168.0.10)', P('192.168.0.10'), 200, 140],
+        ['pc', 'PC-B (192.168.0.20)', P('192.168.0.20'), 600, 140],
+        ['pc', 'PC-C', P('192.168.0.30'), 400, 360]],
+    L: [[0, 1], [0, 2], [0, 3]],
+    m: 'Étape 6 — Principe Peer-to-peer. Tous les postes sont égaux (chaque machine peut être source et client).'
+  },
+  dhcp: {
+    N: [['sw', 'Switch', 0, 400, 220],
+        ['srv', 'DHCP Server', P('192.168.0.10', '', { dhcp: true, dhcpRange: '192.168.0.100-192.168.0.200', page: 'Serveur DHCP actif' }), 620, 220],
+        ['pc', 'Ordinateur A', P('', '', { dhcpClient: true }), 180, 100],
+        ['pc', 'Ordinateur B', P('', '', { dhcpClient: true }), 180, 220],
+        ['pc', 'Ordinateur C', P('', '', { dhcpClient: true }), 180, 340]],
+    L: [[0, 1], [0, 2], [0, 3], [0, 4]],
+    m: 'Étape 7 — DHCP. Sélectionne le serveur, coche Activer serveur DHCP, puis « Distribuer adresses DHCP ». Les PC reçoivent une IP. Puis ping.'
+  },
+  mail: {
+    N: [['pc', 'Liz', P('192.168.0.10', '192.168.0.1', { dns: '192.168.2.10' }), 80, 80],
+        ['pc', 'Bob', P('192.168.1.10', '192.168.1.1', { dns: '192.168.2.10' }), 80, 220],
+        ['pc', 'Jef', P('192.168.1.20', '192.168.1.1', { dns: '192.168.2.10' }), 80, 360],
+        ['sw', 'Sw0', 0, 220, 80],
+        ['sw', 'Sw1', 0, 220, 290],
+        ['rt', 'R1', { i: { 3: '192.168.0.1', 5: '10.0.0.1' } }, 380, 80],
+        ['rt', 'R2', { i: { 4: '192.168.1.1', 5: '10.0.0.2', 6: '10.0.1.1' },
+          routes: '192.168.0.0 255.255.255.0 10.0.0.1\n192.168.2.0 255.255.255.0 10.0.1.2' }, 380, 290],
+        ['rt', 'R3', { i: { 6: '10.0.1.2', 7: '192.168.2.1' },
+          routes: '192.168.0.0 255.255.255.0 10.0.1.1\n192.168.1.0 255.255.255.0 10.0.1.1' }, 560, 290],
+        ['sw', 'Sw2', 0, 700, 290],
+        ['srv', 'Fmail', P('192.168.2.10', '192.168.2.1', { recs: 'www.fmail.com 192.168.2.10\nfmail.com 192.168.2.10', page: 'Serveur mail fmail.com (SMTP/POP3 simulé)' }), 780, 160],
+        ['srv', 'Hop', P('192.168.2.20', '192.168.2.1', { recs: 'www.hop.com 192.168.2.20', page: 'Serveur mail hop.com' }), 780, 360]],
+    L: [[0, 3], [3, 5], [1, 4], [2, 4], [4, 6], [5, 6], [6, 7], [7, 8], [8, 9], [8, 10]],
+    m: 'Étape 8 — Schéma serveurs mails. Résolution DNS vers Fmail / Hop. (En Filius : Email Server + comptes POP3/SMTP.)'
+  },
+  modem: {
+    N: [['pc', 'Ordinateur A', P('192.168.0.10'), 180, 200],
+        ['modem', 'Modem A (destinataire)', P('192.168.0.1'), 400, 120],
+        ['modem', 'Modem B', P('192.168.0.2'), 400, 300],
+        ['pc', 'Ordinateur B', P('192.168.0.20'), 680, 200]],
+    L: [[0, 1], [1, 2], [2, 3]],
+    m: 'Étape 9 — Modem. Pont entre deux instances. Même préfixe réseau. Ping A → B.'
+  }
+};
+
+function load(k) {
+  nodes = []; links = []; nid = 1; sel = null; first = null;
+  const s = SC[k];
+  if (s) {
+    const m = s.N.map(a => {
+      const n = add(a[0], a[3], a[4], a[1]);
+      const c = a[2];
+      if (c) { const i = c.i; const r = Object.assign({}, c); delete r.i; Object.assign(n, r); }
+      return n;
+    });
+    s.L.forEach(function(pair) { links.push({ id: nid++, a: m[pair[0]].id, b: m[pair[1]].id }); });
+    s.N.forEach(function(a, i) {
+      const c = a[2];
+      if (c && c.i) for (const li in c.i) m[i].ifs[links[+li].id] = { ip: c.i[li], mask: '255.255.255.0' };
+    });
+    $('#log').innerHTML = ''; say(s.m, 'h');
+    $('#hint').textContent = s.m;
+  } else {
+    $('#log').innerHTML = ''; say('Réseau vide — construis ta topologie.', 'h');
+    $('#hint').textContent = 'Ajoute des équipements et relie-les.';
+  }
+  draw(); panel();
+}
+$('#sc').onchange = e => { if (e.target.value) load(e.target.value); };
+load('p2p');
+</script>
+</body>
+</html>

@@ -247,7 +247,7 @@ function draw(){
   if(flash>0){ ctx.fillStyle=`rgba(255,51,102,${flash})`; ctx.fillRect(0,0,W,H); flash=Math.max(0,flash-.1); }
   
   ctx.fillStyle="#eaf1ff"; ctx.font="bold 15px system-ui"; ctx.textAlign="left";
-  ctx.fillText("❤️ HP: " + me.hp, 14, 26);
+  ctx.fillText("❤️ HP: " + Math.round(me.hp), 14, 26);
   ctx.fillText(netMode ? "🌐 COMBAT EN LIGNE" : "🤖 MODE SOLO", 14, 48);
 
   drawMinimap();
@@ -270,28 +270,27 @@ function move(dt){
   if(!wall(me.x, me.y + vy)) me.y += vy;
 }
 
-// GESTION CORRIGÉE DES TIRS (Bidirectionnelle et équitable)
+// SYSTÈME DE TIR CORRIGÉ ET ÉQUITABLE POUR LES DEUX JOUEURS
 function shoot(){
   const now=performance.now(); if(now-lastShot<400) return; lastShot=now; flash=.7;
   setGameMsg("🔫 Pan ! Tir effectué.");
 
   if(netMode){
-    for(const [id, p] of remote){
-      let distance = Math.hypot(p.x - me.x, p.y - me.y);
-      if(distance < 12) { // Portée de tir
-        p.hp = Math.max(0, (p.hp || 100) - 34);
-        setGameMsg("🎯 Touché ! Adversaire à " + Math.round(p.hp) + " HP");
-        
-        if(host) {
-          // Si c'est l'hôte qui tire, il prévient directement le client touché
+    if(host){
+      // Si c'est l'hôte qui tire, il vérifie s'il touche un client distant
+      for(const [id, p] of remote){
+        let distance = Math.hypot(p.x - me.x, p.y - me.y);
+        if(distance < 12) {
+          p.hp = Math.max(0, (p.hp || 100) - 34);
+          setGameMsg("🎯 Touché ! Adversaire à " + Math.round(p.hp) + " HP");
           let c = connections.get(id);
           if(c?.open) c.send({type:"hit", target:id, hp:p.hp});
-        } else {
-          // Si c'est le client qui tire, il prévient l'hôte pour appliquer les dégâts
-          sendHost({type:"shootAt", target:id});
+          break;
         }
-        break;
       }
+    } else {
+      // Si c'est un client qui tire, il prévient l'hôte qu'il tire sur l'hôte (ou un autre)
+      sendHost({type:"shootAt", from:peer.id});
     }
   }
 }
@@ -352,23 +351,25 @@ function onHostMessage(from, msg){
   }
   if(msg.type==="state"){ let p=remote.get(from); if(p){ p.x=msg.x; p.y=msg.y; p.a=msg.a; p.hp=msg.hp??100; p.name=p.name??"Joueur"; } }
   
-  // Correction de la gestion des dégâts reçus par l'hôte de la part d'un client
   if(msg.type==="shootAt"){
-    let targetId = msg.target;
-    if(targetId === peer.id) {
-      // L'hôte est touché par un client !
-      me.hp = Math.max(0, me.hp - 34);
-      setGameMsg("💥 Tu as été touché par l'adversaire ! PV restants : " + Math.round(me.hp));
-      if(me.hp <= 0) {
-        setGameMsg("💀 Éliminé ! Réapparition dans l'arène...");
-        me = spawn(peer.id);
-      }
-    } else {
-      let p = remote.get(targetId);
-      if(p) {
-        p.hp = Math.max(0, (p.hp || 100) - 34);
-        let c = connections.get(targetId);
-        if(c?.open) c.send({type:"hit", target:targetId, hp:p.hp});
+    // Un client (from) a tiré. L'hôte vérifie la distance entre ce client et l'hôte lui-même.
+    let clientPlayer = remote.get(from);
+    if(clientPlayer) {
+      let distance = Math.hypot(clientPlayer.x - me.x, clientPlayer.y - me.y);
+      if(distance < 12) {
+        // L'hôte perd de la vie !
+        me.hp = Math.max(0, me.hp - 34);
+        setGameMsg("💥 Touché par " + clientPlayer.name + " ! PV restants : " + Math.round(me.hp));
+        
+        // On renvoie un ordre de dégâts direct à l'hôte lui-même via la gestion locale, 
+        // et on prévient le client que son tir a touché pour l'affichage.
+        let c = connections.get(from);
+        if(c?.open) c.send({type:"hitConfirm", hp: me.hp});
+
+        if(me.hp <= 0) {
+          setGameMsg("💀 Éliminé par " + clientPlayer.name + " ! Réapparition...");
+          me = spawn(peer.id);
+        }
       }
     }
   }
@@ -378,13 +379,21 @@ function broadcast(msg, except=null){ for(const [id,c] of connections) if(id!==e
 
 function onMessage(conn, msg){
   if(host){ onHostMessage(conn.peer, msg); return; }
+  
   if(msg.type==="roster"){ remote=new Map(msg.players||[]); remote.delete(peer.id); updateRoster(); }
   if(msg.type==="state"){ remote.set(msg.id, {x:msg.x, y:msg.y, a:msg.a, name:msg.name, hp:msg.hp}); }
+  
+  // Si le client reçoit un ordre de dégâts direct sur sa propre cible (quand il touche l'hôte)
+  if(msg.type==="hitConfirm"){
+    setGameMsg("🎯 Ton tir a touché l'hôte avec succès !");
+  }
+  
+  // Si le client est touché par un tir de l'hôte
   if(msg.type==="hit" && msg.target===(peer?.id)){
     me.hp=msg.hp;
-    setGameMsg("💥 Aïe ! Tu as été touché ! PV restants : " + Math.round(me.hp));
+    setGameMsg("💥 Aïe ! Touché par l'hôte ! PV restants : " + Math.round(me.hp));
     if(me.hp<=0){
-      setGameMsg("💀 Éliminé ! Réapparition immédiate dans l'arène...");
+      setGameMsg("💀 Éliminé ! Réapparition immédiate...");
       me=spawn(peer?.id||"solo");
     }
   }

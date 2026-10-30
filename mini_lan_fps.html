@@ -41,7 +41,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
 <main>
 <header>
   <h1>MINI <span>LAN ARENA FPS</span></h1>
-  <span class="tag">MODE COMBAT SNT · 8 JOUEURS MAX</span>
+  <span class="tag">MODE COMBAT SNT · 2 JOUEURS</span>
 </header>
 
 <div class="layout">
@@ -55,9 +55,9 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
       <button id="reset">↻ Réinitialiser</button>
     </div>
     <p class="small" style="margin-top:12px;">
-      Déplacements : <span class="kbd">Z</span><span class="kbd">Q</span><span class="kbd">S</span><span class="kbd">D</span> (ou flèches) · Regarder : Flèches <span class="kbd">←</span> <span class="kbd">→</span> · Tirer : <span class="kbd">Espace</span>
+      Avancer/Reculer : <span class="kbd">Z</span> <span class="kbd">S</span> · Tourner : <span class="kbd">Q</span> <span class="kbd">D</span> (ou flèches <span class="kbd">←</span> <span class="kbd">→</span>) · Tirer : <span class="kbd">Espace</span>
     </p>
-    <div class="status" id="gameStatus">Arène prête. Crée une salle ou rejoins un camarade pour lancer le match !</div>
+    <div class="status" id="gameStatus">Arène prête. Choisis un nom de salle et rejoins ton adversaire !</div>
   </section>
 
   <!-- SECTION RESEAU / SALLE -->
@@ -66,18 +66,18 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
     <label for="nick">Ton Pseudo</label>
     <input id="nick" maxlength="16" placeholder="Ex. CyberKnight" value="Joueur">
 
+    <label for="room">Nom de la salle (ex: salle1)</label>
+    <input id="room" placeholder="Ex. salle1" value="salle1">
+
     <div class="row" style="margin-top:12px;">
-      <button id="create" class="primary">Créer une salle</button>
+      <button id="create" class="primary">Créer la salle</button>
       <button id="join">Rejoindre</button>
     </div>
-
-    <label for="room">Code de la Salle (ex: snt-1234)</label>
-    <input id="room" placeholder="Ex. snt-4829">
 
     <div class="status" id="netStatus">Statut : Non connecté au réseau.</div>
 
     <div class="section">
-      <h2>👥 Combattants dans l'arène (<span id="count">1/8</span>)</h2>
+      <h2>👥 Combattants (<span id="count">1/8</span>)</h2>
       <div id="players" class="players"></div>
     </div>
 
@@ -99,7 +99,6 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
 const $=id=>document.getElementById(id), canvas=$("game"), ctx=canvas.getContext("2d");
 const W=canvas.width, H=canvas.height;
 
-// Carte de l'arène (1 = murs, 0 = espaces vides)
 const map=[
 "111111111111111",
 "100000000000001",
@@ -134,12 +133,6 @@ function getPlayerList(){
   return all.slice(0,8);
 }
 
-// Générateur de code de salle court (ex: snt-4829)
-function generateShortRoomId(){
-  return "snt-" + Math.floor(1000 + Math.random() * 9000);
-}
-
-// Configuration PeerJS robuste avec STUN
 function newPeer(customId=undefined){
   return new Peer(customId, {
     debug: 1,
@@ -152,8 +145,53 @@ function newPeer(customId=undefined){
   });
 }
 
+function drawMinimap(){
+  const mapW = map[0].length, mapH = map.length;
+  const mSize = 7; // Taille d'une case sur la mini-carte (agrandie pour être bien visible)
+  const startX = W - (mapW * mSize) - 15;
+  const startY = 15;
+  
+  // Fond semi-transparent de la mini-carte
+  ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
+  ctx.strokeStyle = "#00f0ff";
+  ctx.lineWidth = 1.5;
+  ctx.fillRect(startX - 6, startY - 6, mapW * mSize + 12, mapH * mSize + 12);
+  ctx.strokeRect(startX - 6, startY - 6, mapW * mSize + 12, mapH * mSize + 12);
+  
+  // Dessin des murs
+  for(let y=0; y<mapH; y++){
+    for(let x=0; x<mapW; x++){
+      if(map[y][x]==="1"){
+        ctx.fillStyle = "#1e2d4a";
+        ctx.fillRect(startX + x*mSize, startY + y*mSize, mSize, mSize);
+      }
+    }
+  }
+  
+  // Dessin des adversaires (points rouges)
+  for(const [id, p] of remote){
+    ctx.fillStyle = "#ff3366";
+    ctx.beginPath();
+    ctx.arc(startX + p.x * mSize, startY + p.y * mSize, 4.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  // Dessin du joueur local (point cyan + ligne d'orientation)
+  ctx.fillStyle = "#00f0ff";
+  ctx.beginPath();
+  ctx.arc(startX + me.x * mSize, startY + me.y * mSize, 5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = "#00f0ff";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(startX + me.x * mSize, startY + me.y * mSize);
+  ctx.lineTo(startX + (me.x + Math.cos(me.a)*1.1) * mSize, startY + (me.y + Math.sin(me.a)*1.1) * mSize);
+  ctx.stroke();
+}
+
 function draw(){
-  // Ciel et sol de l'arène
+  // Ciel et sol 3D
   const sky=ctx.createLinearGradient(0,0,0,H/2); sky.addColorStop(0,"#050812"); sky.addColorStop(1,"#131e38");
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,H/2);
   const floor=ctx.createLinearGradient(0,H/2,0,H); floor.addColorStop(0,"#151f33"); floor.addColorStop(1,"#04060b");
@@ -176,7 +214,7 @@ function draw(){
     ctx.fillRect(x, top, 1, height);
   }
 
-  // Rendu des autres joueurs dans l'arène
+  // Joueurs distants (sprites 3D)
   const sprites=[...remote.entries()].map(([id,p])=>({id,...p})).sort((a,b)=>dist2(b)-dist2(a));
   for(const p of sprites){
     let dx=p.x-me.x, dy=p.y-me.y, d=Math.hypot(dx,dy), ang=Math.atan2(dy,dx)-me.a;
@@ -192,28 +230,37 @@ function draw(){
     ctx.fillText(p.name||"Adversaire", sx, sy-6);
   }
 
-  // Réticule de visée et HUD
+  // Réticule de visée
   ctx.strokeStyle="rgba(0, 240, 255, 0.7)"; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(W/2-6,H/2); ctx.lineTo(W/2+6,H/2); ctx.moveTo(W/2,H/2-6); ctx.lineTo(W/2,H/2+6); ctx.stroke();
 
   if(flash>0){ ctx.fillStyle=`rgba(255,51,102,${flash})`; ctx.fillRect(0,0,W,H); flash=Math.max(0,flash-.1); }
   
-  // Affichage des PV sur l'écran de jeu
+  // Affichage des PV et mode
   ctx.fillStyle="#eaf1ff"; ctx.font="bold 15px system-ui"; ctx.textAlign="left";
   ctx.fillText("❤️ HP: " + me.hp, 14, 26);
   ctx.fillText(netMode ? "🌐 COMBAT EN LIGNE" : "🤖 MODE SOLO", 14, 48);
+
+  // Affichage de la mini-carte
+  drawMinimap();
 }
 
 function dist2(p){ return (p.x-me.x)**2 + (p.y-me.y)**2; }
 
 function move(dt){
-  const speed=2.3*dt, turn=2.5*dt;
-  if(keys.ArrowLeft||keys.KeyA) me.a-=turn;
-  if(keys.ArrowRight||keys.KeyD) me.a+=turn;
-  let f=(keys.KeyW||keys.KeyZ||keys.ArrowUp?1:0)-(keys.KeyS||keys.ArrowDown?1:0);
-  let vx=Math.cos(me.a)*f*speed, vy=Math.sin(me.a)*f*speed;
-  if(!wall(me.x+vx, me.y)) me.x+=vx;
-  if(!wall(me.x, me.y+vy)) me.y+=vy;
+  const speed=2.3*dt, turn=2.8*dt;
+  
+  // Rotation avec Q, D ou flèches gauche/droite
+  if(keys["arrowleft"] || keys["q"]) me.a -= turn;
+  if(keys["arrowright"] || keys["d"]) me.a += turn;
+  
+  // Avancer / Reculer avec Z, S ou flèches haut/bas
+  let f = (keys["z"] || keys["w"] || keys["arrowup"] ? 1 : 0) - (keys["s"] || keys["arrowdown"] ? 1 : 0);
+  let vx = Math.cos(me.a) * f * speed;
+  let vy = Math.sin(me.a) * f * speed;
+  
+  if(!wall(me.x + vx, me.y)) me.x += vx;
+  if(!wall(me.x, me.y + vy)) me.y += vy;
 }
 
 function shoot(){
@@ -243,10 +290,18 @@ function frame(t){
 }
 requestAnimationFrame(frame);
 
-window.addEventListener("keydown",e=>{ keys[e.code]=true; if(["Space","ArrowUp","ArrowDown"].includes(e.code)) e.preventDefault(); if(e.code==="Space") shoot(); });
-window.addEventListener("keyup",e=>keys[e.code]=false);
+// Gestion clavier indépendante du type de clavier (AZERTY / QWERTY) via e.key
+window.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  keys[k] = true;
+  if([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) e.preventDefault();
+  if(k === " ") shoot();
+});
+window.addEventListener("keyup", e => {
+  keys[e.key.toLowerCase()] = false;
+});
 
-$("start").onclick=()=>{ running=true; setGameMsg("🔥 Combat lancé ! Traque ton adversaire dans l'arène."); };
+$("start").onclick=()=>{ running=true; setGameMsg("🔥 Combat lancé ! Traque ton adversaire."); };
 $("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
 $("shoot").onclick=shoot;
 $("reset").onclick=()=>{ me=spawn(peer?.id||"solo"); running=false; setGameMsg("Position réinitialisée."); };
@@ -296,9 +351,9 @@ function onMessage(conn, msg){
   if(msg.type==="state"){ remote.set(msg.id, {x:msg.x, y:msg.y, a:msg.a, name:msg.name, hp:msg.hp}); }
   if(msg.type==="hit" && msg.target===(peer?.id)){
     me.hp=msg.hp;
-    setGameMsg("💥 Touché par un adversaire ! PV restants : " + me.hp);
+    setGameMsg("💥 Touché ! PV restants : " + me.hp);
     if(me.hp<=0){
-      setGameMsg("💀 Tu as été éliminé ! Réapparition dans l'arène...");
+      setGameMsg("💀 Éliminé ! Réapparition dans l'arène...");
       me=spawn(peer?.id||"solo");
     }
   }
@@ -310,41 +365,39 @@ function sendState(){
   if(host){ broadcast(msg); } else { sendHost(msg); }
 }
 
-// CREATION DE SALLE AVEC CODE COURT
 $("create").onclick=()=>{
   if(peer) return;
-  say("netStatus","Création de l'arène en cours...");
+  const customId = $("room").value.trim() || "salle1";
+  $("room").value = customId;
+  
+  say("netStatus","Création de la salle '" + escapeHtml(customId) + "'...");
   host=true; netMode=true; running=true;
   
-  roomId = generateShortRoomId();
-  peer = newPeer(roomId);
+  peer = newPeer(customId);
 
   peer.on("open", id=>{
     roomId=id;
-    $("room").value=id;
-    say("netStatus", `Salle créée avec succès !<br>Code à partager : <b style="color:var(--cyan);font-size:16px;">${escapeHtml(id)}</b>`, "good");
+    say("netStatus", `Salle <b>${escapeHtml(id)}</b> créée ! Ton camarade peut la rejoindre.`, "good");
     me=spawn(id);
     updateRoster();
   });
   peer.on("connection", connectConn);
   peer.on("error", err=>{
     if(err.type==='unavailable-id'){
-      // Si le code aléatoire existe déjà, on en génère un autre automatiquement
-      roomId = generateShortRoomId();
-      peer = newPeer(roomId);
+      say("netStatus","Ce nom de salle est déjà pris. Choisis-en un autre !","bad");
+      peer=null; host=false; netMode=false;
     } else {
       say("netStatus","Erreur PeerJS : "+escapeHtml(err.type||err.message),"bad");
     }
   });
 };
 
-// REJOINDRE UNE SALLE AVEC LE CODE COURT
 $("join").onclick=()=>{
   const id=$("room").value.trim();
-  if(!id){ say("netStatus","Veuillez entrer le code de la salle (ex: snt-1234).","bad"); return; }
+  if(!id){ say("netStatus","Entre le nom de la salle (ex: salle1).","bad"); return; }
   if(peer) return;
   
-  host=false; say("netStatus","Connexion à l'arène de "+escapeHtml(id)+"...");
+  host=false; say("netStatus","Connexion à la salle '"+escapeHtml(id)+"'...");
   peer=newPeer();
 
   peer.on("open",()=>{
@@ -355,7 +408,7 @@ $("join").onclick=()=>{
       say("netStatus","Connecté à la salle <b>"+escapeHtml(id)+"</b> ! Bon combat.", "good");
       netMode=true; running=true; me=spawn(peer.id); updateRoster();
     });
-    c.on("error", ()=>say("netStatus","Impossible de rejoindre cette salle. Vérifie le code.","bad"));
+    c.on("error", ()=>say("netStatus","Salle introuvable. Vérifie le nom.","bad"));
   });
   peer.on("error", err=>say("netStatus","Erreur de connexion : "+escapeHtml(err.type||err.message),"bad"));
 };

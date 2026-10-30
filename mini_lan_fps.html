@@ -99,7 +99,6 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
 const $=id=>document.getElementById(id), canvas=$("game"), ctx=canvas.getContext("2d");
 const W=canvas.width, H=canvas.height;
 
-// NOUVELLE CARTE : Une grande pièce ouverte avec 4 piliers au centre (facile pour se voir et se battre)
 const map=[
 "111111111111111",
 "100000000000001",
@@ -126,7 +125,6 @@ const palette=["#ff3366","#00f0ff","#00ff88","#ffcc00","#b866ff","#ff66b8","#66c
 function say(id,msg,cls=""){ $(id).innerHTML=msg; $(id).className="status "+cls; }
 function setGameMsg(msg){ say("gameStatus", msg); }
 function spawn(id){ 
-  // Positions de départ éloignées pour les deux joueurs dans l'arène ouverte
   let n=(parseInt(id,36)||0)%2;
   return n === 0 ? {x: 2.5, y: 2.5, a: 0, hp: 100} : {x: 12.5, y: 9.5, a: Math.PI, hp: 100};
 }
@@ -170,7 +168,6 @@ function drawMinimap(){
     }
   }
   
-  // Dessin des adversaires sur la mini-carte
   for(const [id, p] of remote){
     ctx.fillStyle = "#ff3366";
     ctx.beginPath();
@@ -178,7 +175,6 @@ function drawMinimap(){
     ctx.fill();
   }
   
-  // Joueur local
   ctx.fillStyle = "#00f0ff";
   ctx.beginPath();
   ctx.arc(startX + me.x * mSize, startY + me.y * mSize, 5, 0, Math.PI * 2);
@@ -193,7 +189,6 @@ function drawMinimap(){
 }
 
 function draw(){
-  // Ciel et sol
   const sky=ctx.createLinearGradient(0,0,0,H/2); sky.addColorStop(0,"#050812"); sky.addColorStop(1,"#131e38");
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,H/2);
   const floor=ctx.createLinearGradient(0,H/2,0,H); floor.addColorStop(0,"#151f33"); floor.addColorStop(1,"#04060b");
@@ -218,7 +213,6 @@ function draw(){
     let height=Math.min(H, H/(dist+.001)), top=(H-height)/2;
     let shade=clamp(220-dist*12, 40, 200)*(side===1?.75:1);
     
-    // Motif rayé sur les murs pour voir le mouvement
     let stripeCoord = (side === 0 ? exactY : exactX);
     let isStripe = Math.floor(stripeCoord * 10) % 2 === 0;
     let colorFactor = isStripe ? 1.0 : 0.75;
@@ -227,7 +221,6 @@ function draw(){
     ctx.fillRect(x, top, 1, height);
   }
 
-  // Rendu 3D des autres joueurs (avec leur vrai pseudo et couleur visible)
   const sprites=[...remote.entries()].map(([id,p])=>({id,...p})).sort((a,b)=>dist2(b)-dist2(a));
   for(const p of sprites){
     let dx=p.x-me.x, dy=p.y-me.y, d=Math.hypot(dx,dy), ang=Math.atan2(dy,dx)-me.a;
@@ -235,7 +228,7 @@ function draw(){
     if(Math.abs(ang)>fov/2 || d<.15) continue;
     
     let sx=(.5+ang/fov)*W, sz=Math.min(H, H/(d+.001)*.7), sy=H/2-sz*.5;
-    let col = "#ff3366"; // Couleur voyante pour l'adversaire
+    let col = "#ff3366";
     let left=Math.floor(sx-sz*.3), right=Math.floor(sx+sz*.3);
     
     for(let x=Math.max(0,left); x<Math.min(W,right); x++) {
@@ -244,18 +237,15 @@ function draw(){
         ctx.fillRect(x, sy, 1, sz); 
       }
     }
-    // Affichage du nom personnalisé de l'adversaire au-dessus de lui
     ctx.fillStyle="#fff"; ctx.font="bold 13px system-ui"; ctx.textAlign="center";
     ctx.fillText(p.name || "Adversaire", sx, sy - 10);
   }
 
-  // Réticule de visée
   ctx.strokeStyle="rgba(0, 240, 255, 0.8)"; ctx.lineWidth=2;
   ctx.beginPath(); ctx.moveTo(W/2-7,H/2); ctx.lineTo(W/2+7,H/2); ctx.moveTo(W/2,H/2-7); ctx.lineTo(W/2,H/2+7); ctx.stroke();
 
   if(flash>0){ ctx.fillStyle=`rgba(255,51,102,${flash})`; ctx.fillRect(0,0,W,H); flash=Math.max(0,flash-.1); }
   
-  // HUD
   ctx.fillStyle="#eaf1ff"; ctx.font="bold 15px system-ui"; ctx.textAlign="left";
   ctx.fillText("❤️ HP: " + me.hp, 14, 26);
   ctx.fillText(netMode ? "🌐 COMBAT EN LIGNE" : "🤖 MODE SOLO", 14, 48);
@@ -279,20 +269,30 @@ function move(dt){
   if(!wall(me.x, me.y + vy)) me.y += vy;
 }
 
+// TIR AMÉLIORÉ : Plus besoin d'être parfaitement en face ! Touche tout ennemi à portée de tir proche.
 function shoot(){
   const now=performance.now(); if(now-lastShot<400) return; lastShot=now; flash=.7;
   setGameMsg("🔫 Pan ! Tir effectué.");
-  if(netMode && host){
-    for(const [id,p] of remote){
-      let a=Math.atan2(p.y-me.y, p.x-me.x), diff=Math.atan2(Math.sin(a-me.a), Math.cos(a-me.a));
-      if(Math.abs(diff)<0.4 && Math.hypot(p.x-me.x, p.y-me.y)<12){
-        p.hp=Math.max(0, (p.hp||100)-34);
-        broadcast({type:"hit", target:id, hp:p.hp});
-        setGameMsg("🎯 Touché direct ! Adversaire à " + p.hp + " HP");
+
+  if(netMode){
+    // On cherche l'adversaire le plus proche dans un rayon de 10 cases (sans contrainte d'angle strict)
+    for(const [id, p] of remote){
+      let distance = Math.hypot(p.x - me.x, p.y - me.y);
+      if(distance < 10) {
+        p.hp = Math.max(0, (p.hp || 100) - 34); // 3 tirs pour éliminer
+        setGameMsg("🎯 Touché ! Adversaire à " + p.hp + " HP");
+        
+        // Envoi direct de l'information de dégâts à l'adversaire
+        if(host) {
+          let c = connections.get(id);
+          if(c?.open) c.send({type:"hit", target:id, hp:p.hp});
+          broadcast({type:"roster", players:[...remote.entries(), [peer.id, {name:$("nick").value||"Hôte", ...me}]]});
+        } else {
+          sendHost({type:"shootAt", target:id});
+        }
+        break; // Tire sur le premier ennemi à portée
       }
     }
-  } else if(netMode && peer){
-    sendHost({type:"shoot", a:me.a, x:me.x, y:me.y});
   }
 }
 
@@ -321,7 +321,7 @@ window.addEventListener("keyup", e => {
   keys[e.key.toLowerCase()] = false;
 });
 
-$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Utilise Z S pour avancer et Q D pour tourner."); };
+$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Appuie sur Espace pour tirer à proximité."); };
 $("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
 $("shoot").onclick=shoot;
 $("reset").onclick=()=>{ me=spawn(peer?.id||"solo"); running=false; setGameMsg("Position réinitialisée."); };
@@ -350,14 +350,22 @@ function onHostMessage(from, msg){
     broadcast({type:"roster", players:[...remote.entries(), [peer.id, {name:$("nick").value||"Hôte", ...me}]]});
     updateRoster();
   }
-  if(msg.type==="state"){ let p=remote.get(from); if(p){ p.x=msg.x; p.y=msg.y; p.a=msg.a; p.hp=msg.hp??100; p.name=msg.name??"Joueur"; } }
-  if(msg.type==="shoot"){
-    for(const [id,p] of remote){
-      if(id===from) continue;
-      let a=Math.atan2(p.y-msg.y, p.x-msg.x), diff=Math.atan2(Math.sin(a-msg.a), Math.cos(a-msg.a));
-      if(Math.abs(diff)<0.4 && Math.hypot(p.x-msg.x, p.y-msg.y)<12){
-        p.hp=Math.max(0, (p.hp||100)-34);
-        let c=connections.get(from); if(c?.open) c.send({type:"hit", target:id, hp:p.hp});
+  if(msg.type==="state"){ let p=remote.get(from); if(p){ p.x=msg.x; p.y=msg.y; p.a=msg.a; p.hp=msg.hp??100; p.name=p.name??"Joueur"; } }
+  if(msg.type==="shootAt"){
+    let targetId = msg.target || peer.id;
+    if(targetId === peer.id) {
+      me.hp = Math.max(0, me.hp - 34);
+      setGameMsg("💥 Tu as été touché ! PV restants : " + me.hp);
+      if(me.hp <= 0) {
+        setGameMsg("💀 Éliminé ! Réapparition...");
+        me = spawn(peer.id);
+      }
+    } else {
+      let p = remote.get(targetId);
+      if(p) {
+        p.hp = Math.max(0, (p.hp || 100) - 34);
+        let c = connections.get(targetId);
+        if(c?.open) c.send({type:"hit", target:targetId, hp:p.hp});
       }
     }
   }

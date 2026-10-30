@@ -45,7 +45,6 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
 </header>
 
 <div class="layout">
-  <!-- SECTION JEU / ARÈNE -->
   <section class="panel">
     <canvas id="game" width="640" height="360" aria-label="Vue de l'arène 3D"></canvas>
     <div class="controls">
@@ -57,34 +56,27 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
     <p class="small" style="margin-top:12px;">
       Avancer/Reculer : <span class="kbd">Z</span> <span class="kbd">S</span> · Tourner : <span class="kbd">Q</span> <span class="kbd">D</span> (ou flèches <span class="kbd">←</span> <span class="kbd">→</span>) · Tirer : <span class="kbd">Espace</span>
     </p>
-    <div class="status" id="gameStatus">Arène ouverte prête. Les murs bloquent désormais les balles !</div>
+    <div class="status" id="gameStatus">Arène ouverte prête. Crée une salle pour obtenir le code !</div>
   </section>
 
-  <!-- SECTION RÉSEAU / SALLE -->
   <aside class="panel">
     <h2 style="margin-top:0">🎛️ Gestion de l'Arène</h2>
     <label for="nick">Ton Pseudo</label>
     <input id="nick" maxlength="16" placeholder="Ex. CyberKnight" value="Joueur">
 
-    <label for="room">Nom de la salle (ex: arene)</label>
-    <input id="room" placeholder="Ex. arene" value="arene">
-
     <div class="row" style="margin-top:12px;">
-      <button id="create" class="primary">Créer la salle</button>
+      <button id="create" class="primary">Créer une salle</button>
       <button id="join">Rejoindre</button>
     </div>
+
+    <label for="room" style="margin-top:12px;">Code de la Salle (généré par l'hôte)</label>
+    <input id="room" placeholder="Colle le code ici">
 
     <div class="status" id="netStatus">Statut : Non connecté au réseau.</div>
 
     <div class="section">
       <h2>👥 Combattants (<span id="count">1/8</span>)</h2>
       <div id="players" class="players"></div>
-    </div>
-
-    <div class="section">
-      <h2>📡 Test de Connexion (10s)</h2>
-      <button id="test" class="primary" style="width:100%">Lancer le test de latence</button>
-      <div class="status" id="testStatus" style="margin-top:8px;min-height:36px;">Inactif.</div>
     </div>
   </aside>
 </div>
@@ -119,7 +111,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 let me={x:2.5,y:2.5,a:0,hp:100}, running=false, netMode=false, peer=null, host=false, roomId="";
 let connections=new Map(), remote=new Map(), lastSend=0, lastShot=0, flash=0;
 let keys={z:false, s:false, q:false, d:false, arrowleft:false, arrowright:false, arrowup:false, arrowdown:false};
-let zBuffer=new Float32Array(W), testTimer=null, testData=null;
+let zBuffer=new Float32Array(W);
 const palette=["#ff3366","#00f0ff","#00ff88","#ffcc00","#b866ff","#ff66b8","#66ccff","#ff8844"];
 
 function say(id,msg,cls=""){ $(id).innerHTML=msg; $(id).className="status "+cls; }
@@ -135,8 +127,9 @@ function getPlayerList(){
   return all.slice(0,8);
 }
 
-function newPeer(customId=undefined){
-  return new Peer(customId, {
+// Utilisation d'un ID auto-généré par PeerJS pour garantir 0 conflit sur le cloud public
+function newPeer(){
+  return new Peer(undefined, {
     debug: 1,
     config: {
       iceServers: [
@@ -147,22 +140,18 @@ function newPeer(customId=undefined){
   });
 }
 
-// Fonction pour vérifier si un mur bloque la ligne de tir entre deux points (x1,y1) et (x2,y2)
 function hasLineOfSight(x1, y1, x2, y2) {
   let dist = Math.hypot(x2 - x1, y2 - y1);
-  let steps = Math.floor(dist * 10); // Précision du raycast de tir
+  let steps = Math.floor(dist * 10);
   let dx = (x2 - x1) / steps;
   let dy = (y2 - y1) / steps;
   let cx = x1, cy = y1;
   
   for(let i = 0; i < steps; i++) {
-    cx += dx;
-    cy += dy;
-    if(wall(cx, cy)) {
-      return false; // Un mur bloque la vue/tir !
-    }
+    cx += dx; cy += dy;
+    if(wall(cx, cy)) return false;
   }
-  return true; // Ligne de vue dégagée
+  return true;
 }
 
 function drawMinimap(){
@@ -288,7 +277,6 @@ function move(dt){
   if(!wall(me.x, me.y + vy)) me.y += vy;
 }
 
-// TIR AVEC VÉRIFICATION DES MURS (Les murs bloquent les balles)
 function shoot(){
   const now=performance.now(); if(now-lastShot<400) return; lastShot=now; flash=.7;
   setGameMsg("🔫 Pan ! Tir effectué.");
@@ -297,15 +285,12 @@ function shoot(){
     if(host){
       for(const [id, p] of remote){
         let distance = Math.hypot(p.x - me.x, p.y - me.y);
-        // Vérifie la distance ET l'absence de mur entre l'hôte et l'adversaire
         if(distance < 12 && hasLineOfSight(me.x, me.y, p.x, p.y)) {
           p.hp = Math.max(0, (p.hp || 100) - 34);
           setGameMsg("🎯 Touché ! Adversaire à " + Math.round(p.hp) + " HP");
           let c = connections.get(id);
           if(c?.open) c.send({type:"hit", target:id, hp:p.hp});
           break;
-        } else if(distance < 12) {
-          setGameMsg("🛡️ Tir bloqué par un mur ou un pilier !");
         }
       }
     } else {
@@ -339,7 +324,7 @@ window.addEventListener("keyup", e => {
   keys[e.key.toLowerCase()] = false;
 });
 
-$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Les tirs sont bloqués par les murs."); };
+$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Prêt pour le combat."); };
 $("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
 $("shoot").onclick=shoot;
 $("reset").onclick=()=>{ me=spawn(peer?.id||"solo"); running=false; setGameMsg("Position réinitialisée."); };
@@ -374,20 +359,15 @@ function onHostMessage(from, msg){
     let clientPlayer = remote.get(from);
     if(clientPlayer) {
       let distance = Math.hypot(clientPlayer.x - me.x, clientPlayer.y - me.y);
-      // L'hôte vérifie si le client a une ligne de vue dégagée vers l'hôte
       if(distance < 12 && hasLineOfSight(clientPlayer.x, clientPlayer.y, me.x, me.y)) {
         me.hp = Math.max(0, me.hp - 34);
-        setGameMsg("💥 Touché par " + clientPlayer.name + " ! PV restants : " + Math.round(me.hp));
-        
+        setGameMsg("💥 Touché par " + clientPlayer.name + " ! PV : " + Math.round(me.hp));
         let c = connections.get(from);
         if(c?.open) c.send({type:"hitConfirm", hp: me.hp});
-
         if(me.hp <= 0) {
           setGameMsg("💀 Éliminé par " + clientPlayer.name + " ! Réapparition...");
           me = spawn(peer.id);
         }
-      } else if(distance < 12) {
-        setGameMsg("🛡️ Le tir de " + clientPlayer.name + " a été bloqué par un mur !");
       }
     }
   }
@@ -397,23 +377,18 @@ function broadcast(msg, except=null){ for(const [id,c] of connections) if(id!==e
 
 function onMessage(conn, msg){
   if(host){ onHostMessage(conn.peer, msg); return; }
-  
   if(msg.type==="roster"){ remote=new Map(msg.players||[]); remote.delete(peer.id); updateRoster(); }
   if(msg.type==="state"){ remote.set(msg.id, {x:msg.x, y:msg.y, a:msg.a, name:msg.name, hp:msg.hp}); }
-  
-  if(msg.type==="hitConfirm"){
-    setGameMsg("🎯 Ton tir a traversé l'espace libre et touché l'hôte !");
-  }
-  
+  if(msg.type==="hitConfirm"){ setGameMsg("🎯 Ton tir a touché l'hôte !"); }
   if(msg.type==="hit" && msg.target===(peer?.id)){
     me.hp=msg.hp;
-    setGameMsg("💥 Aïe ! Touché par l'hôte ! PV restants : " + Math.round(me.hp));
+    setGameMsg("💥 Touché par l'hôte ! PV : " + Math.round(me.hp));
     if(me.hp<=0){
-      setGameMsg("💀 Éliminé ! Réapparition immédiate...");
+      setGameMsg("💀 Éliminé ! Réapparition...");
       me=spawn(peer?.id||"solo");
     }
   }
-  if(msg.type==="full") say("netStatus","Salle pleine (maximum 8 joueurs).","bad");
+  if(msg.type==="full") say("netStatus","Salle pleine.","bad");
 }
 
 function sendState(){
@@ -421,58 +396,45 @@ function sendState(){
   if(host){ broadcast(msg); } else { sendHost(msg); }
 }
 
+// CRÉATION DE SALLE AVEC UN ID UNIQUE GÉNÉRÉ (Garanti sans conflit sur le cloud)
 $("create").onclick=()=>{
   if(peer) return;
-  const customId = $("room").value.trim() || "arene";
-  $("room").value = customId;
-  
-  say("netStatus","Création de l'arène '" + escapeHtml(customId) + "'...");
+  say("netStatus","Création de l'arène en cours...");
   host=true; netMode=true; running=true;
   
-  peer = newPeer(customId);
+  peer = newPeer();
 
   peer.on("open", id=>{
     roomId=id;
-    say("netStatus", `Arène <b>${escapeHtml(id)}</b> créée ! Ton camarade peut la rejoindre.`, "good");
+    $("room").value=id; // Le code unique s'affiche dans la case
+    say("netStatus", `Arène créée ! Code à copier : <b style="color:var(--cyan)">${escapeHtml(id)}</b>`, "good");
     me=spawn(id);
     updateRoster();
   });
   peer.on("connection", connectConn);
-  peer.on("error", err=>{
-    if(err.type==='unavailable-id'){
-      say("netStatus","Ce nom d'arène est déjà pris. Choisis-en un autre !","bad");
-      peer=null; host=false; netMode=false;
-    } else {
-      say("netStatus","Erreur PeerJS : "+escapeHtml(err.type||err.message),"bad");
-    }
-  });
+  peer.on("error", err=>say("netStatus","Erreur : "+escapeHtml(err.type||err.message),"bad"));
 };
 
+// REJOINDRE AVEC LE CODE UNIQUE FOURNI PAR L'HÔTE
 $("join").onclick=()=>{
   const id=$("room").value.trim();
-  if(!id){ say("netStatus","Entre le nom de l'arène (ex: arene).","bad"); return; }
+  if(!id){ say("netStatus","Colle d'abord le code de la salle.","bad"); return; }
   if(peer) return;
   
-  host=false; say("netStatus","Connexion à l'arène '"+escapeHtml(id)+"'...");
-  peer=newPeer();
+  host=false; say("netStatus","Connexion à l'arène...");
+  peer = newPeer();
 
   peer.on("open",()=>{
     const c=peer.connect(id, {reliable:true});
     connectConn(c);
     c.on("open",()=>{
       roomId=id;
-      say("netStatus","Connecté à l'arène <b>"+escapeHtml(id)}</b> ! Bon combat.", "good");
+      say("netStatus","Connecté à l'arène avec succès ! Bon combat.", "good");
       netMode=true; running=true; me=spawn(peer.id); updateRoster();
     });
-    c.on("error", ()=>say("netStatus","Arène introuvable. Vérifie le nom.","bad"));
+    c.on("error", ()=>say("netStatus","Impossible de rejoindre. Vérifie le code.","bad"));
   });
-  peer.on("error", err=>say("netStatus","Erreur de connexion : "+escapeHtml(err.type||err.message),"bad"));
-};
-
-$("test").onclick=()=>{
-  if(!peer || (!host && connections.size===0)){ say("testStatus","Rejoins ou crée une salle avant de tester.","bad"); return; }
-  say("testStatus","Test réseau en cours...");
-  setTimeout(()=>say("testStatus","Connexion stable validée avec l'autre joueur !","good"), 2000);
+  peer.on("error", err=>say("netStatus","Erreur : "+escapeHtml(err.type||err.message),"bad"));
 };
 
 updateRoster(); draw();

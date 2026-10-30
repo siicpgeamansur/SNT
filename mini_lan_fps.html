@@ -57,7 +57,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
     <p class="small" style="margin-top:12px;">
       Avancer/Reculer : <span class="kbd">Z</span> <span class="kbd">S</span> · Tourner : <span class="kbd">Q</span> <span class="kbd">D</span> (ou flèches <span class="kbd">←</span> <span class="kbd">→</span>) · Tirer : <span class="kbd">Espace</span>
     </p>
-    <div class="status" id="gameStatus">Arène prête. Choisis un nom de salle et rejoins ton adversaire !</div>
+    <div class="status" id="gameStatus">Arène prête. Crée une salle, clique sur Jouer, et rejoins ton adversaire !</div>
   </section>
 
   <!-- SECTION RESEAU / SALLE -->
@@ -120,7 +120,8 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 let me={x:2.5,y:2.5,a:0,hp:100}, running=false, netMode=false, peer=null, host=false, roomId="";
 let connections=new Map(), remote=new Map(), lastSend=0, lastShot=0, flash=0;
-let keys={}, zBuffer=new Float32Array(W), testTimer=null, testData=null;
+let keys={z:false, s:false, q:false, d:false, arrowleft:false, arrowright:false, arrowup:false, arrowdown:false};
+let zBuffer=new Float32Array(W), testTimer=null, testData=null;
 const palette=["#ff3366","#00f0ff","#00ff88","#ffcc00","#b866ff","#ff66b8","#66ccff","#ff8844"];
 
 function say(id,msg,cls=""){ $(id).innerHTML=msg; $(id).className="status "+cls; }
@@ -147,18 +148,16 @@ function newPeer(customId=undefined){
 
 function drawMinimap(){
   const mapW = map[0].length, mapH = map.length;
-  const mSize = 7; // Taille d'une case sur la mini-carte (agrandie pour être bien visible)
+  const mSize = 7;
   const startX = W - (mapW * mSize) - 15;
   const startY = 15;
   
-  // Fond semi-transparent de la mini-carte
   ctx.fillStyle = "rgba(7, 11, 20, 0.9)";
   ctx.strokeStyle = "#00f0ff";
   ctx.lineWidth = 1.5;
   ctx.fillRect(startX - 6, startY - 6, mapW * mSize + 12, mapH * mSize + 12);
   ctx.strokeRect(startX - 6, startY - 6, mapW * mSize + 12, mapH * mSize + 12);
   
-  // Dessin des murs
   for(let y=0; y<mapH; y++){
     for(let x=0; x<mapW; x++){
       if(map[y][x]==="1"){
@@ -168,7 +167,6 @@ function drawMinimap(){
     }
   }
   
-  // Dessin des adversaires (points rouges)
   for(const [id, p] of remote){
     ctx.fillStyle = "#ff3366";
     ctx.beginPath();
@@ -176,7 +174,6 @@ function drawMinimap(){
     ctx.fill();
   }
   
-  // Dessin du joueur local (point cyan + ligne d'orientation)
   ctx.fillStyle = "#00f0ff";
   ctx.beginPath();
   ctx.arc(startX + me.x * mSize, startY + me.y * mSize, 5, 0, Math.PI * 2);
@@ -191,7 +188,7 @@ function drawMinimap(){
 }
 
 function draw(){
-  // Ciel et sol 3D
+  // Ciel et sol
   const sky=ctx.createLinearGradient(0,0,0,H/2); sky.addColorStop(0,"#050812"); sky.addColorStop(1,"#131e38");
   ctx.fillStyle=sky; ctx.fillRect(0,0,W,H/2);
   const floor=ctx.createLinearGradient(0,H/2,0,H); floor.addColorStop(0,"#151f33"); floor.addColorStop(1,"#04060b");
@@ -200,21 +197,32 @@ function draw(){
   const fov=Math.PI/3;
   for(let x=0; x<W; x++){
     let ray=me.a-fov/2+(x/W)*fov, dx=Math.cos(ray), dy=Math.sin(ray);
-    let dist=0, hit=false, side=0;
+    let dist=0, hit=false, side=0, exactX=0, exactY=0;
     while(!hit && dist<18){
       dist+=.025;
       let tx=Math.floor(me.x+dx*dist), ty=Math.floor(me.y+dy*dist);
-      if(wall(tx,ty)){ hit=true; side=(Math.abs(dx)>Math.abs(dy))?0:1; }
+      if(wall(tx,ty)){ 
+        hit=true; 
+        side=(Math.abs(dx)>Math.abs(dy))?0:1;
+        exactX = me.x + dx*dist;
+        exactY = me.y + dy*dist;
+      }
     }
     dist=Math.max(.03, dist*Math.cos(ray-me.a));
     zBuffer[x]=dist;
     let height=Math.min(H, H/(dist+.001)), top=(H-height)/2;
     let shade=clamp(220-dist*12, 40, 200)*(side===1?.75:1);
-    ctx.fillStyle=`rgb(${shade*.6},${shade*.8},${shade})`;
+    
+    // MOTIF RAYÉ SUR LES MURS (effet visuel de déplacement)
+    let stripeCoord = (side === 0 ? exactY : exactX);
+    let isStripe = Math.floor(stripeCoord * 10) % 2 === 0;
+    let colorFactor = isStripe ? 1.0 : 0.7;
+
+    ctx.fillStyle=`rgb(${shade*.6*colorFactor},${shade*.8*colorFactor},${shade*colorFactor})`;
     ctx.fillRect(x, top, 1, height);
   }
 
-  // Joueurs distants (sprites 3D)
+  // Rendu 3D des autres joueurs (billboards avec affichage garanti)
   const sprites=[...remote.entries()].map(([id,p])=>({id,...p})).sort((a,b)=>dist2(b)-dist2(a));
   for(const p of sprites){
     let dx=p.x-me.x, dy=p.y-me.y, d=Math.hypot(dx,dy), ang=Math.atan2(dy,dx)-me.a;
@@ -224,37 +232,36 @@ function draw(){
     let col=palette[(sprites.indexOf(p)+1)%palette.length];
     let left=Math.floor(sx-sz*.25), right=Math.floor(sx+sz*.25);
     for(let x=Math.max(0,left); x<Math.min(W,right); x++) {
-      if(d<zBuffer[x]) { ctx.fillStyle=col; ctx.fillRect(x, sy, 1, sz); }
+      if(d < zBuffer[x] + 0.5) { // Tolérance accrue pour être sûr de voir l'adversaire
+        ctx.fillStyle=col; ctx.fillRect(x, sy, 1, sz); 
+      }
     }
-    ctx.fillStyle="#fff"; ctx.font="11px system-ui"; ctx.textAlign="center";
-    ctx.fillText(p.name||"Adversaire", sx, sy-6);
+    ctx.fillStyle="#fff"; ctx.font="bold 12px system-ui"; ctx.textAlign="center";
+    ctx.fillText(p.name||"Adversaire", sx, sy-8);
   }
 
   // Réticule de visée
-  ctx.strokeStyle="rgba(0, 240, 255, 0.7)"; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(W/2-6,H/2); ctx.lineTo(W/2+6,H/2); ctx.moveTo(W/2,H/2-6); ctx.lineTo(W/2,H/2+6); ctx.stroke();
+  ctx.strokeStyle="rgba(0, 240, 255, 0.8)"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(W/2-7,H/2); ctx.lineTo(W/2+7,H/2); ctx.moveTo(W/2,H/2-7); ctx.lineTo(W/2,H/2+7); ctx.stroke();
 
   if(flash>0){ ctx.fillStyle=`rgba(255,51,102,${flash})`; ctx.fillRect(0,0,W,H); flash=Math.max(0,flash-.1); }
   
-  // Affichage des PV et mode
+  // HUD
   ctx.fillStyle="#eaf1ff"; ctx.font="bold 15px system-ui"; ctx.textAlign="left";
   ctx.fillText("❤️ HP: " + me.hp, 14, 26);
   ctx.fillText(netMode ? "🌐 COMBAT EN LIGNE" : "🤖 MODE SOLO", 14, 48);
 
-  // Affichage de la mini-carte
   drawMinimap();
 }
 
 function dist2(p){ return (p.x-me.x)**2 + (p.y-me.y)**2; }
 
 function move(dt){
-  const speed=2.3*dt, turn=2.8*dt;
+  const speed=2.5*dt, turn=3.0*dt;
   
-  // Rotation avec Q, D ou flèches gauche/droite
   if(keys["arrowleft"] || keys["q"]) me.a -= turn;
   if(keys["arrowright"] || keys["d"]) me.a += turn;
   
-  // Avancer / Reculer avec Z, S ou flèches haut/bas
   let f = (keys["z"] || keys["w"] || keys["arrowup"] ? 1 : 0) - (keys["s"] || keys["arrowdown"] ? 1 : 0);
   let vx = Math.cos(me.a) * f * speed;
   let vy = Math.sin(me.a) * f * speed;
@@ -265,12 +272,15 @@ function move(dt){
 
 function shoot(){
   const now=performance.now(); if(now-lastShot<400) return; lastShot=now; flash=.7;
+  setGameMsg("🔫 Pan ! Tir effectué.");
   if(netMode && host){
     for(const [id,p] of remote){
       let a=Math.atan2(p.y-me.y, p.x-me.x), diff=Math.atan2(Math.sin(a-me.a), Math.cos(a-me.a));
-      if(Math.abs(diff)<0.15 && Math.hypot(p.x-me.x, p.y-me.y)<8){
-        p.hp=Math.max(0, (p.hp||100)-25);
+      // Zone de tir élargie pour faciliter les touches entre élèves
+      if(Math.abs(diff)<0.35 && Math.hypot(p.x-me.x, p.y-me.y)<10){
+        p.hp=Math.max(0, (p.hp||100)-34); // 3 tirs pour éliminer
         broadcast({type:"hit", target:id, hp:p.hp});
+        setGameMsg("🎯 Touché direct ! Adversaire à " + p.hp + " HP");
       }
     }
   } else if(netMode && peer){
@@ -283,25 +293,33 @@ function frame(t){
   let dt=Math.min(.04, (t-frame.last)/1000); frame.last=t;
   if(running){
     move(dt);
-    if(netMode && peer && t-lastSend>45){ lastSend=t; sendState(); }
+    if(netMode && peer && t-lastSend>40){ lastSend=t; sendState(); }
     draw();
   }
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 
-// Gestion clavier indépendante du type de clavier (AZERTY / QWERTY) via e.key
+// Gestion clavier fiable (ignore si on tape dans un champ de texte)
 window.addEventListener("keydown", e => {
+  if(e.target.tagName === 'INPUT') return;
   const k = e.key.toLowerCase();
-  keys[k] = true;
+  if(keys.hasOwnProperty(k) || k === 'z' || k === 's' || k === 'q' || k === 'd') {
+    keys[k] = true;
+  }
   if([" ", "arrowup", "arrowdown", "arrowleft", "arrowright"].includes(k)) e.preventDefault();
   if(k === " ") shoot();
 });
+
 window.addEventListener("keyup", e => {
-  keys[e.key.toLowerCase()] = false;
+  if(e.target.tagName === 'INPUT') return;
+  const k = e.key.toLowerCase();
+  if(keys.hasOwnProperty(k)) {
+    keys[k] = false;
+  }
 });
 
-$("start").onclick=()=>{ running=true; setGameMsg("🔥 Combat lancé ! Traque ton adversaire."); };
+$("start").onclick=()=>{ running=true; setGameMsg("🔥 Combat lancé ! Utilise Z S pour avancer/reculer et Q D pour tourner."); };
 $("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
 $("shoot").onclick=shoot;
 $("reset").onclick=()=>{ me=spawn(peer?.id||"solo"); running=false; setGameMsg("Position réinitialisée."); };
@@ -330,13 +348,13 @@ function onHostMessage(from, msg){
     broadcast({type:"roster", players:[...remote.entries(), [peer.id, {name:$("nick").value||"Hôte", ...me}]]});
     updateRoster();
   }
-  if(msg.type==="state"){ let p=remote.get(from); if(p){ p.x=msg.x; p.y=msg.y; p.a=msg.a; p.hp=msg.hp??100; p.name=msg.name??"Joueur"; } }
+  if(msg.type==="state"){ let p=remote.get(from); if(p){ p.x=msg.x; p.y=msg.y; p.a=msg.a; p.hp=msg.hp??100; p.name=p.name??"Joueur"; } }
   if(msg.type==="shoot"){
     for(const [id,p] of remote){
       if(id===from) continue;
       let a=Math.atan2(p.y-msg.y, p.x-msg.x), diff=Math.atan2(Math.sin(a-msg.a), Math.cos(a-msg.a));
-      if(Math.abs(diff)<0.15 && Math.hypot(p.x-msg.x, p.y-msg.y)<8){
-        p.hp=Math.max(0, (p.hp||100)-25);
+      if(Math.abs(diff)<0.35 && Math.hypot(p.x-msg.x, p.y-msg.y)<10){
+        p.hp=Math.max(0, (p.hp||100)-34);
         let c=connections.get(from); if(c?.open) c.send({type:"hit", target:id, hp:p.hp});
       }
     }
@@ -351,9 +369,9 @@ function onMessage(conn, msg){
   if(msg.type==="state"){ remote.set(msg.id, {x:msg.x, y:msg.y, a:msg.a, name:msg.name, hp:msg.hp}); }
   if(msg.type==="hit" && msg.target===(peer?.id)){
     me.hp=msg.hp;
-    setGameMsg("💥 Touché ! PV restants : " + me.hp);
+    setGameMsg("💥 Aïe ! Tu as été touché ! PV restants : " + me.hp);
     if(me.hp<=0){
-      setGameMsg("💀 Éliminé ! Réapparition dans l'arène...");
+      setGameMsg("💀 Éliminé ! Réapparition immédiate dans l'arène...");
       me=spawn(peer?.id||"solo");
     }
   }

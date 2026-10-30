@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mini LAN FPS — SNT</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--panel:#151d31;--line:#2b3958;--cyan:#63e6ff;--green:#7cf29a;--red:#ff6b7d;--text:#eaf1ff;--muted:#9aabc9}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#172744,#090d18 65%);color:var(--text);font:15px system-ui,Segoe UI,sans-serif}
+main{max-width:1100px;margin:auto;padding:22px}header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}h1{font-size:clamp(24px,4vw,36px);margin:0}h1 span{color:var(--cyan)}.tag{color:var(--green);border:1px solid #315c4a;border-radius:999px;padding:6px 10px;font-size:12px}
+.layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(260px,1fr);gap:16px;margin-top:18px}.panel{background:#111a2bdc;border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 14px 40px #0003}
+canvas{display:block;width:100%;aspect-ratio:16/9;background:#080c14;border-radius:12px;border:1px solid #2c3b57;image-rendering:pixelated}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}button,input{font:inherit;border-radius:10px;border:1px solid var(--line);padding:10px;background:#0b1323;color:var(--text)}button{cursor:pointer;font-weight:650}button.primary{background:#0c7187;border-color:#1da4bd}button:disabled{opacity:.45;cursor:not-allowed}input{width:100%;min-width:0}label{display:block;color:var(--muted);font-size:12px;margin:9px 0 5px}.row{display:flex;gap:8px;align-items:center}.row>*{flex:1;min-width:0}.small{font-size:12px;color:var(--muted);line-height:1.5}.status{padding:10px;border-radius:10px;background:#0a1220;border:1px solid #27344b;margin-top:10px;min-height:42px}.good{color:var(--green)}.bad{color:var(--red)}.players{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.player{border:1px solid #354666;border-radius:999px;padding:4px 8px;font-size:12px}.kbd{display:inline-block;border:1px solid #50617e;border-radius:5px;padding:1px 5px;color:#dceaff}.section{margin-top:16px}.section h2{font-size:16px;margin:0 0 8px}.footer{margin:18px 2px;color:var(--muted);font-size:12px}.hidden{display:none}
+@media(max-width:800px){.layout{grid-template-columns:1fr}main{padding:12px}.controls{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>MINI <span>LAN FPS</span></h1><span class="tag">PROTO SNT · 8 JOUEURS</span></header>
+<div class="layout">
+<section class="panel">
+<canvas id="game" width="640" height="360" aria-label="Vue du jeu en raycasting"></canvas>
+<div class="controls">
+<button id="start" class="primary">▶ Jouer / reprendre</button><button id="stop">⏸ Pause</button>
+<button id="shoot">● Tirer (Espace)</button><button id="reset">↻ Réinitialiser</button>
+</div>
+<p class="small">Commandes : <span class="kbd">Z</span><span class="kbd">Q</span><span class="kbd">S</span><span class="kbd">D</span> ou <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span> pour bouger · flèches ← → pour tourner · <span class="kbd">Espace</span> pour tirer. Cliquer sur le canvas pour capturer la souris (Échap pour la libérer).</p>
+<div class="status" id="gameStatus">Mode solo prêt. Pour jouer en réseau, crée ou rejoins une salle à droite.</div>
+</section>
+<aside class="panel">
+<h2 style="margin:0 0 10px">Salle multijoueur</h2>
+<label for="nick">Pseudo</label><input id="nick" maxlength="16" placeholder="Ex. Alex" value="Joueur">
+<div class="row"><button id="create" class="primary">Créer une salle</button><button id="join">Rejoindre</button></div>
+<label for="room">Code de salle / ID de l'hôte</label><input id="room" placeholder="Le code fourni par l'hôte">
+<div class="status" id="netStatus">Pas connecté. Création de salle ou rejoindre une salle.</div>
+<div class="section"><h2>Test réseau · 10 secondes</h2><p class="small">À lancer après avoir rejoint la salle. Chaque client envoie des pings aux autres participants et mesure les réponses reçues.</p>
+<button id="test" class="primary" style="width:100%">⌁ Tester la connexion (10 s)</button>
+<div class="status" id="testStatus">Test non lancé.</div></div>
+<div class="section"><h2>Joueurs <span id="count">0/8</span></h2><div id="players" class="players"></div></div>
+<div class="section"><h2>À savoir</h2><p class="small">Prototype pédagogique : PeerJS utilise un service de signalisation public et des serveurs STUN. Ce n'est pas un serveur de jeu à administrer, mais ce n'est pas une connexion garantie sur tous les réseaux du lycée. Les règles pare-feu/proxy peuvent bloquer WebRTC.</p></div>
+</aside>
+</div>
+<div class="footer">Prototype autonome · Canvas + raycasting · PeerJS · Hébergement possible sur GitHub Pages (HTTPS requis)</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(()=> {
+"use strict";
+const $=id=>document.getElementById(id), canvas=$("game"),ctx=canvas.getContext("2d");
+const W=canvas.width,H=canvas.height;
+const map=[
+"111111111111111",
+"100000000000001",
+"101110010111101",
+"100010000100001",
+"111010110101111",
+"100000000000001",
+"101101011011101",
+"100001000010001",
+"101111010111101",
+"100000000000001",
+"111011110111101",
+"100000000000001",
+"111111111111111"
+];
+const MW=map[0].length,MH=map.length;
+const wall=(x,y)=>x<0||y<0||x>=MW||y>=MH||map[Math.floor(y)][Math.floor(x)]==="1";
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+let me={x:2.5,y:2.5,a:0,hp:100},running=false,netMode=false,peer=null,host=false,roomId="",connections=new Map(),remote=new Map(),players=new Map(),lastSend=0,lastShot=0,flash=0;
+let keys={},zBuffer=new Float32Array(W),testTimer=null,testData=null;
+const palette=["#ff6b7d","#63e6ff","#b8ff6a","#ffc56b","#c7a4ff","#ff9ee7","#e8f2ff","#ff885b"];
+function say(id,msg,cls=""){ $(id).innerHTML=msg;$(id).className="status "+cls; }
+function setGameMsg(msg){say("gameStatus",msg)}
+function spawn(id){let n=(parseInt(id,36)||0)%8;return {x:2.5+(n%4)*.55,y:2.5+Math.floor(n/4)*.55,a:n*Math.PI/4,hp:100};}
+function getPlayerList(){let all=[{id:peer?.id||"solo",name:$("nick").value||"Joueur",...me,color:palette[0]}];for(const [id,p] of remote)all.push({id,...p,color:palette[(all.length)%palette.length]});return all.slice(0,8)}
+function draw(){
+ const sky=ctx.createLinearGradient(0,0,0,H/2);sky.addColorStop(0,"#101a31");sky.addColorStop(1,"#52617a");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H/2);
+ const floor=ctx.createLinearGradient(0,H/2,0,H);floor.addColorStop(0,"#252d39");floor.addColorStop(1,"#090c12");ctx.fillStyle=floor;ctx.fillRect(0,H/2,W,H/2);
+ const fov=Math.PI/3;
+ for(let x=0;x<W;x++){
+  let ray=me.a-fov/2+(x/W)*fov,dx=Math.cos(ray),dy=Math.sin(ray);
+  let dist=0,hit=false,side=0;
+  while(!hit&&dist<18){dist+=.025;let tx=Math.floor(me.x+dx*dist),ty=Math.floor(me.y+dy*dist);if(wall(tx,ty)){hit=true;side=(Math.abs(dx)>Math.abs(dy))?0:1;}}
+  dist=Math.max(.03,dist*Math.cos(ray-me.a));zBuffer[x]=dist;
+  let height=Math.min(H,H/(dist+.001)),top=(H-height)/2;
+  let shade=clamp(210-dist*13,35,190)*(side===1?.72:1);
+  let stripe=((Math.floor((side===0?me.y+dy*dist:me.x+dx*dist)*8)%2)===0)?1:.82;
+  ctx.fillStyle=`rgb(${shade*stripe*.65},${shade*stripe*.78},${shade*stripe})`;ctx.fillRect(x,top,1,height);
+ }
+ const fov2=Math.PI/3;
+ const sprites=[...remote.entries()].map(([id,p])=>({id,...p})).sort((a,b)=>dist2(b)-dist2(a));
+ for(const p of sprites){
+  let dx=p.x-me.x,dy=p.y-me.y,d=Math.hypot(dx,dy),ang=Math.atan2(dy,dx)-me.a;
+  while(ang>Math.PI)ang-=2*Math.PI;while(ang< -Math.PI)ang+=2*Math.PI;
+  if(Math.abs(ang)>fov2/2||d<.15)continue;
+  let sx=(.5+ang/fov2)*W,sz=Math.min(H,H/(d+.001)*.62),sy=H/2-sz*.52;
+  let col=palette[(sprites.indexOf(p)+1)%palette.length];
+  let left=Math.floor(sx-sz*.24),right=Math.floor(sx+sz*.24);
+  for(let x=Math.max(0,left);x<Math.min(W,right);x++)if(d<zBuffer[x]){
+   ctx.fillStyle=col;ctx.fillRect(x,sy,1,sz);
+  }
+  ctx.fillStyle="#f1f5ff";ctx.font="12px system-ui";ctx.textAlign="center";ctx.fillText(p.name||"Joueur",sx,sy-5);
+ }
+ ctx.strokeStyle="#dff8ffb0";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(W/2-7,H/2);ctx.lineTo(W/2+7,H/2);ctx.moveTo(W/2,H/2-7);ctx.lineTo(W/2,H/2+7);ctx.stroke();
+ ctx.fillStyle="#b7c8df";ctx.fillRect(W/2-35,H-30,70,30);ctx.fillStyle="#33445b";ctx.fillRect(W/2-24,H-20,48,20);
+ if(flash>0){ctx.fillStyle=`rgba(255,240,170,${flash})`;ctx.fillRect(0,0,W,H);flash=Math.max(0,flash-.08)}
+ ctx.fillStyle="#eaf1ff";ctx.font="14px system-ui";ctx.textAlign="left";ctx.fillText("HP "+me.hp,12,22);ctx.fillText(netMode?"RÉSEAU":"SOLO",12,42);
+}
+function dist2(p){return (p.x-me.x)**2+(p.y-me.y)**2}
+function move(dt){
+ const speed=2.25*dt,turn=2.4*dt;
+ if(keys.ArrowLeft)me.a-=turn;if(keys.ArrowRight)me.a+=turn;
+ let f=(keys.KeyW||keys.KeyZ?1:0)-(keys.KeyS?1:0),s=(keys.KeyD?1:0)-(keys.KeyA||keys.KeyQ?1:0);
+ let vx=Math.cos(me.a)*f-Math.sin(me.a)*s,vy=Math.sin(me.a)*f+Math.cos(me.a)*s;
+ let mag=Math.hypot(vx,vy)||1;vx=vx/mag*speed;vy=vy/mag*speed;
+ if(!wall(me.x+vx,me.y))me.x+=vx;if(!wall(me.x,me.y+vy))me.y+=vy;
+}
+function shoot(){
+ const now=performance.now();if(now-lastShot<350)return;lastShot=now;flash=.8;
+ if(netMode&&host){
+  for(const [id,p] of remote){let a=Math.atan2(p.y-me.y,p.x-me.x),diff=Math.atan2(Math.sin(a-me.a),Math.cos(a-me.a));if(Math.abs(diff)<.12&&Math.hypot(p.x-me.x,p.y-me.y)<7){p.hp=Math.max(0,(p.hp||100)-25);broadcast({type:"hit",target:id,hp:p.hp});}}
+ }else if(netMode&&peer){sendHost({type:"shoot",a:me.a,x:me.x,y:me.y});}
+}
+function frame(t){if(!frame.last)frame.last=t;let dt=Math.min(.04,(t-frame.last)/1000);frame.last=t;if(running){move(dt);if(netMode&&peer&&t-lastSend>45){lastSend=t;sendState();}draw();}requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+window.addEventListener("keydown",e=>{keys[e.code]=true;if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code))e.preventDefault();if(e.code==="Space")shoot()});
+window.addEventListener("keyup",e=>keys[e.code]=false);
+canvas.addEventListener("click",()=>canvas.requestPointerLock?.());
+$("start").onclick=()=>{running=true;setGameMsg("Partie en cours. Déplace-toi et explore le labyrinthe.");};
+$("stop").onclick=()=>{running=false;setGameMsg("Partie en pause.");};
+$("shoot").onclick=shoot;
+$("reset").onclick=()=>{me=spawn(peer?.id||"solo");running=false;setGameMsg("Position réinitialisée. Clique sur Jouer / reprendre.");};
+function updateRoster(){let list=getPlayerList();$("count").textContent=list.length+"/8";$("players").innerHTML=list.map(p=>`<span class="player">${escapeHtml(p.name)}</span>`).join("");}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function connectConn(conn){
+ conn.on("open",()=>{connections.set(conn.peer,conn);conn.send({type:"hello",name:$("nick").value||"Joueur",state:me});updateRoster();});
+ conn.on("data",msg=>onMessage(conn,msg));
+ conn.on("close",()=>{connections.delete(conn.peer);remote.delete(conn.peer);updateRoster();});
+ conn.on("error",err=>say("netStatus","Erreur connexion : "+escapeHtml(err.message),"bad"));
+}
+function sendHost(msg){if(host){onHostMessage(peer?.id,msg);return;}const c=connections.values().next().value;if(c?.open)c.send(msg);}
+function onHostMessage(from,msg){
+ if(!host)return;
+ if(msg.type==="hello"){if(remote.size>=7&&!remote.has(from)){broadcast({type:"full"});return;}remote.set(from,{name:String(msg.name||"Joueur").slice(0,16),...spawn(from),...(msg.state||{})});broadcast({type:"roster",players:[...remote.entries(),[peer.id,{name:$("nick").value||"Hôte",...me}]]});updateRoster();}
+ if(msg.type==="state"){let p=remote.get(from);if(p){p.x=msg.x;p.y=msg.y;p.a=msg.a;p.hp=p.hp??100;p.name=p.name??"Joueur";}}
+ if(msg.type==="ping"){let c=connections.get(from);if(c?.open)c.send({type:"pong",id:msg.id,ts:msg.ts,from:peer.id});}
+ if(msg.type==="shoot"){for(const [id,p] of remote){if(id===from)continue;let a=Math.atan2(p.y-msg.y,p.x-msg.x),diff=Math.atan2(Math.sin(a-msg.a),Math.cos(a-msg.a));if(Math.abs(diff)<.12&&Math.hypot(p.x-msg.x,p.y-msg.y)<7){p.hp=Math.max(0,(p.hp||100)-25);let c=connections.get(from);if(c?.open)c.send({type:"hit",target:id,hp:p.hp});}}}
+ if(msg.type==="testPing"){let c=connections.get(from);if(c?.open)c.send({type:"testPong",id:msg.id,ts:msg.ts});}
+ if(msg.type==="testPong"&&testData){let sent=testData.pending.get(msg.id);if(sent){testData.pending.delete(msg.id);testData.rtts.push(performance.now()-sent);}}
+}
+function broadcast(msg,except=null){for(const [id,c] of connections)if(id!==except&&c.open)c.send(msg);}
+function onMessage(conn,msg){
+ if(host){onHostMessage(conn.peer,msg);return;}
+ if(msg.type==="roster"){remote=new Map(msg.players||[]);remote.delete(peer.id);updateRoster();}
+ if(msg.type==="state"){remote.set(msg.id,{x:msg.x,y:msg.y,a:msg.a,name:msg.name,hp:msg.hp});}
+ if(msg.type==="pong"&&testData){let sent=testData.pending.get(msg.id);if(sent){testData.pending.delete(msg.id);testData.rtts.push(performance.now()-sent);}}
+ if(msg.type==="testPing"){let c=connections.values().next().value;if(c?.open)c.send({type:"testPong",id:msg.id,ts:msg.ts});}
+ if(msg.type==="testPong"&&testData){let sent=testData.pending.get(msg.id);if(sent){testData.pending.delete(msg.id);testData.rtts.push(performance.now()-sent);}}
+ if(msg.type==="hit"&&msg.target===(peer?.id)){me.hp=msg.hp;setGameMsg("Touché ! Points de vie : "+me.hp);}
+ if(msg.type==="full")say("netStatus","Salle pleine (maximum 8 joueurs).","bad");
+}
+function sendState(){const msg={type:"state",id:peer.id,x:me.x,y:me.y,a:me.a,name:$("nick").value||"Joueur",hp:me.hp};if(host){broadcast(msg);for(const [id,p] of remote){let c=connections.get(id);if(c?.open)c.send({type:"state",id,...p});}}else sendHost(msg);}
+
+// MODIFICATION ICI : Ajout d'une configuration STUN stable pour éviter les blocages de création de salle
+function newPeer(){
+  return new Peer(undefined, {
+    debug: 2,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:global.stun.twilio.com:3478' }
+      ]
+    }
+  });
+}
+
+$("create").onclick=()=>{
+ if(peer)return;say("netStatus","Connexion au service de signalisation PeerJS…");
+ host=true;netMode=true;running=true;peer=newPeer();
+ peer.on("open",id=>{roomId=id;$("room").value=id;say("netStatus",`Salle créée : <b>${escapeHtml(id)}</b><br>Transmets cet ID aux joueurs. En attente de connexions…`,"good");me=spawn(id);updateRoster();});
+ peer.on("connection",connectConn);
+ peer.on("error",err=>say("netStatus","PeerJS : "+escapeHtml(err.type||err.message),"bad"));
+ peer.on("disconnected",()=>say("netStatus","Signalisation déconnectée. Reconnexion possible.","bad"));
+};
+$("join").onclick=()=>{
+ const id=$("room").value.trim();if(!id){say("netStatus","Saisis l'ID de la salle communiqué par l'hôte.","bad");return;}if(peer)return;
+ host=false;say("netStatus","Connexion à la salle…");peer=newPeer();
+ peer.on("open",()=>{const c=peer.connect(id,{reliable:true});connectConn(c);c.on("open",()=>{roomId=id;say("netStatus","Connecté à la salle de "+escapeHtml(id),"good");netMode=true;running=true;me=spawn(peer.id);updateRoster();});});
+ peer.on("error",err=>say("netStatus","PeerJS : "+escapeHtml(err.type||err.message),"bad"));
+};
+$("test").onclick=()=>{
+ if(!peer||(!host&&connections.size===0)){say("testStatus","Connecte-toi à une salle avant le test.","bad");return;}
+ const start=performance.now();testData={pending:new Map(),rtts:[],total:0};say("testStatus","Test en cours : 10 secondes…");
+ const sendPing=()=>{
+  const id=Math.random().toString(36).slice(2),ts=performance.now();testData.pending.set(id,ts);testData.total++;
+  if(host){for(const c of connections.values())if(c.open)c.send({type:"testPing",id,ts});}
+  else sendHost({type:"ping",id,ts});
+ };
+ sendPing();const interval=setInterval(()=>{if(testData)sendPing();},700);
+ testTimer=setTimeout(()=>{
+  clearInterval(interval);if(!testData)return;
+  const d=testData,elapsed=(performance.now()-start)/1000,avg=d.rtts.length?d.rtts.reduce((a,b)=>a+b,0)/d.rtts.length:0;
+  const pct=d.total?Math.round(d.rtts.length/d.total*100):0;
+  let msg=`Résultat : <b>${d.rtts.length}</b> réponse(s) / ${d.total} ping(s), ${pct}% reçus. `;
+  if(d.rtts.length)msg+=`Latence moyenne ≈ <b>${Math.round(avg)} ms</b>. `;
+  msg+=pct>=80?"<span class='good'>Connexion prometteuse pour le prototype.</span>": "<span class='bad'>Connexion instable ou filtrée. Vérifier pare-feu/proxy ou essayer un autre réseau.</span>";
+  say("testStatus",msg,pct>=80?"good":"bad");testData=null;
+ },10000);
+};
+function cleanup(){if(testTimer)clearTimeout(testTimer);if(peer)peer.destroy();peer=null;host=false;netMode=false;connections.clear();remote.clear();}
+window.addEventListener("beforeunload",cleanup);
+updateRoster();draw();
+})();
+</script>
+</body>
+</html>

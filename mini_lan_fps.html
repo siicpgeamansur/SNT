@@ -256,10 +256,11 @@ function draw(){
 function dist2(p){ return (p.x-me.x)**2 + (p.y-me.y)**2; }
 
 function move(dt){
-  const speed=2.5*dt, turn=3.0*dt;
+  const speed = 2.5 * dt;
+  const turnSpeed = 1.3 * dt;
   
-  if(keys["arrowleft"] || keys["q"]) me.a -= turn;
-  if(keys["arrowright"] || keys["d"]) me.a += turn;
+  if(keys["arrowleft"] || keys["q"]) me.a -= turnSpeed;
+  if(keys["arrowright"] || keys["d"]) me.a += turnSpeed;
   
   let f = (keys["z"] || keys["w"] || keys["arrowup"] ? 1 : 0) - (keys["s"] || keys["arrowdown"] ? 1 : 0);
   let vx = Math.cos(me.a) * f * speed;
@@ -269,28 +270,27 @@ function move(dt){
   if(!wall(me.x, me.y + vy)) me.y += vy;
 }
 
-// TIR AMÉLIORÉ : Plus besoin d'être parfaitement en face ! Touche tout ennemi à portée de tir proche.
+// GESTION CORRIGÉE DES TIRS (Bidirectionnelle et équitable)
 function shoot(){
   const now=performance.now(); if(now-lastShot<400) return; lastShot=now; flash=.7;
   setGameMsg("🔫 Pan ! Tir effectué.");
 
   if(netMode){
-    // On cherche l'adversaire le plus proche dans un rayon de 10 cases (sans contrainte d'angle strict)
     for(const [id, p] of remote){
       let distance = Math.hypot(p.x - me.x, p.y - me.y);
-      if(distance < 10) {
-        p.hp = Math.max(0, (p.hp || 100) - 34); // 3 tirs pour éliminer
-        setGameMsg("🎯 Touché ! Adversaire à " + p.hp + " HP");
+      if(distance < 12) { // Portée de tir
+        p.hp = Math.max(0, (p.hp || 100) - 34);
+        setGameMsg("🎯 Touché ! Adversaire à " + Math.round(p.hp) + " HP");
         
-        // Envoi direct de l'information de dégâts à l'adversaire
         if(host) {
+          // Si c'est l'hôte qui tire, il prévient directement le client touché
           let c = connections.get(id);
           if(c?.open) c.send({type:"hit", target:id, hp:p.hp});
-          broadcast({type:"roster", players:[...remote.entries(), [peer.id, {name:$("nick").value||"Hôte", ...me}]]});
         } else {
+          // Si c'est le client qui tire, il prévient l'hôte pour appliquer les dégâts
           sendHost({type:"shootAt", target:id});
         }
-        break; // Tire sur le premier ennemi à portée
+        break;
       }
     }
   }
@@ -321,7 +321,7 @@ window.addEventListener("keyup", e => {
   keys[e.key.toLowerCase()] = false;
 });
 
-$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Appuie sur Espace pour tirer à proximité."); };
+$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Prêt pour le combat."); };
 $("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
 $("shoot").onclick=shoot;
 $("reset").onclick=()=>{ me=spawn(peer?.id||"solo"); running=false; setGameMsg("Position réinitialisée."); };
@@ -351,13 +351,16 @@ function onHostMessage(from, msg){
     updateRoster();
   }
   if(msg.type==="state"){ let p=remote.get(from); if(p){ p.x=msg.x; p.y=msg.y; p.a=msg.a; p.hp=msg.hp??100; p.name=p.name??"Joueur"; } }
+  
+  // Correction de la gestion des dégâts reçus par l'hôte de la part d'un client
   if(msg.type==="shootAt"){
-    let targetId = msg.target || peer.id;
+    let targetId = msg.target;
     if(targetId === peer.id) {
+      // L'hôte est touché par un client !
       me.hp = Math.max(0, me.hp - 34);
-      setGameMsg("💥 Tu as été touché ! PV restants : " + me.hp);
+      setGameMsg("💥 Tu as été touché par l'adversaire ! PV restants : " + Math.round(me.hp));
       if(me.hp <= 0) {
-        setGameMsg("💀 Éliminé ! Réapparition...");
+        setGameMsg("💀 Éliminé ! Réapparition dans l'arène...");
         me = spawn(peer.id);
       }
     } else {
@@ -379,7 +382,7 @@ function onMessage(conn, msg){
   if(msg.type==="state"){ remote.set(msg.id, {x:msg.x, y:msg.y, a:msg.a, name:msg.name, hp:msg.hp}); }
   if(msg.type==="hit" && msg.target===(peer?.id)){
     me.hp=msg.hp;
-    setGameMsg("💥 Aïe ! Tu as été touché ! PV restants : " + me.hp);
+    setGameMsg("💥 Aïe ! Tu as été touché ! PV restants : " + Math.round(me.hp));
     if(me.hp<=0){
       setGameMsg("💀 Éliminé ! Réapparition immédiate dans l'arène...");
       me=spawn(peer?.id||"solo");

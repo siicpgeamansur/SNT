@@ -57,7 +57,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
     <p class="small" style="margin-top:12px;">
       Avancer/Reculer : <span class="kbd">Z</span> <span class="kbd">S</span> · Tourner : <span class="kbd">Q</span> <span class="kbd">D</span> (ou flèches <span class="kbd">←</span> <span class="kbd">→</span>) · Tirer : <span class="kbd">Espace</span>
     </p>
-    <div class="status" id="gameStatus">Arène ouverte prête. Crée une salle, clique sur Jouer, et rejoins ton adversaire !</div>
+    <div class="status" id="gameStatus">Arène ouverte prête. Les murs bloquent désormais les balles !</div>
   </section>
 
   <!-- SECTION RÉSEAU / SALLE -->
@@ -145,6 +145,24 @@ function newPeer(customId=undefined){
       ]
     }
   });
+}
+
+// Fonction pour vérifier si un mur bloque la ligne de tir entre deux points (x1,y1) et (x2,y2)
+function hasLineOfSight(x1, y1, x2, y2) {
+  let dist = Math.hypot(x2 - x1, y2 - y1);
+  let steps = Math.floor(dist * 10); // Précision du raycast de tir
+  let dx = (x2 - x1) / steps;
+  let dy = (y2 - y1) / steps;
+  let cx = x1, cy = y1;
+  
+  for(let i = 0; i < steps; i++) {
+    cx += dx;
+    cy += dy;
+    if(wall(cx, cy)) {
+      return false; // Un mur bloque la vue/tir !
+    }
+  }
+  return true; // Ligne de vue dégagée
 }
 
 function drawMinimap(){
@@ -270,26 +288,27 @@ function move(dt){
   if(!wall(me.x, me.y + vy)) me.y += vy;
 }
 
-// SYSTÈME DE TIR CORRIGÉ ET ÉQUITABLE POUR LES DEUX JOUEURS
+// TIR AVEC VÉRIFICATION DES MURS (Les murs bloquent les balles)
 function shoot(){
   const now=performance.now(); if(now-lastShot<400) return; lastShot=now; flash=.7;
   setGameMsg("🔫 Pan ! Tir effectué.");
 
   if(netMode){
     if(host){
-      // Si c'est l'hôte qui tire, il vérifie s'il touche un client distant
       for(const [id, p] of remote){
         let distance = Math.hypot(p.x - me.x, p.y - me.y);
-        if(distance < 12) {
+        // Vérifie la distance ET l'absence de mur entre l'hôte et l'adversaire
+        if(distance < 12 && hasLineOfSight(me.x, me.y, p.x, p.y)) {
           p.hp = Math.max(0, (p.hp || 100) - 34);
           setGameMsg("🎯 Touché ! Adversaire à " + Math.round(p.hp) + " HP");
           let c = connections.get(id);
           if(c?.open) c.send({type:"hit", target:id, hp:p.hp});
           break;
+        } else if(distance < 12) {
+          setGameMsg("🛡️ Tir bloqué par un mur ou un pilier !");
         }
       }
     } else {
-      // Si c'est un client qui tire, il prévient l'hôte qu'il tire sur l'hôte (ou un autre)
       sendHost({type:"shootAt", from:peer.id});
     }
   }
@@ -320,7 +339,7 @@ window.addEventListener("keyup", e => {
   keys[e.key.toLowerCase()] = false;
 });
 
-$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Prêt pour le combat."); };
+$("start").onclick=()=>{ running=true; setGameMsg("🔥 Arène ouverte ! Les tirs sont bloqués par les murs."); };
 $("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
 $("shoot").onclick=shoot;
 $("reset").onclick=()=>{ me=spawn(peer?.id||"solo"); running=false; setGameMsg("Position réinitialisée."); };
@@ -336,7 +355,7 @@ function connectConn(conn){
   conn.on("open",()=>{ connections.set(conn.peer, conn); conn.send({type:"hello", name:$("nick").value||"Joueur", state:me}); updateRoster(); });
   conn.on("data",msg=>onMessage(conn,msg));
   conn.on("close",()=>{ connections.delete(conn.peer); remote.delete(conn.peer); updateRoster(); });
-  conn.on("error",err=>say("netStatus","Erreur réseau : "+escapeHtml(err.message),"bad"));
+  conn.on("error",err=>say("netStatus","Erreur connexion : "+escapeHtml(err.message),"bad"));
 }
 
 function sendHost(msg){ if(host){ onHostMessage(peer?.id, msg); return; } const c=connections.values().next().value; if(c?.open) c.send(msg); }
@@ -352,17 +371,14 @@ function onHostMessage(from, msg){
   if(msg.type==="state"){ let p=remote.get(from); if(p){ p.x=msg.x; p.y=msg.y; p.a=msg.a; p.hp=msg.hp??100; p.name=p.name??"Joueur"; } }
   
   if(msg.type==="shootAt"){
-    // Un client (from) a tiré. L'hôte vérifie la distance entre ce client et l'hôte lui-même.
     let clientPlayer = remote.get(from);
     if(clientPlayer) {
       let distance = Math.hypot(clientPlayer.x - me.x, clientPlayer.y - me.y);
-      if(distance < 12) {
-        // L'hôte perd de la vie !
+      // L'hôte vérifie si le client a une ligne de vue dégagée vers l'hôte
+      if(distance < 12 && hasLineOfSight(clientPlayer.x, clientPlayer.y, me.x, me.y)) {
         me.hp = Math.max(0, me.hp - 34);
         setGameMsg("💥 Touché par " + clientPlayer.name + " ! PV restants : " + Math.round(me.hp));
         
-        // On renvoie un ordre de dégâts direct à l'hôte lui-même via la gestion locale, 
-        // et on prévient le client que son tir a touché pour l'affichage.
         let c = connections.get(from);
         if(c?.open) c.send({type:"hitConfirm", hp: me.hp});
 
@@ -370,6 +386,8 @@ function onHostMessage(from, msg){
           setGameMsg("💀 Éliminé par " + clientPlayer.name + " ! Réapparition...");
           me = spawn(peer.id);
         }
+      } else if(distance < 12) {
+        setGameMsg("🛡️ Le tir de " + clientPlayer.name + " a été bloqué par un mur !");
       }
     }
   }
@@ -383,12 +401,10 @@ function onMessage(conn, msg){
   if(msg.type==="roster"){ remote=new Map(msg.players||[]); remote.delete(peer.id); updateRoster(); }
   if(msg.type==="state"){ remote.set(msg.id, {x:msg.x, y:msg.y, a:msg.a, name:msg.name, hp:msg.hp}); }
   
-  // Si le client reçoit un ordre de dégâts direct sur sa propre cible (quand il touche l'hôte)
   if(msg.type==="hitConfirm"){
-    setGameMsg("🎯 Ton tir a touché l'hôte avec succès !");
+    setGameMsg("🎯 Ton tir a traversé l'espace libre et touché l'hôte !");
   }
   
-  // Si le client est touché par un tir de l'hôte
   if(msg.type==="hit" && msg.target===(peer?.id)){
     me.hp=msg.hp;
     setGameMsg("💥 Aïe ! Touché par l'hôte ! PV restants : " + Math.round(me.hp));
@@ -445,7 +461,7 @@ $("join").onclick=()=>{
     connectConn(c);
     c.on("open",()=>{
       roomId=id;
-      say("netStatus","Connecté à l'arène <b>"+escapeHtml(id)+"</b> ! Bon combat.", "good");
+      say("netStatus","Connecté à l'arène <b>"+escapeHtml(id)}</b> ! Bon combat.", "good");
       netMode=true; running=true; me=spawn(peer.id); updateRoster();
     });
     c.on("error", ()=>say("netStatus","Arène introuvable. Vérifie le nom.","bad"));

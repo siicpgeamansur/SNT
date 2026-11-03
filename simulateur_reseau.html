@@ -60,6 +60,7 @@ hr { border: 0; border-top: 1px solid var(--bd); margin: 10px 0; }
 #log .h { font-weight: 700; margin-top: 5px; color: var(--ac); }
 #log .err { color: var(--err); }
 #log .ok { color: var(--ok); font-weight: 600; }
+#log .http { color: #dd6b20; font-family: monospace; font-size: 0.78rem; background: #fffaf0; border-left: 3px solid #dd6b20; padding-left: 6px; margin: 2px 0; }
 .help { font-size: .8rem; color: var(--mut); margin: 4px 0 0; max-width: 80ch; }
 footer { margin-top: 8px; font-size: .75rem; color: var(--mut); text-align: center; }
 </style>
@@ -108,13 +109,13 @@ footer { margin-top: 8px; font-size: .75rem; color: var(--mut); text-align: cent
 
 <div id="log-wrap">
   <div class="lh">
-    <b>Journal des paquets</b>
+    <b>Journal des paquets et requêtes HTTP</b>
     <label>Lent <input type="range" id="spd" min="120" max="1100" value="650"> Rapide</label>
     <button id="clr">Effacer</button>
   </div>
   <div id="log"></div>
 </div>
-<footer>Simulateur pédagogique inspiré de Filius</footer>
+<footer>Simulateur pédagogique inspiré de Filius — adapté aux TP SNT (réseaux, DNS, DHCP, web, peer-to-peer). Style clair type GeoGebra.</footer>
 
 <script>
 const $ = s => document.querySelector(s), svg = $('#svg'), NS = 'http://www.w3.org/2000/svg';
@@ -140,7 +141,14 @@ function add(t, x, y, name) {
   nodes.push(n); return n;
 }
 function say(t, c) {
-  const d = document.createElement('div'); d.textContent = t; if (c) d.className = c;
+  const d = document.createElement('div');
+  if (c === 'http') {
+    d.className = 'http';
+    d.innerHTML = '🌐 <b>Requête HTTP :</b> ' + esc(t);
+  } else {
+    d.textContent = t;
+    if (c) d.className = c;
+  }
   $('#log').appendChild(d); $('#log').scrollTop = 1e9;
 }
 
@@ -249,13 +257,19 @@ async function web(src, url) {
     r = await send(s, src.ip, host + '=' + ip, '#38a169');
     if (!r.ok) return;
   }
+  
+  // Affichage détaillé de la requête HTTP formatée
+  say('GET / HTTP/1.1<br>Host: ' + host + '<br>User-Agent: Navigateur-SNT/' + src.name, 'http');
   say('🌍 HTTP GET → ' + ip);
+  
   let r = await send(src, ip, 'HTTP GET', '#dd6b20');
   if (!r.ok) return;
   if (!(r.node.page || '').trim()) return say('✖ ' + r.node.name + ' n\'héberge pas de site (port 80 fermé).', 'err');
+  
   r = await send(r.node, src.ip, 'Page', '#dd6b20');
   if (r.ok) {
     const pg = (nodes.find(n => owns(n, ip)) || { page: '' }).page.trim();
+    say('HTTP/1.1 200 OK<br>Content-Type: text/html<br>Body: "' + esc(pg) + '"', 'http');
     say('✔ Page reçue : « ' + pg + ' »', 'ok');
   }
 }
@@ -288,7 +302,7 @@ function panel() {
       '<b>Astuces TP</b><br>' +
       '• Étape 1 : deux PC + câble, ping direct.<br>' +
       '• Étape 3 : configure les passerelles sur les PC et les IP d’interfaces du routeur.<br>' +
-      '• Étape 4-5 : enregistrements DNS (nom IP) + page web sur le serveur.<br>' +
+      '• Étape 4-5 : enregistrements DNS (nom IP) + page web sur le serveur + IP du sous-réseau du switch 2 sur le routeur.<br>' +
       '• DHCP : active « Adressage auto » et une plage sur le serveur.<br>' +
       '• Traceroute : utilise plusieurs pings et observe les sauts dans le journal.</p>';
     return;
@@ -297,7 +311,7 @@ function panel() {
   if (isH(n)) {
     h += '<label>Adresse IP <input data-k="ip" value="' + esc(n.ip) + '"></label>';
     h += '<label>Masque <input data-k="mask" value="' + esc(n.mask) + '"></label>';
-    h += '<label>Passerelle par défaut <input data-k="gw" value="' + esc(n.gw) + '"></label>';
+    h += '<label>Passerelle par défaut (Routeur) <input data-k="gw" value="' + esc(n.gw) + '"></label>';
     h += '<label>Serveur DNS <input data-k="dns" value="' + esc(n.dns) + '"></label>';
     if (n.t === 'srv') {
       h += '<label><input type="checkbox" data-k="dhcp" ' + (n.dhcp ? 'checked' : '') + '> Activer serveur DHCP</label>';
@@ -306,7 +320,7 @@ function panel() {
     h += '<p class="mut" id="info"></p>';
   }
   if (n.t === 'rt') {
-    h += '<p class="mut">Une IP par interface (câble) :</p>';
+    h += '<p class="mut">Une IP par interface (câble) connectée à chaque sous-réseau :</p>';
     for (const k of myLinks(n)) {
       const f = n.ifs[k.id] || { ip: '', mask: '255.255.255.0' };
       h += '<label>Vers ' + esc(other(k, n.id).name) + '</label>' +
@@ -512,7 +526,7 @@ const SC = {
   modem: {
     N: [['pc', 'Ordinateur A', P('192.168.0.10'), 180, 200],
         ['modem', 'Modem A (destinataire)', P('192.168.0.1'), 400, 120],
-        ['modem', 'Modem B', P('192.168.0.2'), 400, 300],
+        ['modem', 'Modem B', P('192.168.0.2', ''), 400, 300],
         ['pc', 'Ordinateur B', P('192.168.0.20'), 680, 200]],
     L: [[0, 1], [1, 2], [2, 3]],
     m: 'Étape 9 — Modem. Pont entre deux instances. Même préfixe réseau. Ping A → B.'

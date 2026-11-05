@@ -1,0 +1,1218 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Atelier Réseaux sociaux</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : barre d'outils en haut, palette à gauche, zone de travail blanche, panneau de l'appareil à droite (feuille basse sur téléphone). */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;
+  --canvas:#ffffff;--grid:#ffffff;--cable:#000000;--node-fill:#dfe7f0;--node-stroke:#33475b;--screen:#8ec1e6;
+  --note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;--page-bg:#ffffff;--page-fg:#1d2733;
+  --term-bg:#121a22;--term-fg:#d5e0ea;
+  --ok:#1e7a2e;--warn:#9a5b00;--bad:#c0281f;
+  --c-arp:#c98a00;--c-icmp:#7b4fc2;--c-dns:#1478b8;--c-dhcp:#c2347f;--c-tcp:#6d8a14;--c-http:#0f8c68;--c-mail:#d1561b;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:.01em}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn.del{color:var(--bad)}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.seg button[data-mode=sim][aria-pressed="true"]{background:var(--run)}
+#simctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#simctl label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+#simctl select{width:auto}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--run);font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.paused{color:var(--warn)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#palette{flex:none;width:92px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.tool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;font-weight:500;font-size:11.5px;min-width:74px;text-align:center}
+.tool svg{width:34px;height:34px;overflow:visible}
+.tool:hover{border-color:var(--accent)}
+.tool.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.sep{height:1px;background:var(--line);flex:none;margin:2px 0}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#svg{display:block;width:1400px;height:900px;touch-action:none;user-select:none;-webkit-user-select:none}
+.node{cursor:pointer}
+.mode-design .node,.mode-doc .note{cursor:grab}
+.ic-body{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:2;stroke-linejoin:round}
+.ic-screen{fill:var(--screen);stroke:var(--node-stroke);stroke-width:1.2}
+.ic-acc{stroke:var(--accent);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic-led{fill:var(--accent)}
+.nlabel{font:600 12.5px var(--font-ui);fill:var(--fg)}
+.nip{font:11px var(--font-mono);fill:var(--muted)}
+.selbox{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.lk .selbox{stroke-dasharray:none;stroke-width:2.5}
+.cab{stroke:var(--cable);stroke-width:2.2;stroke-linecap:round}
+.cab.on{stroke:var(--accent);stroke-width:4}
+.hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.note rect{fill:var(--note-bg);stroke:var(--note-line)}
+.note text{font:12.5px var(--font-ui);fill:var(--note-fg)}
+#panel{flex:none;width:360px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0}
+#panel.wide{width:clamp(380px,38vw,600px)}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.pbody.fill{display:flex;flex-direction:column;gap:8px}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.fld.chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);font-size:13px}
+.fld.chk input{width:auto}
+input[type=text],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.mono{font-family:var(--font-mono);font-size:12.5px}
+textarea{resize:vertical;min-height:70px}
+.bad{border-color:var(--bad)!important}
+.grp{border:1px solid var(--line);border-radius:8px;padding:10px 10px 2px;margin-bottom:10px}
+.grp>h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.line3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.line2{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.small{font-size:12px;color:var(--muted);margin:0 0 9px}
+.term{display:flex;flex-direction:column;flex:1;min-height:240px;background:var(--term-bg);color:var(--term-fg);border-radius:8px;font:12.5px/1.5 var(--font-mono);overflow:hidden}
+.tout{flex:1;overflow:auto;padding:10px;white-space:pre-wrap;word-break:break-word}
+.tout .ok{color:#6fdc9a}.tout .err{color:#ff9a94}.tout .dim{color:#8da0b5}.tout .cmd{color:#fff}
+.tin{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid #2a3542}
+.tin:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.tin input{flex:1;background:transparent;border:0;color:inherit;font:inherit;outline:none;padding:2px 0}
+.tin .prm{color:#6fdc9a;white-space:nowrap}
+.bar-url{display:flex;gap:6px}
+.bstat{font-size:12.5px;color:var(--muted)}
+.page{flex:1;min-height:180px;overflow:auto;background:var(--page-bg);color:var(--page-fg);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font:15px/1.5 Georgia,'Times New Roman',serif}
+.page h1{font-size:24px;margin:.2em 0 .4em}.page h2{font-size:19px}.page a{color:#1558c0;text-decoration:underline;cursor:pointer}
+.exch{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.extop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex:none}
+.tscroll{overflow:auto;border:1px solid var(--line);border-radius:8px;flex:1;min-height:110px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px}
+.tbl th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:5px 8px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tbl td{padding:4px 8px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--font-mono)}
+.tbl td.info{white-space:normal;min-width:150px}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover{background:var(--panel2)}
+.tbl tbody tr.sel{background:var(--accent-soft)}
+.tbl tr.ign td{opacity:.55}
+tr[data-pk=arp] td:first-child{box-shadow:inset 4px 0 var(--c-arp)}tr[data-pk=icmp] td:first-child{box-shadow:inset 4px 0 var(--c-icmp)}
+tr[data-pk=dns] td:first-child{box-shadow:inset 4px 0 var(--c-dns)}tr[data-pk=dhcp] td:first-child{box-shadow:inset 4px 0 var(--c-dhcp)}
+tr[data-pk=tcp] td:first-child{box-shadow:inset 4px 0 var(--c-tcp)}tr[data-pk=http] td:first-child{box-shadow:inset 4px 0 var(--c-http)}
+.detail{overflow:auto;flex:none;max-height:46%}
+.layer{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.layer h4{margin:0;padding:4px 10px;font-size:12px;background:var(--panel2);display:flex;justify-content:space-between}
+.layer h4 span{color:var(--muted);font-weight:400}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:1px 12px;padding:6px 10px;font-size:12px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-family:var(--font-mono);white-space:pre-wrap;word-break:break-word}
+.layer.empty .kv{color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;background:var(--panel2)}
+.mono-tbl{font:12px var(--font-mono);width:100%;border-collapse:collapse;margin-bottom:10px}
+.mono-tbl th{text-align:left;color:var(--muted);font-weight:500;padding:3px 6px;border-bottom:1px solid var(--line)}
+.mono-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlgbox h3{margin:14px 0 4px;font-size:14px}.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}.dlgbox code{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px;white-space:nowrap}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+.score{font-weight:600;font-size:15px;margin:4px 0 8px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px;text-wrap:balance}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.cbody table{display:block;overflow-x:auto;max-width:100%}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.ctable.narrow td,.ctable.narrow th{text-align:center;font-family:var(--font-mono);font-size:13px}
+.ctable td.on1{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+.bits{font:13px var(--font-mono);overflow-x:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0;background:var(--panel2)}
+.bits>div{display:flex;white-space:nowrap;align-items:baseline;line-height:1.8}
+.bits .lbl{width:96px;flex:none;color:var(--muted);font-family:var(--font-ui);font-size:12px}
+.bits .n{color:var(--accent-ink);font-weight:600}.bits .m{color:#8a949f}
+.bits .dec{margin-left:14px;color:var(--fg);font-family:var(--font-ui);font-size:12.5px}
+.encap{display:flex;flex-wrap:wrap;margin:8px 0 12px}
+.encap span{padding:7px 14px;font:13px var(--font-mono);border:1px solid var(--node-stroke);margin-left:-1px}
+.encap .e4{background:#f6dede}.encap .e3{background:#dfeaf7}.encap .e2{background:#e0f1dc}.encap .e1{background:#fff4c2}
+.widget{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0 14px;background:var(--panel)}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}.bars>div{display:flex;align-items:center;gap:8px}
+.bars .bl{width:44px;flex:none;font-size:12.5px;color:var(--muted)}.bars .bar{display:inline-block;height:14px;background:var(--accent);border-radius:3px}.bars .bar.alt{background:var(--run)}.bars .bv{font:13px var(--font-mono)}
+input[type=range]{width:100%;padding:0}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .work{flex-direction:column;gap:8px}
+  #palette{flex-direction:row;width:auto;overflow-x:auto;overflow-y:hidden;flex:none}
+  .sep{width:1px;height:auto;margin:0 2px}
+  .tool{min-width:70px}
+  #panel,#panel.wide{position:fixed;left:0;right:0;bottom:0;width:auto;height:62%;max-height:none;border-radius:14px 14px 0 0;z-index:30;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .line3{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:no-preference){.tool,.btn{transition:border-color .12s,background .12s}}
+/* ---- ateliers : commun, 1 et 2 ---- */
+#ws{padding:16px max(16px,env(safe-area-inset-left,0px)) 30px;max-width:980px}
+#ws h2{font-size:24px;margin:0 0 8px;text-wrap:balance}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.55}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.stack{margin:14px 0;display:flex;flex-direction:column;gap:6px}
+.stk-row{display:flex;gap:6px;flex-wrap:wrap}
+.stk{border:1px solid var(--node-stroke);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stk b{font-size:15px}.stk span{font-size:12.5px;color:var(--muted)}
+.stk.web{background:#dfeaf7;flex:2 1 260px}.stk.oth{background:var(--panel2);flex:1 1 170px}.stk.net{background:#e0f1dc}
+.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:6px 0}
+.ev{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);border-top:4px solid var(--muted);min-width:0}
+.ev.web{border-top-color:var(--accent)}.ev.net{border-top-color:var(--run)}
+.ev .yr{font:600 17px var(--font-mono)}.ev .et{margin-left:8px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ev p{margin:4px 0 0;font-size:13.5px}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px}
+.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.score{font-weight:600;font-size:15px;margin:6px 0}
+.urlseg{font:15px var(--font-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow-x:auto;white-space:nowrap;background:var(--panel2)}
+.urlseg span{padding:2px 1px;border-bottom:3px solid transparent}
+.u-s{border-bottom-color:#c98a00!important}.u-h{border-bottom-color:#1478b8!important}.u-p{border-bottom-color:#7b4fc2!important}
+.u-c{border-bottom-color:#1e7a2e!important}.u-q{border-bottom-color:#c2347f!important}.u-a{border-bottom-color:#d1561b!important}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border-bottom:3px solid transparent;background:var(--panel2);white-space:nowrap}
+.bar-url{display:flex;gap:6px;margin:8px 0}
+.wout{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.stepc{border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.stepc.k-dns{border-left-color:var(--c-dns)}.stepc.k-tcp{border-left-color:var(--c-tcp)}.stepc.k-http{border-left-color:var(--c-http)}.stepc.k-tls{border-left-color:var(--c-icmp)}.stepc.k-nav{border-left-color:var(--accent)}
+.sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stag{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 8px}
+pre.code{font:12.5px/1.5 var(--font-mono);margin:6px 0 0;white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:6px;padding:7px 9px;overflow-x:auto}
+.pgbar{font-size:12.5px;color:var(--muted);margin-top:4px}
+.broken{display:inline-block;border:1px dashed var(--muted);padding:2px 6px;font:12px var(--font-mono);color:var(--muted)}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ---- réseaux sociaux ---- */
+.gwrap{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:#fff}
+.webg{display:block;width:100%;min-width:640px;height:auto}
+.gn{cursor:pointer}.gn circle{fill:#eef1f6;stroke:#4a5a6e;stroke-width:1.6}
+.gn.onp circle{fill:#cfe3f7;stroke:var(--accent);stroke-width:2.4}.gn.inf circle{fill:#f6c9c4;stroke:var(--bad);stroke-width:2.4}
+.gn.blk circle{stroke:var(--ok);stroke-width:3.2;stroke-dasharray:4 2}.gn.sel circle{stroke:#111;stroke-width:3.2}
+.gn.off{opacity:.35}.gn.off circle{stroke-dasharray:3 3}.gn:focus-visible{outline:none}.gn:focus-visible circle{stroke:#111;stroke-width:3.4}
+.gd{font:600 12px var(--font-ui);fill:#1d2733}.gl{font:12.5px var(--font-ui);fill:#1d2733}
+.ge{stroke:#aab3bf;stroke-width:1.6}.ge.path{stroke:var(--accent);stroke-width:4}.ge.off{stroke-dasharray:3 4;opacity:.3}
+.pcard{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;background:var(--panel)}
+.pcard p{margin:6px 0 2px}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px}.stat span{font-size:12px;color:var(--muted)}.stat b{font-size:15px}
+.opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0 10px}.opts .fld{margin:0}
+.rlog{margin:6px 0;padding:6px 8px 6px 22px;font:12.5px/1.6 var(--font-mono);max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}.rlog:empty{display:none}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.two2>div{min-width:0}
+.post{display:flex;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--panel)}
+.post .rk{font:600 18px var(--font-mono);color:var(--muted);width:24px;flex:none;text-align:center}.post .pb{flex:1;min-width:0}.post p{margin:3px 0 6px}
+.pa{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pf{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;padding:1px 8px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.ibar{display:grid;grid-template-columns:90px 1fr 24px;gap:8px;align-items:center;font-size:13px;margin:3px 0}
+.bar2{display:block;height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}.bar2 i{display:block;height:100%;background:var(--accent)}.bar2.big{height:12px;margin:6px 0}
+.ad{margin-top:10px;border:1px dashed #8a949f;border-radius:6px;padding:8px 12px;background:#f6f6f0;font-size:14px}.ad .adl{display:block;font-size:11px;color:#5a6068;text-transform:uppercase;letter-spacing:.06em}
+.dd{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:5px 0;font-size:14px}.dd.exp{background:rgba(192,40,31,.1);border-color:var(--bad)}.dd.safe{background:rgba(30,122,46,.1);border-color:var(--ok)}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px;flex-wrap:wrap}.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.files{display:flex;gap:6px;flex-wrap:wrap}
+#ws .small{font-size:12.5px}
+.seg{max-width:100%;overflow-x:auto}.seg button{white-space:nowrap}
+#act code.k{white-space:normal;word-break:break-all}
+#act.sheet{position:fixed;left:0;right:0;bottom:0;max-height:72vh;z-index:20}
+
+
+</style>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="var(--fg)" stroke-width="1.6"/><ellipse cx="13" cy="13" rx="4.2" ry="10" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M3.5 13h19M5 8h16M5 18h16" stroke="var(--accent)" stroke-width="1.4" fill="none"/></svg><span>Atelier Réseaux sociaux <small>SNT</small></span></div>
+    <div class="files">
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band" id="modes"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <main class="inner work" id="work">
+    <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+/*CORE-START*/
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'atelier-reseaux-sociaux-v1', code: 'atelier-rs-extra-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
+const cm = t => '<code class="k">' + t + '</code>';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- images virtuelles (pour le HTML des élèves) ---------- */
+const dataSvg = s => 'data:image/svg+xml;utf8,' + encodeURIComponent(s);
+const IMGS = {
+  'logo.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' rx='18' fill='#2e6da4'/><path d='M28 88V44l32-18 32 18v44z' fill='#fff'/><rect x='51' y='58' width='18' height='30' fill='#2e6da4'/><rect x='34' y='52' width='12' height='12' fill='#2e6da4'/><rect x='74' y='52' width='12' height='12' fill='#2e6da4'/></svg>"),
+  'planete.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='160' height='120' viewBox='0 0 160 120'><rect width='160' height='120' fill='#101c33'/><circle cx='80' cy='60' r='28' fill='#e0a458'/><ellipse cx='80' cy='60' rx='54' ry='11' fill='none' stroke='#f3d9a4' stroke-width='4' transform='rotate(-18 80 60)'/><circle cx='30' cy='24' r='2' fill='#fff'/><circle cx='132' cy='96' r='2' fill='#fff'/><circle cx='122' cy='22' r='1.5' fill='#fff'/></svg>")
+};
+
+/* ---------- assainisseur : le HTML d'un élève ne peut rien exécuter ---------- */
+const OKTAGS = new Set('a b i u em strong small mark code pre br hr p div span h1 h2 h3 h4 h5 h6 ul ol li dl dt dd table thead tbody tfoot tr td th caption img header footer nav main section article aside figure figcaption blockquote'.split(' '));
+const DROPTAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'title', 'head', 'meta', 'link', 'noscript', 'template', 'svg', 'math', 'form', 'input', 'button', 'select', 'textarea', 'audio', 'video', 'canvas', 'base']);
+function safeDom(html, o) {
+  o = o || {};
+  const doc = new DOMParser().parseFromString('<!doctype html><body>' + html, 'text/html');
+  const css = [...doc.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  const out = document.createElement('div');
+  (function walk(src, dst) {
+    for (const c of src.childNodes) {
+      if (c.nodeType === 3) { dst.append(c.textContent); continue; }
+      if (c.nodeType !== 1) continue;
+      const t = c.tagName.toLowerCase();
+      if (DROPTAGS.has(t)) continue;
+      if (!OKTAGS.has(t)) { walk(c, dst); continue; }
+      const e = document.createElement(t);
+      for (const a of c.attributes) {
+        const n = a.name.toLowerCase(), v = a.value;
+        if (['class', 'title', 'lang', 'colspan', 'rowspan', 'width', 'height', 'alt'].includes(n)) e.setAttribute(n, v);
+        else if (n === 'id' && !o.light) e.setAttribute('id', v);
+        else if (n === 'style' && !/url\s*\(|expression|@import/i.test(v)) e.setAttribute('style', v);
+      }
+      if (t === 'a') {
+        const href = c.getAttribute('href') || ''; e.setAttribute('href', '#'); e.dataset.href = href;
+        e.addEventListener('click', ev => { ev.preventDefault(); if (o.onLink) o.onLink(href); });
+      }
+      if (t === 'img') {
+        const src = (c.getAttribute('src') || '').trim();
+        if (IMGS[src]) { e.setAttribute('src', IMGS[src]); e.dataset.ok = '1'; }
+        else { const sp = document.createElement('span'); sp.className = 'broken'; sp.textContent = '[image introuvable : ' + (src || 'attribut src manquant') + (c.getAttribute('alt') ? ', texte alternatif : ' + c.getAttribute('alt') : '') + ']'; dst.append(sp); continue; }
+      }
+      walk(c, e); dst.append(e);
+    }
+  })(doc.body, out);
+  return { el: out, css, doc };
+}
+function scopeCss(css) {
+  return String(css).replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none').replace(/(^|[\s,{}>+~])(html|body)(?=[\s,{.:#\[>+~]|$)/gi, '$1#body');
+}
+
+/* ---------- URL ---------- */
+function parseUrl(u) {
+  const m = /^([a-z][a-z0-9+.-]*):\/\/([^\/?#:]*)(?::(\d+))?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(u).trim());
+  if (!m) return null;
+  return { scheme: m[1].toLowerCase(), host: m[2].toLowerCase(), port: m[3] || '', path: m[4] || '/', query: m[5] || '', hash: m[6] || '' };
+}
+function domainSplit(host) { const p = host.split('.'); return p.length <= 2 ? { sub: '', dom: host } : { sub: p.slice(0, -2).join('.'), dom: p.slice(-2).join('.') }; }
+function widgetUrl(root, start) {
+  const inp = h('input', { type: 'text', class: 'mono', value: start || 'https://www.lycee-exemple.fr/snt/reseaux.html?page=2&lang=fr#masques', 'aria-label': 'Adresse à décoder', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+  const out = h('div');
+  const draw = () => {
+    out.innerHTML = ''; const u = parseUrl(inp.value);
+    inp.classList.toggle('bad', !!inp.value.trim() && !u);
+    if (!u) { out.append(h('p', { class: 'small' }, 'Saisissez une adresse complète, par exemple https://www.exemple.fr/page.html')); return; }
+    const d = domainSplit(u.host), dport = u.scheme === 'https' ? '443' : u.scheme === 'http' ? '80' : '';
+    const seg = [['u-s', u.scheme + '://'], ['u-h', u.host]];
+    if (u.port) seg.push(['u-p', ':' + u.port]);
+    seg.push(['u-c', u.path === '/' && !/\/$/.test(inp.value.split(/[?#]/)[0]) ? '' : u.path]);
+    if (u.query) seg.push(['u-q', u.query]); if (u.hash) seg.push(['u-a', u.hash]);
+    out.append(h('div', { class: 'urlseg', 'aria-label': 'Adresse découpée' }, seg.filter(s => s[1]).map(s => h('span', { class: s[0] }, s[1]))));
+    const q = u.query ? u.query.slice(1).split('&').map(x => x.split('=')).map(p => p[0] + ' = ' + (p[1] || '')).join(' ; ') : '';
+    out.append(h('table', { class: 'ctable' }, h('tbody', null,
+      h('tr', null, h('td', null, h('span', { class: 'u-s tag' }, 'Protocole')), h('td', null, u.scheme + (u.scheme === 'https' ? ' : HTTP chiffré (TLS)' : u.scheme === 'http' ? ' : HTTP non chiffré' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-h tag' }, 'Nom de domaine')), h('td', null, u.host + (d.sub ? ' : sous-domaine « ' + d.sub + ' », domaine principal « ' + d.dom + ' »' : ' : domaine principal « ' + d.dom + ' »'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-p tag' }, 'Port')), h('td', null, u.port ? u.port : (dport ? 'non précisé : ' + dport + ' par défaut' : 'non précisé'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-c tag' }, 'Chemin')), h('td', null, u.path + (u.path === '/' ? ' : page d’accueil' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-q tag' }, 'Paramètres')), h('td', null, q || 'aucun')),
+      h('tr', null, h('td', null, h('span', { class: 'u-a tag' }, 'Ancre')), h('td', null, u.hash ? u.hash + ' : endroit précis de la page' : 'aucune')))));
+  };
+  inp.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Adresse (URL)'), inp), out);
+}
+/*CORE-END*/
+
+/* ---------- Atelier 1 : le graphe ---------- */
+const WORKSHOPS = [];
+const PEOPLE = [
+  ['Inès', 330, 215], ['Malo', 190, 120], ['Yanis', 110, 215], ['Léa', 170, 320], ['Hugo', 290, 385], ['Camille', 330, 70],
+  ['Sofia', 460, 150], ['Nathan', 420, 330], ['Jade', 480, 40], ['Karim', 570, 230], ['Zoé', 640, 110], ['Louis', 620, 330],
+  ['Emma', 500, 410], ['Adam', 680, 410], ['Clara', 680, 230], ['Tom', 720, 170]];
+const LINKS = [[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [1, 2], [2, 3], [3, 4], [4, 7], [5, 6], [5, 8], [6, 9], [7, 9], [8, 10], [9, 10], [9, 11], [10, 14], [7, 12], [11, 13], [12, 13], [13, 14], [14, 15]];
+const W1 = { sel: 0, a: 1, b: 15, pick: 'a', removed: [], rum: null, blockers: [], rstart: 0 };
+function adjOf(removed) {
+  const adj = PEOPLE.map(() => []);
+  LINKS.forEach(([x, y]) => { if (!removed.includes(x) && !removed.includes(y)) { adj[x].push(y); adj[y].push(x); } });
+  return adj;
+}
+function bfs(adj, s) {
+  const dist = {}, prev = {}; dist[s] = 0; const q = [s];
+  while (q.length) { const u = q.shift(); adj[u].forEach(v => { if (dist[v] == null) { dist[v] = dist[u] + 1; prev[v] = u; q.push(v); } }); }
+  return { dist, prev };
+}
+function pathTo(prev, a, b) { const p = [b]; let c = b; while (c !== a) { c = prev[c]; if (c == null) return null; p.unshift(c); } return p; }
+function graphStats(removed) {
+  const adj = adjOf(removed), alive = PEOPLE.map((_, i) => i).filter(i => !removed.includes(i));
+  const links = LINKS.filter(([x, y]) => !removed.includes(x) && !removed.includes(y)).length;
+  const seen = new Set(); let comps = 0, tot = 0, pairs = 0;
+  alive.forEach(i => { const { dist } = bfs(adj, i); Object.keys(dist).forEach(k => { if (+k > i) { tot += dist[k]; pairs++; } }); if (!seen.has(i)) { comps++; Object.keys(dist).forEach(k => seen.add(+k)); } });
+  let maxd = 0, best = -1; alive.forEach(i => { if (adj[i].length > maxd) { maxd = adj[i].length; best = i; } });
+  return { n: alive.length, links, sum: alive.reduce((s, i) => s + adj[i].length, 0), comps, avg: pairs ? tot / pairs : 0, maxd, best };
+}
+function mountW1(root) {
+  root.append(h('h2', null, 'LycéeGram : un réseau social est un graphe'),
+    h('p', null, 'Voici un mini réseau social fictif de 16 élèves. Chaque rond est une personne (un ', h('b', null, 'sommet'), '), chaque trait est une relation d’amitié (une ', h('b', null, 'arête'), '). Cliquez sur les ronds pour explorer.'));
+  const svgBox = h('div', { class: 'gwrap' }), info = h('div', { class: 'pcard' }), stats = h('div', { class: 'gstats' });
+  const pathBox = h('div', { class: 'pcard' }), rumBox = h('div'), rumLog = h('ol', { class: 'rlog' });
+  const selA = h('select', { 'aria-label': 'Départ' }), selB = h('select', { 'aria-label': 'Arrivée' });
+  const fillSel = () => { [[selA, W1.a], [selB, W1.b]].forEach(([s, v]) => { s.innerHTML = ''; PEOPLE.forEach((p, i) => s.append(h('option', { value: i, selected: i === v }, p[0]))); }); };
+  const NS = 'http://www.w3.org/2000/svg';
+  const sv = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  function pathInfo() {
+    const adj = adjOf(W1.removed); pathBox.innerHTML = '';
+    if (W1.removed.includes(W1.a) || W1.removed.includes(W1.b)) { pathBox.append('Un des deux comptes est supprimé.'); return null; }
+    const { prev, dist } = bfs(adj, W1.a), p = dist[W1.b] != null ? pathTo(prev, W1.a, W1.b) : null;
+    if (!p) pathBox.append(h('b', null, 'Aucun chemin : '), PEOPLE[W1.a][0] + ' et ' + PEOPLE[W1.b][0] + ' ne sont plus reliés.');
+    else pathBox.append(h('b', null, 'Chemin le plus court : '), p.map(i => PEOPLE[i][0]).join(' → '), h('br'), h('span', null, p.length - 1 + ' relation(s) à franchir, soit ' + Math.max(0, p.length - 2) + ' intermédiaire(s) entre eux. Distance = ' + (p.length - 1) + '.'));
+    return p;
+  }
+  function draw() {
+    const adj = adjOf(W1.removed), p = pathInfo(), pe = new Set();
+    if (p) for (let i = 0; i + 1 < p.length; i++) pe.add(Math.min(p[i], p[i + 1]) + '-' + Math.max(p[i], p[i + 1]));
+    const inf = W1.rum ? new Set(W1.rum.informed) : new Set();
+    const svg = sv('svg', { viewBox: '0 0 760 450', class: 'webg', role: 'group', 'aria-label': 'Graphe des amitiés' });
+    LINKS.forEach(([x, y]) => {
+      const off = W1.removed.includes(x) || W1.removed.includes(y), onp = pe.has(x + '-' + y);
+      svg.append(sv('line', { x1: PEOPLE[x][1], y1: PEOPLE[x][2], x2: PEOPLE[y][1], y2: PEOPLE[y][2], class: 'ge' + (onp ? ' path' : '') + (off ? ' off' : '') }));
+    });
+    PEOPLE.forEach((pp, i) => {
+      const off = W1.removed.includes(i), cls = ['gn', off ? 'off' : '', i === W1.sel ? 'sel' : '', p && p.includes(i) ? 'onp' : '', inf.has(i) ? 'inf' : '', W1.blockers.includes(i) ? 'blk' : ''].join(' ');
+      const g = sv('g', { class: cls, tabindex: 0, role: 'button', 'aria-label': pp[0] + ', ' + adj[i].length + ' ami(s)' + (off ? ', compte supprimé' : '') });
+      g.append(sv('circle', { cx: pp[1], cy: pp[2], r: 14 + Math.min(adj[i].length, 6) * 1.2 }));
+      const t = sv('text', { x: pp[1], y: pp[2] + 4, 'text-anchor': 'middle', class: 'gd' }); t.textContent = off ? '×' : adj[i].length; g.append(t);
+      const l = sv('text', { x: pp[1], y: pp[2] + 34, 'text-anchor': 'middle', class: 'gl' }); l.textContent = pp[0]; g.append(l);
+      const act = () => { W1.sel = i; if (W1.pick === 'a') { W1.a = i; W1.pick = 'b'; } else { W1.b = i; W1.pick = 'a'; } fillSel(); draw(); };
+      g.addEventListener('click', act); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+      svg.append(g);
+    });
+    svgBox.innerHTML = ''; svgBox.append(svg);
+    const i = W1.sel, fr = adj[i];
+    info.innerHTML = '';
+    info.append(h('b', null, PEOPLE[i][0]), ' : ', h('b', null, fr.length + ' ami(s)'), ' (le nombre dans le rond est le ', h('b', null, 'degré'), ').', h('br'),
+      fr.length ? 'Amis : ' + fr.map(j => PEOPLE[j][0]).join(', ') + '.' : 'Aucun ami.',
+      h('p', null, h('button', { class: 'btn sm' + (W1.removed.includes(i) ? ' pri' : ''), type: 'button', onclick: () => { W1.removed = W1.removed.includes(i) ? W1.removed.filter(x => x !== i) : W1.removed.concat(i); W1.rum = null; rumLog.innerHTML = ''; draw(); drawRum(); } }, W1.removed.includes(i) ? 'Rétablir le compte de ' + PEOPLE[i][0] : 'Supprimer le compte de ' + PEOPLE[i][0])));
+    const s = graphStats(W1.removed);
+    stats.innerHTML = '';
+    [['Personnes', s.n], ['Relations', s.links], ['Somme des degrés', s.sum + ' = 2 × ' + s.links], ['Groupes séparés', s.comps], ['Distance moyenne', s.avg.toFixed(2).replace('.', ',')], ['Le plus d’amis', PEOPLE[s.best][0] + ' (' + s.maxd + ')']].forEach(k => stats.append(h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, String(k[1])))));
+  }
+  const onSel = () => { W1.a = +selA.value; W1.b = +selB.value; draw(); };
+  selA.addEventListener('change', onSel); selB.addEventListener('change', onSel); fillSel();
+  root.append(svgBox, h('p', { class: 'small' }, 'Cliquez sur un rond : il devient tour à tour le départ puis l’arrivée du chemin. Les ronds plus gros ont plus d’amis.'), info, stats);
+  root.append(h('h3', null, 'Le chemin le plus court'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'De'), selA), h('label', { class: 'fld' }, h('span', null, 'À'), selB)), pathBox,
+    h('p', { class: 'small' }, 'Supprimez le compte d’Inès (la personne la plus connectée) puis recalculez : la distance moyenne augmente, et le réseau peut même se couper en plusieurs groupes.'));
+  /* rumeur */
+  const startSel = h('select', { 'aria-label': 'Première personne' }); PEOPLE.forEach((p, i) => startSel.append(h('option', { value: i, selected: i === W1.rstart }, p[0])));
+  startSel.addEventListener('change', () => { W1.rstart = +startSel.value; });
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Personnes qui vérifient avant de relayer' }), cnt = h('p', { class: 'score' });
+  function drawRum() {
+    chips.innerHTML = '';
+    PEOPLE.forEach((p, i) => chips.append(h('button', { type: 'button', class: 'chip' + (W1.blockers.includes(i) ? ' on' : ''), 'aria-pressed': W1.blockers.includes(i) ? 'true' : 'false', onclick: () => { W1.blockers = W1.blockers.includes(i) ? W1.blockers.filter(x => x !== i) : W1.blockers.concat(i); resetRum(); } }, p[0])));
+    cnt.textContent = W1.rum ? 'Étape ' + W1.rum.step + ' : ' + W1.rum.informed.length + ' personne(s) informée(s) sur ' + (PEOPLE.length - W1.removed.length) + '.' : '';
+  }
+  function resetRum() { W1.rum = null; rumLog.innerHTML = ''; drawRum(); draw(); }
+  function stepRum() {
+    const adj = adjOf(W1.removed);
+    if (!W1.rum) { if (W1.removed.includes(W1.rstart)) { toast('Ce compte est supprimé'); return false; } W1.rum = { informed: [W1.rstart], front: [W1.rstart], step: 0 }; rumLog.innerHTML = ''; rumLog.append(h('li', null, 'Étape 0 : ' + PEOPLE[W1.rstart][0] + ' publie la rumeur.')); }
+    const r = W1.rum, nw = [];
+    r.front.forEach(u => { if (u !== W1.rstart && W1.blockers.includes(u)) return; adj[u].forEach(v => { if (!r.informed.includes(v) && !nw.includes(v)) nw.push(v); }); });
+    if (!nw.length) { rumLog.append(h('li', null, 'Fin : la rumeur ne se propage plus.')); drawRum(); draw(); return false; }
+    r.step++; r.informed = r.informed.concat(nw); r.front = nw;
+    rumLog.append(h('li', null, 'Étape ' + r.step + ' : ' + nw.map(i => PEOPLE[i][0]).join(', ') + ' (' + nw.length + ' nouvelle(s))'));
+    drawRum(); draw(); return true;
+  }
+  root.append(h('h3', null, 'Une rumeur se propage'),
+    h('p', null, 'À chaque étape, toutes les personnes qui viennent d’apprendre la rumeur la partagent à tous leurs amis. Choisissez qui la lance, puis avancez.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'Première personne'), startSel),
+      h('button', { class: 'btn pri', type: 'button', onclick: stepRum }, 'Étape suivante'),
+      h('button', { class: 'btn', type: 'button', onclick: () => { let g = 0; while (stepRum() && g++ < 30); } }, 'Tout afficher'),
+      h('button', { class: 'btn', type: 'button', onclick: resetRum }, 'Recommencer')),
+    h('p', { class: 'small' }, 'Personnes qui vérifient avant de relayer (cliquez pour activer ; elles lisent la rumeur mais ne la transmettent pas) :'), chips, cnt, rumLog);
+  drawRum(); draw();
+}
+WORKSHOPS.push({ id: 's1', title: 'Le réseau, un graphe', hint: 'Explorez le graphe, cherchez des chemins, puis regardez une rumeur se propager.', mount: mountW1, reset: () => { Object.assign(W1, { sel: 0, a: 1, b: 15, pick: 'a', removed: [], rum: null, blockers: [], rstart: 0 }); } });
+
+/* ---------- Atelier 2 : le fil d'actualité ---------- */
+const TOPICS = { sport: 'Sport', musique: 'Musique', jeux: 'Jeux vidéo', actu: 'Actualité', humour: 'Humour', science: 'Sciences', voyage: 'Voyage', mode: 'Mode' };
+const POSTS = [
+  ['Inès', 'musique', 'Concert de la chorale du lycée vendredi !', 25, 120], ['Malo', 'jeux', 'Nouveau record au tournoi du club de jeux : 12 000 points', 40, 310],
+  ['Léa', 'sport', 'Match de basket gagné 54 à 49 contre le lycée voisin', 90, 85], ['Yanis', 'humour', 'Mon prof de maths quand il rend les copies (mème)', 15, 540],
+  ['Hugo', 'science', 'Éclipse partielle : à quelle heure la regarder ?', 200, 60], ['Camille', 'voyage', 'Sept jours en Écosse : mes photos', 300, 210],
+  ['Sofia', 'mode', 'Je transforme un vieux jean en sac', 55, 95], ['Nathan', 'actu', 'Le conseil municipal vote la nouvelle piste cyclable', 120, 40],
+  ['Jade', 'jeux', 'Test : le nouveau jeu d’aventure vaut-il son prix ?', 10, 280], ['Karim', 'sport', 'Mon premier 10 km en 52 minutes', 180, 150],
+  ['Zoé', 'musique', 'Playlist pour réviser sans s’endormir', 70, 390], ['Louis', 'humour', 'Les 10 types d’élèves en cours d’EPS', 8, 610],
+  ['Emma', 'science', 'Comment les fusées reviennent-elles se poser ?', 35, 175], ['Adam', 'actu', 'Résultats du vote des délégués de classe', 5, 70],
+  ['Clara', 'mode', 'Mes 5 tenues de rentrée sans dépenser', 250, 130], ['Tom', 'voyage', 'Week-end à vélo le long de la rivière', 150, 45],
+  ['Théo', 'jeux', 'Astuces pour finir le niveau 7 sans mourir', 60, 200], ['Lina', 'musique', 'Je découvre un groupe de rock local', 100, 95],
+  ['Ryan', 'humour', 'Les excuses les plus folles pour un retard', 30, 260], ['Maya', 'sport', 'Le cross du lycée en 90 secondes', 45, 110]];
+const ADS = { jeux: 'Casque de jeu −30 % ce week-end', sport: 'Chaussures de running −20 %', musique: 'Billets pour le festival de l’été', mode: 'Vêtements d’occasion : 2 achetés, 1 offert', voyage: 'Pass train jeunes −50 %', science: 'Kit de robotique pour débutants', humour: 'Application de stickers rigolos', actu: 'Abonnement numérique : premier mois offert' };
+const W2 = { mode: 'chrono', liked: [], consent: true, users: 20, ads: 30, cpm: 2 };
+function interests() { const it = {}; Object.keys(TOPICS).forEach(t => { it[t] = 0; }); W2.liked.forEach(i => { it[POSTS[i][1]]++; }); return it; }
+function rankFeed(mode, it) {
+  const sc = p => mode === 'perso' ? 4 * it[p[1]] + p[4] / 100 + Math.max(0, (120 - p[3]) / 60) : mode === 'pop' ? p[4] : -p[3];
+  return POSTS.map((p, i) => ({ p, i, s: sc(p) })).sort((a, b) => b.s - a.s || a.i - b.i);
+}
+function mountW2(root) {
+  root.append(h('h2', null, 'Qui décide de ce que vous voyez ?'),
+    h('p', null, 'Un réseau social a bien plus de publications à vous montrer que vous ne pouvez en lire. Un ', h('b', null, 'algorithme de recommandation'), ' choisit lesquelles afficher, et dans quel ordre. Ici, votre fil montre les 6 premières publications sur 20.'));
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Algorithme du fil' }), feed = h('div'), side = h('div'), msg = h('p', { class: 'score' }), ad = h('div', { class: 'ad' });
+  const MODES = [['chrono', 'Du plus récent au plus ancien'], ['pop', 'Les plus aimées d’abord'], ['perso', 'Personnalisé (selon vos « J’aime »)']];
+  function draw() {
+    chips.innerHTML = ''; MODES.forEach(m => chips.append(h('button', { type: 'button', class: 'chip' + (W2.mode === m[0] ? ' on' : ''), 'aria-pressed': W2.mode === m[0] ? 'true' : 'false', onclick: () => { W2.mode = m[0]; draw(); } }, m[1])));
+    const it = interests(), r = rankFeed(W2.mode, it).slice(0, 6);
+    feed.innerHTML = '';
+    r.forEach((x, k) => { const p = x.p, on = W2.liked.includes(x.i);
+      feed.append(h('div', { class: 'post' }, h('span', { class: 'rk' }, String(k + 1)),
+        h('div', { class: 'pb' }, h('div', { class: 'pa' }, h('b', null, p[0]), h('span', { class: 'tag t-' + p[1] }, TOPICS[p[1]]), h('span', { class: 'small' }, 'il y a ' + (p[3] < 60 ? p[3] + ' min' : Math.round(p[3] / 60) + ' h'))), h('p', null, p[2]),
+          h('div', { class: 'pf' }, h('button', { type: 'button', class: 'btn sm' + (on ? ' good' : ''), 'aria-pressed': on ? 'true' : 'false', onclick: () => { W2.liked = on ? W2.liked.filter(z => z !== x.i) : W2.liked.concat(x.i); draw(); } }, (on ? '♥ ' : '♡ ') + 'J’aime'), h('span', { class: 'small' }, (p[4] + (on ? 1 : 0)) + ' J’aime'),
+            W2.mode === 'perso' ? h('span', { class: 'small' }, 'score ' + x.s.toFixed(1).replace('.', ',')) : null))));
+    });
+    const topics = new Set(r.map(x => x.p[1]));
+    msg.className = 'score'; msg.textContent = 'Sujets différents dans votre fil : ' + topics.size + ' sur 8. ' + (topics.size <= 3 ? 'Bulle de filtres : votre fil se referme sur quelques sujets.' : topics.size >= 5 ? 'Fil varié.' : '');
+    side.innerHTML = ''; side.append(h('h3', null, 'Ce que la plateforme croit savoir de vous'));
+    const mx = Math.max(1, ...Object.values(it));
+    Object.keys(TOPICS).forEach(t => side.append(h('div', { class: 'ibar' }, h('span', null, TOPICS[t]), h('span', { class: 'bar2' + (it[t] ? '' : ' alt') }, h('i', { style: 'width:' + (it[t] / mx * 100) + '%' })), h('b', null, String(it[t])))));
+    const best = Object.keys(TOPICS).sort((a, b) => it[b] - it[a])[0];
+    ad.innerHTML = ''; ad.append(h('span', { class: 'adl' }, 'Publicité'), W2.consent && it[best] > 0 ? ADS[best] + '  (ciblée : vous aimez « ' + TOPICS[best] + ' »)' : 'Boisson énergisante (même publicité pour tout le monde)');
+    side.append(h('label', { class: 'fld chk' }, h('input', { type: 'checkbox', checked: W2.consent, onchange: e => { W2.consent = e.target.checked; draw(); } }), 'Autoriser la publicité ciblée'), ad,
+      h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W2.liked = []; draw(); } }, 'Effacer mes « J’aime »')));
+  }
+  root.append(chips, h('div', { class: 'two2' }, h('div', null, feed, msg), side));
+  draw();
+  root.append(h('p', { class: 'small' }, 'Vous ne pouvez aimer que ce que vous voyez : la plateforme choisit ce qu’elle vous montre, vous réagissez, et elle vous en montre davantage du même genre.'));
+}
+WORKSHOPS.push({ id: 's2', title: 'Algorithmes et fil', hint: 'Changez l’algorithme du fil, aimez des publications et observez la bulle de filtres se former.', mount: mountW2, reset: () => { Object.assign(W2, { mode: 'chrono', liked: [], consent: true }); } });
+
+/* ---------- Atelier 3 : le modèle économique ---------- */
+const DATAC = { age: 'Âge', ville: 'Ville', interet: 'Centre d’intérêt', appareil: 'Appareil' };
+const AGES = ['13-14 ans', '15-17 ans', '18-25 ans'], VILLES = ['Valmont', 'Rivemont', 'Bellevue'], APPS = ['Téléphone', 'Ordinateur'];
+const USERS = (() => { let s = 7; const r = n => { s = (s * 1103515245 + 12345) % 2147483648; return s % n; }; const o = []; for (let i = 0; i < 200; i++) o.push({ age: AGES[[0, 1, 1, 1, 2, 2][r(6)]], ville: VILLES[[0, 0, 1, 2][r(4)]], interet: Object.keys(TOPICS)[r(8)], appareil: APPS[[0, 0, 0, 1][r(4)]] }); return o; })();
+const W3 = { shared: { age: true, ville: true, interet: true, appareil: true }, f: { age: '', ville: '', interet: '', appareil: '' }, users: 20, ads: 30, cpm: 2 };
+const fr = n => Math.round(n).toLocaleString('fr-FR');
+function mountW3(root) {
+  root.append(h('h2', null, 'Si c’est gratuit, vous êtes le produit'),
+    h('p', null, 'Les réseaux sociaux sont gratuits pour les utilisateurs. Ils gagnent de l’argent en vendant de la ', h('b', null, 'publicité'), ', d’autant plus chère qu’elle est ', h('b', null, 'ciblée'), ' grâce à vos données. Vous êtes l’annonceur : essayez de cibler vos clients.'));
+  const out = h('div'), pan = h('div', { class: 'opts' }), rev = h('div');
+  const sels = {};
+  function draw() {
+    pan.innerHTML = '';
+    Object.keys(DATAC).forEach(k => {
+      const vals = k === 'age' ? AGES : k === 'ville' ? VILLES : k === 'interet' ? Object.keys(TOPICS) : APPS;
+      const s = h('select', { 'aria-label': DATAC[k], disabled: !W3.shared[k], onchange: e => { W3.f[k] = e.target.value; draw(); } }, h('option', { value: '' }, 'Tous'), vals.map(v => h('option', { value: v, selected: W3.f[k] === v }, k === 'interet' ? TOPICS[v] : v)));
+      pan.append(h('label', { class: 'fld' }, h('span', null, DATAC[k] + (W3.shared[k] ? '' : ' (non communiqué)')), s));
+    });
+    const act = Object.keys(DATAC).filter(k => W3.shared[k] && W3.f[k]);
+    const match = USERS.filter(u => act.every(k => u[k] === W3.f[k])), n = match.length * 1000;
+    const cpm = 2 + 1.5 * act.length, price = n / 1000 * cpm;
+    out.innerHTML = '';
+    out.append(h('div', { class: 'gstats' },
+      h('div', { class: 'stat' }, h('span', null, 'Audience atteinte'), h('b', null, fr(n) + ' / 200 000')),
+      h('div', { class: 'stat' }, h('span', null, 'Critères utilisés'), h('b', null, String(act.length))),
+      h('div', { class: 'stat' }, h('span', null, 'Prix pour 1 000 affichages'), h('b', null, cpm.toFixed(2).replace('.', ',') + ' €')),
+      h('div', { class: 'stat' }, h('span', null, 'Coût de la campagne'), h('b', null, fr(price) + ' €'))),
+      h('div', { class: 'bar2 big' }, h('i', { style: 'width:' + (match.length / 2) + '%' })),
+      h('p', { class: 'small' }, n === 200000 ? 'Sans ciblage, la publicité est montrée à tout le monde, y compris à des personnes qui ne seront jamais intéressées.' : n === 0 ? 'Aucun utilisateur ne correspond à ces critères.' : 'Chaque critère de plus réduit l’audience, mais fait monter le prix : l’annonceur paie pour la précision.'));
+    rev.innerHTML = '';
+    const rv = W3.users * 1e6 * W3.ads / 1000 * W3.cpm;
+    const sl = (k, lab, mi, ma, st, fm) => { const v = h('b', null, fm(W3[k])); const i = h('input', { type: 'range', min: mi, max: ma, step: st, value: W3[k], 'aria-label': lab }); i.addEventListener('input', () => { W3[k] = +i.value; v.textContent = fm(W3[k]); res.textContent = txt(); }); return h('label', { class: 'fld' }, h('span', null, lab + ' : ', v), i); };
+    const txt = () => { const d = W3.users * 1e6 * W3.ads / 1000 * W3.cpm; return 'Revenu publicitaire : ' + fr(d) + ' € par jour, soit environ ' + fr(d * 365 / 1e6) + ' millions d’euros par an.'; };
+    const res = h('p', { class: 'score' }, txt());
+    rev.append(h('h3', null, 'Combien rapporte un réseau social ?'), h('p', { class: 'small' }, 'Calcul avec des chiffres fictifs : revenu par jour = utilisateurs × publicités vues par jour ÷ 1 000 × prix pour 1 000 affichages.'),
+      sl('users', 'Utilisateurs (millions)', 1, 100, 1, v => v + ' M'), sl('ads', 'Publicités vues par jour et par personne', 5, 100, 5, v => String(v)), sl('cpm', 'Prix pour 1 000 affichages (€)', 1, 10, 0.5, v => String(v).replace('.', ',') + ' €'), res);
+  }
+  const cons = h('div', { class: 'chips', role: 'group', 'aria-label': 'Données partagées par les utilisateurs' });
+  function drawCons() { cons.innerHTML = ''; Object.keys(DATAC).forEach(k => cons.append(h('button', { type: 'button', class: 'chip' + (W3.shared[k] ? ' on' : ''), 'aria-pressed': W3.shared[k] ? 'true' : 'false', onclick: () => { W3.shared[k] = !W3.shared[k]; if (!W3.shared[k]) W3.f[k] = ''; drawCons(); draw(); } }, DATAC[k]))); }
+  root.append(h('h3', null, '1. Les données dont dispose le réseau'), h('p', { class: 'small' }, 'Cliquez pour activer ou désactiver les données que les utilisateurs acceptent de partager avec les annonceurs.'), cons,
+    h('h3', null, '2. Cibler une campagne'), pan, out, rev);
+  drawCons(); draw();
+}
+WORKSHOPS.push({ id: 's3', title: 'Modèle économique', hint: 'Ciblez une campagne publicitaire, puis calculez ce que rapporte un réseau social.', mount: mountW3, reset: () => { Object.assign(W3, { shared: { age: true, ville: true, interet: true, appareil: true }, f: { age: '', ville: '', interet: '', appareil: '' }, users: 20, ads: 30, cpm: 2 }); } });
+
+/* ---------- Atelier 4 : identité numérique ---------- */
+const PROF_POSTS = [
+  { t: 'Photo devant le lycée Jean-Moulin : première journée de seconde !', c: ['lycee'] },
+  { t: 'Mon chien Biscotte a 3 ans aujourd’hui 🐶', c: ['chien'] },
+  { t: 'Joyeux anniversaire à moi : née le 15 mars 2010 !', c: ['naissance'] },
+  { t: 'Judo tous les mardis à 18 h au gymnase des Lilas (position partagée)', c: ['routine'] },
+  { t: 'Vacances en Corse du 12 au 26 juillet, la maison est vide, vive la plage !', c: ['absence'] },
+  { t: 'Retrouvez-moi partout sous le pseudo maelle_judo15', c: ['pseudo'] }];
+const DEDUCT = [
+  ['Son lycée', ['lycee'], 'Un inconnu sait où la trouver en semaine.'],
+  ['Où la croiser chaque semaine', ['routine'], 'Lieu et horaire régulier : très risqué pour une personne mineure.'],
+  ['Son mot de passe probable (nom du chien + date)', ['chien', 'naissance'], 'Beaucoup de mots de passe mélangent un prénom d’animal et une date.'],
+  ['Quand sa maison est vide', ['absence'], 'Informe d’éventuels cambrioleurs.'],
+  ['Ses autres comptes', ['pseudo'], 'Un même pseudo permet de recouper les informations d’un réseau à l’autre.']];
+const W4 = { pub: [true, true, true, true, true, true] };
+function mountW4(root) {
+  root.append(h('h2', null, 'Maëlle, 16 ans : que peut-on apprendre sur elle ?'),
+    h('p', null, 'Maëlle est un personnage fictif. Chaque publication est visible par tout le monde (« public ») ou seulement par ses amis (« privé »). Décidez de ce qu’elle devrait laisser public, et regardez ce qu’un inconnu peut en déduire en croisant les informations.'));
+  const list = h('div', { class: 'sorts' }), res = h('div'), sc = h('p', { class: 'score' });
+  function draw() {
+    list.innerHTML = '';
+    PROF_POSTS.forEach((p, i) => list.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, p.t), h('span', { class: 'sb' },
+      h('button', { type: 'button', class: 'btn sm' + (W4.pub[i] ? ' badc' : ''), 'aria-pressed': W4.pub[i] ? 'true' : 'false', onclick: () => { W4.pub[i] = true; draw(); } }, 'Public'),
+      h('button', { type: 'button', class: 'btn sm' + (!W4.pub[i] ? ' good' : ''), 'aria-pressed': !W4.pub[i] ? 'true' : 'false', onclick: () => { W4.pub[i] = false; draw(); } }, 'Privé')))));
+    const clues = new Set(); PROF_POSTS.forEach((p, i) => { if (W4.pub[i]) p.c.forEach(x => clues.add(x)); });
+    res.innerHTML = ''; let n = 0;
+    DEDUCT.forEach(d => { const ok = d[1].every(x => clues.has(x)); if (ok) n++; res.append(h('div', { class: 'dd ' + (ok ? 'exp' : 'safe') }, h('b', null, (ok ? '⚠ Déductible : ' : '✓ Protégé : ') + d[0]), ok ? h('span', { class: 'small' }, ' ' + d[2]) : null)); });
+    const np = W4.pub.filter(Boolean).length;
+    sc.textContent = 'Informations exposées : ' + n + ' sur ' + DEDUCT.length + ' · publications publiques : ' + np + ' sur ' + PROF_POSTS.length + '.';
+  }
+  root.append(h('h3', null, 'Ses publications'), list, h('h3', null, 'Ce qu’un inconnu peut déduire'), res, sc,
+    h('p', { class: 'small' }, 'Une seule publication paraît anodine. C’est le croisement de plusieurs informations qui révèle beaucoup. Même une publication supprimée peut avoir été copiée ou capturée.'),
+    h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W4.pub = PROF_POSTS.map(() => true); draw(); } }, 'Tout remettre en public')));
+  draw();
+}
+WORKSHOPS.push({ id: 's4', title: 'Identité numérique', hint: 'Choisissez ce que Maëlle laisse public, puis regardez ce qu’un inconnu peut en déduire.', mount: mountW4, reset: () => { W4.pub = PROF_POSTS.map(() => true); } });
+
+/* ---------- Atelier 5 : info, intox, harcèlement ---------- */
+function sortWidget(box, items, labels, store, redraw) {
+  const done = Object.keys(store).length; let ok = 0;
+  items.forEach((it, i) => { const a = store[i], right = a === it.a; if (a != null && right) ok++;
+    box.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, it.card ? it.card : it.t), h('span', { class: 'sb' }, labels.map((lab, j) => h('button', { type: 'button', class: 'btn sm' + (a === j ? (right ? ' good' : ' badc') : ''), disabled: a != null, onclick: () => { store[i] = j; redraw(); } }, lab))),
+      a != null ? h('span', { class: 'sf ' + (right ? 'ok' : 'ko') }, (right ? 'Exact. ' : 'Pas tout à fait : il fallait « ' + labels[it.a] + ' ». ') + it.w) : null)); });
+  box.append(h('p', { class: 'score' }, done ? 'Score : ' + ok + ' / ' + items.length + (done === items.length ? ' (terminé)' : '') : ''));
+}
+const NEWS = [
+  { card: h('span', null, h('b', null, 'mairie-valmont.fr'), ' : « Le pont de la Rivière sera fermé lundi pour travaux. Détails et déviations sur notre site. »'), a: 0, w: 'Source officielle identifiée, information précise, lien vers le site de la mairie. On peut relayer.' },
+  { card: h('span', null, h('b', null, '@alerte_valmont (compte créé hier)'), ' : « URGENT !!! Un requin vu dans le lac !!! PARTAGEZ avant que ce soit supprimé !!! »'), a: 1, w: 'Compte inconnu, ton alarmiste, pression pour partager vite : classique de l’intox. Vérifiez la source et la date de la photo.' },
+  { card: h('span', null, h('b', null, 'Capture floue sans auteur'), ' : « Preuve : le lycée fermera ses portes en 2027. »'), a: 1, w: 'Aucune source, aucun lien, aucune date. On cherche la source d’origine avant de partager.' },
+  { card: h('span', null, h('b', null, 'Message public'), ' : capture de conversations privées d’une élève de 2de B avec son nom complet et « Regardez cette folle ».'), a: 2, w: 'C’est du harcèlement. Ne pas relayer, signaler la publication, prévenir un adulte.' },
+  { card: h('span', null, h('b', null, 'Message privé'), ' : « Gagnez un smartphone ! Entrez votre identifiant et votre mot de passe ici : lycee-gram-gagnant.com »'), a: 2, w: 'Hameçonnage : l’adresse n’est pas celle du réseau. Ne pas cliquer, signaler.' },
+  { card: h('span', null, h('b', null, 'Le Courrier de Valmont'), ' : « Les lycéens dorment 6 h par nuit ! » (étude auprès de 30 élèves d’une seule classe)'), a: 1, w: 'Le titre généralise une petite enquête. On lit l’article et on regarde l’échantillon avant de relayer.' }];
+const HARC = [
+  { t: 'Ne pas répondre sur le même ton ni se venger.', a: 0, w: 'Répondre alimente le conflit et peut vous mettre en tort.' },
+  { t: 'Faire des captures d’écran des messages, avec la date et le nom du compte.', a: 0, w: 'Ce sont des preuves utiles pour signaler et porter plainte.' },
+  { t: 'Supprimer tous les messages pour les oublier.', a: 1, w: 'Sans preuves, il est difficile d’agir. Gardez-les, même si c’est dur de les relire.' },
+  { t: 'Bloquer l’auteur et signaler le contenu au réseau.', a: 0, w: 'Les réseaux ont l’obligation de traiter les signalements.' },
+  { t: 'En parler à un adulte de confiance : parent, CPE, professeur, infirmière.', a: 0, w: 'On n’a pas à gérer seul. L’établissement a un protocole contre le harcèlement.' },
+  { t: 'Relayer la publication humiliante « pour montrer à quel point c’est nul ».', a: 1, w: 'Relayer, c’est participer au harcèlement et le propager.' },
+  { t: 'Appeler le 3018, numéro national gratuit contre le cyberharcèlement.', a: 0, w: 'Des professionnels écoutent, conseillent et peuvent faire supprimer des contenus.' },
+  { t: 'Se taire en espérant que ça passe.', a: 1, w: 'Le harcèlement s’arrête rarement seul : en parler est le premier pas.' }];
+const W5 = { tab: 'news', news: {}, harc: {} };
+function mountW5(root) {
+  root.append(h('h2', null, 'Info, intox et cyberharcèlement'));
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div');
+  const draw = () => {
+    tabs.innerHTML = ''; [['news', 'Info ou intox ?'], ['harc', 'Cyberharcèlement']].forEach(t => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': W5.tab === t[0] ? 'true' : 'false', onclick: () => { W5.tab = t[0]; draw(); } }, t[1])));
+    body.innerHTML = '';
+    if (W5.tab === 'news') {
+      body.append(h('p', null, 'Voici six publications vues dans un fil. Pour chacune, que faites-vous ?'), h('p', { class: 'small' }, 'Réflexes : qui publie ? à quelle date ? où est la source ? la même info existe-t-elle ailleurs ? l’image est-elle ancienne (recherche d’image inversée) ?'));
+      const box = h('div', { class: 'sorts' }); sortWidget(box, NEWS, ['Je relaie', 'Je vérifie d’abord', 'Je signale'], W5.news, draw);
+      body.append(box, h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W5.news = {}; draw(); } }, 'Recommencer')));
+    } else {
+      body.append(h('p', null, 'Une élève, Lina, reçoit chaque soir des messages d’insultes, et une photo truquée d’elle circule. Pour chaque réaction, dites si c’est « À faire » ou « À éviter ».'));
+      const box = h('div', { class: 'sorts' }); sortWidget(box, HARC, ['À faire', 'À éviter'], W5.harc, draw);
+      body.append(box, h('div', { class: 'retain' }, h('b', null, 'Besoin d’aide ? '), '3018 : numéro national gratuit contre le harcèlement et les violences numériques (7 j/7). Si vous vous sentez très mal : 3114, numéro national de prévention du suicide (24 h/24).'),
+        h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W5.harc = {}; draw(); } }, 'Recommencer')));
+    }
+  };
+  root.append(tabs, body); draw();
+}
+WORKSHOPS.push({ id: 's5', title: 'Info, intox, harcèlement', hint: 'Triez des publications, puis choisissez les bonnes réactions face au cyberharcèlement.', mount: mountW5, reset: () => { W5.news = {}; W5.harc = {}; W5.tab = 'news'; } });
+
+/*ACT-START*/
+const ACT = {
+  s1: {
+    title: 'Le réseau, un graphe', level: 'Niveau 1 · Modéliser', time: '25 min', course: 'graphe',
+    goal: 'Représenter un réseau social par un graphe et comprendre pourquoi une information (ou une rumeur) s’y propage si vite.',
+    steps: [
+      'Dans le graphe de LycéeGram, cliquez sur quelques personnes. Le nombre dans le rond est son <b>degré</b> : son nombre d’amis. Qui en a le plus ?',
+      'Regardez les <b>statistiques</b> : comparez « Somme des degrés » et « Relations ». Que remarquez-vous ? Pourquoi (pensez à la poignée de mains) ?',
+      'Dans <b>« Le chemin le plus court »</b>, cherchez le chemin de Malo à Tom. Combien d’intermédiaires ?',
+      'Supprimez le compte d’Inès, puis recalculez ce chemin et regardez la distance moyenne. Que devient le réseau ?',
+      'Dans <b>« Une rumeur se propage »</b>, lancez la rumeur depuis Tom, étape par étape. Combien d’étapes pour informer tout le monde ?',
+      'Activez ensuite des personnes qui <b>vérifient avant de relayer</b>. Quelles personnes ralentissent le plus la rumeur ?'
+    ],
+    defi: { q: 'Quelle est la plus petite liste de personnes à qui demander de vérifier avant de relayer pour que la rumeur lancée par Malo n’atteigne jamais Tom ? Justifiez avec le graphe.',
+      a: 'Il suffit d’une seule personne : Clara. Tom n’a qu’un seul ami (degré 1), et c’est Clara : tous les chemins vers Tom passent par elle. Bloquer Clara isole Tom de la rumeur. Plus généralement, une personne par laquelle passent tous les chemins s’appelle un point d’articulation du graphe.' },
+    qcm: [
+      { q: 'Dans le graphe d’un réseau social, qu’est-ce qu’une arête ?', o: ['Une personne', 'Une relation entre deux personnes', 'Un message', 'Une publication'], a: 1, w: 'Les sommets sont les personnes, les arêtes les relations.' },
+      { q: 'Le degré d’un sommet est…', o: ['Son âge', 'Le nombre de chemins du graphe', 'Son nombre d’amis (d’arêtes)', 'La distance au centre'], a: 2, w: 'C’est le nombre d’arêtes qui touchent le sommet.' },
+      { q: 'Dans un graphe, la somme des degrés vaut…', o: ['Le nombre d’arêtes', 'Deux fois le nombre d’arêtes', 'Le nombre de sommets au carré', 'Toujours 100'], a: 1, w: 'Chaque arête compte pour deux : une fois pour chacune de ses extrémités. C’est le lemme des poignées de mains.' },
+      { q: 'La « distance » entre deux personnes est…', o: ['Le nombre de kilomètres qui les séparent', 'Le nombre de messages échangés', 'Le plus petit nombre de relations à franchir pour aller de l’une à l’autre', 'Le nombre d’amis communs'], a: 2, w: 'Distance = longueur du plus court chemin dans le graphe.' },
+      { q: 'L’expérience de Milgram (1967) et les « six degrés de séparation » suggèrent que…', o: ['Deux personnes quelconques sont reliées par une courte chaîne de connaissances', 'Chacun a exactement six amis', 'Les réseaux sociaux existent depuis 1967', 'Il faut six clics pour se connecter'], a: 0, w: 'C’est le phénomène du « petit monde » : peu d’intermédiaires suffisent.' },
+      { q: 'Pourquoi supprimer le compte très connecté (Inès) change-t-il autant le graphe ?', o: ['Il supprime tous les messages', 'Il rend le graphe plus petit uniquement', 'Il casse des chemins courts : les distances augmentent', 'Il n’a aucun effet'], a: 2, w: 'Les sommets de fort degré servent de raccourcis. Les retirer allonge les chemins, voire isole des groupes.' },
+      { q: 'Pour freiner une rumeur, il vaut mieux que ceux qui vérifient avant de partager soient…', o: ['Les moins connectés', 'Choisis au hasard obligatoirement', 'Très connectés, car ils bloquent beaucoup de chemins', 'Uniquement le premier auteur'], a: 2, w: 'Un sommet de fort degré relaie à beaucoup de personnes : s’il vérifie, il coupe beaucoup de chemins.' }
+    ]
+  },
+  s2: {
+    title: 'Algorithmes et fil d’actualité', level: 'Niveau 2 · Comprendre', time: '25 min', course: 'algo',
+    goal: 'Comprendre comment un algorithme de recommandation choisit les publications affichées, et ses effets : personnalisation, bulle de filtres.',
+    steps: [
+      'Choisissez « Du plus récent au plus ancien ». Relevez les 6 sujets affichés. Passez à « Les plus aimées d’abord » : le fil change-t-il ?',
+      'Passez à <b>« Personnalisé »</b>. Aimez deux publications sur le même sujet (par exemple les jeux vidéo). Que devient le fil ?',
+      'Regardez la partie <b>« Ce que la plateforme croit savoir de vous »</b> : quel sujet domine ?',
+      'Continuez à aimer ce que vous voyez, jusqu’à ce que le message « Bulle de filtres » apparaisse. Combien de sujets reste-t-il ?',
+      'Décochez <b>« Autoriser la publicité ciblée »</b> : la publicité change-t-elle ? Pourquoi ?',
+      'Effacez vos « J’aime » : retrouvez-vous le fil du départ ?'
+    ],
+    defi: { q: 'En mode « Personnalisé », combien de « J’aime » faut-il au minimum pour que le fil ne contienne plus que 3 sujets ou moins ? Quel défaut cela révèle-t-il ?',
+      a: 'Cela dépend du choix, mais 2 à 4 « J’aime » suffisent souvent : le score d’un sujet aimé pèse plus que la popularité ou la fraîcheur. Défaut : la plateforme ne vous montre presque plus que ce que vous aimez déjà (bulle de filtres), donc vous ne découvrez plus d’autres sujets ni d’autres opinions.' },
+    qcm: [
+      { q: 'À quoi sert un algorithme de recommandation ?', o: ['À supprimer les comptes', 'À choisir et classer les contenus affichés à chaque utilisateur', 'À chiffrer les messages', 'À mesurer la vitesse de connexion'], a: 1, w: 'Il trie la masse des publications pour afficher celles que l’on croit les plus pertinentes pour chacun.' },
+      { q: 'Quel critère utilise souvent un fil « personnalisé » ?', o: ['La couleur du profil', 'Ce que vous avez déjà aimé, regardé ou partagé', 'L’ordre alphabétique des auteurs', 'La taille de l’écran'], a: 1, w: 'Les actions passées (J’aime, temps passé, partages) servent à prédire vos goûts.' },
+      { q: 'Qu’appelle-t-on « bulle de filtres » ?', o: ['Une publicité qui flotte à l’écran', 'Un filtre photo', 'Un fil qui ne montre presque plus que des contenus proches de ceux qu’on aime déjà', 'Un réglage de confidentialité'], a: 2, w: 'La personnalisation peut enfermer l’utilisateur dans un univers étroit.' },
+      { q: 'Pourquoi un réseau social cherche-t-il à maximiser l’« engagement » ?', o: ['Pour que les utilisateurs passent plus de temps et voient plus de publicités', 'Pour réduire sa consommation d’électricité', 'Pour obliger à se déconnecter', 'Pour respecter une loi'], a: 0, w: 'Plus on reste longtemps, plus on voit de publicités : l’attention est la ressource à vendre.' },
+      { q: 'Dans l’atelier, pourquoi ne peut-on aimer que 6 publications sur 20 ?', o: ['Parce que les autres sont interdites', 'Parce que l’algorithme décide de ce qu’il nous montre', 'Parce qu’elles sont supprimées', 'Parce que le fil est limité par la loi'], a: 1, w: 'Ce qu’on ne voit pas, on ne peut pas le liker : l’algorithme influence donc aussi ce qu’il apprend de nous.' },
+      { q: 'Quelle bonne pratique réduit l’effet d’une bulle de filtres ?', o: ['Ne jamais se connecter', 'Suivre des sources variées et choisir parfois un fil chronologique', 'Aimer toujours les mêmes contenus', 'Supprimer son nom'], a: 1, w: 'Diversifier ses sources et ne pas se contenter du fil recommandé aide à garder un regard large.' }
+    ]
+  },
+  s3: {
+    title: 'Modèle économique', level: 'Niveau 2 · Analyser', time: '20 min', course: 'economie',
+    goal: 'Comprendre comment un réseau social gratuit gagne de l’argent, et le rôle des données personnelles dans la publicité ciblée.',
+    steps: [
+      'Laissez les quatre données partagées. Ciblez les « 15-17 ans » : notez l’audience et le prix pour 1 000 affichages.',
+      'Ajoutez un centre d’intérêt (jeux vidéo) puis une ville. Que deviennent l’audience, le prix et le coût de la campagne ?',
+      'Retirez des données du ciblage en cliquant sur leurs boutons en haut (« Âge », « Ville »…) : que se passe-t-il pour l’annonceur ?',
+      'Dans <b>« Combien rapporte un réseau social ? »</b>, réglez 20 millions d’utilisateurs, 30 publicités par jour et 2 € : quel revenu par an ?',
+      'Doublez le nombre de publicités vues par personne. Pourquoi un réseau a-t-il intérêt à vous garder connecté plus longtemps ?'
+    ],
+    defi: { q: 'Un annonceur vend des chaussures de running. Quelle campagne choisiriez-vous pour dépenser le moins possible tout en touchant des gens intéressés ? Quelles données du réseau sont alors utiles ?',
+      a: 'On cible le centre d’intérêt « Sport », éventuellement l’âge et la ville de la boutique. Peu de critères, peu de gaspillage. Ces données sont des données personnelles : le réseau les collecte et les exploite pour que l’annonceur paie davantage. D’où l’idée : « si c’est gratuit, c’est vous le produit ».' },
+    qcm: [
+      { q: 'Comment un réseau social gratuit gagne-t-il surtout de l’argent ?', o: ['Avec l’argent des élèves', 'En vendant de l’espace publicitaire aux annonceurs', 'Avec des subventions de l’État uniquement', 'En vendant des ordinateurs'], a: 1, w: 'La publicité est la première source de revenus des grands réseaux.' },
+      { q: 'Pourquoi la publicité ciblée est-elle plus chère qu’une publicité vue par tout le monde ?', o: ['Elle est plus longue', 'Elle touche plus précisément des personnes susceptibles d’acheter', 'Elle est interdite sans cela', 'Elle utilise plus d’électricité'], a: 1, w: 'Plus la cible est précise, moins l’annonceur gaspille d’affichages.' },
+      { q: 'Que signifie « Si c’est gratuit, vous êtes le produit » ?', o: ['Le service est gratuit, mais vos données et votre attention sont vendues', 'On vous paie pour utiliser le réseau', 'Vous devez acheter le produit après', 'Les réseaux n’ont pas de clients'], a: 0, w: 'Ce que l’on vend aux annonceurs, c’est l’accès à votre attention, grâce à vos données.' },
+      { q: 'Laquelle de ces informations est une donnée personnelle ?', o: ['Le nom d’un logiciel', 'Votre âge et votre ville', 'La météo du jour', 'Le prix d’un billet de train'], a: 1, w: 'Une donnée personnelle permet d’identifier une personne, directement ou par recoupement.' },
+      { q: 'Quel texte européen encadre l’usage des données personnelles, y compris par les réseaux sociaux ?', o: ['Le RGPD', 'Le protocole HTTP', 'La loi de Moore', 'Le standard HTML'], a: 0, w: 'Le RGPD (2018) impose notamment un consentement clair et un droit d’accès et de suppression.' },
+      { q: 'Dans l’atelier, qu’arrive-t-il quand les utilisateurs ne partagent plus un type de donnée ?', o: ['L’annonceur ne peut plus cibler selon ce critère', 'L’audience augmente toujours', 'Le prix baisse à 0', 'Le réseau disparaît'], a: 0, w: 'Sans la donnée, le critère n’est plus disponible : la publicité est moins précise.' },
+      { q: 'Pourquoi les réseaux cherchent-ils à ce que vous restiez longtemps connecté ?', o: ['Pour économiser leurs serveurs', 'Parce que plus de temps = plus de publicités vues = plus de revenus', 'Pour respecter la loi', 'Pour réduire le nombre d’amis'], a: 1, w: 'Les revenus dépendent du nombre de publicités affichées.' }
+    ]
+  },
+  s4: {
+    title: 'Identité numérique', level: 'Niveau 2 · Protéger', time: '20 min', course: 'identite',
+    goal: 'Comprendre ce qu’est l’identité numérique, comment des informations s’additionnent et se recoupent, et comment maîtriser ses traces.',
+    steps: [
+      'Lisez les six publications de Maëlle : toutes sont publiques. Combien d’informations un inconnu peut-il déduire ?',
+      'Passez en « Privé » une publication à la fois. Laquelle protège le plus d’informations d’un seul coup ?',
+      'Repérez la déduction qui demande <b>deux</b> publications (mot de passe probable). Pourquoi faut-il en cacher une seule pour s’en protéger ?',
+      'Cherchez une combinaison qui laisse le maximum de publications publiques tout en exposant au plus une information.',
+      'Remettez tout en public. Puis réfléchissez : quelles informations de ce type avez-vous déjà publiées vous-même ?'
+    ],
+    defi: { q: 'Quel est le nombre maximal de publications que Maëlle peut laisser publiques sans qu’aucune information ne soit déductible ? Lesquelles ?',
+      a: 'Une seule. Le lycée, la routine du judo, les vacances et le pseudo révèlent chacun une information : ces quatre publications doivent être privées. Le mot de passe probable demande à la fois le chien et l’anniversaire : on peut en laisser une des deux publique, pas les deux. Le maximum est donc 1 publication publique (chien ou anniversaire).' },
+    qcm: [
+      { q: 'L’identité numérique est…', o: ['Le mot de passe d’un compte', 'L’ensemble des traces et informations qui concernent une personne sur Internet', 'Une carte d’identité électronique obligatoire', 'Le nom d’un réseau social'], a: 1, w: 'Elle regroupe profil, publications, photos, commentaires, mais aussi les informations laissées par d’autres.' },
+      { q: 'Qu’est-ce que l’e-réputation ?', o: ['Le nombre de followers', 'L’image qu’on donne de soi sur Internet, d’après ce qui s’y trouve', 'La vitesse de connexion', 'Un mot de passe sûr'], a: 1, w: 'Elle peut être consultée par des recruteurs, des établissements, des inconnus.' },
+      { q: 'Pourquoi est-il risqué de publier un lieu et un horaire réguliers (judo le mardi à 18 h) ?', o: ['Cela ralentit la connexion', 'Cela permet à un inconnu de savoir où trouver la personne', 'C’est interdit par la loi', 'Cela supprime le compte'], a: 1, w: 'Un lieu et un horaire régulier révèlent où vous serez, ce qui est dangereux surtout pour les mineurs.' },
+      { q: 'Pourquoi le croisement d’informations est-il dangereux ?', o: ['Chaque information seule paraît anodine, mais ensemble elles en révèlent beaucoup', 'Il ralentit le réseau', 'Il supprime des publications', 'Il est interdit'], a: 0, w: 'Nom de chien + date de naissance, par exemple, donnent un mot de passe probable.' },
+      { q: 'Peut-on être sûr qu’une publication supprimée a disparu ?', o: ['Oui, toujours', 'Non : elle a pu être copiée ou capturée avant', 'Oui, après 24 heures', 'Seulement pour les photos'], a: 1, w: 'Sur Internet, ce qui est publié peut être copié, partagé, archivé.' },
+      { q: 'Que prévoit le RGPD pour une personne dont les données sont collectées ?', o: ['Rien du tout', 'Des droits : accéder à ses données, les corriger, demander leur effacement', 'Le droit de les vendre', 'L’obligation de les publier'], a: 1, w: 'Le droit d’accès, de rectification et d’effacement (« droit à l’oubli ») existe dans le RGPD.' },
+      { q: 'Quel réglage protège le mieux sa vie privée ?', o: ['Laisser le profil public', 'Réserver ses publications à ses amis et vérifier qui est dans cette liste', 'Utiliser toujours le même pseudo partout', 'Partager sa position en permanence'], a: 1, w: 'Un compte privé limite la diffusion, à condition de ne pas accepter n’importe qui.' }
+    ]
+  },
+  s5: {
+    title: 'Info, intox, harcèlement', level: 'Niveau 3 · Réagir', time: '25 min', course: 'desinfo',
+    goal: 'Savoir repérer une intox ou une arnaque avant de partager, et connaître les bons réflexes face au cyberharcèlement.',
+    steps: [
+      'Dans <b>« Info ou intox ? »</b>, lisez chaque publication. Quels indices de la source, de la date, du ton et de la pression repérez-vous ?',
+      'Choisissez votre réaction : « Je relaie », « Je vérifie d’abord » ou « Je signale ». Lisez les explications quand vous vous trompez.',
+      'Passez à l’onglet <b>« Cyberharcèlement »</b> : classez chaque réaction en « À faire » ou « À éviter ».',
+      'Retenez les deux numéros : 3018 (harcèlement et violences numériques) et 3114 (prévention du suicide).',
+      'Retournez à l’atelier 1 : relancez la rumeur en activant des personnes qui vérifient. Quel lien avec les réflexes appris ici ?'
+    ],
+    defi: { q: 'Vous recevez : « Info exclusive ! Le lycée supprime la cantine. Partagez à tous vos contacts ! » sans source. Décrivez en quatre points ce que vous faites avant de partager.',
+      a: '1. Regarder qui publie et depuis quand le compte existe. 2. Chercher la date de la publication. 3. Chercher la même information sur un site fiable (le site du lycée, un adulte du lycée, un journal local). 4. Si la source est introuvable, ne pas partager, et signaler la publication si elle semble trompeuse.' },
+    qcm: [
+      { q: 'Quelle publication a le plus de chances d’être une intox ?', o: ['Un communiqué avec lien vers le site officiel', 'Un message anonyme en majuscules qui demande de partager vite', 'Un article daté avec un auteur identifié', 'Une annonce sur le site de la mairie'], a: 1, w: 'Anonymat, urgence et pression sont des signaux d’alerte classiques.' },
+      { q: 'Quel est un bon réflexe avant de partager une information ?', o: ['Regarder le nombre de partages', 'Vérifier la source et chercher la même information ailleurs', 'Partager d’abord, vérifier plus tard', 'Se fier au titre'], a: 1, w: 'Le nombre de partages ne prouve pas que l’information est vraie.' },
+      { q: 'À quoi sert la recherche d’image inversée ?', o: ['À mettre une image à l’envers', 'À retrouver l’origine d’une image et voir si elle est ancienne ou détournée', 'À changer la couleur', 'À compresser une photo'], a: 1, w: 'On vérifie si la photo a déjà été publiée ailleurs, avec un autre contexte.' },
+      { q: 'Un message privé promet un smartphone si vous entrez votre mot de passe sur un site. Que faites-vous ?', o: ['Je tente ma chance', 'Je ne clique pas et je signale : c’est de l’hameçonnage', 'Je transfère à mes amis', 'Je donne un faux mot de passe'], a: 1, w: 'Aucun réseau ne demande votre mot de passe sur un site extérieur.' },
+      { q: 'Face à des messages harcelants, que doit-on faire en premier ?', o: ['Répondre par des insultes', 'Garder des preuves, ne pas répondre, et en parler à un adulte', 'Tout supprimer sans en parler', 'Attendre que ça passe'], a: 1, w: 'Les preuves et l’aide d’un adulte permettent d’agir efficacement.' },
+      { q: 'Que fait-on d’une publication humiliante sur un camarade ?', o: ['On la relaie pour alerter', 'On la signale et on ne la partage pas', 'On la commente pour se moquer', 'On la sauvegarde pour la poster plus tard'], a: 1, w: 'Relayer, c’est participer au harcèlement. On signale la publication.' },
+      { q: 'Quel numéro appeler pour du cyberharcèlement ?', o: ['Le 15', 'Le 3018', 'Le 112', 'Le 118 218'], a: 1, w: 'Le 3018 est le numéro national gratuit contre le harcèlement et les violences numériques.' }
+    ]
+  }
+};
+/*ACT-END*/
+
+/*COURSE-START*/
+const COURSE = [];
+COURSE.push({ id: 'histoire', t: 'Qu’est-ce qu’un réseau social ?', h: `
+<p>Un <b>réseau social</b> est un service en ligne qui permet à ses utilisateurs de créer un <b>profil</b>, de se <b>relier</b> à d’autres personnes et de <b>publier ou échanger</b> des contenus (textes, photos, vidéos, messages).</p>
+<h3>Quelques types de réseaux</h3>
+<ul>
+<li><b>Réseaux d’amis et de famille</b>, centrés sur des relations existantes.</li>
+<li><b>Réseaux de partage de contenus</b> (photos, vidéos courtes, musique) où l’on suit aussi des inconnus.</li>
+<li><b>Réseaux professionnels</b>, pour la carrière et le recrutement.</li>
+<li><b>Messageries</b> et forums, plus proches de conversations privées ou de groupes.</li>
+</ul>
+<h3>Repères historiques</h3>
+<table class="ctable"><thead><tr><th>Date</th><th>Événement</th></tr></thead><tbody>
+<tr><td>1929, 1967</td><td>L’idée des « chaînes de connaissances » est proposée par Frigyes Karinthy, puis testée par Stanley Milgram : en moyenne, quelques intermédiaires séparent deux personnes.</td></tr>
+<tr><td>1997</td><td>SixDegrees.com, l’un des premiers sites où l’on déclare ses relations.</td></tr>
+<tr><td>2003 à 2006</td><td>MySpace, LinkedIn, Facebook (2004), YouTube (2005), Twitter (2006).</td></tr>
+<tr><td>2010 à 2011</td><td>Instagram et Snapchat : la photo et le smartphone deviennent centraux.</td></tr>
+<tr><td>Depuis 2016</td><td>Les vidéos courtes recommandées par algorithme prennent une place majeure.</td></tr>
+</tbody></table>
+<div class="retain"><b>À retenir.</b> Un réseau social = des profils, des relations, des contenus. Le Web et les smartphones ont permis son développement massif depuis les années 2000.</div>` });
+
+COURSE.push({ id: 'graphe', t: 'Réseau social et graphe', h: `
+<p>Les mathématiciens modélisent un réseau social par un <b>graphe</b>.</p>
+<ul>
+<li>Un <b>sommet</b> représente une personne (un compte).</li>
+<li>Une <b>arête</b> représente une relation entre deux personnes (amitié, abonnement réciproque).</li>
+<li>Le <b>degré</b> d’un sommet est son nombre d’arêtes, c’est-à-dire son nombre d’amis.</li>
+<li>Un <b>chemin</b> est une suite d’arêtes qui relie deux sommets. Sa <b>longueur</b> est son nombre d’arêtes.</li>
+<li>La <b>distance</b> entre deux sommets est la longueur du plus court chemin.</li>
+<li>Un graphe est <b>connexe</b> si l’on peut aller de n’importe quel sommet à n’importe quel autre.</li>
+</ul>
+<p>Dans un réseau où les amitiés sont réciproques, le graphe est <b>non orienté</b>. Quand on peut suivre quelqu’un sans être suivi en retour (abonnements), il est <b>orienté</b> : les arêtes sont des flèches.</p>
+<h3>La somme des degrés</h3>
+<p>Chaque arête relie deux sommets, donc elle compte pour 2 dans la somme des degrés :</p>
+<div class="formula">somme des degrés = 2 × nombre d’arêtes</div>
+<p>C’est le lemme des poignées de mains. Il impose que la somme des degrés soit toujours un nombre pair. Dans un graphe complet de <i>n</i> personnes, le nombre de relations est <i>n</i>(<i>n</i> − 1)/2 (voir la page sur Internet, avec les câbles).</p>
+<h3>Le petit monde</h3>
+<p>Dans la plupart des réseaux sociaux, deux personnes quelconques sont séparées par un <b>petit nombre d’intermédiaires</b>. C’est le phénomène du <b>petit monde</b> (« six degrés de séparation »). Il vient de quelques personnes très connectées (les <b>hubs</b>), qui servent de raccourcis. Essayez :</p>
+<div class="widget" data-w="hand"></div>
+<p>Ce calcul est un maximum : en réalité, beaucoup d’amis sont communs, donc moins de personnes sont atteintes, mais la croissance reste très rapide.</p>
+<h3>Conséquences</h3>
+<ul>
+<li>Une information (ou une rumeur) se propage <b>très vite</b> : en quelques étapes elle atteint presque tout le réseau.</li>
+<li>Les personnes très connectées ont un <b>poids énorme</b> : les supprimer ou les convaincre change beaucoup de choses.</li>
+<li>Les réseaux utilisent le graphe pour <b>suggérer des amis</b> : les amis d’amis sont des candidats naturels.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Réseau social = graphe (sommets = personnes, arêtes = relations). Somme des degrés = 2 × arêtes. Petit monde : peu d’intermédiaires entre deux personnes, grâce aux hubs.</div>` });
+
+COURSE.push({ id: 'algo', t: 'Algorithmes de recommandation', h: `
+<p>Un réseau social possède bien plus de contenus à montrer que ce qu’un utilisateur peut lire. Un <b>algorithme de recommandation</b> trie les contenus et choisit ceux qui apparaissent dans votre fil.</p>
+<h3>Comment ça marche, en gros ?</h3>
+<ol>
+<li>La plateforme <b>collecte</b> des signaux : ce que vous aimez, regardez jusqu’au bout, commentez, partagez, les comptes que vous suivez, la durée passée sur chaque contenu.</li>
+<li>Elle <b>calcule un score</b> pour chaque contenu possible : la probabilité que vous réagissiez.</li>
+<li>Elle <b>affiche d’abord</b> les contenus aux meilleurs scores.</li>
+<li>Elle <b>observe votre réaction</b> et ajuste son modèle : on parle d’une boucle de rétroaction.</li>
+</ol>
+<h3>Quel objectif ?</h3>
+<p>L’objectif de la plateforme est souvent de maximiser l’<b>engagement</b> : le temps passé et les interactions. Plus on reste, plus on voit de publicités (voir la section sur le modèle économique).</p>
+<h3>Effets possibles</h3>
+<ul>
+<li><b>Bulle de filtres</b> : le fil se rétrécit autour de ce qu’on aime déjà ; on voit moins de sujets et de points de vue différents.</li>
+<li><b>Chambre d’écho</b> : on ne rencontre que des opinions semblables aux siennes, qui se renforcent.</li>
+<li><b>Contenus extrêmes ou émotionnels</b> favorisés : ils déclenchent plus de réactions, donc plus d’engagement.</li>
+<li><b>Viralité</b> : un contenu aimé et partagé est montré à encore plus de monde.</li>
+</ul>
+<h3>Que peut faire l’utilisateur ?</h3>
+<ul>
+<li>Choisir, quand c’est possible, un fil <b>chronologique</b> ou limiter la personnalisation.</li>
+<li>Suivre des sources variées, et chercher volontairement d’autres points de vue.</li>
+<li>Se rappeler que le fil est <b>un choix de la plateforme</b>, pas le reflet du monde.</li>
+<li>Utiliser les réglages de temps d’écran et couper les notifications inutiles.</li>
+</ul>
+<p>En Europe, les très grandes plateformes doivent aussi expliquer leurs principaux critères de recommandation et proposer une option de fil non personnalisé (règlement sur les services numériques, DSA).</p>
+<div class="retain"><b>À retenir.</b> Un algorithme de recommandation trie les contenus d’après vos actions passées pour maximiser l’engagement. Risques : bulle de filtres, chambre d’écho, contenus polarisants.</div>` });
+
+COURSE.push({ id: 'economie', t: 'Le modèle économique', h: `
+<p>Les grands réseaux sociaux sont gratuits pour l’utilisateur, mais coûtent très cher à faire fonctionner (serveurs, équipes, modération). Leur principale source de revenus est la <b>publicité</b>.</p>
+<h3>Le principe</h3>
+<ol>
+<li>Les utilisateurs fournissent des <b>données</b> (âge, ville, goûts, temps passé, contacts) et passent du <b>temps</b> sur la plateforme.</li>
+<li>La plateforme vend à des <b>annonceurs</b> des espaces publicitaires, qu’ils peuvent <b>cibler</b> selon ces données.</li>
+<li>Plus la cible est précise, plus l’annonce est efficace, donc plus elle est chère.</li>
+</ol>
+<p>L’annonceur ne reçoit pas directement vos données : il choisit une cible, et la plateforme affiche la publicité aux personnes concernées. Mais pour la plateforme, vos données ont une grande valeur.</p>
+<h3>Les ordres de grandeur</h3>
+<p>Le prix d’une publicité se compte souvent pour 1 000 affichages (le CPM). Avec des millions d’utilisateurs qui voient chacun de nombreuses publicités par jour, les revenus se comptent en milliards (voir l’atelier 3).</p>
+<h3>L’économie de l’attention</h3>
+<p>Le temps d’attention est limité. Les plateformes rivalisent pour le capter : notifications, défilement sans fin, lecture automatique. L’expression « si c’est gratuit, c’est vous le produit » résume ce modèle : ce qui est vendu, c’est l’accès à votre attention.</p>
+<h3>Autres revenus</h3>
+<ul>
+<li>Abonnements payants (sans publicité ou avec options).</li>
+<li>Contenus sponsorisés et placements de produits par des influenceurs.</li>
+<li>Vente de services aux entreprises (boutiques, outils d’analyse).</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Gratuit pour l’utilisateur, financé par la publicité ciblée. Données personnelles et attention sont la matière première du modèle économique.</div>` });
+
+COURSE.push({ id: 'donnees', t: 'Données personnelles et droit', h: `
+<h3>Donnée personnelle</h3>
+<p>Une <b>donnée personnelle</b> est toute information qui permet d’identifier une personne, directement (nom, photo) ou en recoupant plusieurs informations (âge, ville, établissement, centres d’intérêt).</p>
+<h3>Le RGPD</h3>
+<p>Le <b>Règlement général sur la protection des données</b> (RGPD) s’applique dans toute l’Union européenne depuis 2018. En France, la <b>CNIL</b> veille à son respect. Principes :</p>
+<ul>
+<li><b>Finalité</b> : on ne collecte des données que pour un but précis.</li>
+<li><b>Minimisation</b> : seulement les données nécessaires.</li>
+<li><b>Consentement</b> clair pour les usages non indispensables.</li>
+<li><b>Droits de la personne</b> : être informée, accéder à ses données, les corriger, demander leur effacement, s’opposer à leur usage.</li>
+</ul>
+<p>En France, avant 15 ans, l’accord d’un parent est nécessaire pour que le réseau traite vos données personnelles. Beaucoup de plateformes fixent aussi dans leurs conditions d’utilisation un âge minimum, souvent 13 ans.</p>
+<h3>Quelques règles de droit à connaître</h3>
+<ul>
+<li><b>Droit à l’image</b> : on ne publie pas la photo d’une personne sans son accord.</li>
+<li><b>Injure, diffamation, menaces, harcèlement</b> : ces comportements sont punis par la loi, en ligne comme hors ligne.</li>
+<li>Les contenus qui incitent à la haine ou à la violence sont interdits.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Le RGPD donne des droits sur ses données (accès, correction, effacement). La CNIL contrôle. Les propos en ligne sont soumis à la loi.</div>` });
+
+COURSE.push({ id: 'identite', t: 'Identité numérique et traces', h: `
+<h3>Identité numérique</h3>
+<p>L’<b>identité numérique</b> est l’ensemble des informations qui concernent une personne sur Internet : son profil, ce qu’elle publie, ses commentaires, ses photos, et aussi ce que d’autres publient à son sujet.</p>
+<h3>Trois types de traces</h3>
+<ul>
+<li><b>Traces volontaires</b> : ce que l’on publie soi-même.</li>
+<li><b>Traces involontaires</b> : données collectées sans qu’on y pense (adresse IP, localisation, historique, cookies).</li>
+<li><b>Traces laissées par les autres</b> : photos où l’on est identifié, commentaires, captures.</li>
+</ul>
+<h3>Le croisement d’informations</h3>
+<p>Une information seule paraît souvent anodine. Mais en croisant plusieurs informations publiques, on peut en déduire beaucoup : où la personne étudie, où elle sera à telle heure, quand son domicile est vide, quel pourrait être son mot de passe. C’est ce que montre l’atelier 4.</p>
+<h3>E-réputation</h3>
+<p>L’<b>e-réputation</b> est l’image de soi qu’on donne sur Internet. Elle peut être regardée par des établissements, des employeurs, des inconnus. Ce qui est publié peut être <b>copié, capturé, archivé</b> : une publication supprimée n’a pas forcément disparu.</p>
+<h3>Bonnes pratiques</h3>
+<ul>
+<li>Se demander : « Est-ce que je serais gêné que ma famille, mon futur employeur ou un inconnu voie cela ? »</li>
+<li>Régler la <b>confidentialité</b> : compte privé, choix de qui voit les publications et les tags.</li>
+<li>Désactiver la <b>localisation</b> des photos et des publications.</li>
+<li>Ne pas publier les informations d’autres personnes sans leur accord.</li>
+<li>Utiliser des mots de passe qui n’ont aucun lien avec des informations publiques, et la double authentification.</li>
+<li>Rechercher son propre nom sur un moteur de recherche pour voir ce qui existe, et demander l’effacement de ce qui ne doit pas rester.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> L’identité numérique est faite de traces volontaires, involontaires et laissées par les autres. Le croisement d’informations révèle beaucoup. Ce qui est publié peut rester.</div>` });
+
+COURSE.push({ id: 'desinfo', t: 'Information et désinformation', h: `
+<p>Les réseaux sociaux sont devenus une source d’information, mais n’importe qui peut y publier, sans vérification.</p>
+<h3>Vocabulaire</h3>
+<ul>
+<li><b>Information fausse involontaire</b> : une erreur de bonne foi.</li>
+<li><b>Intox / désinformation</b> : fausse information diffusée pour tromper ou nuire.</li>
+<li><b>Rumeur</b> : information non vérifiée qui se transmet de personne en personne.</li>
+<li><b>Canular (hoax)</b> : information inventée pour amuser ou tromper.</li>
+<li><b>Contenu manipulé</b> : image ou vidéo retouchée, sortie de son contexte, ou générée par une intelligence artificielle.</li>
+</ul>
+<h3>Pourquoi ça se propage</h3>
+<ul>
+<li>Les contenus qui <b>choquent ou émeuvent</b> sont plus partagés.</li>
+<li>L’algorithme les met en avant (voir la section sur les recommandations).</li>
+<li>Le graphe est un petit monde : la rumeur atteint vite tout le monde.</li>
+<li>On partage plus facilement ce qui <b>confirme</b> ce qu’on pense (biais de confirmation).</li>
+</ul>
+<h3>Réflexes de vérification</h3>
+<ol>
+<li><b>Qui</b> publie ? Source identifiée ou compte anonyme récent ?</li>
+<li><b>Quand</b> ? La date est-elle récente, ou l’information est-elle ancienne ?</li>
+<li><b>Comment</b> est-ce écrit ? Majuscules, urgence, « partagez avant suppression » : signaux d’alerte.</li>
+<li><b>Où</b> est la source ? Y a-t-il un lien, un auteur, des chiffres précis ?</li>
+<li><b>Ailleurs</b> : la même information existe-t-elle chez plusieurs sources indépendantes ?</li>
+<li><b>Image</b> : la recherche d’image inversée donne-t-elle une autre origine ?</li>
+</ol>
+<p>En cas de doute : <b>ne pas partager</b>. Si le contenu est trompeur, le signaler au réseau.</p>
+<h3>Hameçonnage</h3>
+<p>Beaucoup de messages sur les réseaux sont des arnaques (faux concours, faux support) qui cherchent à voler un mot de passe. Un réseau ne demande jamais votre mot de passe sur un site extérieur (voir la page sur le Web).</p>
+<div class="retain"><b>À retenir.</b> Avant de partager : qui, quand, où est la source, ailleurs, image. Un contenu qui pousse à partager vite est suspect. En cas de doute, on ne relaie pas.</div>` });
+
+COURSE.push({ id: 'harcelement', t: 'Cyberharcèlement', h: `
+<p>Le <b>cyberharcèlement</b> est un harcèlement qui passe par les outils numériques : messages d’insultes, moqueries publiques, photos humiliantes, faux profils, exclusion de groupes, rumeurs.</p>
+<h3>Ce qui le rend particulier</h3>
+<ul>
+<li><b>Permanent</b> : il peut suivre la victime jusque chez elle, à toute heure.</li>
+<li><b>Massif</b> : un contenu peut être vu par des centaines de personnes.</li>
+<li><b>Durable</b> : une publication peut être copiée et revenir.</li>
+<li>Les auteurs se sentent parfois <b>anonymes</b>, mais ils peuvent être identifiés.</li>
+</ul>
+<h3>Qui est responsable ?</h3>
+<p>Les <b>auteurs</b>, mais aussi ceux qui <b>relaient</b>, commentent ou « likent » pour se moquer : sans eux, le harcèlement n’aurait pas cette ampleur. Le harcèlement est un délit puni par la loi, avec des peines pouvant aller jusqu’à plusieurs années de prison.</p>
+<h3>Si vous êtes victime</h3>
+<ol>
+<li><b>Ne pas répondre</b> ni se venger.</li>
+<li><b>Garder des preuves</b> : captures d’écran avec date et nom des comptes.</li>
+<li><b>Bloquer</b> l’auteur et <b>signaler</b> les contenus au réseau.</li>
+<li><b>En parler</b> à un adulte de confiance : parent, CPE, professeur, infirmière scolaire, chef d’établissement.</li>
+<li><b>Appeler le 3018</b> : numéro national gratuit contre le harcèlement et les violences numériques, avec des professionnels à l’écoute.</li>
+</ol>
+<h3>Si vous êtes témoin</h3>
+<ul>
+<li>Ne pas relayer, ne pas liker, ne pas commenter.</li>
+<li>Soutenir la victime en privé et lui conseiller d’en parler.</li>
+<li>Signaler le contenu, et prévenir un adulte.</li>
+</ul>
+<p>Si vous vous sentez très mal ou en danger : le <b>3114</b> est le numéro national de prévention du suicide, gratuit, joignable 24 h/24. En cas de danger immédiat : le <b>112</b>.</p>
+<div class="retain"><b>À retenir.</b> Cyberharcèlement : ne pas répondre, garder des preuves, bloquer et signaler, en parler à un adulte, appeler le 3018. Relayer, c’est participer.</div>` });
+
+COURSE.push({ id: 'bienetre', t: 'Usages et bien-être', h: `
+<p>Les réseaux sociaux ont de vrais avantages : garder le contact, s’informer, créer, s’engager. Ils peuvent aussi avoir des effets négatifs si l’on ne garde pas la maîtrise de son usage.</p>
+<h3>Mécanismes qui retiennent l’attention</h3>
+<ul>
+<li>Le <b>défilement infini</b> (pas de « fin » naturelle).</li>
+<li>Les <b>notifications</b>, qui rappellent à revenir.</li>
+<li>Les <b>récompenses variables</b> : on ne sait jamais combien de « J’aime » on aura, ce qui donne envie de regarder.</li>
+<li>La <b>comparaison sociale</b> : on compare sa vie aux vies mises en scène des autres.</li>
+</ul>
+<h3>Signes d’alerte</h3>
+<ul>
+<li>Difficulté à s’arrêter, ou à se concentrer sans consulter son téléphone.</li>
+<li>Sommeil réduit à cause des écrans, fatigue.</li>
+<li>Humeur qui dépend des « J’aime » ou des réactions.</li>
+<li>Moins d’activités hors ligne qu’avant.</li>
+</ul>
+<h3>Reprendre la main</h3>
+<ul>
+<li>Fixer un <b>temps d’écran</b> et utiliser les outils de suivi du téléphone.</li>
+<li>Couper les <b>notifications</b> non essentielles, et ne pas garder le téléphone dans la chambre la nuit.</li>
+<li>Choisir ses abonnements, et désabonner ce qui met mal à l’aise.</li>
+<li>Se rappeler que les images sont <b>sélectionnées et retouchées</b>.</li>
+<li>Parler à un adulte ou un professionnel de santé si l’on se sent mal : le 3114 est joignable 24 h/24.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Les réseaux sont conçus pour retenir l’attention. Reprendre la main : limiter le temps, couper les notifications, choisir ce qu’on suit.</div>` });
+
+COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
+<ul>
+<li>Le réseau « LycéeGram », les personnes, les publications et les publicités sont <b>fictifs</b>. Aucune vraie plateforme n’est utilisée.</li>
+<li>Le graphe n’a que 16 personnes et des amitiés réciproques. Les vrais réseaux ont des milliards de comptes et souvent des relations orientées.</li>
+<li>L’algorithme du fil est un score très simple (« J’aime » + popularité + fraîcheur). Les vrais algorithmes combinent des milliers de signaux et changent en permanence.</li>
+<li>La propagation de la rumeur est déterministe : à chaque étape, tous les amis sont informés. Dans la réalité, chacun partage ou non, avec une certaine probabilité.</li>
+<li>Les chiffres de l’atelier sur le modèle économique sont inventés, pour des calculs simples.</li>
+<li>Les publications à classer comme info ou intox sont des cas types. Dans la vie réelle, la vérification demande plus de recherche.</li>
+</ul>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>Algorithme de recommandation</dt><dd>Programme qui choisit et classe les contenus montrés à chaque utilisateur.</dd>
+<dt>Arête</dt><dd>Lien entre deux sommets d’un graphe (une relation entre deux personnes).</dd>
+<dt>Bulle de filtres</dt><dd>Univers de contenus réduit à ce que l’algorithme pense qu’on aime.</dd>
+<dt>Chambre d’écho</dt><dd>Espace où l’on ne rencontre que des opinions semblables aux siennes.</dd>
+<dt>Cyberharcèlement</dt><dd>Harcèlement exercé par des moyens numériques.</dd>
+<dt>Degré</dt><dd>Nombre d’arêtes d’un sommet (nombre d’amis).</dd>
+<dt>Distance</dt><dd>Longueur du plus court chemin entre deux sommets.</dd>
+<dt>Donnée personnelle</dt><dd>Information qui permet d’identifier une personne.</dd>
+<dt>E-réputation</dt><dd>Image de soi donnée sur Internet.</dd>
+<dt>Engagement</dt><dd>Temps passé et réactions des utilisateurs sur une plateforme.</dd>
+<dt>Graphe</dt><dd>Ensemble de sommets reliés par des arêtes.</dd>
+<dt>Hameçonnage</dt><dd>Arnaque qui imite un service connu pour voler des informations.</dd>
+<dt>Hub</dt><dd>Sommet qui a un très grand nombre de relations.</dd>
+<dt>Identité numérique</dt><dd>Ensemble des traces et informations liées à une personne sur Internet.</dd>
+<dt>Intox</dt><dd>Fausse information diffusée pour tromper.</dd>
+<dt>Petit monde</dt><dd>Propriété d’un réseau où deux personnes sont séparées par peu d’intermédiaires.</dd>
+<dt>Publicité ciblée</dt><dd>Publicité montrée à un public choisi grâce à des données.</dd>
+<dt>RGPD</dt><dd>Règlement européen sur la protection des données personnelles.</dd>
+<dt>Sommet</dt><dd>Élément d’un graphe (une personne dans un réseau social).</dd>
+<dt>Viralité</dt><dd>Propagation très rapide d’un contenu par partages successifs.</dd>
+</dl>` });
+/*COURSE-END*/
+
+/* ---------- interface ---------- */
+const UI = { cur: 's1' };
+const AS = { key: 's1', tab: 'steps', open: false, st: lsGet(KEYS.act, {}), arm: null };
+const CS = { open: false, id: 'web' };
+function actSave() { lsSet(KEYS.act, AS.st); }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function wsById(id) { return WORKSHOPS.find(w => w.id === id) || WORKSHOPS[0]; }
+
+function renderSeg() {
+  const seg = $('#wsSeg'); seg.innerHTML = '';
+  WORKSHOPS.forEach((w, i) => seg.append(h('button', { type: 'button', role: 'tab', 'aria-pressed': w.id === UI.cur ? 'true' : 'false', 'aria-selected': w.id === UI.cur ? 'true' : 'false', onclick: () => gotoWs(w.id) }, (i + 1) + '. ' + w.title)));
+}
+function mountWs() {
+  const w = wsById(UI.cur), root = $('#ws');
+  $('#hint').textContent = w.hint; root.innerHTML = '';
+  w.mount(root);
+  const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
+}
+function gotoWs(id) {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  UI.cur = id; AS.key = id; AS.tab = 'steps';
+  renderSeg(); mountWs(); renderAct();
+}
+
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
+  if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: s }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: a.defi.q }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: a.defi.a }))));
+    if (a.course) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(a.course) }, 'Voir le cours : ' + courseSection(a.course).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Votre travail sera effacé'; AS.arm = setTimeout(() => { b.textContent = 'Recommencer l’atelier'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; wsById(UI.cur).reset(); mountWs(); renderAct(); } }, 'Recommencer l’atelier')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open; renderAct();
+}
+$('#bAct').addEventListener('click', actToggle);
+
+/* ---------- cours ---------- */
+function widgetHand(root) {
+  let f = 150;
+  const out = h('div'), rg = h('input', { type: 'range', min: 10, max: 500, step: 10, value: f, 'aria-label': 'Nombre d’amis par personne' });
+  const draw = () => { f = +rg.value; out.innerHTML = '';
+    out.append(h('p', null, 'Si chaque personne a ', h('b', null, f + ' amis'), ', le nombre maximal de personnes atteintes est :'),
+      h('table', { class: 'ctable' }, h('thead', null, h('tr', null, h('th', null, 'Étapes'), h('th', null, 'Personnes atteignables (maximum)'))), h('tbody', null,
+        [1, 2, 3, 4].map(k => h('tr', null, h('td', null, String(k)), h('td', null, Math.pow(f, k).toLocaleString('fr-FR')))))),
+      h('p', { class: 'small' }, 'Il y a environ 8 milliards d’humains : avec ' + f + ' amis, quelques étapes suffisent en théorie pour atteindre tout le monde.')); };
+  rg.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Nombre d’amis par personne (10 à 500)'), rg), out);
+}
+
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const go = id => { CS.id = id; renderCourse(); };
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => go(s.id) }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => go(e.target.value) }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+  art.querySelectorAll('[data-w]').forEach(w => { if (w.dataset.w === 'hand') widgetHand(w); });
+  art.append(h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => go(COURSE[idx - 1].id) }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => go(COURSE[idx + 1].id) }, COURSE[idx + 1].t + ' →') : h('span')));
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : notions des réseaux sociaux'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+  const sc = box.querySelector('.cwrap'); if (sc) sc.scrollTop = 0; box.scrollTop = 0;
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+
+/* ---------- aide ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre les réseaux sociaux (SNT, seconde). Le réseau « LycéeGram » et toutes ses personnes sont fictifs.</p>' +
+    '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction.</li><li>Le bouton <b>Cours</b> détaille toutes les notions.</li></ul>' +
+    '<h3>Vos données</h3><p>Les réponses au QCM sont mémorisées dans ce navigateur uniquement.</p>' }));
+});
+
+/* ---------- démarrage ---------- */
+(function init() {
+    AS.open = !isSmall();
+  renderSeg(); mountWs(); renderAct(); renderCourse();
+})();
+
+</script>
+
+</body></html>

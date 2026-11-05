@@ -1,0 +1,2297 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Filius en ligne</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : barre d'outils en haut, palette à gauche, zone de travail blanche, panneau de l'appareil à droite (feuille basse sur téléphone). */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;
+  --canvas:#ffffff;--grid:#ffffff;--cable:#000000;--node-fill:#dfe7f0;--node-stroke:#33475b;--screen:#8ec1e6;
+  --note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;--page-bg:#ffffff;--page-fg:#1d2733;
+  --term-bg:#121a22;--term-fg:#d5e0ea;
+  --ok:#1e7a2e;--warn:#9a5b00;--bad:#c0281f;
+  --c-arp:#c98a00;--c-icmp:#7b4fc2;--c-dns:#1478b8;--c-dhcp:#c2347f;--c-tcp:#6d8a14;--c-http:#0f8c68;--c-mail:#d1561b;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:.01em}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn.del{color:var(--bad)}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.seg button[data-mode=sim][aria-pressed="true"]{background:var(--run)}
+#simctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#simctl label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+#simctl select{width:auto}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--run);font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.paused{color:var(--warn)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#palette{flex:none;width:92px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.tool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;font-weight:500;font-size:11.5px;min-width:74px;text-align:center}
+.tool svg{width:34px;height:34px;overflow:visible}
+.tool:hover{border-color:var(--accent)}
+.tool.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.sep{height:1px;background:var(--line);flex:none;margin:2px 0}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#svg{display:block;width:1400px;height:900px;touch-action:none;user-select:none;-webkit-user-select:none}
+.node{cursor:pointer}
+.mode-design .node,.mode-doc .note{cursor:grab}
+.ic-body{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:2;stroke-linejoin:round}
+.ic-screen{fill:var(--screen);stroke:var(--node-stroke);stroke-width:1.2}
+.ic-acc{stroke:var(--accent);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic-led{fill:var(--accent)}
+.nlabel{font:600 12.5px var(--font-ui);fill:var(--fg)}
+.nip{font:11px var(--font-mono);fill:var(--muted)}
+.selbox{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.lk .selbox{stroke-dasharray:none;stroke-width:2.5}
+.cab{stroke:var(--cable);stroke-width:2.2;stroke-linecap:round}
+.cab.on{stroke:var(--accent);stroke-width:4}
+.hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.note rect{fill:var(--note-bg);stroke:var(--note-line)}
+.note text{font:12.5px var(--font-ui);fill:var(--note-fg)}
+#panel{flex:none;width:360px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0}
+#panel.wide{width:clamp(380px,38vw,600px)}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.pbody.fill{display:flex;flex-direction:column;gap:8px}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.fld.chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);font-size:13px}
+.fld.chk input{width:auto}
+input[type=text],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.mono{font-family:var(--font-mono);font-size:12.5px}
+textarea{resize:vertical;min-height:70px}
+.bad{border-color:var(--bad)!important}
+.grp{border:1px solid var(--line);border-radius:8px;padding:10px 10px 2px;margin-bottom:10px}
+.grp>h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.line3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.line2{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.small{font-size:12px;color:var(--muted);margin:0 0 9px}
+.term{display:flex;flex-direction:column;flex:1;min-height:240px;background:var(--term-bg);color:var(--term-fg);border-radius:8px;font:12.5px/1.5 var(--font-mono);overflow:hidden}
+.tout{flex:1;overflow:auto;padding:10px;white-space:pre-wrap;word-break:break-word}
+.tout .ok{color:#6fdc9a}.tout .err{color:#ff9a94}.tout .dim{color:#8da0b5}.tout .cmd{color:#fff}
+.tin{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid #2a3542}
+.tin:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.tin input{flex:1;background:transparent;border:0;color:inherit;font:inherit;outline:none;padding:2px 0}
+.tin .prm{color:#6fdc9a;white-space:nowrap}
+.bar-url{display:flex;gap:6px}
+.bstat{font-size:12.5px;color:var(--muted)}
+.page{flex:1;min-height:180px;overflow:auto;background:var(--page-bg);color:var(--page-fg);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font:15px/1.5 Georgia,'Times New Roman',serif}
+.page h1{font-size:24px;margin:.2em 0 .4em}.page h2{font-size:19px}.page a{color:#1558c0;text-decoration:underline;cursor:pointer}
+.exch{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.extop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex:none}
+.tscroll{overflow:auto;border:1px solid var(--line);border-radius:8px;flex:1;min-height:110px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px}
+.tbl th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:5px 8px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tbl td{padding:4px 8px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--font-mono)}
+.tbl td.info{white-space:normal;min-width:150px}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover{background:var(--panel2)}
+.tbl tbody tr.sel{background:var(--accent-soft)}
+.tbl tr.ign td{opacity:.55}
+tr[data-pk=arp] td:first-child{box-shadow:inset 4px 0 var(--c-arp)}tr[data-pk=icmp] td:first-child{box-shadow:inset 4px 0 var(--c-icmp)}
+tr[data-pk=dns] td:first-child{box-shadow:inset 4px 0 var(--c-dns)}tr[data-pk=dhcp] td:first-child{box-shadow:inset 4px 0 var(--c-dhcp)}
+tr[data-pk=tcp] td:first-child{box-shadow:inset 4px 0 var(--c-tcp)}tr[data-pk=http] td:first-child{box-shadow:inset 4px 0 var(--c-http)}
+.detail{overflow:auto;flex:none;max-height:46%}
+.layer{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.layer h4{margin:0;padding:4px 10px;font-size:12px;background:var(--panel2);display:flex;justify-content:space-between}
+.layer h4 span{color:var(--muted);font-weight:400}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:1px 12px;padding:6px 10px;font-size:12px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-family:var(--font-mono);white-space:pre-wrap;word-break:break-word}
+.layer.empty .kv{color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;background:var(--panel2)}
+.mono-tbl{font:12px var(--font-mono);width:100%;border-collapse:collapse;margin-bottom:10px}
+.mono-tbl th{text-align:left;color:var(--muted);font-weight:500;padding:3px 6px;border-bottom:1px solid var(--line)}
+.mono-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlgbox h3{margin:14px 0 4px;font-size:14px}.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}.dlgbox code{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px;white-space:nowrap}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+.score{font-weight:600;font-size:15px;margin:4px 0 8px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px;text-wrap:balance}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.cbody table{display:block;overflow-x:auto;max-width:100%}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.ctable.narrow td,.ctable.narrow th{text-align:center;font-family:var(--font-mono);font-size:13px}
+.ctable td.on1{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+.bits{font:13px var(--font-mono);overflow-x:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0;background:var(--panel2)}
+.bits>div{display:flex;white-space:nowrap;align-items:baseline;line-height:1.8}
+.bits .lbl{width:96px;flex:none;color:var(--muted);font-family:var(--font-ui);font-size:12px}
+.bits .n{color:var(--accent-ink);font-weight:600}.bits .m{color:#8a949f}
+.bits .dec{margin-left:14px;color:var(--fg);font-family:var(--font-ui);font-size:12.5px}
+.encap{display:flex;flex-wrap:wrap;margin:8px 0 12px}
+.encap span{padding:7px 14px;font:13px var(--font-mono);border:1px solid var(--node-stroke);margin-left:-1px}
+.encap .e4{background:#f6dede}.encap .e3{background:#dfeaf7}.encap .e2{background:#e0f1dc}.encap .e1{background:#fff4c2}
+.widget{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0 14px;background:var(--panel)}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}.bars>div{display:flex;align-items:center;gap:8px}
+.bars .bl{width:44px;flex:none;font-size:12.5px;color:var(--muted)}.bars .bar{display:inline-block;height:14px;background:var(--accent);border-radius:3px}.bars .bar.alt{background:var(--run)}.bars .bv{font:13px var(--font-mono)}
+input[type=range]{width:100%;padding:0}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .work{flex-direction:column;gap:8px}
+  #palette{flex-direction:row;width:auto;overflow-x:auto;overflow-y:hidden;flex:none}
+  .sep{width:1px;height:auto;margin:0 2px}
+  .tool{min-width:70px}
+  #panel,#panel.wide{position:fixed;left:0;right:0;bottom:0;width:auto;height:62%;max-height:none;border-radius:14px 14px 0 0;z-index:30;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .line3{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:no-preference){.tool,.btn{transition:border-color .12s,background .12s}}
+</style>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="5" r="3.2" fill="var(--accent)"/><circle cx="5" cy="20" r="3.2" fill="var(--accent)"/><circle cx="21" cy="20" r="3.2" fill="var(--accent)"/><path d="M13 8v5M13 13L6.5 18M13 13l6.5 5" stroke="var(--fg)" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg><span>Filius <small>en ligne</small></span></div>
+    <div class="files">
+      <button class="btn" id="bNew" type="button">Nouveau</button>
+      <button class="btn" id="bOpen" type="button">Ouvrir</button>
+      <button class="btn" id="bSave" type="button">Enregistrer</button>
+      <select id="ex" aria-label="Exemples" style="width:auto"><option value="">Exemples…</option><option value="cables">Pourquoi un commutateur ?</option><option value="lan">Réseau local</option><option value="router">Deux réseaux et un routeur</option><option value="internet">DHCP, DNS et site web</option><option value="mail">Courrier électronique</option><option value="modem">Liaison par modems</option></select>
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band" id="modes"><div class="inner row">
+    <div class="seg" role="group" aria-label="Mode">
+      <button type="button" data-mode="design" aria-pressed="true"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 14l3-1 8-8-2-2-8 8z"/></svg>Conception</button>
+      <button type="button" data-mode="sim" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M4 2.5v11l9-5.5z"/></svg>Simulation</button>
+      <button type="button" data-mode="doc" aria-pressed="false"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3 2h7l3 3v9H3zM5 8h6M5 11h6"/></svg>Documentation</button>
+    </div>
+    <div id="simctl" hidden>
+      <span class="live" id="live">Simulation en cours</span>
+      <button class="btn" id="bPause" type="button">Pause</button>
+      <label>Vitesse <select id="speed"><option value="0.25">×0,25</option><option value="0.5">×0,5</option><option value="1" selected>×1</option><option value="2">×2</option><option value="4">×4</option><option value="10">×10</option></select></label>
+      <button class="btn" id="bReset" type="button">Redémarrer</button>
+    </div>
+  </div></div>
+  <main class="inner work mode-design" id="work">
+    <aside id="palette" aria-label="Palette"></aside>
+    <section id="stage">
+      <div id="hint"></div>
+      <div id="scroller"><svg id="svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Zone de travail du réseau"></svg></div>
+    </section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+    <aside id="panel" hidden></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+<script>
+/*ENGINE-START*/
+'use strict';
+const BCAST = 'FF:FF:FF:FF:FF:FF';
+const FLIGHT_MS = 520, LINK_MS = 1;
+const Sim = { t: 0, seq: 0, queue: [], flights: [], speed: 1, paused: false, running: false };
+const hooks = { log() {}, changed() {} };
+const RT = {};
+const M = { nodes: [], cables: [], notes: [], nextId: 1, macSeq: 16 };
+const TYPES = { pc: 'Ordinateur', laptop: 'Portable', switch: 'Commutateur', router: 'Routeur', modem: 'Modem' };
+const PREFIX = { pc: 'PC', laptop: 'Portable', switch: 'Switch', router: 'Routeur', modem: 'Modem' };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+
+/* ---------- scheduler ---------- */
+function schedule(ms, fn) {
+  const ev = { at: Sim.t + ms, fn, dead: false };
+  const q = Sim.queue; let i = q.length;
+  while (i > 0 && q[i - 1].at > ev.at) i--;
+  q.splice(i, 0, ev); return ev;
+}
+function cancel(ev) { if (ev) ev.dead = true; }
+function advance(dt) {
+  const end = Sim.t + dt;
+  for (;;) {
+    const e = Sim.queue[0];
+    if (!e || e.at > end) break;
+    Sim.queue.shift(); Sim.t = Math.max(Sim.t, e.at);
+    if (!e.dead) e.fn();
+  }
+  Sim.t = end;
+  if (Sim.flights.length) Sim.flights = Sim.flights.filter(f => f.t1 > Sim.t);
+}
+function sleep(ms) { return new Promise(r => schedule(ms, r)); }
+
+/* ---------- IP helpers ---------- */
+function isIp(s) { const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec((s || '').trim()); return !!m && m.slice(1).every(x => +x <= 255); }
+function ip2n(s) { return s.trim().split('.').reduce((a, b) => a * 256 + (+b), 0); }
+function n2ip(n) { return [24, 16, 8, 0].map(s => Math.floor(n / 2 ** s) % 256).join('.'); }
+function isMask(s) { if (!isIp(s)) return false; const inv = 4294967295 - ip2n(s); return (inv & (inv + 1)) === 0; }
+function prefix(m) { return ip2n(m).toString(2).split('1').length - 1; }
+function sameNet(a, b, m) { const M2 = ip2n(m); return ((ip2n(a) & M2) >>> 0) === ((ip2n(b) & M2) >>> 0); }
+function netOf(ip, m) { return n2ip(((ip2n(ip) & ip2n(m)) >>> 0)); }
+
+/* ---------- model ---------- */
+function isHost(n) { return n.type === 'pc' || n.type === 'laptop'; }
+function nodeById(id) { return M.nodes.find(n => n.id === id); }
+function rt(n) { return RT[n.id]; }
+function resetModel() { M.nodes = []; M.cables = []; M.notes = []; M.nextId = 1; M.macSeq = 16; }
+function newMac() {
+  M.macSeq += 1; const x = (M.macSeq * 2654435761) >>> 0, h = v => v.toString(16).padStart(2, '0').toUpperCase();
+  return ['9A', '3C', h(x >>> 24), h((x >>> 16) & 255), h((x >>> 8) & 255), h(x & 255)].join(':');
+}
+function mkIface() { return { id: M.nextId++, mac: newMac(), ip: '', mask: '255.255.255.0', cable: null }; }
+function uniqueName(type) {
+  let k = 1; const used = new Set(M.nodes.map(n => n.name));
+  while (used.has(PREFIX[type] + ' ' + k)) k++;
+  return PREFIX[type] + ' ' + k;
+}
+function defaultPage(name) { return '<h1>Bienvenue sur ' + esc(name) + '</h1>\n<p>Cette page est servie par le serveur web de la machine.</p>'; }
+function mkNode(type, x, y) {
+  const n = { id: M.nextId++, type, x, y, name: uniqueName(type), ifaces: [], gateway: '', dns: '', dhcp: false, routes: [], apps: {},
+    web: { pages: [] }, dnsSrv: { records: [] }, dhcpSrv: { start: '', end: '', mask: '255.255.255.0', gw: '', dns: '' },
+    mail: { addr: '', smtp: '', pop: '', user: '', pass: '' }, mailSrv: { domain: '', accounts: [] }, online: true };
+  if (isHost(n)) { n.ifaces.push(mkIface()); n.apps = { term: true, browser: true, web: false, dns: false, dhcpd: false, mail: false, mailsrv: false }; }
+  n.web.pages.push({ path: '/', content: defaultPage(n.name) });
+  M.nodes.push(n); return n;
+}
+function connect(a, b) {
+  if (a === b) return { err: 'Un appareil ne peut pas être relié à lui-même.' };
+  if (M.cables.some(c => (c.a.n === a.id && c.b.n === b.id) || (c.a.n === b.id && c.b.n === a.id))) return { err: 'Ces deux appareils sont déjà reliés.' };
+  for (const n of [a, b]) {
+    if (isHost(n) && n.ifaces[0].cable != null) return { err: n.ifaces.length > 1 ? n.name + ' : toutes ses cartes réseau sont déjà utilisées.' : n.name + ' n’a qu’une carte réseau, déjà reliée.' };
+    if (n.type === 'modem' && n.ifaces.length >= 2) return { err: n.name + ' n’a que deux prises : une vers le réseau local, une vers Internet.' };
+  }
+  const port = n => { if (isHost(n)) return n.ifaces[0]; const i = mkIface(); n.ifaces.push(i); return i; };
+  const ia = port(a), ib = port(b);
+  const c = { id: M.nextId++, a: { n: a.id, i: ia.id }, b: { n: b.id, i: ib.id } };
+  ia.cable = c.id; ib.cable = c.id; M.cables.push(c); return { cable: c };
+}
+function removeCable(c) {
+  for (const e of [c.a, c.b]) {
+    const n = nodeById(e.n); if (!n) continue;
+    const f = ifaceById(n, e.i); if (isHost(n) && n.ifaces.length === 1) { if (f) f.cable = null; } else n.ifaces = n.ifaces.filter(i => i.id !== e.i);
+  }
+  M.cables = M.cables.filter(x => x !== c);
+}
+function removeNode(n) { M.cables.filter(c => c.a.n === n.id || c.b.n === n.id).forEach(removeCable); M.nodes = M.nodes.filter(x => x !== n); }
+function ifaceById(n, id) { return n.ifaces.find(i => i.id === id); }
+function ifaceFor(n, cable) { return n.ifaces.find(i => i.cable === cable.id); }
+function neighbor(n, iface) {
+  const c = M.cables.find(x => x.id === iface.cable); if (!c) return null;
+  const e = c.a.n === n.id && c.a.i === iface.id ? c.b : c.a; return nodeById(e.n) || null;
+}
+function serialize() { return JSON.stringify({ v: 1, nextId: M.nextId, macSeq: M.macSeq, nodes: M.nodes, cables: M.cables, notes: M.notes }); }
+function deserialize(txt) {
+  const d = JSON.parse(txt);
+  if (!d || !Array.isArray(d.nodes) || !Array.isArray(d.cables)) throw new Error('Fichier non reconnu');
+  resetModel();
+  M.nodes = d.nodes.map(n => {
+    n.ifaces = n.ifaces || []; n.routes = n.routes || []; n.apps = n.apps || {};
+    n.web = n.web && n.web.pages ? n.web : { pages: [{ path: '/', content: '' }] };
+    n.dnsSrv = n.dnsSrv || { records: [] };
+    n.dhcpSrv = Object.assign({ start: '', end: '', mask: '255.255.255.0', gw: '', dns: '' }, n.dhcpSrv);
+    n.mail = Object.assign({ addr: '', smtp: '', pop: '', user: '', pass: '' }, n.mail);
+    n.mailSrv = Object.assign({ domain: '', accounts: [] }, n.mailSrv); n.online = n.online !== false;
+    n.gateway = n.gateway || ''; n.dns = n.dns || ''; n.dhcp = !!n.dhcp; return n;
+  });
+  M.cables = d.cables; M.notes = d.notes || [];
+  let mx = d.macSeq || 16; let id = 1;
+  const bump = v => { if (v >= id) id = v + 1; };
+  M.nodes.forEach(n => { bump(n.id); n.ifaces.forEach(i => bump(i.id)); }); M.cables.forEach(c => bump(c.id)); M.notes.forEach(c => bump(c.id));
+  M.nextId = Math.max(id, d.nextId || 1); M.macSeq = mx;
+}
+
+/* ---------- description of frames ---------- */
+function describe(f) {
+  if (f.type === 'ARP') {
+    const a = f.p;
+    return { pk: 'arp', proto: 'ARP', src: a.spa, dst: a.tpa, info: a.op === 'request' ? 'Qui a ' + a.tpa + ' ? Répondez à ' + a.spa : a.spa + ' est à l’adresse ' + a.sha };
+  }
+  const p = f.p, base = { src: p.src, dst: p.dst };
+  if (p.proto === 'ICMP') {
+    const d = p.data; let info;
+    if (d.type === 8) info = 'Demande d’écho (ping) id=' + d.id + ' seq=' + d.seq + ' ttl=' + p.ttl;
+    else if (d.type === 0) info = 'Réponse d’écho id=' + d.id + ' seq=' + d.seq + ' ttl=' + p.ttl;
+    else if (d.type === 11) info = 'TTL expiré en transit';
+    else info = d.code === 1 ? 'Hôte de destination inaccessible' : 'Réseau de destination inaccessible';
+    return Object.assign({ pk: 'icmp', proto: 'ICMP', info }, base);
+  }
+  if (p.proto === 'UDP') {
+    const u = p.data, a = u.data;
+    if (a && a.kind === 'DNS') return Object.assign({ pk: 'dns', proto: 'DNS', info: a.qr === 0 ? 'Requête : A ' + a.qname + ' ?' : (a.rcode === 0 ? 'Réponse : ' + a.qname + ' = ' + a.answer : 'Réponse : ' + a.qname + ' introuvable') }, base);
+    if (a && a.kind === 'DHCP') return Object.assign({ pk: 'dhcp', proto: 'DHCP', info: a.msg + (a.yiaddr ? ' (adresse ' + a.yiaddr + ')' : '') }, base);
+    return Object.assign({ pk: 'dns', proto: 'UDP', info: u.sport + ' → ' + u.dport }, base);
+  }
+  const t = p.data;
+  if (t.payload) { const k = t.payload.kind; return Object.assign({ pk: k === 'HTTP' ? 'http' : 'mail', proto: k, info: t.payload.text.split('\r\n')[0] }, base); }
+  return Object.assign({ pk: 'tcp', proto: 'TCP', info: t.sport + ' → ' + t.dport + ' [' + t.flags.join(',') + '] seq=' + t.seq + (t.flags.includes('ACK') ? ' ack=' + t.ack : '') }, base);
+}
+function logFrame(n, iface, dir, frame, note) {
+  const R = rt(n); if (!R) return;
+  const e = { no: ++R.logNo, t: Date.now(), dir, iface: iface.id, frame, d: describe(frame), note: note || '' };
+  R.log.push(e); if (R.log.length > 400) R.log.shift();
+  hooks.log(n, e);
+}
+
+/* ---------- link layer ---------- */
+function transmit(n, iface, frame) {
+  const cab = M.cables.find(c => c.id === iface.cable); if (!cab) return;
+  const fr = clone(frame); fr.vt = (fr.vt || 0) + LINK_MS;
+  logFrame(n, iface, 'out', fr);
+  const end = cab.a.n === n.id && cab.a.i === iface.id ? cab.b : cab.a;
+  Sim.flights.push({ cab: cab.id, from: n.id, t0: Sim.t, t1: Sim.t + FLIGHT_MS, pk: describe(fr).pk });
+  schedule(FLIGHT_MS, () => { const dn = nodeById(end.n); if (dn && rt(dn)) receive(dn, end.i, fr); });
+}
+function receive(n, ifid, frame) {
+  const iface = ifaceById(n, ifid); if (!iface) return;
+  if (n.type === 'switch') { logFrame(n, iface, 'in', frame); return switchReceive(n, iface, frame); }
+  if (n.type === 'modem') {
+    logFrame(n, iface, 'in', frame, n.online ? '' : 'Perdue : le modem n’est pas connecté à Internet');
+    if (n.online) n.ifaces.filter(i => i.id !== iface.id && i.cable != null).forEach(o => transmit(n, o, frame));
+    return;
+  }
+  const mine = frame.dst === iface.mac || frame.dst === BCAST;
+  logFrame(n, iface, 'in', frame, mine ? '' : 'Ignorée : adresse MAC de destination différente');
+  if (!mine) return;
+  if (frame.type === 'ARP') arpReceive(n, iface, frame); else ipReceive(n, iface, frame);
+}
+function switchReceive(sw, iface, frame) {
+  const R = rt(sw); R.macTable[frame.src] = iface.id;
+  const out = sw.ifaces.filter(i => i.id !== iface.id && i.cable != null);
+  const known = R.macTable[frame.dst];
+  if (frame.dst !== BCAST && known != null) { const o = ifaceById(sw, known); if (o && o.id !== iface.id) transmit(sw, o, frame); return; }
+  out.forEach(o => transmit(sw, o, frame));
+}
+
+/* ---------- ARP ---------- */
+function arpRequest(n, iface, tpa, vt) {
+  transmit(n, iface, { src: iface.mac, dst: BCAST, type: 'ARP', vt, p: { op: 'request', sha: iface.mac, spa: iface.ip, tha: '00:00:00:00:00:00', tpa } });
+}
+function arpReceive(n, iface, f) {
+  const a = f.p, R = rt(n); if (!iface.ip) return;
+  if (a.op === 'request') {
+    if (a.tpa !== iface.ip) return;
+    R.arp[a.spa] = { mac: a.sha, iface: iface.id };
+    transmit(n, iface, { src: iface.mac, dst: a.sha, type: 'ARP', vt: f.vt, p: { op: 'reply', sha: iface.mac, spa: iface.ip, tha: a.sha, tpa: a.spa } });
+  } else if (a.tpa === iface.ip) {
+    R.arp[a.spa] = { mac: a.sha, iface: iface.id };
+    const pd = R.pend[a.spa];
+    if (pd) {
+      cancel(pd.timer); delete R.pend[a.spa];
+      const o = ifaceById(n, pd.iface);
+      pd.q.forEach(it => transmit(n, o, { src: o.mac, dst: a.sha, type: 'IP', vt: Math.max(f.vt, it.vt), p: it.pkt }));
+    }
+  }
+}
+
+/* ---------- IP layer ---------- */
+function okIface(i) { return isIp(i.ip) && isMask(i.mask); }
+function routeLookup(n, dst) {
+  for (const i of n.ifaces) if (okIface(i) && sameNet(i.ip, dst, i.mask)) return { iface: i, nh: dst };
+  let best = null;
+  for (const r of n.routes) if (isIp(r.net) && isMask(r.mask) && isIp(r.gw) && sameNet(r.net, dst, r.mask) && (!best || prefix(r.mask) > prefix(best.mask))) best = r;
+  if (best) { const i = n.ifaces.find(x => okIface(x) && sameNet(x.ip, best.gw, x.mask)); if (i) return { iface: i, nh: best.gw }; }
+  if (isHost(n) && isIp(n.gateway)) { const i = n.ifaces.find(x => okIface(x) && sameNet(x.ip, n.gateway, x.mask)); if (i) return { iface: i, nh: n.gateway }; }
+  return null;
+}
+function ipSend(n, dst, proto, data, o) {
+  o = o || {};
+  const r = routeLookup(n, dst); if (!r) return { ok: false, err: 'réseau inaccessible' };
+  const pkt = { src: o.src || r.iface.ip, dst, ttl: o.ttl == null ? 64 : o.ttl, proto, data };
+  sendViaIface(n, r.iface, r.nh, pkt, o.vt || 0, o);
+  return { ok: true };
+}
+function sendViaIface(n, iface, nh, pkt, vt, o) {
+  o = o || {}; const R = rt(n), e = R.arp[nh];
+  if (e && e.iface === iface.id) { transmit(n, iface, { src: iface.mac, dst: e.mac, type: 'IP', vt, p: pkt }); return; }
+  let pd = R.pend[nh];
+  if (!pd) {
+    pd = R.pend[nh] = { q: [], iface: iface.id };
+    arpRequest(n, iface, nh, vt);
+    pd.timer = schedule(8000, () => { const q = R.pend[nh]; delete R.pend[nh]; if (q) q.q.forEach(it => it.fail && it.fail()); });
+  }
+  pd.q.push({ pkt, vt, fail: () => { if (o.onFail) o.onFail(); else if (o.routerFail) icmpError(n, o.routerFail, 3, 1, vt); } });
+}
+function icmpError(n, orig, type, code, vt) {
+  if (orig.proto === 'ICMP' && orig.data.type !== 8 && orig.data.type !== 0) return;
+  const o = orig.proto === 'ICMP' ? { id: orig.data.id, seq: orig.data.seq } : null;
+  ipSend(n, orig.src, 'ICMP', { type, code, orig: o }, { vt });
+}
+function ipReceive(n, iface, f) {
+  const p = f.p, bc = p.dst === '255.255.255.255';
+  if (!iface.ip && !bc) return;
+  const mine = bc || n.ifaces.some(i => i.ip && i.ip === p.dst);
+  if (mine) return deliver(n, iface, p, f.vt);
+  if (n.type !== 'router') return;
+  if (p.ttl <= 1) return icmpError(n, p, 11, 0, f.vt);
+  const r = routeLookup(n, p.dst);
+  if (!r) return icmpError(n, p, 3, 0, f.vt);
+  sendViaIface(n, r.iface, r.nh, Object.assign({}, p, { ttl: p.ttl - 1 }), f.vt, { routerFail: p });
+}
+function deliver(n, iface, p, vt) {
+  if (p.proto === 'ICMP') icmpReceive(n, iface, p, vt);
+  else if (p.proto === 'UDP') udpReceive(n, iface, p, vt);
+  else if (p.proto === 'TCP') tcpReceive(n, iface, p, vt);
+}
+function icmpReceive(n, iface, p, vt) {
+  const d = p.data, R = rt(n);
+  if (d.type === 8) { if (p.dst === '255.255.255.255') return; ipSend(n, p.src, 'ICMP', { type: 0, code: 0, id: d.id, seq: d.seq }, { vt, src: p.dst }); }
+  else if (d.type === 0) { const w = R.icmpWait[d.seq]; if (w) w({ status: 'ok', from: p.src, ttl: p.ttl, vt }); }
+  else { const w = d.orig && R.icmpWait[d.orig.seq]; if (w) w({ status: d.type === 11 ? 'ttl' : 'unreach', from: p.src, vt }); }
+}
+function pingOnce(n, ip, ttl, timeout) {
+  ttl = ttl || 64; timeout = timeout || 12000;
+  return new Promise(res => {
+    const R = rt(n), seq = ++R.icmpSeq; let fin = false, to;
+    const done = r => { if (fin) return; fin = true; delete R.icmpWait[seq]; cancel(to); res(r); };
+    R.icmpWait[seq] = done; to = schedule(timeout, () => done({ status: 'timeout' }));
+    const rl = routeLookup(n, ip);
+    const r = ipSend(n, ip, 'ICMP', { type: 8, code: 0, id: n.id, seq }, { vt: 0, ttl, onFail: () => done({ status: 'unreach', from: rl ? rl.iface.ip : '' }) });
+    if (!r.ok) done({ status: 'noroute' });
+  });
+}
+
+/* ---------- UDP, DNS, DHCP ---------- */
+function udpReceive(n, iface, p, vt) {
+  const d = p.data, R = rt(n);
+  if (d.dport === 53 && n.apps.dns) return dnsServe(n, p, vt);
+  if (d.dport === 67 && n.apps.dhcpd) return dhcpServe(n, iface, p, vt);
+  const h = R.udp[d.dport]; if (h) h(p, vt);
+}
+function dnsServe(n, p, vt) {
+  const q = p.data.data; if (!q || q.kind !== 'DNS' || q.qr !== 0) return;
+  const rec = n.dnsSrv.records.find(r => r.name.trim().toLowerCase() === String(q.qname).toLowerCase() && isIp(r.ip));
+  ipSend(n, p.src, 'UDP', { sport: 53, dport: p.data.sport, data: { kind: 'DNS', id: q.id, qr: 1, qname: q.qname, qtype: 'A', rcode: rec ? 0 : 3, answer: rec ? rec.ip.trim() : null } }, { vt, src: p.dst });
+}
+function resolveName(n, name) {
+  return new Promise(res => {
+    const R = rt(n); if (isIp(name)) return res({ ok: true, ip: name.trim(), vt: 0 });
+    if (!isIp(n.dns)) return res({ ok: false, err: 'aucun serveur DNS configuré' });
+    let sport; do { sport = 49152 + Math.floor(Math.random() * 10000); } while (R.udp[sport]);
+    const id = ++R.dnsId; let fin = false, to;
+    const done = r => { if (fin) return; fin = true; delete R.udp[sport]; cancel(to); res(r); };
+    R.udp[sport] = (p, vt) => { const a = p.data.data; if (a && a.kind === 'DNS' && a.qr === 1 && a.id === id) done(a.rcode === 0 ? { ok: true, ip: a.answer, vt } : { ok: false, err: 'nom de domaine introuvable (NXDOMAIN)', vt }); };
+    to = schedule(9000, () => done({ ok: false, err: 'le serveur DNS ne répond pas (délai dépassé)' }));
+    const r = ipSend(n, n.dns.trim(), 'UDP', { sport, dport: 53, data: { kind: 'DNS', id, qr: 0, qname: name, qtype: 'A' } }, { vt: 0, onFail: () => done({ ok: false, err: 'serveur DNS injoignable' }) });
+    if (!r.ok) done({ ok: false, err: 'serveur DNS inaccessible (' + r.err + ')' });
+  });
+}
+function dhcpServe(n, iface, p, vt) {
+  const d = p.data.data; if (!d || d.kind !== 'DHCP') return;
+  const R = rt(n), S = n.dhcpSrv;
+  if (!isIp(iface.ip) || !isIp(S.start) || !isIp(S.end)) return;
+  const reply = (msg, yi) => transmit(n, iface, { src: iface.mac, dst: d.chaddr, type: 'IP', vt, p: { src: iface.ip, dst: '255.255.255.255', ttl: 64, proto: 'UDP',
+    data: { sport: 67, dport: 68, data: { kind: 'DHCP', msg, xid: d.xid, chaddr: d.chaddr, yiaddr: yi, mask: isMask(S.mask) ? S.mask : '255.255.255.0', gw: S.gw, dns: S.dns, server: iface.ip } } } });
+  if (d.msg === 'DISCOVER') {
+    let ip = R.leases[d.chaddr];
+    if (!ip) { const used = new Set(Object.values(R.leases)); for (let x = ip2n(S.start); x <= ip2n(S.end); x++) { const c = n2ip(x); if (!used.has(c) && c !== iface.ip) { ip = c; break; } } }
+    if (ip) reply('OFFER', ip);
+  } else if (d.msg === 'REQUEST') {
+    if (d.server && d.server !== iface.ip) return;
+    R.leases[d.chaddr] = d.yiaddr; reply('ACK', d.yiaddr);
+  }
+}
+function dhcpRun(n) {
+  return new Promise(res => {
+    const R = rt(n), iface = n.ifaces[0], xid = Math.floor(Math.random() * 0xffffff); let fin = false, to;
+    const done = r => { if (fin) return; fin = true; delete R.udp[68]; cancel(to); res(r); };
+    to = schedule(8000, () => done({ ok: false, err: 'aucun serveur DHCP n’a répondu.' }));
+    const send = (msg, extra, vt) => transmit(n, iface, { src: iface.mac, dst: BCAST, type: 'IP', vt: vt || 0, p: { src: '0.0.0.0', dst: '255.255.255.255', ttl: 64, proto: 'UDP',
+      data: { sport: 68, dport: 67, data: Object.assign({ kind: 'DHCP', msg, xid, chaddr: iface.mac }, extra) } } });
+    R.udp[68] = (p, vt) => {
+      const d = p.data.data; if (!d || d.kind !== 'DHCP' || d.xid !== xid || d.chaddr !== iface.mac) return;
+      if (d.msg === 'OFFER') send('REQUEST', { yiaddr: d.yiaddr, server: d.server }, vt);
+      else if (d.msg === 'ACK') { iface.ip = d.yiaddr; iface.mask = d.mask; n.gateway = d.gw || ''; n.dns = d.dns || ''; hooks.changed(); done({ ok: true, ip: d.yiaddr, vt }); }
+    };
+    send('DISCOVER', {}, 0);
+  });
+}
+
+/* ---------- TCP, HTTP ---------- */
+function rnd() { return 1000 + Math.floor(Math.random() * 90000); }
+function tcpSegSend(n, c, flags, payload, vt, o) {
+  const seg = { sport: c.lport, dport: c.rport, flags, seq: c.seq, ack: flags.includes('ACK') ? c.ack : 0, payload: payload || null };
+  const len = payload ? payload.text.length : 0;
+  ipSend(n, c.rip, 'TCP', seg, Object.assign({ vt, src: c.lip }, o));
+  c.seq += len + (flags.includes('SYN') || flags.includes('FIN') ? 1 : 0);
+}
+function tcpConnect(n, dst, dport) {
+  return new Promise(res => {
+    const R = rt(n), r = routeLookup(n, dst); if (!r) return res({ ok: false, err: 'réseau inaccessible' });
+    let lport; do { lport = 49152 + Math.floor(Math.random() * 16000); } while (R.tcp[dst + ':' + dport + ':' + lport]);
+    const key = dst + ':' + dport + ':' + lport;
+    const c = { lip: r.iface.ip, lport, rip: dst, rport: dport, seq: rnd(), ack: 0, state: 'SYN_SENT', onData: null, resolve: null };
+    R.tcp[key] = c;
+    const fail = err => { cancel(to); delete R.tcp[key]; res({ ok: false, err }); };
+    const to = schedule(10000, () => { if (c.state === 'SYN_SENT') fail('délai de connexion dépassé'); });
+    c.resolve = r2 => { cancel(to); if (!r2.ok) delete R.tcp[key]; res(r2); };
+    tcpSegSend(n, c, ['SYN'], null, 0, { onFail: () => fail('hôte inaccessible') });
+  });
+}
+function tcpClose(n, c, vt) { c.state = 'FIN_WAIT'; tcpSegSend(n, c, ['FIN', 'ACK'], null, vt); }
+function tcpReceive(n, iface, p, vt) {
+  const R = rt(n), s = p.data, f = s.flags, has = x => f.includes(x), key = p.src + ':' + s.sport + ':' + s.dport;
+  let c = R.tcp[key];
+  if (!c) {
+    if (has('SYN') && !has('ACK')) {
+      if (!(tcpService(n, s.dport))) { tcpSegSend(n, { lip: p.dst, lport: s.dport, rip: p.src, rport: s.sport, seq: 0, ack: s.seq + 1 }, ['RST', 'ACK'], null, vt); return; }
+      c = { lip: p.dst, lport: s.dport, rip: p.src, rport: s.sport, seq: rnd(), ack: s.seq + 1, state: 'SYN_RCVD' };
+      R.tcp[key] = c; tcpSegSend(n, c, ['SYN', 'ACK'], null, vt);
+    }
+    return;
+  }
+  if (has('RST')) { if (c.resolve) c.resolve({ ok: false, err: 'connexion refusée (aucun serveur sur ce port)' }); delete R.tcp[key]; return; }
+  if (c.state === 'SYN_SENT' && has('SYN') && has('ACK')) { c.ack = s.seq + 1; c.state = 'ESTABLISHED'; tcpSegSend(n, c, ['ACK'], null, vt); c.resolve({ ok: true, conn: c, vt }); return; }
+  if (c.state === 'SYN_RCVD' && has('ACK')) c.state = 'ESTABLISHED';
+  if (has('FIN')) {
+    c.ack = s.seq + 1;
+    if (c.state === 'FIN_WAIT') { tcpSegSend(n, c, ['ACK'], null, vt); delete R.tcp[key]; return; }
+    c.state = 'LAST_ACK'; tcpSegSend(n, c, ['FIN', 'ACK'], null, vt); return;
+  }
+  if (c.state === 'LAST_ACK' && has('ACK')) { delete R.tcp[key]; return; }
+  if (s.payload) {
+    c.ack = s.seq + s.payload.text.length; tcpSegSend(n, c, ['ACK'], null, vt);
+    if (c.state === 'ESTABLISHED') {
+      if (c.onData) c.onData(s.payload, vt);
+      else if (c.lport === 80 && n.apps.web) webServe(n, c, s.payload, vt);
+      else if (c.lport === 25 && n.apps.mailsrv) smtpServe(n, c, s.payload, vt);
+      else if (c.lport === 110 && n.apps.mailsrv) popServe(n, c, s.payload, vt);
+    }
+  }
+}
+function tcpService(n, port) { return (port === 80 && n.apps.web) || ((port === 25 || port === 110) && n.apps.mailsrv); }
+function webServe(n, c, payload, vt) {
+  const m = /^GET\s+(\S+)/.exec(payload.text); let path = (m ? m[1] : '/').split('?')[0]; if (path === '/index.html') path = '/';
+  const page = n.web.pages.find(pg => pg.path === path);
+  const body = page ? page.content : '<h1>Erreur 404</h1><p>Page introuvable : ' + esc(path) + '</p>';
+  const status = page ? '200 OK' : '404 Not Found';
+  const text = 'HTTP/1.1 ' + status + '\r\nContent-Type: text/html\r\nContent-Length: ' + body.length + '\r\n\r\n' + body;
+  schedule(0, () => tcpSegSend(n, c, ['PSH', 'ACK'], { kind: 'HTTP', text, status, body }, vt));
+}
+async function httpGet(n, url, step) {
+  step = step || (() => {});
+  let u = url.trim(); const sch = /^([a-z]+):\/\//i.exec(u);
+  if (sch) { if (sch[1].toLowerCase() !== 'http') return { ok: false, err: 'seul le protocole http est géré' }; u = u.slice(sch[0].length); }
+  const i = u.search(/[\/?#]/); const host = i < 0 ? u : u.slice(0, i); let path = i < 0 ? '/' : u.slice(i);
+  if (!path.startsWith('/')) path = '/' + path;
+  if (!host) return { ok: false, err: 'adresse vide' };
+  step('Résolution DNS de ' + host + '…');
+  const r = await resolveName(n, host); if (!r.ok) return { ok: false, err: 'DNS : ' + r.err };
+  step('Connexion TCP à ' + r.ip + ' port 80…');
+  const t = await tcpConnect(n, r.ip, 80); if (!t.ok) return { ok: false, err: 'TCP : ' + t.err };
+  const c = t.conn; step('Requête HTTP envoyée, attente de la réponse…');
+  const resp = await new Promise(res => {
+    const to = schedule(10000, () => res(null));
+    c.onData = pl => { cancel(to); res(pl); };
+    tcpSegSend(n, c, ['PSH', 'ACK'], { kind: 'HTTP', text: 'GET ' + path + ' HTTP/1.1\r\nHost: ' + host }, t.vt, { onFail: () => { cancel(to); res(null); } });
+  });
+  tcpClose(n, c, 0);
+  if (!resp) return { ok: false, err: 'pas de réponse du serveur' };
+  return { ok: true, status: resp.status, body: resp.body, host, path, ip: r.ip };
+}
+
+/* ---------- e-mail (SMTP port 25, POP3 port 110) ---------- */
+function mailParse(a) { const m = /^([^@\s<>]+)@([^@\s<>]+)$/.exec((a || '').trim()); return m ? { user: m[1], domain: m[2] } : null; }
+function smtpServe(n, c, pl, vt) {
+  const R = rt(n), S = n.mailSrv, t = pl.text; let reply;
+  if (/^HELO/i.test(t)) reply = '250 ' + (S.domain || n.name) + ' bonjour';
+  else if (/^MAIL FROM:/i.test(t)) {
+    const from = /MAIL FROM:<([^>]*)>/i.exec(t), to = /RCPT TO:<([^>]*)>/i.exec(t), p = to && mailParse(to[1]);
+    const acc = p && p.domain.toLowerCase() === String(S.domain).trim().toLowerCase() && S.accounts.find(a => a.user === p.user);
+    if (!acc) reply = '550 utilisateur inconnu : ' + (to ? to[1] : '?');
+    else {
+      const di = t.indexOf('\r\n\r\n'), body = di < 0 ? '' : t.slice(di + 4).replace(/\r\n\.$/, ''), sm = /^Subject: (.*)$/m.exec(t);
+      (R.mailbox[p.user] = R.mailbox[p.user] || []).push({ from: from ? from[1] : '?', to: to[1], subject: sm ? sm[1] : '', body });
+      reply = '250 message accepté pour ' + to[1];
+    }
+  } else reply = '500 commande non reconnue';
+  schedule(0, () => tcpSegSend(n, c, ['PSH', 'ACK'], { kind: 'SMTP', text: reply }, vt));
+}
+function popServe(n, c, pl, vt) {
+  const R = rt(n), S = n.mailSrv, u = /USER (\S+)/.exec(pl.text), p = /PASS (\S*)/.exec(pl.text);
+  const acc = u && S.accounts.find(a => a.user === u[1] && a.pass === (p ? p[1] : ''));
+  let resp;
+  if (!acc) resp = { kind: 'POP3', text: '-ERR authentification refusée', mails: [] };
+  else {
+    const ms = R.mailbox[acc.user] || []; R.mailbox[acc.user] = [];
+    resp = { kind: 'POP3', mails: ms, text: '+OK ' + ms.length + ' message(s)' + ms.map(m => '\r\n--- message ---\r\nFrom: ' + m.from + '\r\nSubject: ' + m.subject + '\r\n\r\n' + m.body).join('') };
+  }
+  schedule(0, () => tcpSegSend(n, c, ['PSH', 'ACK'], resp, vt));
+}
+function ask(n, c, payload, vt) {
+  return new Promise(res => {
+    const to = schedule(10000, () => res(null));
+    c.onData = pl => { cancel(to); res(pl); };
+    tcpSegSend(n, c, ['PSH', 'ACK'], payload, vt || 0, { onFail: () => { cancel(to); res(null); } });
+  });
+}
+async function mailOpen(n, host, port, step) {
+  if (!host) return { ok: false, err: 'serveur non configuré' };
+  step('Résolution de ' + host + '…'); const r = await resolveName(n, host); if (!r.ok) return { ok: false, err: 'DNS : ' + r.err };
+  step('Connexion TCP à ' + r.ip + ' port ' + port + '…'); const t = await tcpConnect(n, r.ip, port);
+  return t.ok ? t : { ok: false, err: 'TCP : ' + t.err };
+}
+async function sendMail(n, to, subject, body, step) {
+  step = step || (() => {}); const cf = n.mail;
+  if (!mailParse(cf.addr)) return { ok: false, err: 'adresse de l’expéditeur non configurée' };
+  if (!mailParse(to)) return { ok: false, err: 'adresse du destinataire invalide' };
+  const t = await mailOpen(n, (cf.smtp || '').trim(), 25, step); if (!t.ok) return t;
+  const c = t.conn; step('Dialogue SMTP…');
+  let a = await ask(n, c, { kind: 'SMTP', text: 'HELO ' + n.name }, t.vt);
+  if (!a) { tcpClose(n, c, 0); return { ok: false, err: 'pas de réponse du serveur SMTP' }; }
+  a = await ask(n, c, { kind: 'SMTP', text: 'MAIL FROM:<' + cf.addr.trim() + '>\r\nRCPT TO:<' + to.trim() + '>\r\nDATA\r\nSubject: ' + subject + '\r\n\r\n' + body + '\r\n.' }, 0);
+  tcpClose(n, c, 0);
+  if (!a) return { ok: false, err: 'pas de réponse du serveur SMTP' };
+  return /^250/.test(a.text) ? { ok: true, resp: a.text } : { ok: false, err: a.text };
+}
+async function fetchMail(n, step) {
+  step = step || (() => {}); const cf = n.mail;
+  const t = await mailOpen(n, (cf.pop || '').trim(), 110, step); if (!t.ok) return t;
+  const c = t.conn; step('Dialogue POP3…');
+  const a = await ask(n, c, { kind: 'POP3', text: 'USER ' + cf.user + '\r\nPASS ' + cf.pass + '\r\nRETR' }, t.vt);
+  tcpClose(n, c, 0);
+  if (!a) return { ok: false, err: 'pas de réponse du serveur POP3' };
+  return a.text.startsWith('+OK') ? { ok: true, mails: a.mails } : { ok: false, err: a.text };
+}
+
+/* ---------- terminal commands ---------- */
+async function runCommand(n, line, out, tok) {
+  const a = line.trim().split(/\s+/).filter(Boolean); if (!a.length) return;
+  const c = a[0].toLowerCase(), args = a.slice(1), R = rt(n), f = n.ifaces[0];
+  if (c === 'aide' || c === 'help') {
+    ['Commandes disponibles :', '  ipconfig              adresse IP, masque, passerelle, DNS, MAC', '  ping <ip|nom>         tester la communication avec une machine',
+      '  traceroute <ip|nom>   afficher les routeurs traversés', '  host <nom>            interroger le serveur DNS', '  arp                   table ARP (IP et MAC)',
+      '  route                 table de routage', '  dhclient              demander une adresse au serveur DHCP', '  hostname              nom de la machine', '  clear                 effacer l’écran'].forEach(l => out(l, 'dim'));
+    return;
+  }
+  if (c === 'clear' || c === 'cls') return out('\f');
+  if (c === 'hostname') return out(n.name);
+  if (c === 'ipconfig' || c === 'ifconfig') {
+    out('Carte réseau eth0'); out('  Adresse MAC   : ' + f.mac); out('  Adresse IP    : ' + (f.ip || '(non configurée)'));
+    out('  Masque        : ' + (f.ip ? f.mask : '-')); out('  Passerelle    : ' + (n.gateway || '-')); out('  Serveur DNS   : ' + (n.dns || '-')); return;
+  }
+  if (c === 'arp') {
+    const k = Object.keys(R.arp); if (!k.length) return out('Table ARP vide.', 'dim');
+    out('Adresse IP        Adresse MAC'); k.forEach(ip => out(ip.padEnd(18) + R.arp[ip].mac)); return;
+  }
+  if (c === 'route') {
+    out('Destination      Masque           Passerelle       Interface');
+    if (okIface(f)) out(netOf(f.ip, f.mask).padEnd(17) + f.mask.padEnd(17) + '*'.padEnd(17) + f.ip);
+    if (isIp(n.gateway)) out('0.0.0.0'.padEnd(17) + '0.0.0.0'.padEnd(17) + n.gateway.padEnd(17) + f.ip);
+    return;
+  }
+  if (c === 'dhclient') {
+    out('Demande d’adresse au serveur DHCP…'); const r = await dhcpRun(n);
+    return tok.cancel ? 0 : r.ok ? out('Adresse ' + r.ip + ' obtenue.', 'ok') : out('Échec : ' + r.err, 'err');
+  }
+  if (c === 'host' || c === 'nslookup') {
+    if (!args[0]) return out('Usage : host <nom>');
+    const r = await resolveName(n, args[0]); if (tok.cancel) return;
+    return r.ok ? out(args[0] + ' a pour adresse IP ' + r.ip, 'ok') : out('host : ' + args[0] + ' : ' + r.err, 'err');
+  }
+  if (c === 'ping' || c === 'traceroute' || c === 'tracert') {
+    const target = args[0]; if (!target) return out('Usage : ' + c + ' <adresse IP ou nom>');
+    let ip = target;
+    if (!isIp(target)) { const r = await resolveName(n, target); if (tok.cancel) return; if (!r.ok) return out(c + ' : ' + target + ' : ' + r.err, 'err'); ip = r.ip; }
+    const label = target !== ip ? target + ' (' + ip + ')' : ip;
+    if (c === 'ping') {
+      out('PING ' + label + ' : 4 paquets de 32 octets'); let ok = 0; const ts = [];
+      for (let s = 1; s <= 4; s++) {
+        const r = await pingOnce(n, ip); if (tok.cancel) return;
+        if (r.status === 'ok') { ok++; ts.push(r.vt); out('Réponse de ' + r.from + ' : octets=32 temps=' + r.vt + ' ms TTL=' + r.ttl, 'ok'); }
+        else if (r.status === 'noroute') { out('ping : réseau de destination inaccessible (pas de route, vérifiez la passerelle)', 'err'); return; }
+        else if (r.status === 'unreach') out('Réponse de ' + (r.from || n.ifaces[0].ip) + ' : hôte de destination inaccessible', 'err');
+        else if (r.status === 'ttl') out('Réponse de ' + r.from + ' : TTL expiré en transit', 'err');
+        else out('Délai d’attente dépassé.', 'err');
+        if (s < 4) { await sleep(1000); if (tok.cancel) return; }
+      }
+      out('--- statistiques ping pour ' + ip + ' ---');
+      out('4 envoyés, ' + ok + ' reçus, ' + Math.round((4 - ok) * 25) + ' % de perte' + (ts.length ? ', temps moyen ' + Math.round(ts.reduce((x, y) => x + y, 0) / ts.length) + ' ms' : ''));
+      return;
+    }
+    out('Route vers ' + label + ', 12 sauts maximum :');
+    for (let ttl = 1; ttl <= 12; ttl++) {
+      const r = await pingOnce(n, ip, ttl, 6000); if (tok.cancel) return; const k = String(ttl).padStart(2);
+      if (r.status === 'noroute') return out('Réseau inaccessible.', 'err');
+      if (r.status === 'timeout') out(k + '  *  pas de réponse', 'dim');
+      else out(k + '  ' + (r.from || '?').padEnd(16) + r.vt + ' ms', r.status === 'ok' ? 'ok' : '');
+      if (r.status === 'ok' || r.status === 'unreach') break;
+    }
+    return out('Trace terminée.', 'dim');
+  }
+  out('Commande inconnue : ' + a[0] + '. Tapez « aide ».', 'err');
+}
+
+/* ---------- simulation lifecycle ---------- */
+function newRT() {
+  return { arp: {}, pend: {}, log: [], logNo: 0, udp: {}, tcp: {}, icmpWait: {}, icmpSeq: 0, dnsId: 0, macTable: {}, leases: {}, mailbox: {}, inbox: [],
+    term: { lines: [], hist: [], hi: 0, busy: false, tok: null }, br: { url: '', status: '', html: null } };
+}
+function startSim() {
+  Sim.t = 0; Sim.queue = []; Sim.flights = []; Sim.running = true; Sim.paused = false;
+  for (const k in RT) delete RT[k];
+  for (const n of M.nodes) { RT[n.id] = newRT(); if (isHost(n) && n.dhcp) { const i = n.ifaces[0]; i.ip = ''; i.mask = ''; n.gateway = ''; n.dns = ''; } }
+  M.nodes.filter(n => isHost(n) && n.dhcp).forEach((n, i) => schedule(300 + i * 200, () => {
+    dhcpRun(n).then(r => hooks.print(n, r.ok ? 'DHCP : adresse ' + r.ip + ' obtenue' : 'DHCP : ' + r.err, r.ok ? 'ok' : 'err'));
+  }));
+  hooks.changed();
+}
+hooks.print = () => {};
+function stopSim() {
+  Sim.running = false; Sim.queue = []; Sim.flights = [];
+  for (const k in RT) delete RT[k];
+}
+
+/* ---------- examples ---------- */
+function note(x, y, text) { M.notes.push({ id: M.nextId++, x, y, text }); }
+function host(name, type, x, y, ip, gw, sw, mask) {
+  const n = mkNode(type, x, y); n.name = name; n.ifaces[0].ip = ip; if (mask) n.ifaces[0].mask = mask; n.gateway = gw || ''; connect(n, sw); return n;
+}
+/* liaison directe entre deux ordinateurs (schéma de comparaison : une carte réseau par câble) */
+function meshLink(a, b) {
+  const port = n => { const f = n.ifaces[0]; if (f.cable == null) return f; const i = mkIface(); n.ifaces.push(i); return i; };
+  const ia = port(a), ib = port(b), c = { id: M.nextId++, a: { n: a.id, i: ia.id }, b: { n: b.id, i: ib.id } };
+  ia.cable = c.id; ib.cable = c.id; M.cables.push(c); return c;
+}
+function exampleCables() {
+  resetModel();
+  const ring = (cx, cy, r, k) => [Math.round(cx + r * Math.cos((-90 + 60 * k) * Math.PI / 180)), Math.round(cy + r * Math.sin((-90 + 60 * k) * Math.PI / 180))];
+  const A = [0, 1, 2, 3, 4, 5].map(k => { const p = ring(190, 290, 125, k), n = mkNode('pc', p[0], p[1]); n.name = 'A' + (k + 1); return n; });
+  for (let i = 0; i < 6; i++) for (let j = i + 1; j < 6; j++) meshLink(A[i], A[j]);
+  const sw = mkNode('switch', 620, 290); sw.name = 'Switch';
+  for (let k = 0; k < 6; k++) { const p = ring(620, 290, 130, k); host('B' + (k + 1), 'pc', p[0], p[1], '192.168.0.' + (k + 1), '', sw); }
+  note(40, 14, 'Sans commutateur');
+  note(40, 500, 'Combien de câbles ?');
+  note(440, 14, 'Avec un commutateur');
+  note(440, 500, 'Combien de câbles ?');
+}
+function exampleLan() {
+  resetModel();
+  const sw = mkNode('switch', 440, 250); sw.name = 'Switch';
+  host('PC 1', 'pc', 200, 120, '192.168.0.1', '', sw); host('PC 2', 'pc', 200, 380, '192.168.0.2', '', sw);
+  host('PC 3', 'pc', 680, 120, '192.168.0.3', '', sw); host('Portable', 'laptop', 680, 380, '192.168.0.4', '', sw);
+  note(150, 30, 'Réseau local 192.168.0.0/24. Essayez : ping 192.168.0.3');
+}
+function exampleRouter() {
+  resetModel();
+  const A = mkNode('switch', 250, 240); A.name = 'Switch A'; const B = mkNode('switch', 610, 240); B.name = 'Switch B';
+  const R = mkNode('router', 430, 240); R.name = 'Routeur';
+  host('PC 1', 'pc', 90, 110, '192.168.1.1', '192.168.1.254', A); host('PC 2', 'pc', 90, 370, '192.168.1.2', '192.168.1.254', A);
+  host('PC 3', 'pc', 780, 110, '192.168.2.1', '192.168.2.254', B); host('PC 4', 'pc', 780, 370, '192.168.2.2', '192.168.2.254', B);
+  const c1 = connect(R, A).cable, c2 = connect(R, B).cable;
+  ifaceFor(R, c1).ip = '192.168.1.254'; ifaceFor(R, c2).ip = '192.168.2.254';
+  note(60, 30, 'Deux réseaux reliés par un routeur. Depuis PC 1 : ping 192.168.2.1 puis traceroute 192.168.2.1');
+}
+function exampleInternet() {
+  resetModel();
+  const L = mkNode('switch', 260, 240); L.name = 'Switch LAN'; const W = mkNode('switch', 620, 240); W.name = 'Switch serveurs';
+  const R = mkNode('router', 440, 240); R.name = 'Routeur';
+  const cli = mkNode('pc', 90, 110); cli.name = 'PC élève'; cli.dhcp = true; connect(cli, L);
+  const dh = host('Serveur DHCP', 'pc', 90, 370, '192.168.1.1', '192.168.1.254', L);
+  dh.apps.dhcpd = true; dh.dhcpSrv = { start: '192.168.1.100', end: '192.168.1.150', mask: '255.255.255.0', gw: '192.168.1.254', dns: '10.0.0.53' };
+  const dn = host('Serveur DNS', 'pc', 790, 110, '10.0.0.53', '10.0.0.254', W); dn.apps.dns = true;
+  dn.dnsSrv.records = [{ name: 'www.exemple.fr', ip: '10.0.0.80' }, { name: 'snt.exemple.fr', ip: '10.0.0.80' }];
+  const ws = host('Serveur web', 'pc', 790, 370, '10.0.0.80', '10.0.0.254', W); ws.apps.web = true;
+  ws.web.pages = [
+    { path: '/', content: '<h1>Bienvenue sur exemple.fr</h1>\n<p>Ce site est hébergé sur le serveur web du réseau.</p>\n<p><a href="/snt">Page de SNT</a></p>' },
+    { path: '/snt', content: '<h1>SNT : Internet</h1>\n<ul>\n<li>Le DNS traduit un nom en adresse IP.</li>\n<li>Le routeur transmet les paquets d’un réseau à l’autre.</li>\n</ul>\n<p><a href="/">Retour à l’accueil</a></p>' }];
+  const c1 = connect(R, L).cable, c2 = connect(R, W).cable;
+  ifaceFor(R, c1).ip = '192.168.1.254'; ifaceFor(R, c2).ip = '10.0.0.254'; ifaceFor(R, c2).mask = '255.255.255.0';
+  note(60, 30, 'Lancez la simulation, ouvrez PC élève (adresse reçue par DHCP) puis son navigateur : http://www.exemple.fr');
+}
+function exampleMail() {
+  resetModel();
+  const sw = mkNode('switch', 440, 250); sw.name = 'Switch';
+  const al = host('Alice', 'pc', 200, 120, '192.168.0.1', '', sw), bo = host('Bob', 'laptop', 680, 120, '192.168.0.2', '', sw);
+  const sv = host('Serveur e-mail', 'pc', 440, 430, '192.168.0.10', '', sw);
+  sv.apps.mailsrv = true; sv.mailSrv = { domain: 'exemple.fr', accounts: [{ user: 'alice', pass: 'azerty' }, { user: 'bob', pass: 'qwerty' }] };
+  al.apps.mail = true; al.mail = { addr: 'alice@exemple.fr', smtp: '192.168.0.10', pop: '192.168.0.10', user: 'alice', pass: 'azerty' };
+  bo.apps.mail = true; bo.mail = { addr: 'bob@exemple.fr', smtp: '192.168.0.10', pop: '192.168.0.10', user: 'bob', pass: 'qwerty' };
+  note(100, 30, 'Simulation : ouvrez Alice, onglet E-mail, envoyez un message à bob@exemple.fr, puis relevez le courrier de Bob.');
+}
+function exampleModem() {
+  resetModel();
+  const sA = mkNode('switch', 170, 250); sA.name = 'Switch A'; const sB = mkNode('switch', 720, 250); sB.name = 'Switch B';
+  const mA = mkNode('modem', 340, 250); mA.name = 'Modem A'; const mB = mkNode('modem', 550, 250); mB.name = 'Modem B';
+  host('PC 1', 'pc', 90, 110, '192.168.5.1', '', sA); host('PC 2', 'pc', 90, 390, '192.168.5.2', '', sA);
+  host('PC 3', 'pc', 800, 110, '192.168.5.3', '', sB); host('PC 4', 'pc', 800, 390, '192.168.5.4', '', sB);
+  connect(sA, mA); connect(mA, mB); connect(mB, sB);
+  note(90, 30, 'Deux sites reliés par une liaison de modems (Internet). Essayez ping 192.168.5.3 depuis PC 1, puis déconnectez un modem.');
+}
+/*ENGINE-END*/
+/*UI-START*/
+const $ = (s, r) => (r || document).querySelector(s);
+const KEY = 'filius-en-ligne-v1';
+const UI = { mode: 'design', tool: 'select', sel: null, link: null, simNode: null, tab: null, drag: null, exSel: null, exTbody: null, termOut: null, termNode: null };
+const els = { svg: $('#svg'), panel: $('#panel'), palette: $('#palette'), hint: $('#hint'), scroller: $('#scroller'), work: $('#work') };
+
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3200);
+}
+let saveT = null;
+function persist() { try { localStorage.setItem(KEY, serialize()); } catch (e) { /* stockage indisponible */ } }
+function touch() { renderCanvas(); clearTimeout(saveT); saveT = setTimeout(persist, 400); }
+
+/* ---------- icons ---------- */
+function iconSVG(t) {
+  if (t === 'pc') return '<rect class="ic-body" x="-24" y="-28" width="48" height="34" rx="3"/><rect class="ic-screen" x="-20" y="-24" width="40" height="26" rx="1.5"/><path class="ic-body" d="M-6 6h12l3 10h-18z"/><rect class="ic-body" x="-18" y="16" width="36" height="5" rx="2"/>';
+  if (t === 'laptop') return '<rect class="ic-body" x="-21" y="-26" width="42" height="30" rx="3"/><rect class="ic-screen" x="-17" y="-22" width="34" height="22" rx="1.5"/><path class="ic-body" d="M-28 8h56l-5 9h-46z"/>';
+  if (t === 'switch') return '<rect class="ic-body" x="-31" y="-12" width="62" height="26" rx="4"/>' + [0, 1, 2, 3, 4, 5].map(i => '<rect x="' + (-24 + i * 9) + '" y="-2" width="6" height="9" rx="1" fill="var(--screen)" stroke="var(--node-stroke)" stroke-width="1"/><circle class="ic-led" cx="' + (-21 + i * 9) + '" cy="-7" r="1.6"/>').join('');
+  if (t === 'router') return '<circle class="ic-body" r="25"/><path class="ic-acc" d="M-15 0H15M10 -5l5 5-5 5M-10 -5l-5 5 5 5M0 -15V15M-5 -10l5-5 5 5M-5 10l5 5 5-5"/>';
+  if (t === 'modem') return '<rect class="ic-body" x="-27" y="-10" width="54" height="22" rx="4"/><path class="ic-acc" d="M-12 -10V-24M0 -10V-28M12 -10V-24"/><circle class="ic-led" cx="-17" cy="1" r="2"/><circle class="ic-led" cx="-9" cy="1" r="2"/><circle class="ic-led" cx="-1" cy="1" r="2"/><path class="ic-acc" d="M7 1h14"/>';
+  if (t === 'cable') return '<path class="ic-acc" d="M-26 18C-12 18 -12 -18 2 -18H20"/><rect class="ic-body" x="18" y="-24" width="12" height="12" rx="2"/><rect class="ic-body" x="-32" y="12" width="12" height="12" rx="2"/>';
+  if (t === 'select') return '<path class="ic-body" d="M-14 -22l0 38 10-9 8 15 8-4-8-15 14-1z"/>';
+  if (t === 'delete') return '<path class="ic-acc" d="M-16 -16L16 16M16 -16L-16 16" style="stroke:var(--bad)"/>';
+  if (t === 'note') return '<path class="ic-body" d="M-22 -24h36l10 10v38h-46z" style="fill:var(--note-bg);stroke:var(--note-line)"/><path class="ic-acc" d="M-14 -8h26M-14 2h26M-14 12h16" style="stroke:var(--note-fg)"/>';
+  return '';
+}
+function iconBox(t, size) { return '<svg viewBox="-34 -34 68 68" width="' + size + '" height="' + size + '" aria-hidden="true">' + iconSVG(t) + '</svg>'; }
+
+/* ---------- palette ---------- */
+const TOOLS_DESIGN = [['select', 'Sélection'], ['cable', 'Câble'], ['sep'], ['pc', 'Ordinateur'], ['laptop', 'Portable'], ['switch', 'Commutateur'], ['router', 'Routeur'], ['modem', 'Modem'], ['sep'], ['delete', 'Supprimer']];
+const TOOLS_DOC = [['select', 'Sélection'], ['note', 'Note'], ['sep'], ['delete', 'Supprimer']];
+function renderPalette() {
+  const p = els.palette; p.innerHTML = ''; els.palette.hidden = UI.mode === 'sim'; if (UI.mode === 'sim') return;
+  for (const t of (UI.mode === 'doc' ? TOOLS_DOC : TOOLS_DESIGN)) {
+    if (t[0] === 'sep') { p.append(h('div', { class: 'sep' })); continue; }
+    const b = h('button', { type: 'button', class: 'tool' + (UI.tool === t[0] ? ' on' : ''), 'aria-pressed': UI.tool === t[0] ? 'true' : 'false', 'aria-label': t[1], html: iconBox(t[0], 34) + '<span>' + t[1] + '</span>',
+      onclick: () => { UI.tool = UI.tool === t[0] && t[0] !== 'select' ? 'select' : t[0]; UI.link = null; renderPalette(); renderHint(); renderCanvas(); } });
+    p.append(b);
+  }
+}
+function renderHint() {
+  const m = UI.mode, t = UI.tool; let s;
+  if (m === 'sim') s = Sim.paused ? 'Simulation en pause. Cliquez sur un appareil pour ouvrir son poste.' : 'Cliquez sur un appareil pour ouvrir son poste : terminal, navigateur, serveurs, échanges de données.';
+  else if (t === 'cable') s = UI.link ? 'Cliquez sur le deuxième appareil à relier à ' + UI.link.name + '.' : 'Cliquez sur le premier appareil, puis sur le second pour tirer un câble.';
+  else if (t === 'delete') s = 'Cliquez sur un appareil, un câble ou une note pour le supprimer.';
+  else if (t === 'note') s = 'Cliquez dans la zone de travail pour poser une note.';
+  else if (TYPES[t]) s = 'Cliquez dans la zone de travail pour placer : ' + TYPES[t] + '.';
+  else s = m === 'doc' ? 'Sélectionnez une note pour la modifier ou la déplacer.' : 'Glissez les appareils pour les placer. Cliquez pour modifier leurs réglages.';
+  els.hint.textContent = s;
+}
+
+/* ---------- canvas ---------- */
+function labelLines(n) {
+  if (n.type === 'switch') return [];
+  if (n.type === 'modem') return [n.online ? 'connecté' : 'déconnecté'];
+  if (isHost(n)) { const i = n.ifaces[0]; if (n.ifaces.length > 1) return [n.ifaces.length + ' cartes réseau']; return [i.ip ? i.ip : (n.dhcp ? 'DHCP' : 'sans adresse')]; }
+  return n.ifaces.filter(i => i.ip).slice(0, 4).map(i => i.ip + (isMask(i.mask) ? '/' + prefix(i.mask) : ''));
+}
+function noteSVG(nt) {
+  const lines = String(nt.text || '').split('\n'), w = Math.max(60, Math.max(...lines.map(l => l.length)) * 7 + 20), hh = lines.length * 17 + 14;
+  const on = UI.sel && UI.sel.k === 'note' && UI.sel.id === nt.id;
+  return '<g class="note" data-k="note" data-id="' + nt.id + '" transform="translate(' + nt.x + ',' + nt.y + ')"><rect width="' + w + '" height="' + hh + '" rx="4"' + (on ? ' style="stroke:var(--accent);stroke-width:2"' : '') + '/>' +
+    lines.map((l, i) => '<text x="10" y="' + (21 + i * 17) + '">' + esc(l) + '</text>').join('') + '</g>';
+}
+function renderCanvas() {
+  let s = '<defs><pattern id="g" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="var(--grid)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(#g)"/>';
+  for (const nt of M.notes) s += noteSVG(nt);
+  for (const c of M.cables) {
+    const a = nodeById(c.a.n), b = nodeById(c.b.n); if (!a || !b) continue;
+    const on = UI.sel && UI.sel.k === 'cable' && UI.sel.id === c.id, co = 'x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '"';
+    s += '<g data-k="cable" data-id="' + c.id + '"><line class="hit" ' + co + '/><line class="cab' + (on ? ' on' : '') + '" ' + co + '/></g>';
+  }
+  for (const n of M.nodes) {
+    const on = (UI.sel && UI.sel.k === 'node' && UI.sel.id === n.id) || (UI.mode === 'sim' && UI.simNode === n.id), lk = UI.link === n, ls = labelLines(n);
+    s += '<g class="node' + (lk ? ' lk' : '') + '" data-k="node" data-id="' + n.id + '" transform="translate(' + n.x + ',' + n.y + ')"><rect x="-40" y="-38" width="80" height="' + (84 + ls.length * 13) + '" fill="transparent"/>' +
+      (on || lk ? '<rect class="selbox" x="-40" y="-38" width="80" height="' + (84 + ls.length * 13) + '" rx="8"/>' : '') + iconSVG(n.type) +
+      '<text class="nlabel" y="40" text-anchor="middle">' + esc(n.name) + '</text>' + ls.map((l, i) => '<text class="nip" y="' + (54 + i * 13) + '" text-anchor="middle">' + esc(l) + '</text>').join('') + '</g>';
+  }
+  s += '<g id="fl" pointer-events="none"></g>';
+  els.svg.innerHTML = s;
+}
+function drawFlights() {
+  const g = $('#fl'); if (!g) return; let s = '';
+  for (const f of Sim.flights) {
+    const cab = M.cables.find(c => c.id === f.cab); if (!cab) continue;
+    const a = nodeById(f.from), bn = nodeById(cab.a.n === f.from ? cab.b.n : cab.a.n); if (!a || !bn) continue;
+    const p = Math.min(1, Math.max(0, (Sim.t - f.t0) / (f.t1 - f.t0)));
+    s += '<circle cx="' + (a.x + (bn.x - a.x) * p).toFixed(1) + '" cy="' + (a.y + (bn.y - a.y) * p).toFixed(1) + '" r="7" fill="var(--c-' + f.pk + ')" stroke="var(--canvas)" stroke-width="2"/>';
+  }
+  g.innerHTML = s;
+}
+let last = 0;
+function loop(ts) {
+  const dt = ts - last; last = ts;
+  if (Sim.running && !Sim.paused) advance(Math.min(dt, 100) * Sim.speed);
+  if (Sim.running) drawFlights();
+  requestAnimationFrame(loop);
+}
+
+/* ---------- pointer interaction ---------- */
+function svgPt(e) { const r = els.svg.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+function selObj(s) { if (!s) return null; return s.k === 'node' ? nodeById(s.id) : s.k === 'note' ? M.notes.find(x => x.id === s.id) : M.cables.find(x => x.id === s.id); }
+function deleteSel(s) {
+  s = s || UI.sel; if (!s) return;
+  const o = selObj(s); if (!o) return;
+  if (s.k === 'node') removeNode(o); else if (s.k === 'cable') removeCable(o); else M.notes = M.notes.filter(x => x !== o);
+  if (UI.sel && UI.sel.id === s.id) UI.sel = null;
+  touch(); renderPanel();
+}
+function select(s) { UI.sel = s; renderCanvas(); renderPanel(); }
+els.svg.addEventListener('pointerdown', e => {
+  if (e.button > 0) return;
+  const t = e.target.closest('[data-k]'), k = t && t.dataset.k, id = t && +t.dataset.id, pt = svgPt(e), m = UI.mode;
+  if (m === 'sim') {
+    if (k === 'node') { UI.simNode = id; UI.tab = null; renderCanvas(); renderPanel(); }
+    else { UI.drag = { pan: true, sx: e.clientX, sy: e.clientY, l: els.scroller.scrollLeft, t: els.scroller.scrollTop, moved: false }; try { els.svg.setPointerCapture(e.pointerId); } catch (x) { /* ignoré */ } }
+    return;
+  }
+  const tool = UI.tool;
+  if (TYPES[tool] && m === 'design') {
+    const n = mkNode(tool, Math.max(50, Math.round(pt.x)), Math.max(45, Math.round(pt.y)));
+    UI.tool = 'select'; UI.sel = { k: 'node', id: n.id }; renderPalette(); renderHint(); touch(); renderPanel(); return;
+  }
+  if (tool === 'note' && m === 'doc') {
+    const nt = { id: M.nextId++, x: Math.max(10, Math.round(pt.x)), y: Math.max(10, Math.round(pt.y)), text: 'Note' };
+    M.notes.push(nt); UI.tool = 'select'; UI.sel = { k: 'note', id: nt.id }; renderPalette(); renderHint(); touch(); renderPanel(); return;
+  }
+  if (tool === 'delete') { if (t) deleteSel({ k, id }); return; }
+  if (tool === 'cable' && m === 'design') {
+    if (k !== 'node') return;
+    const n = nodeById(id);
+    if (!UI.link) { UI.link = n; } else {
+      const r = connect(UI.link, n); UI.link = null;
+      if (r.err) toast(r.err); else { toast('Câble ajouté'); touch(); }
+    }
+    renderHint(); renderCanvas(); return;
+  }
+  const canGrab = (k === 'node' && m === 'design') || (k === 'note' && m === 'doc');
+  if (canGrab) {
+    const o = selObj({ k, id }); UI.sel = { k, id };
+    UI.drag = { k, id, ox: pt.x - o.x, oy: pt.y - o.y, sx: pt.x, sy: pt.y, moved: false };
+    try { els.svg.setPointerCapture(e.pointerId); } catch (x) { /* ignoré */ }
+    renderCanvas(); renderPanel(); return;
+  }
+  if (k === 'cable' && m === 'design') { select({ k, id }); return; }
+  UI.drag = { pan: true, sx: e.clientX, sy: e.clientY, l: els.scroller.scrollLeft, t: els.scroller.scrollTop, moved: false, clear: true };
+  try { els.svg.setPointerCapture(e.pointerId); } catch (x) { /* ignoré */ }
+});
+els.svg.addEventListener('pointermove', e => {
+  const d = UI.drag; if (!d) return;
+  if (d.pan) {
+    const dx = e.clientX - d.sx, dy = e.clientY - d.sy;
+    if (Math.abs(dx) + Math.abs(dy) > 4) d.moved = true;
+    els.scroller.scrollLeft = d.l - dx; els.scroller.scrollTop = d.t - dy; return;
+  }
+  const pt = svgPt(e); if (Math.abs(pt.x - d.sx) + Math.abs(pt.y - d.sy) > 3) d.moved = true;
+  if (!d.moved) return;
+  const o = selObj({ k: d.k, id: d.id }); if (!o) return;
+  o.x = Math.min(1360, Math.max(d.k === 'node' ? 45 : 5, Math.round(pt.x - d.ox))); o.y = Math.min(860, Math.max(d.k === 'node' ? 40 : 5, Math.round(pt.y - d.oy)));
+  renderCanvas();
+});
+function endDrag() {
+  const d = UI.drag; UI.drag = null; if (!d) return;
+  if (d.pan) { if (!d.moved && d.clear && UI.sel) { UI.sel = null; renderCanvas(); renderPanel(); } return; }
+  if (d.moved) touch();
+}
+els.svg.addEventListener('pointerup', endDrag);
+els.svg.addEventListener('pointercancel', endDrag);
+document.addEventListener('keydown', e => {
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && UI.sel && UI.mode !== 'sim') { e.preventDefault(); deleteSel(); }
+  if (e.key === 'Escape') { UI.tool = 'select'; UI.link = null; renderPalette(); renderHint(); renderCanvas(); }
+});
+
+/* ---------- modes ---------- */
+function syncChrome() {
+  document.querySelectorAll('[data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === UI.mode ? 'true' : 'false'));
+  $('#simctl').hidden = UI.mode !== 'sim';
+  els.work.className = 'inner work mode-' + UI.mode;
+  renderPalette(); renderHint();
+}
+function setMode(m) {
+  if (UI.mode === m) return;
+  if (UI.mode === 'sim') stopSim();
+  UI.mode = m; UI.tool = 'select'; UI.link = null; UI.sel = null; UI.simNode = null; UI.tab = null;
+  if (m === 'sim') { startSim(); syncPauseUI(); }
+  syncChrome(); renderCanvas(); renderPanel();
+}
+function syncPauseUI() {
+  $('#bPause').textContent = Sim.paused ? 'Reprendre' : 'Pause';
+  const l = $('#live'); l.textContent = Sim.paused ? 'En pause' : 'Simulation en cours'; l.classList.toggle('paused', Sim.paused); renderHint();
+}
+document.querySelectorAll('[data-mode]').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+$('#bPause').addEventListener('click', () => { Sim.paused = !Sim.paused; syncPauseUI(); });
+$('#speed').addEventListener('change', e => { Sim.speed = +e.target.value; });
+$('#bReset').addEventListener('click', () => { startSim(); Sim.speed = +$('#speed').value; syncPauseUI(); renderCanvas(); renderPanel(); toast('Simulation redémarrée'); });
+hooks.changed = () => { renderCanvas(); };
+hooks.print = (n, t, c) => termPrint(n, t, c);
+hooks.log = (n, e) => { if (UI.exTbody && UI.simNode === n.id && UI.tab === 'ech') exAppend(n, e); };
+/* ---------- cours : sections 1 à 6 ---------- */
+const COURSE = [];
+COURSE.push({ id: 'reseau', t: 'Réseaux et Internet', h: `
+<p>Un <b>réseau informatique</b> est un ensemble de machines (ordinateurs, serveurs, imprimantes, téléphones…) reliées entre elles pour échanger des données.</p>
+<h3>Réseau local et Internet</h3>
+<ul>
+<li>Un <b>réseau local</b> (LAN, <i>Local Area Network</i>) relie des machines proches : une salle informatique, un lycée, une maison. Dans la page, c’est un commutateur avec des ordinateurs.</li>
+<li><b>Internet</b> est un <b>réseau de réseaux</b> : des millions de réseaux locaux et de réseaux d’opérateurs reliés par des <b>routeurs</b>. Personne n’en est le propriétaire unique. Un particulier y accède par un fournisseur d’accès (FAI).</li>
+</ul>
+<h3>Client et serveur</h3>
+<ul>
+<li>Un <b>serveur</b> offre un service : afficher des pages (serveur web), traduire des noms (serveur DNS), distribuer des adresses (serveur DHCP), gérer le courrier (serveur de messagerie).</li>
+<li>Un <b>client</b> demande ce service : navigateur web, client de messagerie, terminal…</li>
+<li>Un serveur est souvent un ordinateur ordinaire sur lequel on a installé un logiciel serveur. C’est ce que montre la case « Logiciels installés » de la page.</li>
+</ul>
+<h3>Paquets et protocoles</h3>
+<ul>
+<li>Les données sont découpées en petits blocs appelés <b>paquets</b>. Chaque paquet porte l’adresse de la source et celle de la destination, comme une lettre porte deux adresses.</li>
+<li>Un <b>protocole</b> est un ensemble de règles qui fixent comment deux machines dialoguent (dans quel ordre, avec quel format). Internet repose sur la famille de protocoles <b>TCP/IP</b>.</li>
+</ul>
+<h3>Débit et latence</h3>
+<p>Le <b>débit</b> est la quantité de données transmises par seconde (en bit/s). La <b>latence</b> est le temps qu’un message met pour aller d’un point à un autre (en ms). Le « temps » affiché par <code>ping</code> mesure la latence d’un aller-retour.</p>
+<div class="retain"><b>À retenir.</b> Internet = réseau de réseaux. Les machines communiquent avec des protocoles, en échangeant des paquets, selon le modèle client / serveur.</div>` });
+
+COURSE.push({ id: 'equip', t: 'Les équipements', h: `
+<table class="ctable"><thead><tr><th>Équipement</th><th>Rôle</th><th>Ce qu’il lit</th><th>Dans la page</th></tr></thead><tbody>
+<tr><td><b>Ordinateur, portable</b> (hôte)</td><td>Utilise les services du réseau ou en fournit.</td><td>Tout</td><td>Une carte réseau : une adresse MAC, une adresse IP.</td></tr>
+<tr><td><b>Commutateur</b> (<i>switch</i>)</td><td>Relie les machines d’un même réseau local.</td><td>Adresses MAC</td><td>Table de commutation. Pas d’adresse IP.</td></tr>
+<tr><td><b>Routeur</b></td><td>Relie des réseaux différents et choisit le chemin des paquets.</td><td>Adresses IP</td><td>Une interface (une adresse IP) par réseau relié. Table de routage.</td></tr>
+<tr><td><b>Modem</b></td><td>Adapte les signaux à la ligne qui relie le réseau à l’extérieur.</td><td>Rien (il relaie)</td><td>Deux prises. Case « Connecté à Internet ».</td></tr>
+<tr><td><b>Câble</b></td><td>Transporte les signaux (cuivre, fibre).</td><td>-</td><td>Une bille colorée = une trame en transit.</td></tr>
+</tbody></table>
+<h3>Comment un commutateur apprend</h3>
+<ol>
+<li>Une trame arrive par une prise. Le commutateur note : « cette adresse MAC source est derrière cette prise ».</li>
+<li>Si l’adresse MAC de destination est dans sa table, il envoie la trame uniquement sur la bonne prise.</li>
+<li>Sinon, ou si la trame est une diffusion, il la copie sur toutes les autres prises. Au début, sa table est vide : il diffuse beaucoup.</li>
+</ol>
+<p>Observez-le : en simulation, cliquez sur le commutateur, onglet « Table de commutation », avant et après un ping.</p>
+<h3>Commutateur ou routeur ?</h3>
+<p>Le commutateur travaille <b>à l’intérieur</b> d’un réseau (adresses MAC). Le routeur travaille <b>entre</b> les réseaux (adresses IP). Une machine ne peut parler à une machine d’un autre réseau qu’en passant par un routeur.</p>
+<div class="retain"><b>À retenir.</b> Commutateur = adresses MAC, un seul réseau. Routeur = adresses IP, relie plusieurs réseaux. Modem = interface avec la ligne.</div>` });
+
+COURSE.push({ id: 'cables', t: 'Pourquoi un commutateur ? Compter les câbles', h: `
+<h3>La situation</h3>
+<p>On veut relier <b>m</b> ordinateurs pour que chacun puisse parler à tous les autres. Deux solutions :</p>
+<ul>
+<li><b>Sans commutateur</b> : un câble entre chaque paire d’ordinateurs. Chaque ordinateur est relié à <b>m − 1</b> autres : il lui faut <b>m − 1 cartes réseau</b>.</li>
+<li><b>Avec commutateur</b> : un câble par ordinateur, vers le commutateur. Il suffit d’<b>une</b> carte réseau par ordinateur.</li>
+</ul>
+<p>Pour m = 6, le schéma de l’exemple « Pourquoi un commutateur ? » montre <b>15 câbles</b> d’un côté et <b>6</b> de l’autre.</p>
+
+<h3>Essayez avec le nombre de machines de votre choix</h3>
+<div class="widget" data-w="cables"></div>
+
+<h3>Les données</h3>
+<table class="ctable"><thead><tr><th>Machines (m)</th><th>n = m − 1</th><th>Sans commutateur : n(n+1)/2</th><th>Avec commutateur : m</th></tr></thead><tbody>
+<tr><td>2</td><td>1</td><td>1</td><td>2</td></tr><tr><td>3</td><td>2</td><td>3</td><td>3</td></tr><tr><td>4</td><td>3</td><td>6</td><td>4</td></tr>
+<tr><td>5</td><td>4</td><td>10</td><td>5</td></tr><tr><td><b>6</b></td><td><b>5</b></td><td><b>15</b></td><td><b>6</b></td></tr><tr><td>7</td><td>6</td><td>21</td><td>7</td></tr>
+<tr><td>8</td><td>7</td><td>28</td><td>8</td></tr><tr><td>10</td><td>9</td><td>45</td><td>10</td></tr><tr><td>20</td><td>19</td><td>190</td><td>20</td></tr>
+<tr><td>50</td><td>49</td><td>1 225</td><td>50</td></tr><tr><td>100</td><td>99</td><td>4 950</td><td>100</td></tr>
+</tbody></table>
+<p>Sans commutateur, le nombre de câbles augmente <b>beaucoup plus vite</b> que le nombre de machines (environ comme son carré). Avec un commutateur, il augmente <b>comme le nombre de machines</b>.</p>
+
+<h3>La formule</h3>
+<p>Notons <b>m</b> le nombre de machines et <b>n = m − 1</b>. Le nombre de câbles sans commutateur est :</p>
+<p class="formula">S<sub>n</sub> = 1 + 2 + 3 + … + n = <b>n × (n + 1) / 2</b>, soit m × (m − 1) / 2.</p>
+<p>Voici trois façons de la démontrer.</p>
+
+<h3>Preuve 1 : on ajoute les machines une à une</h3>
+<ul>
+<li>La 1<sup>re</sup> machine est seule : 0 câble.</li>
+<li>La 2<sup>e</sup> est reliée à la 1<sup>re</sup> : 1 nouveau câble.</li>
+<li>La 3<sup>e</sup> doit être reliée aux 2 premières : 2 nouveaux câbles.</li>
+<li>La k<sup>e</sup> doit être reliée aux k − 1 précédentes : k − 1 nouveaux câbles.</li>
+</ul>
+<p>Total pour m machines : 0 + 1 + 2 + … + (m − 1) = 1 + 2 + … + n = S<sub>n</sub>. Pour 6 machines : 1 + 2 + 3 + 4 + 5 = 15.</p>
+
+<h3>Preuve 2 : l’astuce de Gauss (on écrit la somme deux fois)</h3>
+<p>On écrit S<sub>n</sub> dans un sens, puis dans l’autre, et on additionne colonne par colonne. Exemple avec n = 5 :</p>
+<table class="ctable narrow"><tbody>
+<tr><td><b>S</b></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+<tr><td><b>S</b></td><td>5</td><td>4</td><td>3</td><td>2</td><td>1</td></tr>
+<tr><td><b>Somme</b></td><td>6</td><td>6</td><td>6</td><td>6</td><td>6</td></tr>
+</tbody></table>
+<p>En général, chaque colonne vaut n + 1 et il y a n colonnes. Donc 2 × S<sub>n</sub> = n × (n + 1), et <b>S<sub>n</sub> = n × (n + 1) / 2</b>. Pour n = 5 : 2 × S = 5 × 6 = 30, donc S = 15.</p>
+
+<h3>Preuve 3 : le lemme des poignées de main</h3>
+<p>Dans un groupe, si chaque personne serre la main de certaines autres, alors :</p>
+<p class="formula">somme des nombres de mains serrées par chacun = 2 × nombre de poignées de main.</p>
+<p>Chaque poignée de main fait intervenir deux personnes, donc elle est comptée <b>deux fois</b> dans la somme. En informatique, une machine est un <b>sommet</b>, un câble est une <b>arête</b>, et le nombre de câbles d’une machine s’appelle son <b>degré</b> : la somme des degrés vaut le double du nombre de câbles.</p>
+<p>Application : sans commutateur, chacune des m machines a m − 1 câbles. La somme des degrés est donc m × (m − 1). Si C est le nombre de câbles :</p>
+<p class="formula">2 × C = m × (m − 1), donc C = m × (m − 1) / 2 = n × (n + 1) / 2.</p>
+<p>Pour 6 machines : C = 6 × 5 / 2 = 15. On retrouve la même formule, avec une preuve qui marche aussi pour tout autre réseau (un réseau où seulement certaines machines sont reliées).</p>
+<details class="defi"><summary>S’entraîner : une classe de 28 élèves où chacun serre la main de tous les autres</summary><p>28 × 27 / 2 = 378 poignées de main, ou avec n = 27 : 27 × 28 / 2 = 378.</p></details>
+
+<h3>À partir de quand le commutateur gagne-t-il ?</h3>
+<p>Il faut comparer m (avec commutateur) et m(m − 1)/2 (sans). Le commutateur utilise moins de câbles quand m &lt; m(m − 1)/2, c’est-à-dire quand 2 &lt; m − 1, donc <b>m &gt; 3</b>. Pour 3 machines, c’est égal (3 câbles). Pour 4 machines, 6 câbles contre 4. Pour 6 machines : 15 contre 6.</p>
+
+<h3>Ce que le commutateur apporte, et ses limites</h3>
+<ul>
+<li><b>Moins de câbles et de cartes réseau</b> : une seule carte par ordinateur.</li>
+<li><b>Ajout facile</b> : une nouvelle machine = un nouveau câble (et non pas un câble vers chacune des machines existantes).</li>
+<li><b>Il sait où envoyer chaque trame</b> grâce à sa table d’adresses MAC (voir « Les équipements »).</li>
+<li><b>Limites</b> : si le commutateur tombe en panne, plus personne ne communique ; un commutateur a un nombre limité de prises (on relie alors plusieurs commutateurs entre eux).</li>
+</ul>
+<p>La page ne simule que le réseau avec commutateur. Un vrai réseau « tout relié à tout » demanderait une adresse différente pour chaque câble, ce qui est une autre raison de ne pas l’utiliser.</p>
+<div class="retain"><b>À retenir.</b> Sans commutateur : m machines → m(m − 1)/2 câbles = n(n + 1)/2 avec n = m − 1, et m − 1 cartes réseau par machine. Avec commutateur : m câbles et 1 carte par machine. Preuves : ajout une à une, astuce de Gauss, lemme des poignées de main (somme des degrés = 2 × nombre de câbles).</div>` });
+
+COURSE.push({ id: 'couches', t: 'Les couches et l’encapsulation', h: `
+<p>Pour faire communiquer des machines très différentes, on découpe le travail en <b>couches</b>. Chaque couche rend un service à la couche du dessus et ajoute ses informations dans un <b>en-tête</b>. On retrouve ce découpage dans l’onglet « Échanges » : cliquez sur une ligne pour voir les en-têtes.</p>
+<table class="ctable"><thead><tr><th>Couche</th><th>Rôle</th><th>Protocoles vus</th><th>Information ajoutée</th><th>Nom du bloc</th></tr></thead><tbody>
+<tr><td><b>Application</b></td><td>Le service que veut l’utilisateur.</td><td>HTTP, DNS, DHCP, SMTP, POP3</td><td>Requête, réponse</td><td>Message</td></tr>
+<tr><td><b>Transport</b></td><td>Dialogue entre deux programmes.</td><td>TCP, UDP</td><td>Ports (source, destination)</td><td>Segment</td></tr>
+<tr><td><b>Internet</b></td><td>Acheminer d’un réseau à l’autre.</td><td>IP, ICMP</td><td>Adresses IP, TTL</td><td>Paquet</td></tr>
+<tr><td><b>Liaison</b></td><td>Livrer sur le réseau local.</td><td>Ethernet, ARP</td><td>Adresses MAC</td><td>Trame</td></tr>
+</tbody></table>
+<p>ARP est à la frontière entre les couches liaison et internet. La page l’affiche avec la couche internet.</p>
+<h3>Encapsulation</h3>
+<p>Quand un message part, il descend les couches et chacune <b>enveloppe</b> ce qui vient du dessus :</p>
+<div class="encap" aria-label="Schéma d’encapsulation"><span class="e4">MAC</span><span class="e3">IP</span><span class="e2">TCP</span><span class="e1">HTTP : GET /</span></div>
+<ul>
+<li>L’application produit un message (par exemple « GET / »).</li>
+<li>Le transport ajoute les <b>ports</b>.</li>
+<li>La couche internet ajoute les <b>adresses IP</b>.</li>
+<li>La liaison ajoute les <b>adresses MAC</b> et envoie la trame sur le câble.</li>
+</ul>
+<p>À l’arrivée, chaque couche lit son en-tête, le retire et remonte le reste. Un commutateur ne lit que la couche liaison, un routeur remonte jusqu’à la couche internet.</p>
+<div class="retain"><b>À retenir.</b> Application → Transport → Internet → Liaison. Chaque couche ajoute son en-tête : ports, adresses IP, adresses MAC.</div>` });
+
+COURSE.push({ id: 'mac', t: 'Adresse MAC', h: `
+<ul>
+<li>Une <b>adresse MAC</b> identifie une <b>carte réseau</b>. Elle est écrite sur 48 bits, soit 6 octets en hexadécimal : <code>9A:3C:1F:07:B2:44</code>.</li>
+<li>Elle est attribuée à la fabrication de la carte et ne dépend pas du réseau où l’on branche la machine.</li>
+<li>Elle sert à livrer une trame <b>sur le réseau local</b>, d’une machine à la suivante.</li>
+<li><code>FF:FF:FF:FF:FF:FF</code> est l’adresse de <b>diffusion</b> : tout le monde sur le réseau local reçoit la trame et la lit. Les autres machines ignorent une trame dont l’adresse MAC de destination n’est pas la leur (la page l’indique « Ignorée »).</li>
+</ul>
+<h3>Ce qui change et ce qui ne change pas</h3>
+<table class="ctable"><thead><tr><th></th><th>Adresse IP</th><th>Adresse MAC</th></tr></thead><tbody>
+<tr><td><b>Identifie</b></td><td>Une interface dans un réseau</td><td>Une carte réseau</td></tr>
+<tr><td><b>Pendant le trajet</b></td><td>Source et destination restent les mêmes, de bout en bout</td><td>Changent à chaque réseau traversé : chaque routeur remplace les adresses MAC</td></tr>
+<tr><td><b>Portée</b></td><td>Tout Internet</td><td>Le réseau local</td></tr>
+</tbody></table>
+<p>Pour s’en convaincre : dans l’exemple « Deux réseaux et un routeur », un ping de PC 1 vers PC 3 a pour adresse IP de destination celle de PC 3, mais pour adresse MAC de destination celle du routeur.</p>
+<div class="retain"><b>À retenir.</b> MAC = locale, liée à la carte. IP = globale, liée au réseau. Pour sortir du réseau local, la trame est adressée en MAC au routeur.</div>` });
+
+COURSE.push({ id: 'ip', t: 'Adresse IP', h: `
+<ul>
+<li>Une adresse <b>IPv4</b> est un nombre de <b>32 bits</b>, écrit en 4 <b>octets</b> séparés par des points : <code>192.168.0.1</code>. Chaque octet est un nombre de 0 à 255 (8 bits).</li>
+<li>Elle est attribuée à une <b>interface</b>, pas à une machine : un routeur a plusieurs adresses, une par réseau relié.</li>
+<li>Elle se compose de deux parties : le <b>numéro du réseau</b> et le <b>numéro de la machine</b> dans ce réseau. Le <b>masque</b> indique où est la frontière (section suivante).</li>
+<li>Avec 32 bits, il y a environ 4,3 milliards d’adresses (2<sup>32</sup>). Elles ne suffisent plus : <b>IPv6</b> utilise 128 bits (par exemple <code>2001:db8::1</code>).</li>
+</ul>
+<h3>Passer du décimal au binaire</h3>
+<p>Un octet a 8 bits. Chaque bit vaut une puissance de 2 : 128, 64, 32, 16, 8, 4, 2, 1. Pour écrire 77 : 64 + 8 + 4 + 1, donc <code>01001101</code>. Essayez avec l’outil :</p>
+<div class="widget" data-w="octet"></div>
+<h3>Adresses privées et adresses spéciales</h3>
+<table class="ctable"><thead><tr><th>Adresse ou plage</th><th>Signification</th></tr></thead><tbody>
+<tr><td><code>10.0.0.0</code> à <code>10.255.255.255</code></td><td rowspan="3">Adresses <b>privées</b> : utilisables dans les réseaux locaux, non routées sur Internet. Les exemples de la page utilisent 192.168.x.x et 10.0.0.x.</td></tr>
+<tr><td><code>172.16.0.0</code> à <code>172.31.255.255</code></td></tr>
+<tr><td><code>192.168.0.0</code> à <code>192.168.255.255</code></td></tr>
+<tr><td><code>127.0.0.1</code></td><td>« Moi-même » (boucle locale) : sert à tester sa propre machine.</td></tr>
+<tr><td><code>0.0.0.0</code></td><td>« Aucune adresse » : celle d’une machine qui n’a pas encore d’adresse (par exemple au début du DHCP).</td></tr>
+<tr><td><code>255.255.255.255</code></td><td>Diffusion vers tout le réseau local.</td></tr>
+</tbody></table>
+<h3>Statique ou dynamique</h3>
+<ul>
+<li><b>Statique</b> : on saisit l’adresse à la main (comme dans l’onglet de conception). Les serveurs ont une adresse fixe pour être toujours trouvés.</li>
+<li><b>Dynamique</b> : un serveur DHCP l’attribue automatiquement (voir la section DHCP).</li>
+</ul>
+<div class="retain"><b>À retenir.</b> IPv4 = 4 octets (32 bits). Une adresse = réseau + machine. 192.168.x.x, 10.x.x.x et 172.16 à 172.31 sont privées.</div>` });
+
+COURSE.push({ id: 'masque', t: 'Le masque de sous-réseau', h: `
+<h3>1. À quoi sert un masque ?</h3>
+<p>Une adresse IP contient deux informations collées l’une à l’autre : <b>le réseau</b> et <b>la machine</b>. Comme dans une adresse postale : « rue des Lilas » (le réseau) et « n° 12 » (la machine). Mais dans l’adresse IP, rien n’indique où finit le nom de la rue et où commence le numéro. C’est le <b>masque</b> qui le dit.</p>
+<p>Le masque ne se transmet pas à part avec les paquets : chaque machine connaît <b>son propre masque</b> et s’en sert pour décider si la destination est dans son réseau ou non.</p>
+
+<h3>2. Le masque en binaire</h3>
+<p>Un masque s’écrit comme une adresse (4 octets), mais il se lit en binaire : <b>une suite de 1 suivie d’une suite de 0</b>.</p>
+<ul>
+<li>Les bits à <b>1</b> correspondent à la <b>partie réseau</b>.</li>
+<li>Les bits à <b>0</b> correspondent à la <b>partie machine</b>.</li>
+</ul>
+<div class="bits" aria-label="Exemple de masque 255.255.255.0">
+<div><span class="lbl">Adresse</span><span class="n">11000000.10101000.00000000.</span><span class="m">00000001</span><span class="dec">192.168.0.1</span></div>
+<div><span class="lbl">Masque</span><span class="n">11111111.11111111.11111111.</span><span class="m">00000000</span><span class="dec">255.255.255.0</span></div>
+</div>
+<p>Ici, 24 bits à 1 : les 3 premiers octets (192.168.0) désignent le réseau, le dernier octet (1) désigne la machine.</p>
+<p><b>Un masque valide ne peut pas avoir de 1 après un 0.</b> Les valeurs possibles pour un octet du masque sont donc seulement :</p>
+<table class="ctable narrow"><thead><tr><th>Binaire</th><th>00000000</th><th>10000000</th><th>11000000</th><th>11100000</th><th>11110000</th><th>11111000</th><th>11111100</th><th>11111110</th><th>11111111</th></tr></thead><tbody>
+<tr><td><b>Décimal</b></td><td>0</td><td>128</td><td>192</td><td>224</td><td>240</td><td>248</td><td>252</td><td>254</td><td>255</td></tr>
+<tr><td><b>Bits à 1</b></td><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+</tbody></table>
+<p>Donc <code>255.255.255.100</code> ou <code>255.0.255.0</code> ne sont <b>pas</b> des masques valides : la page colore le champ en rouge.</p>
+
+<h3>3. Notation décimale ou notation /n (CIDR)</h3>
+<p>Au lieu d’écrire 255.255.255.0, on peut écrire <b>/24</b> : le nombre de bits à 1. On écrit alors <code>192.168.0.1/24</code>. La page affiche cette notation sous les routeurs.</p>
+<table class="ctable"><thead><tr><th>Notation</th><th>Masque</th><th>Bits à 0 (machine)</th><th>Adresses attribuables aux machines</th></tr></thead><tbody>
+<tr><td>/8</td><td>255.0.0.0</td><td>24</td><td>16 777 214</td></tr>
+<tr><td>/16</td><td>255.255.0.0</td><td>16</td><td>65 534</td></tr>
+<tr><td><b>/24</b></td><td><b>255.255.255.0</b></td><td>8</td><td><b>254</b></td></tr>
+<tr><td>/25</td><td>255.255.255.128</td><td>7</td><td>126</td></tr>
+<tr><td>/26</td><td>255.255.255.192</td><td>6</td><td>62</td></tr>
+<tr><td>/27</td><td>255.255.255.224</td><td>5</td><td>30</td></tr>
+<tr><td>/28</td><td>255.255.255.240</td><td>4</td><td>14</td></tr>
+<tr><td>/29</td><td>255.255.255.248</td><td>3</td><td>6</td></tr>
+<tr><td>/30</td><td>255.255.255.252</td><td>2</td><td>2</td></tr>
+</tbody></table>
+<p>Nombre d’adresses attribuables = 2<sup>(bits à 0)</sup> − 2. Pourquoi « − 2 » ? Voir le point 5.</p>
+
+<h3>4. Trouver le réseau d’une adresse : le « ET » bit à bit</h3>
+<p>L’<b>adresse du réseau</b> s’obtient en faisant un <b>ET logique</b> bit à bit entre l’adresse et le masque (1 ET 1 = 1, tout le reste donne 0). Concrètement : on garde la partie réseau et on remplace la partie machine par des 0.</p>
+<p><b>Exemple : 192.168.1.77 avec le masque 255.255.255.192 (/26).</b></p>
+<div class="bits">
+<div><span class="lbl">Adresse</span><span class="n">11000000.10101000.00000001.01</span><span class="m">001101</span><span class="dec">192.168.1.77</span></div>
+<div><span class="lbl">Masque</span><span class="n">11111111.11111111.11111111.11</span><span class="m">000000</span><span class="dec">255.255.255.192</span></div>
+<div><span class="lbl">Réseau (ET)</span><span class="n">11000000.10101000.00000001.01</span><span class="m">000000</span><span class="dec">192.168.1.64</span></div>
+</div>
+<p><b>Méthode rapide quand le masque coupe un octet</b> : on regarde l’octet concerné (ici le 4<sup>e</sup>, valeur 192 dans le masque).</p>
+<ol>
+<li>Taille d’un bloc = 256 − 192 = <b>64</b>.</li>
+<li>Les réseaux commencent aux multiples de 64 : 0, 64, 128, 192.</li>
+<li>77 est entre 64 et 127 : le réseau commence à <b>64</b>.</li>
+</ol>
+<p>Résultat : réseau <code>192.168.1.64/26</code>, de 192.168.1.64 à 192.168.1.127.</p>
+<p>Pour les masques en /8, /16 et /24, c’est encore plus simple : on compare des octets entiers.</p>
+
+<h3>5. Adresse du réseau, adresse de diffusion, adresses attribuables</h3>
+<p>Dans un réseau, deux adresses sont réservées :</p>
+<ul>
+<li>l’<b>adresse du réseau</b> : tous les bits « machine » à <b>0</b> (ici 192.168.1.64). Elle désigne le réseau lui-même ;</li>
+<li>l’<b>adresse de diffusion</b> (<i>broadcast</i>) : tous les bits « machine » à <b>1</b> (ici 192.168.1.127). Elle désigne toutes les machines du réseau.</li>
+</ul>
+<p>Les adresses attribuables aux machines sont celles qui sont entre les deux : de <b>192.168.1.65</b> à <b>192.168.1.126</b>, soit 64 − 2 = <b>62</b> adresses. C’est la raison du « − 2 ».</p>
+<p>Pour un /24 (par exemple 192.168.0.0/24) : réseau = 192.168.0.0, diffusion = 192.168.0.255, machines de 192.168.0.1 à 192.168.0.254.</p>
+
+<h3>6. Deux machines sont-elles dans le même réseau ?</h3>
+<p>Il faut calculer l’adresse réseau de <b>chacune</b>, avec le masque, puis comparer. Si elles sont identiques, c’est le même réseau.</p>
+<table class="ctable"><thead><tr><th>Machine A</th><th>Machine B</th><th>Masque</th><th>Réseau de A</th><th>Réseau de B</th><th>Même réseau ?</th></tr></thead><tbody>
+<tr><td>192.168.0.1</td><td>192.168.0.200</td><td>/24</td><td>192.168.0.0</td><td>192.168.0.0</td><td><b>Oui</b></td></tr>
+<tr><td>192.168.0.1</td><td>192.168.1.1</td><td>/24</td><td>192.168.0.0</td><td>192.168.1.0</td><td><b>Non</b></td></tr>
+<tr><td>192.168.0.1</td><td>192.168.1.1</td><td>/16</td><td>192.168.0.0</td><td>192.168.0.0</td><td><b>Oui</b></td></tr>
+<tr><td>192.168.0.1</td><td>192.168.0.200</td><td>/25</td><td>192.168.0.0</td><td>192.168.0.128</td><td><b>Non</b></td></tr>
+</tbody></table>
+<p>Retenez : <b>la réponse dépend du masque</b>. Les mêmes deux adresses peuvent être dans le même réseau ou non selon le masque utilisé.</p>
+
+<h3>7. Ce que fait une machine avant d’envoyer un paquet</h3>
+<ol>
+<li>Elle applique <b>son masque</b> à sa propre adresse et à l’adresse de destination.</li>
+<li><b>Même réseau ?</b> Elle envoie directement : ARP pour trouver l’adresse MAC de la destination, puis trame vers cette destination.</li>
+<li><b>Réseau différent ?</b> Elle envoie le paquet à sa <b>passerelle</b> : ARP pour trouver l’adresse MAC de la passerelle, puis trame vers le routeur.</li>
+<li><b>Pas de passerelle ?</b> Échec : « réseau de destination inaccessible ». Rien n’est envoyé.</li>
+</ol>
+<p>La passerelle doit elle-même être <b>dans le même réseau</b> que la machine, sinon celle-ci ne peut pas l’atteindre directement.</p>
+
+<h3>8. Erreurs fréquentes</h3>
+<ul>
+<li><b>« Le masque est une adresse. »</b> Non : il ne désigne aucune machine, il indique la frontière réseau / machine.</li>
+<li><b>« Deux adresses qui commencent par 192.168 sont dans le même réseau. »</b> Non : cela dépend du masque (voir le tableau ci-dessus).</li>
+<li><b>« 255 = réseau, 0 = machine, donc il n’y a que trois masques. »</b> Vrai seulement pour /8, /16, /24. Les autres masques coupent un octet (192, 224, 240…).</li>
+<li><b>« On peut utiliser toutes les adresses d’un réseau. »</b> Non : l’adresse du réseau et l’adresse de diffusion sont réservées.</li>
+<li><b>« Chaque machine peut avoir le masque de son choix. »</b> Les machines d’un même réseau doivent avoir le <b>même masque</b>, sinon elles ne sont pas d’accord sur qui est dans le réseau.</li>
+<li><b>Confondre masque et passerelle.</b> 255.255.255.0 est le masque ; 192.168.0.254 (par exemple) est la passerelle.</li>
+<li><b>Oublier que le résultat dépend de l’octet coupé.</b> Pour 192.168.1.77/26, le réseau n’est pas 192.168.1.0 mais 192.168.1.64.</li>
+</ul>
+
+<h3>9. Calculatrice de masque</h3>
+<p>Saisissez une adresse et un masque (en <code>255.255.255.192</code> ou en <code>/26</code>). Les bits du réseau sont en couleur, ceux de la machine en gris. Ajoutez une seconde adresse pour tester si elle est dans le même réseau.</p>
+<div class="widget" data-w="mask"></div>
+
+<h3>10. Expérience dans la simulation</h3>
+<p>Chargez l’exemple <b>Réseau local</b>. En Conception :</p>
+<ol>
+<li>Cliquez sur <b>PC 1</b> et changez son masque en <code>255.255.255.128</code> (/25). PC 1 pense que son réseau va de 192.168.0.0 à 192.168.0.127.</li>
+<li>Cliquez sur <b>PC 3</b> et changez son adresse en <code>192.168.0.130</code>. PC 3 garde le masque /24.</li>
+<li>En Simulation, depuis PC 1 : <code>ping 192.168.0.130</code>. Résultat : « réseau de destination inaccessible ». Pour PC 1, 192.168.0.130 est <b>dans un autre réseau</b> (128 à 255) et il n’a pas de passerelle.</li>
+<li>Depuis PC 3 : <code>ping 192.168.0.1</code>. Résultat : délai dépassé. PC 3 (en /24) envoie bien la demande et PC 1 la reçoit, mais PC 1 ne peut pas répondre : pour lui, PC 3 est hors de son réseau.</li>
+</ol>
+<p>Un seul masque erroné suffit à casser la communication, parfois dans un seul sens. Remettez ensuite <code>255.255.255.0</code> sur PC 1 : tout refonctionne.</p>
+<div class="retain"><b>À retenir.</b> Le masque sépare la partie réseau (bits à 1) de la partie machine (bits à 0). Réseau = adresse ET masque. Même réseau si les deux adresses réseau sont identiques. Attribuables = 2<sup>bits à 0</sup> − 2.</div>` });
+/* ---------- cours : sections 7 à fin, outils, affichage ---------- */
+COURSE.push({ id: 'routage', t: 'Passerelle et routage', h: `
+<ul>
+<li>La <b>passerelle par défaut</b> d’une machine est l’adresse IP du routeur de son réseau. C’est vers elle que partent tous les paquets destinés à un autre réseau.</li>
+<li>Un <b>routeur</b> reçoit un paquet, regarde l’adresse IP de destination et consulte sa <b>table de routage</b> pour savoir par quelle interface et vers quel routeur suivant (« prochain saut ») l’envoyer.</li>
+</ul>
+<h3>La table de routage</h3>
+<table class="ctable"><thead><tr><th>Réseau</th><th>Masque</th><th>Passerelle</th><th>Signification</th></tr></thead><tbody>
+<tr><td>192.168.1.0</td><td>255.255.255.0</td><td>direct</td><td>Réseau relié directement à une interface du routeur.</td></tr>
+<tr><td>10.0.0.0</td><td>255.0.0.0</td><td>192.168.1.253</td><td>Route statique : pour ce réseau, passer par un autre routeur.</td></tr>
+<tr><td>0.0.0.0</td><td>0.0.0.0</td><td>192.168.1.254</td><td><b>Route par défaut</b> : « tout le reste » (par exemple vers Internet).</td></tr>
+</tbody></table>
+<ul>
+<li>Les réseaux <b>directement reliés</b> sont ajoutés automatiquement.</li>
+<li>Quand plusieurs routes conviennent, on choisit la plus <b>précise</b> (celle dont le masque a le plus de 1). La route par défaut (/0) est donc utilisée en dernier.</li>
+<li>Si aucune route ne convient, le paquet est abandonné et le routeur renvoie une erreur ICMP « réseau inaccessible ».</li>
+<li>Dans l’Internet réel, les tables sont remplies automatiquement par des protocoles de routage. Dans la page, vous les remplissez à la main.</li>
+</ul>
+<h3>Le TTL (<i>Time To Live</i>)</h3>
+<p>Chaque paquet IP porte un compteur, le <b>TTL</b>. Chaque routeur le diminue de 1. À 0, le paquet est détruit et le routeur prévient l’émetteur (ICMP « TTL expiré »). Cela évite qu’un paquet tourne indéfiniment dans une boucle. Quand la réponse à votre ping arrive avec TTL=63, c’est qu’elle a traversé un routeur depuis 64.</p>
+<h3>Traceroute</h3>
+<p><code>traceroute</code> envoie des paquets avec un TTL de 1, puis 2, puis 3… Chaque routeur qui détruit un paquet renvoie « TTL expiré » : on découvre ainsi les routeurs un par un, jusqu’à la destination.</p>
+<div class="retain"><b>À retenir.</b> Passerelle = porte de sortie du réseau local. Routeur = table de routage. Route par défaut = « tout le reste ». TTL = durée de vie, décrémentée à chaque routeur.</div>` });
+
+COURSE.push({ id: 'arp', t: 'ARP', h: `
+<p>Sur un réseau local, une trame est adressée avec des adresses <b>MAC</b>, mais on ne connaît au départ que l’adresse <b>IP</b> de la destination. Le protocole <b>ARP</b> fait le lien.</p>
+<ol>
+<li><b>Requête ARP</b> (diffusion, MAC de destination FF:FF:FF:FF:FF:FF) : « Qui a l’adresse IP 192.168.0.3 ? Répondez à 192.168.0.1. »</li>
+<li>Toutes les machines reçoivent la question. Seule celle qui possède cette adresse IP répond.</li>
+<li><b>Réponse ARP</b> (adressée à la machine qui a demandé) : « L’adresse 192.168.0.3 est à la MAC 9A:3C:… »</li>
+<li>La machine garde la correspondance dans sa <b>table ARP</b> (commande <code>arp</code>) pour ne pas reposer la question.</li>
+</ol>
+<ul>
+<li>ARP ne sort jamais du réseau local : pour joindre une machine d’un autre réseau, on fait un ARP pour trouver la MAC de la <b>passerelle</b>.</li>
+<li>Dans la page, vous voyez ARP au début du premier ping, puis plus du tout (la table est remplie). Si personne ne répond, la machine abandonne et ping indique que l’hôte est inaccessible.</li>
+<li>Dans un vrai système, les entrées de la table ARP expirent au bout de quelques minutes. Ce n’est pas simulé.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> ARP : de l’adresse IP à l’adresse MAC, sur le réseau local, par une question en diffusion.</div>` });
+
+COURSE.push({ id: 'icmp', t: 'ICMP : ping et messages d’erreur', h: `
+<p><b>ICMP</b> est un protocole de diagnostic et de messages d’erreur, utilisé par les machines et les routeurs. Il appartient à la couche internet : ses messages sont portés directement par des paquets IP, sans ports.</p>
+<table class="ctable"><thead><tr><th>Type</th><th>Message</th><th>Quand ?</th></tr></thead><tbody>
+<tr><td>8</td><td>Demande d’écho</td><td>Envoyé par <code>ping</code>.</td></tr>
+<tr><td>0</td><td>Réponse d’écho</td><td>La machine interrogée répond.</td></tr>
+<tr><td>3</td><td>Destination inaccessible</td><td>Un routeur n’a pas de route pour la destination.</td></tr>
+<tr><td>11</td><td>TTL expiré</td><td>Un routeur détruit un paquet dont le TTL est tombé à 0.</td></tr>
+</tbody></table>
+<h3>Lire un résultat de ping</h3>
+<ul>
+<li><code>Réponse de 10.0.0.80 : temps=8 ms TTL=63</code> : la machine répond. Le TTL montre combien de routeurs la réponse a traversés.</li>
+<li><code>Délai d’attente dépassé</code> : aucune réponse (machine éteinte, câble ou modem coupé, ou réponse impossible à renvoyer, comme dans l’expérience du masque).</li>
+<li><code>réseau de destination inaccessible</code> : la machine ne sait même pas où envoyer le paquet (pas de route, pas de passerelle).</li>
+</ul>
+<p>Attention : le « temps » affiché par la page est une <b>durée virtuelle</b> de la simulation (1 ms par câble traversé). Il sert à comparer des trajets, pas à mesurer une vraie durée.</p>
+<div class="retain"><b>À retenir.</b> Ping = demande d’écho (8) et réponse (0). ICMP signale aussi les erreurs : destination inaccessible (3), TTL expiré (11).</div>` });
+
+COURSE.push({ id: 'dhcp', t: 'DHCP', h: `
+<p>Configurer à la main l’adresse, le masque, la passerelle et le DNS de chaque machine serait long et source d’erreurs. Le <b>DHCP</b> (<i>Dynamic Host Configuration Protocol</i>) fait ce travail automatiquement.</p>
+<h3>Les 4 messages (DORA)</h3>
+<ol>
+<li><b>DISCOVER</b> : le client, qui n’a pas encore d’adresse (source 0.0.0.0), crie en diffusion (255.255.255.255) : « Y a-t-il un serveur DHCP ? »</li>
+<li><b>OFFER</b> : le serveur propose une adresse libre de sa plage.</li>
+<li><b>REQUEST</b> : le client demande officiellement cette adresse.</li>
+<li><b>ACK</b> : le serveur confirme. Le client configure alors son adresse, son <b>masque</b>, sa <b>passerelle</b> et son serveur <b>DNS</b>.</li>
+</ol>
+<ul>
+<li>Le DHCP utilise UDP, avec les ports <b>67</b> (serveur) et <b>68</b> (client).</li>
+<li>Le serveur est configuré avec une <b>plage</b> d’adresses (début et fin) et mémorise à qui il a prêté quelle adresse (onglet « Serveur DHCP » en simulation).</li>
+<li>Dans la réalité, l’adresse est prêtée pour une durée (le <b>bail</b>) : ce n’est pas simulé ici.</li>
+<li>Votre « box » à la maison joue le rôle de serveur DHCP.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> DHCP : attribution automatique de l’adresse, du masque, de la passerelle et du DNS. DISCOVER, OFFER, REQUEST, ACK. UDP 67 / 68.</div>` });
+
+COURSE.push({ id: 'dns', t: 'DNS', h: `
+<p>On retient mieux <code>www.exemple.fr</code> que <code>10.0.0.80</code>. Le <b>DNS</b> (<i>Domain Name System</i>) est l’<b>annuaire d’Internet</b> : il traduit un nom de domaine en adresse IP.</p>
+<h3>Lire un nom de domaine</h3>
+<p>On le lit de droite à gauche :</p>
+<div class="encap dnsn"><span class="e1">www</span><span class="e2">exemple</span><span class="e3">fr</span></div>
+<ul>
+<li><b>fr</b> : domaine de premier niveau (<i>TLD</i>) ;</li>
+<li><b>exemple</b> : le domaine choisi par le propriétaire du site ;</li>
+<li><b>www</b> : un sous-domaine, par convention le serveur web.</li>
+</ul>
+<h3>Une requête DNS</h3>
+<ol>
+<li>La machine connaît l’adresse de son serveur DNS (donnée par le DHCP ou saisie à la main).</li>
+<li>Elle envoie une <b>requête</b> : « Quelle est l’adresse IP de www.exemple.fr ? », en UDP vers le port <b>53</b>.</li>
+<li>Le serveur répond avec l’adresse (enregistrement de type <b>A</b>), ou avec une erreur « nom introuvable » (<b>NXDOMAIN</b>).</li>
+</ol>
+<ul>
+<li>Dans l’Internet réel, la réponse peut venir de plusieurs serveurs qui se délèguent la réponse (de la racine jusqu’au domaine) et les réponses sont gardées en mémoire (<i>cache</i>). Dans la page, un seul serveur connaît tous les noms.</li>
+<li>Sans DNS, on peut quand même atteindre un serveur dont on connaît l’adresse IP : essayez <code>http://10.0.0.80</code> dans l’exemple « DHCP, DNS et site web ».</li>
+</ul>
+<div class="retain"><b>À retenir.</b> DNS : nom de domaine → adresse IP. Requête et réponse en UDP, port 53. Sans DNS, on peut utiliser l’adresse IP.</div>` });
+
+COURSE.push({ id: 'transport', t: 'TCP, UDP et les ports', h: `
+<p>L’adresse IP désigne une machine. Mais plusieurs programmes y tournent en même temps (navigateur, messagerie…). Le <b>port</b> désigne le programme concerné : un nombre de 0 à 65 535.</p>
+<table class="ctable"><thead><tr><th>Port</th><th>Protocole</th><th>Transport</th><th>Service</th></tr></thead><tbody>
+<tr><td>80</td><td>HTTP</td><td>TCP</td><td>Pages web</td></tr>
+<tr><td>443</td><td>HTTPS</td><td>TCP</td><td>Pages web chiffrées (non simulé)</td></tr>
+<tr><td>25</td><td>SMTP</td><td>TCP</td><td>Envoi de courriel</td></tr>
+<tr><td>110</td><td>POP3</td><td>TCP</td><td>Relève du courrier</td></tr>
+<tr><td>143</td><td>IMAP</td><td>TCP</td><td>Courrier synchronisé sur le serveur (non simulé)</td></tr>
+<tr><td>53</td><td>DNS</td><td>UDP</td><td>Traduction des noms</td></tr>
+<tr><td>67 et 68</td><td>DHCP</td><td>UDP</td><td>Attribution d’adresses</td></tr>
+</tbody></table>
+<ul>
+<li>Le <b>serveur</b> écoute sur un port « bien connu » (80 pour le web). Le <b>client</b> choisit un port source au hasard parmi les grands numéros (49152 et plus) : c’est ce que vous voyez dans les échanges.</li>
+<li>Un échange est donc identifié par <b>adresse IP + port</b> de chaque côté.</li>
+</ul>
+<h3>TCP : fiable, avec connexion</h3>
+<p>Avant d’échanger, TCP établit une connexion en <b>3 temps</b> (<i>poignée de main</i>) :</p>
+<ol>
+<li><b>SYN</b> : le client propose une connexion (avec un numéro de séquence) ;</li>
+<li><b>SYN, ACK</b> : le serveur accepte et propose le sien ;</li>
+<li><b>ACK</b> : le client confirme. La connexion est ouverte.</li>
+</ol>
+<ul>
+<li>Les segments de données sont numérotés (<b>séquence</b>) et chaque réception est confirmée par un <b>accusé</b> (<b>ACK</b>). Les drapeaux sont dans l’en-tête : SYN, ACK, PSH (envoyer des données), FIN, RST.</li>
+<li>La fermeture se fait par <b>FIN</b>. <b>RST</b> signifie « refusé » : par exemple si aucun serveur n’écoute sur ce port (le navigateur affiche « connexion refusée »).</li>
+<li>Dans un vrai réseau, TCP renvoie les segments perdus. Dans la page, aucun paquet ne se perd, sauf panne que vous provoquez (modem coupé…).</li>
+</ul>
+<h3>UDP : simple et rapide</h3>
+<p><b>UDP</b> envoie sans connexion et sans garantie de livraison. C’est suffisant pour une question courte comme le DNS ou le DHCP, et utile quand la vitesse prime sur la fiabilité (voix, vidéo en direct).</p>
+<div class="retain"><b>À retenir.</b> Port = programme visé. TCP : connexion en 3 temps (SYN, SYN-ACK, ACK), fiable. UDP : sans connexion, rapide. Web = TCP 80, DNS = UDP 53.</div>` });
+
+COURSE.push({ id: 'web', t: 'Le Web : URL et HTTP', h: `
+<h3>Anatomie d’une URL</h3>
+<div class="encap urln"><span class="e4">http://</span><span class="e3">www.exemple.fr</span><span class="e2">/snt</span></div>
+<ul>
+<li><code>http://</code> : le protocole à utiliser ;</li>
+<li><code>www.exemple.fr</code> : le nom de domaine du serveur (à traduire par le DNS) ;</li>
+<li><code>/snt</code> : le chemin de la page sur le serveur (<code>/</code> pour l’accueil).</li>
+</ul>
+<h3>Ce qui se passe quand on tape une adresse</h3>
+<ol>
+<li><b>DNS</b> : le navigateur demande l’adresse IP du nom ;</li>
+<li><b>TCP</b> : il ouvre une connexion vers cette adresse, port 80 ;</li>
+<li><b>HTTP</b> : il envoie la requête <code>GET /snt</code> ;</li>
+<li>le serveur répond : une ligne d’état (<b>200 OK</b>, ou <b>404 Not Found</b> si la page n’existe pas) puis le contenu de la page en <b>HTML</b> ;</li>
+<li>le navigateur ferme la connexion (FIN) et affiche la page.</li>
+</ol>
+<p>Cliquer sur un lien recommence : une nouvelle requête HTTP (et si besoin un nouveau DNS) part. HTTP ne garde aucun souvenir des requêtes précédentes.</p>
+<ul>
+<li>Le <b>HTML</b> est un langage à balises (<code>&lt;h1&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;a&gt;</code>…) que le navigateur transforme en page. Dans l’onglet « Serveur web », vous pouvez en écrire.</li>
+<li>Le <b>navigateur</b> est le client, le <b>serveur web</b> est un logiciel qui répond aux requêtes.</li>
+<li><b>HTTPS</b> = HTTP + chiffrement (TLS) : un espion qui capte les trames ne peut pas lire le contenu. Il n’est pas simulé : en HTTP, la requête et la page sont lisibles dans les échanges.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> URL = protocole + nom de domaine + chemin. Navigateur : DNS, TCP (port 80), HTTP GET, réponse 200 + HTML.</div>` });
+
+COURSE.push({ id: 'mail', t: 'Le courrier électronique', h: `
+<ul>
+<li>Une adresse se lit <code>utilisateur@domaine</code> : <code>bob@exemple.fr</code> désigne le compte « bob » géré par le serveur de messagerie du domaine exemple.fr.</li>
+<li>Le <b>client de messagerie</b> (le logiciel du poste) et le <b>serveur de messagerie</b> (qui stocke les boîtes) se parlent avec deux protocoles.</li>
+</ul>
+<table class="ctable"><thead><tr><th>Protocole</th><th>Sens</th><th>Port</th><th>Rôle</th></tr></thead><tbody>
+<tr><td><b>SMTP</b></td><td>Client → serveur</td><td>25</td><td>Envoyer un message au serveur, qui le dépose dans la boîte du destinataire.</td></tr>
+<tr><td><b>POP3</b></td><td>Serveur → client</td><td>110</td><td>Relever son courrier : les messages sont récupérés (puis retirés du serveur dans la simulation).</td></tr>
+</tbody></table>
+<h3>Le trajet d’un message</h3>
+<ol>
+<li>Alice écrit à bob@exemple.fr. Son client ouvre une connexion TCP vers le serveur de messagerie (port 25) et lui transmet l’expéditeur, le destinataire, l’objet et le texte.</li>
+<li>Le serveur vérifie que le compte « bob » existe. Sinon, il refuse (erreur <b>550</b>, « utilisateur inconnu »).</li>
+<li>Il garde le message dans la boîte de Bob. Bob n’a pas besoin d’être connecté à ce moment.</li>
+<li>Plus tard, Bob se connecte (port 110) avec son compte et son mot de passe et récupère ses messages.</li>
+</ol>
+<ul>
+<li><b>IMAP</b> (port 143), non simulé, laisse les messages sur le serveur et synchronise plusieurs appareils.</li>
+<li>Dans la réalité, on trouve le serveur du destinataire grâce au DNS (enregistrement de type <b>MX</b>). Ici, on saisit directement l’adresse du serveur.</li>
+<li>SMTP et POP3 de base ne sont <b>pas chiffrés</b> : le texte et le mot de passe circulent en clair dans les trames. On utilise en pratique des versions protégées par TLS.</li>
+<li>L’adresse de l’expéditeur est écrite par le client : n’importe qui peut en écrire une fausse. C’est la base de l’hameçonnage (<i>phishing</i>).</li>
+</ul>
+<div class="retain"><b>À retenir.</b> SMTP envoie (25), POP3 relève (110). Le message attend dans la boîte du serveur. Sans chiffrement, il est lisible par quiconque capte les trames.</div>` });
+
+COURSE.push({ id: 'modem', t: 'Modem et box Internet', h: `
+<ul>
+<li>Un <b>modem</b> est un <b>mo</b>dulateur-<b>dem</b>odulateur : il transforme les signaux numériques de votre réseau en signaux adaptés à la ligne (téléphonique, câble, fibre optique) et inversement.</li>
+<li>Il relie votre réseau local à celui de votre opérateur. Dans la page, il relaie simplement les trames d’une prise à l’autre, et la case « Connecté à Internet » permet de simuler une panne de ligne.</li>
+<li>Quand la liaison est coupée, <b>le réseau local continue de fonctionner</b> : les machines d’un même commutateur communiquent encore. Seuls les échanges qui doivent traverser la ligne échouent.</li>
+</ul>
+<h3>Votre box à la maison</h3>
+<p>Une « box » regroupe plusieurs équipements vus dans cette page :</p>
+<table class="ctable"><thead><tr><th>Fonction dans la box</th><th>Équivalent dans la page</th></tr></thead><tbody>
+<tr><td>Modem (ou boîtier fibre)</td><td>Modem</td></tr>
+<tr><td>Routeur vers Internet (avec adresse privée du côté maison)</td><td>Routeur et sa passerelle</td></tr>
+<tr><td>Prises Ethernet et Wi-Fi</td><td>Commutateur (le Wi-Fi n’est pas simulé)</td></tr>
+<tr><td>Attribution des adresses de la maison</td><td>Serveur DHCP</td></tr>
+<tr><td>Relais des requêtes DNS</td><td>Serveur DNS</td></tr>
+</tbody></table>
+<p>Une box utilise aussi la <b>traduction d’adresses</b> (NAT) pour que plusieurs appareils aux adresses privées partagent une adresse publique. Ce n’est pas simulé.</p>` });
+
+COURSE.push({ id: 'cmd', t: 'Les commandes du terminal', h: `
+<table class="ctable"><thead><tr><th>Commande</th><th>Ce qu’elle fait</th><th>Équivalent courant</th></tr></thead><tbody>
+<tr><td><code>ipconfig</code></td><td>Affiche l’adresse IP, le masque, la passerelle, le DNS et l’adresse MAC.</td><td>Windows : <code>ipconfig</code>. Linux : <code>ip a</code>, <code>ifconfig</code>.</td></tr>
+<tr><td><code>ping &lt;adresse ou nom&gt;</code></td><td>Teste si une machine répond (4 essais).</td><td>Identique.</td></tr>
+<tr><td><code>traceroute &lt;adresse ou nom&gt;</code></td><td>Liste les routeurs traversés.</td><td>Windows : <code>tracert</code>.</td></tr>
+<tr><td><code>host &lt;nom&gt;</code></td><td>Interroge le DNS.</td><td><code>nslookup</code>, <code>dig</code>.</td></tr>
+<tr><td><code>arp</code></td><td>Affiche la table ARP (IP ↔ MAC).</td><td>Windows : <code>arp -a</code>.</td></tr>
+<tr><td><code>route</code></td><td>Affiche la table de routage de la machine.</td><td>Windows : <code>route print</code>. Linux : <code>ip route</code>.</td></tr>
+<tr><td><code>dhclient</code></td><td>Demande une adresse au serveur DHCP.</td><td>Windows : <code>ipconfig /renew</code>.</td></tr>
+<tr><td><code>hostname</code>, <code>clear</code>, <code>aide</code></td><td>Nom de la machine, effacer l’écran, liste des commandes.</td><td>Identique (<code>cls</code> sous Windows).</td></tr>
+</tbody></table>
+<p>Astuces : la flèche ↑ rappelle la commande précédente ; le bouton « Stop » (ou Ctrl+C) arrête une commande en cours.</p>` });
+
+COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
+<p>La page est un outil pédagogique. Elle respecte le principe des protocoles mais simplifie plusieurs points :</p>
+<ul>
+<li>Pas de <b>HTTPS</b> ni de chiffrement : tout est lisible dans « Échanges ».</li>
+<li>Pas de <b>Wi-Fi</b>, pas de <b>NAT</b> (les adresses privées ne sont pas traduites), pas de pare-feu.</li>
+<li>Aucun paquet ne se perd (sauf panne provoquée) : TCP ne retransmet donc rien.</li>
+<li>Les entrées de la table ARP et les baux DHCP n’expirent pas.</li>
+<li>Les routes sont saisies à la main ; il n’y a pas de protocole de routage.</li>
+<li>DNS : un seul serveur connaît tous les noms, sans cache ni hiérarchie.</li>
+<li>Messagerie : un seul serveur, SMTP et POP3 réduits à l’essentiel, pas d’enregistrement MX.</li>
+<li>Les durées affichées sont virtuelles (1 ms par câble traversé).</li>
+<li>Les réseaux avec des boucles de câbles ne sont pas gérés : évitez de relier plusieurs commutateurs en rond.</li>
+</ul>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>ACK</dt><dd>Accusé de réception TCP.</dd>
+<dt>ARP</dt><dd>Protocole qui donne l’adresse MAC correspondant à une adresse IP, sur un réseau local.</dd>
+<dt>Bail</dt><dd>Durée pendant laquelle un serveur DHCP prête une adresse.</dd>
+<dt>Broadcast (diffusion)</dt><dd>Envoi à toutes les machines d’un réseau.</dd>
+<dt>CIDR</dt><dd>Notation /n du masque : n bits à 1.</dd>
+<dt>Client</dt><dd>Programme ou machine qui demande un service.</dd>
+<dt>DHCP</dt><dd>Attribution automatique de la configuration réseau.</dd>
+<dt>DNS</dt><dd>Annuaire qui traduit un nom de domaine en adresse IP.</dd>
+<dt>En-tête</dt><dd>Informations ajoutées par un protocole devant les données.</dd>
+<dt>Hôte</dt><dd>Machine terminale du réseau (ordinateur, serveur…).</dd>
+<dt>HTTP</dt><dd>Protocole du Web : requêtes GET, réponses 200, 404…</dd>
+<dt>ICMP</dt><dd>Protocole de diagnostic et d’erreur (ping, TTL expiré).</dd>
+<dt>Interface</dt><dd>Point de connexion d’une machine ou d’un routeur à un réseau.</dd>
+<dt>IP</dt><dd>Protocole d’adressage et d’acheminement des paquets.</dd>
+<dt>LAN</dt><dd>Réseau local.</dd>
+<dt>Latence</dt><dd>Temps de transmission d’un message.</dd>
+<dt>MAC</dt><dd>Adresse d’une carte réseau, sur 48 bits.</dd>
+<dt>Masque</dt><dd>Indique quels bits d’une adresse IP désignent le réseau et lesquels désignent la machine.</dd>
+<dt>Modem</dt><dd>Modulateur-démodulateur : adapte les signaux à la ligne.</dd>
+<dt>Paquet</dt><dd>Bloc de données avec adresses IP source et destination.</dd>
+<dt>Passerelle</dt><dd>Routeur par lequel une machine envoie ce qui sort de son réseau.</dd>
+<dt>Port</dt><dd>Numéro qui désigne un programme sur une machine.</dd>
+<dt>Protocole</dt><dd>Ensemble de règles de communication.</dd>
+<dt>Routeur</dt><dd>Appareil qui relie des réseaux et choisit le chemin des paquets.</dd>
+<dt>Serveur</dt><dd>Programme ou machine qui fournit un service.</dd>
+<dt>TCP</dt><dd>Protocole de transport fiable, avec connexion.</dd>
+<dt>Trame</dt><dd>Bloc de données avec adresses MAC, envoyé sur un réseau local.</dd>
+<dt>TTL</dt><dd>Durée de vie d’un paquet IP, décrémentée par chaque routeur.</dd>
+<dt>UDP</dt><dd>Protocole de transport simple, sans connexion.</dd>
+<dt>URL</dt><dd>Adresse d’une ressource web : protocole, nom de domaine, chemin.</dd>
+</dl>` });
+
+/* ---------- outils interactifs ---------- */
+const bin8 = n => n.toString(2).padStart(8, '0');
+function parseMask(s) {
+  s = String(s || '').trim(); const m = /^\/?(\d{1,2})$/.exec(s);
+  if (m && s.startsWith('/')) { const p = +m[1]; return p <= 32 ? { p, dot: n2ip(p === 0 ? 0 : (0xFFFFFFFF << (32 - p)) >>> 0) } : null; }
+  if (isMask(s)) return { p: prefix(s), dot: s }; return null;
+}
+function bitsEl(ip, p, label, dec) {
+  const bits = ip2n(ip).toString(2).padStart(32, '0'), g = [0, 8, 16, 24].map(i => bits.slice(i, i + 8)).join('.');
+  const cut = p + Math.floor(p / 8), a = g.slice(0, cut), b = g.slice(cut);
+  return h('div', null, h('span', { class: 'lbl' }, label), h('span', { class: 'n' }, a), h('span', { class: 'm' }, b), h('span', { class: 'dec' }, dec || ip));
+}
+function widgetOctet(root) {
+  const inp = h('input', { type: 'text', inputmode: 'numeric', value: '77', 'aria-label': 'Nombre entre 0 et 255', class: 'mono', style: 'max-width:110px' }), out = h('div');
+  const draw = () => {
+    const v = inp.value.trim(), n = /^\d+$/.test(v) ? +v : -1; out.innerHTML = '';
+    if (n < 0 || n > 255) { inp.classList.add('bad'); out.append(h('p', { class: 'small' }, 'Saisissez un nombre entier de 0 à 255.')); return; }
+    inp.classList.remove('bad'); const b = bin8(n), pw = [128, 64, 32, 16, 8, 4, 2, 1];
+    out.append(h('table', { class: 'ctable narrow' }, h('tbody', null, h('tr', null, pw.map(x => h('td', null, String(x)))), h('tr', null, [...b].map(c => h('td', { class: c === '1' ? 'on1' : '' }, c))))),
+      h('p', null, n + ' = ' + (pw.filter((x, i) => b[i] === '1').join(' + ') || '0') + ' → ', h('code', { class: 'k' }, b)));
+  };
+  inp.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Nombre décimal (0 à 255)'), inp), out);
+}
+function widgetMask(root) {
+  const ip = h('input', { type: 'text', class: 'mono', value: '192.168.1.77', 'aria-label': 'Adresse IP', autocomplete: 'off', spellcheck: 'false' });
+  const mk = h('input', { type: 'text', class: 'mono', value: '/26', 'aria-label': 'Masque', autocomplete: 'off', spellcheck: 'false' });
+  const o2 = h('input', { type: 'text', class: 'mono', value: '192.168.1.100', 'aria-label': 'Seconde adresse (facultatif)', autocomplete: 'off', spellcheck: 'false' });
+  const out = h('div');
+  const draw = () => {
+    out.innerHTML = ''; const a = ip.value.trim(), m = parseMask(mk.value);
+    ip.classList.toggle('bad', !!a && !isIp(a)); mk.classList.toggle('bad', !!mk.value.trim() && !m);
+    if (!isIp(a) || !m) { out.append(h('p', { class: 'small' }, 'Saisissez une adresse IP valide (par exemple 192.168.1.77) et un masque valide (255.255.255.192 ou /26).')); return; }
+    const p = m.p, net = ((ip2n(a) & ip2n(m.dot)) >>> 0), size = 2 ** (32 - p), bc = net + size - 1;
+    const first = p >= 31 ? net : net + 1, last = p >= 31 ? bc : bc - 1, hosts = p >= 31 ? size : size - 2;
+    out.append(h('div', { class: 'bits' }, bitsEl(a, p, 'Adresse'), bitsEl(m.dot, p, 'Masque'), bitsEl(n2ip(net), p, 'Réseau (ET)'), bitsEl(n2ip(bc), p, 'Diffusion')),
+      h('table', { class: 'ctable narrow' }, h('tbody', null,
+        h('tr', null, h('td', null, 'Masque'), h('td', null, m.dot + '  ou  /' + p)),
+        h('tr', null, h('td', null, 'Adresse du réseau'), h('td', null, n2ip(net))),
+        h('tr', null, h('td', null, 'Adresse de diffusion'), h('td', null, n2ip(bc))),
+        h('tr', null, h('td', null, 'Adresses attribuables'), h('td', null, n2ip(first) + ' à ' + n2ip(last) + '  (' + hosts.toLocaleString('fr-FR') + ')')),
+        h('tr', null, h('td', null, 'Bits réseau / machine'), h('td', null, p + ' / ' + (32 - p))))));
+    const b = o2.value.trim();
+    if (b) {
+      if (!isIp(b)) { o2.classList.add('bad'); out.append(h('p', { class: 'small' }, 'La seconde adresse n’est pas valide.')); return; }
+      o2.classList.remove('bad'); const nb = ((ip2n(b) & ip2n(m.dot)) >>> 0), same = nb === net;
+      out.append(h('div', { class: 'verdict ' + (same ? 'yes' : 'no') }, h('b', null, same ? 'Même réseau.' : 'Réseaux différents.'), ' Réseau de ' + a + ' : ' + n2ip(net) + '. Réseau de ' + b + ' : ' + n2ip(nb) + '.' + (same ? '' : ' Pour se parler, ces deux machines doivent passer par un routeur.')));
+    } else o2.classList.remove('bad');
+  };
+  [ip, mk, o2].forEach(i => i.addEventListener('input', draw)); draw();
+  root.append(h('div', { class: 'two' }, h('label', { class: 'fld' }, h('span', null, 'Adresse IP'), ip), h('label', { class: 'fld' }, h('span', null, 'Masque'), mk)),
+    h('label', { class: 'fld' }, h('span', null, 'Seconde adresse (test « même réseau »)'), o2), out);
+}
+
+function widgetCables(root) {
+  const rg = h('input', { type: 'range', min: 2, max: 30, value: 6, 'aria-label': 'Nombre de machines' }), out = h('div');
+  const draw = () => {
+    const m = +rg.value, n = m - 1, c = n * (n + 1) / 2, mx = 435;
+    out.innerHTML = '';
+    out.append(h('table', { class: 'ctable narrow' }, h('tbody', null,
+      h('tr', null, h('td', null, 'Machines m'), h('td', null, String(m))),
+      h('tr', null, h('td', null, 'n = m − 1'), h('td', null, String(n))),
+      h('tr', null, h('td', null, 'Sans commutateur : n(n+1)/2'), h('td', null, n + ' × ' + (n + 1) + ' / 2 = ' + c + ' câbles, ' + n + ' cartes par machine')),
+      h('tr', null, h('td', null, 'Avec commutateur'), h('td', null, m + ' câbles, 1 carte par machine')))),
+      h('div', { class: 'bars' }, h('div', null, h('span', { class: 'bl' }, 'Sans'), h('span', { class: 'bar', style: 'width:' + Math.max(1.5, c / mx * 100) + '%' }), h('span', { class: 'bv' }, String(c))),
+        h('div', null, h('span', { class: 'bl' }, 'Avec'), h('span', { class: 'bar alt', style: 'width:' + Math.max(1.5, m / mx * 100) + '%' }), h('span', { class: 'bv' }, String(m)))));
+  };
+  rg.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Nombre de machines (2 à 30)'), rg), out);
+}
+/* ---------- affichage du cours ---------- */
+const CS = { open: false, id: 'reseau' };
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => { CS.id = s.id; renderCourse(); } }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => { CS.id = e.target.value; renderCourse(); } }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+  art.querySelectorAll('[data-w]').forEach(w => { if (w.dataset.w === 'octet') widgetOctet(w); else if (w.dataset.w === 'mask') widgetMask(w); else if (w.dataset.w === 'cables') widgetCables(w); });
+  const pn = h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => { CS.id = COURSE[idx - 1].id; renderCourse(); } }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => { CS.id = COURSE[idx + 1].id; renderCourse(); } }, COURSE[idx + 1].t + ' →') : h('span'));
+  art.append(pn);
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : notions du TP'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour au schéma'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+  const sc = box.querySelector('.cwrap'); if (sc) sc.scrollTop = 0; box.scrollTop = 0;
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+/* ---------- activités : consignes, défi, QCM ---------- */
+const cm = t => '<code class="k">' + t + '</code>';
+const ACT = {
+  cables: {
+    title: 'Pourquoi un commutateur ?', level: 'Niveau 0 · Point de départ', time: '15 min',
+    goal: 'Comprendre pourquoi on utilise un commutateur : compter les câbles nécessaires pour relier des ordinateurs avec et sans commutateur, puis démontrer la formule.',
+    steps: [
+      '<b>Conception.</b> À gauche, 6 ordinateurs (A1 à A6) sont reliés <b>sans commutateur</b> : chacun est relié à tous les autres. Comptez les câbles. Aide : comptez ceux qui partent de A1, puis ceux de A2 qui n’ont pas encore été comptés, etc.',
+      'Cliquez sur <b>A1</b> : combien de cartes réseau cet ordinateur doit-il avoir ? Le texte sous son nom l’indique.',
+      'À droite, 6 ordinateurs (B1 à B6) sont reliés <b>à un commutateur</b>. Comptez les câbles et les cartes réseau de B1.',
+      'Complétez dans votre cahier : sans commutateur, 6 machines → … câbles ; avec commutateur, 6 machines → … câbles.',
+      '<b>Simulation.</b> Ouvrez B1, onglet Terminal : ' + cm('ping 192.168.0.4') + '. Le réseau de droite fonctionne avec un seul câble par machine. (Le réseau de gauche est un schéma : il n’est pas simulé.)',
+      'Cherchez une formule : combien de câbles pour <b>m</b> machines sans commutateur ? Avec <b>n = m − 1</b>, vérifiez qu’elle donne 15 pour m = 6.',
+      'Lisez la démonstration dans le cours (bouton ci-dessous) : trois preuves, dont celle du <b>lemme des poignées de main</b>.'
+    ],
+    defi: { q: 'Une salle informatique a 30 ordinateurs. Combien de câbles faudrait-il sans commutateur ? Et avec un commutateur ? Combien de cartes réseau dans chaque ordinateur sans commutateur ?',
+      a: 'Sans commutateur : 30 × 29 / 2 = 435 câbles (avec n = 29 : 29 × 30 / 2 = 435), et 29 cartes réseau par ordinateur. Avec un commutateur : 30 câbles et 1 carte réseau par ordinateur. (En pratique, un commutateur a un nombre limité de prises, on en relie plusieurs entre eux.)' },
+    qcm: [
+      { q: 'Combien de câbles faut-il pour relier 6 ordinateurs deux à deux, sans commutateur ?', o: ['6', '12', '30', '15'], a: 3, w: '6 × 5 / 2 = 15, ou encore 5 + 4 + 3 + 2 + 1 = 15.' },
+      { q: 'Avec un commutateur, combien de câbles faut-il pour 6 ordinateurs ?', o: ['6', '15', '1', '12'], a: 0, w: 'Un câble par ordinateur, de l’ordinateur vers le commutateur.' },
+      { q: 'Combien de câbles faut-il pour relier 10 ordinateurs deux à deux ?', o: ['90', '45', '20', '10'], a: 1, w: '10 × 9 / 2 = 45. Avec n = 9 : 9 × 10 / 2 = 45.' },
+      { q: 'Sans commutateur, combien de cartes réseau faut-il dans chacun des 6 ordinateurs ?', o: ['6', '1', '5', '15'], a: 2, w: 'Chaque ordinateur est relié aux 5 autres : il faut une carte réseau pour chaque câble.' },
+      { q: 'Dans la formule S(n) = n × (n + 1) / 2 appliquée aux câbles, que vaut n ?', o: ['Le nombre de câbles', 'Le nombre de commutateurs', 'Le nombre de machines moins 1', 'Le nombre de machines'], a: 2, w: 'Avec m machines, n = m − 1. Pour 6 machines : n = 5 et S = 5 × 6 / 2 = 15.' },
+      { q: 'À partir de combien d’ordinateurs le commutateur demande-t-il moins de câbles que les liaisons deux à deux ?', o: ['3', '4', '5', '6'], a: 1, w: 'Pour 3 machines : 3 câbles dans les deux cas. Pour 4 machines : 6 câbles contre 4 avec un commutateur.' },
+      { q: '8 personnes se serrent la main, chacune une seule fois avec chaque autre. Combien de poignées de main ?', o: ['16', '56', '28', '64'], a: 2, w: 'Chacun serre 7 mains : 8 × 7 = 56, mais chaque poignée est comptée deux fois, donc 56 / 2 = 28. C’est le lemme des poignées de main.' }
+    ]
+  },
+  lan: {
+    title: 'Réseau local', level: 'Niveau 1 · Découvrir', time: '15 min',
+    goal: 'Comprendre comment des machines d’un même réseau local communiquent : adresse IP, adresse MAC, commutateur, ping.',
+    steps: [
+      '<b>Conception.</b> Observez le schéma : 4 machines reliées à un commutateur (switch). Cliquez sur <b>PC 1</b> : notez son adresse IP, son masque et son adresse MAC.',
+      'Toutes les machines ont une adresse en <b>192.168.0.x</b> avec le masque <b>255.255.255.0</b> : elles sont dans le même réseau.',
+      'Passez en <b>Simulation</b>, cliquez sur PC 1, onglet <b>Terminal</b>, puis tapez ' + cm('ipconfig') + '. Retrouvez-vous les mêmes valeurs ?',
+      'Tapez ' + cm('ping 192.168.0.3') + ' et regardez les billes colorées qui circulent sur les câbles.',
+      'Ouvrez l’onglet <b>Échanges</b> de PC 1. La première ligne est un message <b>ARP</b> : PC 1 demande « qui a l’adresse 192.168.0.3 ? ». Cliquez sur la ligne pour voir les en-têtes des 4 couches.',
+      'Dans le terminal, tapez ' + cm('arp') + ' : la table associe une adresse IP à une adresse MAC. Relancez le ping : il n’y a plus de requête ARP.',
+      'Cliquez sur <b>Switch</b> : sa table de commutation a appris les adresses MAC des machines qui ont parlé.'
+    ],
+    defi: { q: 'En Conception, changez l’adresse de PC 3 en <b>192.168.1.3</b>. En Simulation, faites un ping depuis PC 1 vers cette adresse. Que se passe-t-il et pourquoi ?',
+      a: 'Le ping échoue (« réseau de destination inaccessible »). 192.168.1.3 n’est plus dans le même réseau que PC 1 (192.168.0.x) et PC 1 n’a pas de passerelle : il ne sait pas où envoyer le paquet. Il faudrait un routeur.' },
+    qcm: [
+      { q: 'Quel appareil relie les machines d’un même réseau local et transmet les trames grâce aux adresses MAC ?', o: ['Le routeur', 'Le commutateur (switch)', 'Le serveur DNS', 'Le navigateur'], a: 1, w: 'Le commutateur apprend quelle adresse MAC se trouve derrière chaque prise. Il ne lit pas les adresses IP.' },
+      { q: 'À quoi sert la commande ping ?', o: ['À afficher une page web', 'À obtenir une adresse IP', 'À tester si une machine répond', 'À traduire un nom en adresse'], a: 2, w: 'Ping envoie un message ICMP (demande d’écho) et attend la réponse.' },
+      { q: 'Avec le masque 255.255.255.0, quelle machine est dans le même réseau que 192.168.0.1 ?', o: ['192.168.1.1', '10.0.0.1', '192.169.0.1', '192.168.0.200'], a: 3, w: 'Le masque 255.255.255.0 fixe les 3 premiers nombres : 192.168.0 doit être identique.' },
+      { q: 'Avant son premier ping vers 192.168.0.3, PC 1 envoie une requête ARP. Pourquoi ?', o: ['Pour connaître l’adresse MAC qui correspond à cette adresse IP', 'Pour demander une adresse IP à un serveur', 'Pour traduire un nom de domaine', 'Pour compter les routeurs traversés'], a: 0, w: 'Sur un réseau local, les trames sont adressées avec des adresses MAC. ARP fait le lien entre IP et MAC.' },
+      { q: 'Une adresse MAC est…', o: ['L’adresse d’un site web', 'Un mot de passe', 'L’identifiant de la carte réseau d’une machine', 'Une adresse attribuée par le fournisseur d’accès'], a: 2, w: 'Elle est écrite en hexadécimal (par exemple 9A:3C:…) et propre à chaque carte réseau.' }
+    ]
+  },
+  router: {
+    title: 'Deux réseaux et un routeur', level: 'Niveau 2 · Comprendre le routage', time: '20 min',
+    goal: 'Comprendre pourquoi il faut un routeur pour relier deux réseaux, ce qu’est la passerelle, et comment un paquet traverse des routeurs.',
+    steps: [
+      '<b>Conception.</b> Deux réseaux : <b>192.168.1.x</b> (PC 1, PC 2) et <b>192.168.2.x</b> (PC 3, PC 4). Le routeur a une adresse dans chacun (192.168.1.254 et 192.168.2.254).',
+      'Cliquez sur PC 1 : sa <b>passerelle par défaut</b> est 192.168.1.254, l’adresse du routeur dans son réseau.',
+      '<b>Simulation.</b> Depuis le terminal de PC 1 : ' + cm('ping 192.168.1.2') + '. La réponse arrive avec TTL=64 : aucun routeur n’a été traversé.',
+      'Tapez ' + cm('ping 192.168.2.1') + ' : la réponse arrive avec TTL=63. Le TTL a diminué de 1 : un routeur a été traversé.',
+      'Tapez ' + cm('traceroute 192.168.2.1') + ' : la première ligne est le routeur, la deuxième la destination.',
+      'Dans l’onglet <b>Échanges</b> de PC 1, cliquez sur une ligne de ping vers 192.168.2.1 : l’adresse IP de destination est celle de PC 3, mais l’adresse <b>MAC</b> de destination est celle du routeur.',
+      'Cliquez sur le <b>Routeur</b> (onglet Tables) : sa table de routage contient les deux réseaux directement reliés.'
+    ],
+    defi: { q: 'En Conception, effacez la passerelle de PC 1 (champ vide), puis refaites ' + '<code class="k">ping 192.168.2.1</code>' + ' en Simulation. Que se passe-t-il ?',
+      a: 'Le ping échoue : sans passerelle, PC 1 ne sait pas vers qui envoyer un paquet destiné à un autre réseau. Rétablissez 192.168.1.254 pour que cela refonctionne.' },
+    qcm: [
+      { q: 'À quoi sert la passerelle par défaut d’une machine ?', o: ['À donner un nom aux machines', 'À envoyer les paquets destinés à un autre réseau', 'À attribuer les adresses IP', 'À stocker les pages web'], a: 1, w: 'La passerelle est l’adresse du routeur à qui on confie les paquets qui sortent du réseau local.' },
+      { q: 'Dans cet exemple, quel appareil possède une adresse IP dans chacun des deux réseaux ?', o: ['Le routeur', 'PC 1', 'Un des deux commutateurs', 'Aucun'], a: 0, w: 'Le routeur a une interface (et donc une adresse) dans chaque réseau qu’il relie.' },
+      { q: 'PC 1 envoie un ping à 192.168.2.1. Quelle est l’adresse MAC de destination de la trame qui sort de PC 1 ?', o: ['Celle de PC 3', 'FF:FF:FF:FF:FF:FF dans tous les cas', 'Celle du routeur', 'Il n’y en a pas'], a: 2, w: 'PC 1 remet la trame au routeur (sa passerelle). L’adresse IP de destination, elle, reste celle de PC 3.' },
+      { q: 'Que montre la commande traceroute ?', o: ['Les routeurs traversés jusqu’à la destination', 'Le contenu de la page web', 'Les adresses MAC du réseau', 'Le nom du serveur DNS'], a: 0, w: 'Elle envoie des paquets avec un TTL de 1, puis 2, puis 3… et note qui répond à chaque saut.' },
+      { q: 'Quel est le rôle du TTL dans un paquet IP ?', o: ['Indiquer la taille du paquet', 'Chiffrer le message', 'Éviter qu’un paquet circule indéfiniment', 'Choisir le port du serveur'], a: 2, w: 'Chaque routeur retire 1 au TTL. À 0, le paquet est détruit : cela évite les boucles infinies.' },
+      { q: 'Sans passerelle, PC 1 peut-il joindre PC 3 ?', o: ['Oui, le commutateur s’en charge', 'Oui, grâce au masque', 'Non, il ne sait pas où envoyer un paquet destiné à un autre réseau', 'Oui, mais plus lentement'], a: 2, w: 'Le commutateur ne connaît que le réseau local. Il faut un routeur et une passerelle configurée.' }
+    ]
+  },
+  internet: {
+    title: 'DHCP, DNS et site web', level: 'Niveau 3 · Du nom de site à la page', time: '25 min',
+    goal: 'Suivre tout ce qui se passe quand on tape l’adresse d’un site : obtention d’une adresse (DHCP), traduction du nom (DNS), connexion (TCP) et demande de la page (HTTP).',
+    steps: [
+      '<b>Conception.</b> Le <b>PC élève</b> n’a pas d’adresse : il est réglé sur DHCP. Le serveur DHCP, le serveur DNS et le serveur web sont des machines avec le logiciel correspondant. Le routeur relie les deux réseaux.',
+      '<b>Simulation.</b> Au démarrage, le PC élève demande une adresse. Cliquez dessus, onglet <b>Échanges</b> : vous voyez les 4 messages DHCP (DISCOVER, OFFER, REQUEST, ACK).',
+      'Onglet <b>Terminal</b> : ' + cm('ipconfig') + '. Le PC a reçu une adresse, une passerelle et l’adresse du serveur DNS.',
+      'Tapez ' + cm('host www.exemple.fr') + ' : le serveur DNS répond par une adresse IP. Retrouvez la requête et la réponse (en UDP) dans Échanges.',
+      'Onglet <b>Navigateur</b> : saisissez ' + cm('http://www.exemple.fr') + ' puis « Aller ». Dans Échanges, repérez dans l’ordre : DNS, connexion TCP (SYN, SYN ACK, ACK), requête HTTP (GET), réponse 200.',
+      'Cliquez sur le lien « Page de SNT » de la page affichée : une nouvelle requête HTTP est envoyée.',
+      'Cliquez sur la ligne HTTP et lisez la couche <b>Application</b> : la requête et la réponse sont du texte.'
+    ],
+    defi: { q: 'En Conception, ouvrez le <b>Serveur DNS</b> et supprimez la ligne www.exemple.fr. En Simulation, tapez de nouveau http://www.exemple.fr dans le navigateur, puis essayez http://10.0.0.80. Que constatez-vous ?',
+      a: 'Avec le nom, la page ne s’affiche pas : « nom de domaine introuvable ». Avec l’adresse IP 10.0.0.80, la page s’affiche : le serveur web fonctionne, seul le DNS manquait. Le DNS sert à traduire les noms en adresses IP.' },
+    qcm: [
+      { q: 'À quoi sert le protocole DHCP ?', o: ['À traduire un nom en adresse IP', 'À attribuer automatiquement une adresse IP aux machines', 'À envoyer des courriels', 'À chiffrer les pages web'], a: 1, w: 'Un serveur DHCP propose une adresse de sa plage, ainsi que la passerelle et le serveur DNS.' },
+      { q: 'À quoi sert le DNS ?', o: ['À relier deux réseaux', 'À attribuer les adresses MAC', 'À traduire un nom de domaine en adresse IP', 'À mesurer le temps de réponse'], a: 2, w: 'On retient plus facilement www.exemple.fr que 10.0.0.80 : le DNS fait la correspondance.' },
+      { q: 'Dans quel ordre se déroulent les échanges quand on tape http://www.exemple.fr ?', o: ['Requête HTTP, DNS, connexion TCP', 'Connexion TCP, requête HTTP, DNS', 'DNS, connexion TCP, requête HTTP', 'DNS, requête HTTP, connexion TCP'], a: 2, w: 'Il faut d’abord l’adresse IP (DNS), puis ouvrir la connexion (TCP), puis demander la page (HTTP).' },
+      { q: 'Quels sont les 4 messages DHCP, dans l’ordre ?', o: ['Le client cherche un serveur, le serveur propose, le client accepte, le serveur confirme', 'Le serveur propose, le client cherche, le serveur confirme, le client accepte', 'Le client accepte, le serveur propose, le client cherche, le serveur confirme', 'Le serveur confirme, le client accepte, le serveur propose, le client cherche'], a: 0, w: 'DISCOVER, OFFER, REQUEST, ACK.' },
+      { q: 'Le serveur DNS est en panne, mais vous connaissez l’adresse IP du serveur web. Pouvez-vous afficher le site ?', o: ['Non, jamais', 'Oui, en tapant l’adresse IP dans le navigateur', 'Oui, en changeant le masque', 'Oui, en redémarrant le routeur'], a: 1, w: 'Le DNS ne sert qu’à trouver l’adresse IP. Si on la connaît, le serveur web répond quand même.' },
+      { q: 'Quel protocole le navigateur utilise-t-il pour demander une page au serveur web ?', o: ['SMTP', 'HTTP', 'ARP', 'DHCP'], a: 1, w: 'HTTP (HyperText Transfer Protocol) : le navigateur envoie GET, le serveur répond avec le code 200 et la page.' }
+    ]
+  },
+  mail: {
+    title: 'Courrier électronique', level: 'Niveau 3 · Les protocoles de messagerie', time: '20 min',
+    goal: 'Comprendre comment un message passe de Alice à Bob : serveur de messagerie, SMTP pour l’envoi, POP3 pour la réception.',
+    steps: [
+      '<b>Conception.</b> Cliquez sur le <b>Serveur e-mail</b> : il gère le domaine <b>exemple.fr</b> avec deux comptes (alice et bob). Cliquez sur <b>Alice</b> : son client e-mail est configuré avec son adresse et l’adresse du serveur.',
+      '<b>Simulation.</b> Ouvrez <b>Alice</b>, onglet <b>E-mail</b>. Écrivez à ' + cm('bob@exemple.fr') + ' (objet et message au choix) puis « Envoyer ».',
+      'Dans l’onglet <b>Échanges</b> d’Alice : une connexion TCP vers le port 25, puis des lignes <b>SMTP</b>. Cliquez dessus : le texte du message est lisible.',
+      'Ouvrez <b>Bob</b>, onglet <b>E-mail</b>, cliquez sur « Relever le courrier » : le message arrive. Dans Échanges, repérez les lignes <b>POP3</b> (port 110).',
+      'Cliquez de nouveau sur « Relever le courrier » : plus de message, le serveur l’a déjà remis.'
+    ],
+    defi: { q: 'Depuis Alice, envoyez un message à ' + '<code class="k">zoe@exemple.fr</code>' + '. Que répond le serveur ? Pourquoi ?',
+      a: 'Le serveur répond par une erreur 550 « utilisateur inconnu » : il n’existe pas de compte zoe sur le domaine exemple.fr. Le message n’est remis à personne.' },
+    qcm: [
+      { q: 'Quel protocole sert à envoyer un message vers le serveur de messagerie ?', o: ['POP3', 'HTTP', 'SMTP', 'DNS'], a: 2, w: 'SMTP (Simple Mail Transfer Protocol), sur le port 25.' },
+      { q: 'Quel protocole sert à relever son courrier sur le serveur ?', o: ['POP3', 'SMTP', 'ARP', 'ICMP'], a: 0, w: 'POP3, sur le port 110 dans cette simulation.' },
+      { q: 'Dans l’adresse bob@exemple.fr, que désigne exemple.fr ?', o: ['Le nom de la machine de Bob', 'Le mot de passe de Bob', 'Le nom de domaine du serveur de messagerie', 'Le routeur'], a: 2, w: 'Avant @, le nom du compte. Après @, le domaine géré par le serveur de messagerie.' },
+      { q: 'Après l’envoi par Alice, où le message est-il conservé en attendant que Bob le relève ?', o: ['Sur le serveur e-mail', 'Sur l’ordinateur de Bob', 'Dans le commutateur', 'Dans le navigateur d’Alice'], a: 0, w: 'Bob n’a pas besoin d’être connecté au moment de l’envoi : le serveur garde le message dans sa boîte.' },
+      { q: 'Dans l’onglet Échanges, on peut lire le texte du message. Que peut-on en conclure ?', o: ['Le message est chiffré', 'Sans chiffrement, quelqu’un qui capte les trames peut lire le contenu', 'Seul le routeur peut le lire', 'C’est une erreur de la simulation'], a: 1, w: 'SMTP et POP3 de base ne chiffrent rien. En vrai, on utilise des versions chiffrées (TLS).' },
+      { q: 'Alice écrit à un compte qui n’existe pas. Que se passe-t-il ?', o: ['Le message arrive chez Bob', 'Le serveur refuse avec une erreur', 'Le message est perdu sans aucun avertissement', 'Le routeur le corrige'], a: 1, w: 'Le serveur SMTP répond 550 : utilisateur inconnu.' }
+    ]
+  },
+  modem: {
+    title: 'Liaison par modems', level: 'Niveau 2 · Relier deux sites', time: '15 min',
+    goal: 'Comprendre le rôle d’un modem : relier un réseau local à une liaison longue distance (Internet) et que, sans cette liaison, seul le réseau local fonctionne.',
+    steps: [
+      '<b>Conception.</b> Deux sites, chacun avec son commutateur et deux PC. Entre les deux, une liaison avec deux <b>modems</b> : elle représente l’accès à Internet.',
+      '<b>Simulation.</b> Depuis PC 1, terminal : ' + cm('ping 192.168.5.3') + '. La réponse arrive : les deux sites communiquent. Notez le temps (plus long qu’en réseau local).',
+      'Cliquez sur <b>Modem A</b>, onglet <b>Modem</b>, et décochez « Connecté à Internet ». La liaison est coupée.',
+      'Refaites le ping vers 192.168.5.3 : il échoue. Ouvrez l’onglet <b>Échanges</b> de Modem A : les trames sont marquées « perdues ».',
+      'Recochez « Connecté à Internet » : la communication revient.'
+    ],
+    defi: { q: 'Modem A étant déconnecté, faites un ping de PC 1 vers PC 2 (192.168.5.2). Réussit-il ? Que peut-on en déduire ?',
+      a: 'Oui, il réussit. PC 1 et PC 2 sont sur le même commutateur : leurs échanges ne passent pas par les modems. Une panne d’accès à Internet n’empêche pas le réseau local de fonctionner.' },
+    qcm: [
+      { q: 'Que signifie le mot « modem » ?', o: ['Moniteur de réseau', 'Modulateur-démodulateur', 'Mémoire de données', 'Module d’échange mobile'], a: 1, w: 'Il convertit les signaux numériques en signaux adaptés à la ligne (et inversement).' },
+      { q: 'Quel est le rôle du modem dans ce schéma ?', o: ['Attribuer des adresses IP', 'Traduire les noms de domaine', 'Stocker les pages web', 'Relier le réseau local à la liaison vers l’autre site'], a: 3, w: 'C’est l’interface entre le réseau local et la ligne (téléphone, fibre, câble).' },
+      { q: 'Modem A est déconnecté. PC 1 peut-il joindre PC 3 ?', o: ['Non', 'Oui', 'Oui, mais seulement en TCP', 'Oui, grâce au commutateur'], a: 0, w: 'Les trames vers l’autre site doivent traverser les modems : la liaison est coupée.' },
+      { q: 'Modem A est déconnecté. PC 1 peut-il joindre PC 2 ?', o: ['Non, tout est coupé', 'Non, il faut un routeur', 'Oui, ils sont sur le même réseau local', 'Seulement avec DHCP'], a: 2, w: 'PC 1 et PC 2 communiquent par le commutateur du site, sans modem.' },
+      { q: 'Dans cette simulation, un modem possède-t-il une adresse IP ?', o: ['Oui, une adresse par prise', 'Oui, 192.168.5.254', 'Non, mais il a un nom de domaine', 'Non, il relaie simplement les trames d’une prise à l’autre'], a: 3, w: 'Contrairement à un routeur, ce modem ne lit pas les adresses IP : il transmet les trames.' }
+    ]
+  }
+};
+
+/* ---------- panneau d'activité ---------- */
+const AS = { key: null, tab: 'steps', open: false, st: {}, arm: null };
+const AKEY = 'filius-activites-v1';
+try { AS.st = JSON.parse(localStorage.getItem(AKEY) || '{}') || {}; } catch (e) { AS.st = {}; }
+function actSave() { try { localStorage.setItem(AKEY, JSON.stringify(AS.st)); } catch (e) { /* ignoré */ } }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+function actSet(key, open) {
+  AS.key = key && ACT[key] ? key : null; AS.tab = 'steps';
+  if (open !== undefined) AS.open = !!open && !!AS.key;
+  if (AS.open && isSmall()) { UI.sel = null; UI.simNode = null; renderCanvas(); renderPanel(); }
+  renderAct();
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open;
+  if (AS.open && isSmall()) { UI.sel = null; UI.simNode = null; renderCanvas(); renderPanel(); }
+  renderAct();
+}
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  if (!a) {
+    box.append(h('div', { class: 'phead' }, h('b', null, 'Activités'), h('span', { class: 'sub' }), close),
+      h('div', { class: 'pbody' }, h('p', null, 'Chaque exemple est accompagné d’une activité : des consignes à suivre, un défi et un QCM corrigé.'), h('p', { class: 'small' }, 'Choisissez un exemple dans le menu « Exemples » de la barre du haut.'),
+        Object.keys(ACT).map(k2 => h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => loadExample(k2) }, ACT[k2].title)))));
+    return;
+  }
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: s }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: a.defi.q }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: a.defi.a }))));
+    const cs = { cables: 'cables', lan: 'masque', router: 'routage', internet: 'dhcp', mail: 'mail', modem: 'modem' }[AS.key];
+    if (cs) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(cs) }, 'Voir le cours : ' + courseSection(cs).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Vos modifications seront perdues'; AS.arm = setTimeout(() => { b.textContent = 'Recharger le schéma de départ'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; loadExample(AS.key); } }, 'Recharger le schéma de départ')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+$('#bAct').addEventListener('click', actToggle);
+/* ---------- form helpers ---------- */
+function fld(label, input, cls) { return h('label', { class: 'fld' + (cls ? ' ' + cls : '') }, h('span', null, label), input); }
+function txt(obj, key, o) {
+  o = o || {};
+  const i = h('input', { type: 'text', class: o.mono ? 'mono' : '', value: obj[key] == null ? '' : obj[key], placeholder: o.ph || '', autocomplete: 'off', spellcheck: 'false', 'aria-label': o.label || key });
+  const chk = () => { if (o.check) i.classList.toggle('bad', !!i.value.trim() && !o.check(i.value)); };
+  i.addEventListener('input', () => { obj[key] = i.value.trim() === i.value ? i.value : i.value.trim(); if (o.raw) obj[key] = i.value; chk(); if (o.after) o.after(); touch(); });
+  chk(); return i;
+}
+const ipField = (label, obj, key, o) => fld(label, txt(obj, key, Object.assign({ mono: true, check: isIp, ph: '0.0.0.0', label }, o)));
+const maskField = (label, obj, key) => fld(label, txt(obj, key, { mono: true, check: isMask, ph: '255.255.255.0', label }));
+function grp(title, ...kids) { return h('div', { class: 'grp' }, h('h3', null, title), ...kids); }
+function closeBtn() { return h('button', { class: 'btn sm', type: 'button', 'aria-label': 'Fermer', onclick: () => { UI.sel = null; UI.simNode = null; renderCanvas(); renderPanel(); } }, 'Fermer'); }
+function headEl(title, sub, icon) {
+  return h('div', { class: 'phead' }, icon ? h('span', { html: iconBox(icon, 28) }) : null, h('b', null, title), h('span', { class: 'sub' }, sub || ''), closeBtn());
+}
+
+/* ---------- server editors ---------- */
+function webUI(n) {
+  const box = h('div');
+  box.append(h('p', { class: 'small' }, 'Le serveur écoute sur le port 80. Une page = un chemin (par exemple /) et du HTML simple : h1, p, a, ul, li, b, i.'));
+  n.web.pages.forEach((pg, idx) => {
+    box.append(h('div', { class: 'grp' }, fld('Chemin', txt(pg, 'path', { mono: true, ph: '/' })), fld('Contenu HTML', (() => {
+      const t = h('textarea', { class: 'mono', rows: 5, spellcheck: 'false', 'aria-label': 'Contenu HTML' }, pg.content);
+      t.addEventListener('input', () => { pg.content = t.value; touch(); }); return t; })()),
+      n.web.pages.length > 1 ? h('p', null, h('button', { class: 'btn sm del', type: 'button', onclick: () => { n.web.pages.splice(idx, 1); touch(); renderPanel(); } }, 'Supprimer cette page')) : null));
+  });
+  box.append(h('button', { class: 'btn', type: 'button', onclick: () => { n.web.pages.push({ path: '/page' + n.web.pages.length, content: '<h1>Nouvelle page</h1>' }); touch(); renderPanel(); } }, 'Ajouter une page'));
+  return box;
+}
+function dnsUI(n) {
+  const box = h('div'); box.append(h('p', { class: 'small' }, 'Table des noms de domaine (enregistrements A). Le serveur répond sur le port 53 en UDP.'));
+  n.dnsSrv.records.forEach((r, i) => box.append(h('div', { class: 'line2' }, txt(r, 'name', { mono: true, ph: 'www.exemple.fr' }), txt(r, 'ip', { mono: true, check: isIp, ph: '10.0.0.80' }),
+    h('button', { class: 'btn sm del', type: 'button', 'aria-label': 'Supprimer', onclick: () => { n.dnsSrv.records.splice(i, 1); touch(); renderPanel(); } }, '×'))));
+  box.append(h('button', { class: 'btn', type: 'button', onclick: () => { n.dnsSrv.records.push({ name: '', ip: '' }); touch(); renderPanel(); } }, 'Ajouter un nom'));
+  return box;
+}
+function dhcpUI(n) {
+  const S = n.dhcpSrv, box = h('div');
+  box.append(h('p', { class: 'small' }, 'Le serveur répond sur le port 67 en UDP. Il attribue une adresse de la plage aux machines réglées sur « DHCP ».'));
+  box.append(h('div', { class: 'two' }, ipField('Début de plage', S, 'start'), ipField('Fin de plage', S, 'end')));
+  box.append(h('div', { class: 'two' }, maskField('Masque', S, 'mask'), ipField('Passerelle', S, 'gw')));
+  box.append(ipField('Serveur DNS donné aux clients', S, 'dns'));
+  const R = UI.mode === 'sim' && rt(n);
+  if (R) { const k = Object.keys(R.leases); box.append(h('h3', { class: 'small' }, 'Baux attribués'));
+    box.append(k.length ? h('table', { class: 'mono-tbl' }, h('tr', null, h('th', null, 'Adresse MAC'), h('th', null, 'Adresse IP')), k.map(m => h('tr', null, h('td', null, m), h('td', null, R.leases[m])))) : h('p', { class: 'small' }, 'Aucun bail pour le moment.')); }
+  return box;
+}
+function mailSrvUI(n) {
+  const S = n.mailSrv, box = h('div');
+  box.append(h('p', { class: 'small' }, 'Reçoit le courrier en SMTP (port 25) et le remet en POP3 (port 110). Les clients doivent viser l’adresse IP de cette machine ou un nom présent dans le DNS.'));
+  box.append(fld('Nom de domaine géré', txt(S, 'domain', { mono: true, ph: 'exemple.fr' })));
+  S.accounts.forEach((a, i) => box.append(h('div', { class: 'line2' }, txt(a, 'user', { mono: true, ph: 'utilisateur' }), txt(a, 'pass', { mono: true, ph: 'mot de passe' }),
+    h('button', { class: 'btn sm del', type: 'button', 'aria-label': 'Supprimer le compte', onclick: () => { S.accounts.splice(i, 1); touch(); renderPanel(); } }, '×'))));
+  box.append(h('button', { class: 'btn', type: 'button', onclick: () => { S.accounts.push({ user: '', pass: '' }); touch(); renderPanel(); } }, 'Ajouter un compte'));
+  return box;
+}
+function mailCfgUI(n) {
+  const m = n.mail, box = h('div');
+  box.append(fld('Adresse e-mail', txt(m, 'addr', { mono: true, ph: 'alice@exemple.fr', check: a => !!mailParse(a) })));
+  box.append(h('div', { class: 'two' }, fld('Serveur SMTP (envoi)', txt(m, 'smtp', { mono: true, ph: '192.168.0.10' })), fld('Serveur POP3 (réception)', txt(m, 'pop', { mono: true, ph: '192.168.0.10' }))));
+  box.append(h('div', { class: 'two' }, fld('Compte', txt(m, 'user', { mono: true, ph: 'alice' })), fld('Mot de passe', txt(m, 'pass', { mono: true }))));
+  return box;
+}
+function mailUI(n) {
+  const R = rt(n), box = h('div', { class: 'exch' });
+  const st = h('div', { class: 'bstat' }, 'Configurez le compte dans l’onglet « Logiciels » puis écrivez un message.');
+  const to = h('input', { type: 'text', class: 'mono', placeholder: 'bob@exemple.fr', autocomplete: 'off', spellcheck: 'false', 'aria-label': 'Destinataire' });
+  const sub = h('input', { type: 'text', placeholder: 'Objet', autocomplete: 'off', 'aria-label': 'Objet' });
+  const body = h('textarea', { rows: 4, placeholder: 'Votre message', 'aria-label': 'Message' });
+  const list = h('div');
+  const showInbox = () => { list.innerHTML = ''; if (!R.inbox.length) list.append(h('p', { class: 'small' }, 'Aucun message reçu. Cliquez sur « Relever le courrier ».')); R.inbox.forEach(m => list.append(h('div', { class: 'layer' }, h('h4', null, m.subject || '(sans objet)', h('span', null, 'de ' + m.from)), h('div', { class: 'kv', style: 'white-space:pre-wrap;display:block' }, m.body)))); };
+  const prog = s => { st.textContent = s; };
+  const send = h('button', { class: 'btn pri', type: 'button', onclick: async () => { send.disabled = true; st.textContent = 'Envoi…'; const r = await sendMail(n, to.value, sub.value, body.value, prog); send.disabled = false; st.textContent = r.ok ? 'Envoyé : ' + r.resp : 'Échec : ' + r.err; if (r.ok) { body.value = ''; sub.value = ''; } } }, 'Envoyer');
+  const get = h('button', { class: 'btn', type: 'button', onclick: async () => { get.disabled = true; st.textContent = 'Relève du courrier…'; const r = await fetchMail(n, prog); get.disabled = false; if (r.ok) { R.inbox.unshift(...r.mails.reverse()); st.textContent = r.mails.length + ' nouveau(x) message(s).'; showInbox(); } else st.textContent = 'Échec : ' + r.err; } }, 'Relever le courrier');
+  box.append(h('div', { class: 'grp' }, h('h3', null, 'Nouveau message'), fld('À', to), fld('Objet', sub), fld('Message', body), h('p', null, send)), h('div', { class: 'extop' }, h('b', null, 'Boîte de réception'), get), st, list);
+  showInbox(); return box;
+}
+function modemUI(n) {
+  const box = h('div'); const cn = n.ifaces.map(i => neighbor(n, i)).filter(Boolean).map(x => x.name).join(' et ');
+  box.append(h('p', { class: 'small' }, 'Le modem relie un réseau à la liaison vers Internet. Il n’a pas d’adresse IP : il transmet les trames d’une prise à l’autre tant qu’il est connecté.' + (cn ? ' Relié à : ' + cn + '.' : '')));
+  box.append(h('label', { class: 'fld chk' }, h('input', { type: 'checkbox', checked: n.online, onchange: ev => { n.online = ev.target.checked; touch(); if (UI.mode === 'sim') renderPanel(); } }), 'Connecté à Internet'));
+  return box;
+}
+function softUI(n) {
+  const L = [['term', 'Ligne de commande'], ['browser', 'Navigateur web'], ['web', 'Serveur web'], ['dns', 'Serveur DNS'], ['dhcpd', 'Serveur DHCP'], ['mail', 'Client e-mail'], ['mailsrv', 'Serveur e-mail']];
+  return h('div', null, L.map(([k, l]) => h('label', { class: 'fld chk' }, h('input', { type: 'checkbox', checked: !!n.apps[k], onchange: ev => { n.apps[k] = ev.target.checked; touch(); if (UI.simNode === n.id && !simTabs(n).some(t => t[0] === UI.tab)) UI.tab = null; renderPanel(); } }), l)));
+}
+
+/* ---------- design inspector ---------- */
+function hostFields(n) {
+  const i = n.ifaces[0], box = h('div');
+  if (n.ifaces.length > 1) box.append(h('p', { class: 'small' }, 'Cet ordinateur a ' + n.ifaces.length + ' cartes réseau, une par câble. Il sert au schéma de comparaison : la simulation n’utilise que la première carte.'));
+  box.append(h('label', { class: 'fld chk' }, h('input', { type: 'checkbox', checked: n.dhcp, onchange: ev => { n.dhcp = ev.target.checked; touch(); renderPanel(); } }), 'Adresse attribuée par DHCP'));
+  if (n.dhcp) box.append(h('p', { class: 'small' }, 'L’adresse sera reçue au démarrage de la simulation.' + (i.ip ? ' Dernière adresse reçue : ' + i.ip : '')));
+  else {
+    box.append(ipField('Adresse IP', i, 'ip'), maskField('Masque de sous-réseau', i, 'mask'), ipField('Passerelle par défaut', n, 'gateway'), ipField('Serveur DNS', n, 'dns'));
+  }
+  box.append(fld('Adresse MAC', h('input', { type: 'text', class: 'mono', value: i.mac, readonly: true, 'aria-label': 'Adresse MAC' })));
+  return box;
+}
+function routerFields(n) {
+  const box = h('div');
+  const ifs = h('div', { class: 'grp' }, h('h3', null, 'Interfaces'));
+  if (!n.ifaces.length) ifs.append(h('p', { class: 'small' }, 'Reliez le routeur à des appareils avec des câbles : chaque câble crée une interface.'));
+  n.ifaces.forEach((i, k) => { const nb = neighbor(n, i);
+    ifs.append(h('div', { class: 'grp', style: 'background:var(--panel2)' }, h('h3', null, 'Interface ' + (k + 1) + (nb ? ' vers ' + nb.name : '')), h('div', { class: 'two' }, ipField('Adresse IP', i, 'ip', { after: () => {} }), maskField('Masque', i, 'mask')), h('p', { class: 'small mono' }, i.mac))); });
+  box.append(ifs);
+  const rg = h('div', { class: 'grp' }, h('h3', null, 'Routes statiques'));
+  rg.append(h('p', { class: 'small' }, 'Les réseaux directement reliés sont connus automatiquement. Pour une route par défaut : réseau 0.0.0.0, masque 0.0.0.0.'));
+  n.routes.forEach((r, i) => rg.append(h('div', { class: 'line3' }, txt(r, 'net', { mono: true, check: isIp, ph: 'Réseau' }), txt(r, 'mask', { mono: true, check: isMask, ph: 'Masque' }), txt(r, 'gw', { mono: true, check: isIp, ph: 'Passerelle' }),
+    h('button', { class: 'btn sm del', type: 'button', 'aria-label': 'Supprimer la route', onclick: () => { n.routes.splice(i, 1); touch(); renderPanel(); } }, '×'))));
+  rg.append(h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { n.routes.push({ net: '', mask: '255.255.255.0', gw: '' }); renderPanel(); } }, 'Ajouter une route')));
+  box.append(rg); return box;
+}
+function buildInspector(s) {
+  const p = els.panel; p.className = ''; const o = selObj(s);
+  if (!o) { UI.sel = null; p.hidden = true; return; }
+  const body = h('div', { class: 'pbody' });
+  if (s.k === 'cable') {
+    const a = nodeById(o.a.n), b = nodeById(o.b.n);
+    p.append(headEl('Câble', a.name + ' ↔ ' + b.name)); body.append(h('p', { class: 'small' }, 'Ce câble relie ' + a.name + ' et ' + b.name + '.'), h('button', { class: 'btn del', type: 'button', onclick: () => deleteSel() }, 'Supprimer le câble'));
+  } else if (s.k === 'note') {
+    p.append(headEl('Note', 'Documentation', 'note'));
+    const t = h('textarea', { rows: 5, 'aria-label': 'Texte de la note' }, o.text); t.addEventListener('input', () => { o.text = t.value; touch(); });
+    body.append(fld('Texte', t), h('button', { class: 'btn del', type: 'button', onclick: () => deleteSel() }, 'Supprimer la note'));
+  } else {
+    if (UI.mode === 'doc') { p.hidden = true; return; }
+    const n = o; p.append(headEl(n.name, TYPES[n.type], n.type));
+    body.append(fld('Nom', txt(n, 'name', { label: 'Nom', after: () => { const b = $('.phead b', p); if (b) b.textContent = n.name; } })));
+    if (isHost(n)) {
+      body.append(hostFields(n), grp('Logiciels installés', softUI(n)));
+      if (n.apps.web) body.append(grp('Serveur web', webUI(n)));
+      if (n.apps.dns) body.append(grp('Serveur DNS', dnsUI(n)));
+      if (n.apps.dhcpd) body.append(grp('Serveur DHCP', dhcpUI(n)));
+      if (n.apps.mailsrv) body.append(grp('Serveur e-mail', mailSrvUI(n)));
+      if (n.apps.mail) body.append(grp('Client e-mail', mailCfgUI(n)));
+    } else if (n.type === 'modem') body.append(modemUI(n));
+    else if (n.type === 'router') body.append(routerFields(n));
+    else body.append(h('p', { class: 'small' }, n.ifaces.length ? 'Ports utilisés : ' + n.ifaces.length + '. Un commutateur n’a pas d’adresse IP : il apprend les adresses MAC pendant la simulation.' : 'Reliez des appareils à ce commutateur avec des câbles.'));
+    body.append(h('button', { class: 'btn del', type: 'button', onclick: () => deleteSel() }, 'Supprimer l’appareil'));
+  }
+  p.append(body);
+}
+
+/* ---------- simulation panel ---------- */
+function simTabs(n) {
+  const t = [];
+  if (isHost(n)) { if (n.apps.term) t.push(['term', 'Terminal']); if (n.apps.browser) t.push(['br', 'Navigateur']); if (n.apps.web) t.push(['web', 'Serveur web']); if (n.apps.dns) t.push(['dns', 'Serveur DNS']); if (n.apps.dhcpd) t.push(['dhcpd', 'Serveur DHCP']); if (n.apps.mail) t.push(['mail', 'E-mail']); if (n.apps.mailsrv) t.push(['msrv', 'Serveur e-mail']); }
+  else if (n.type === 'modem') t.push(['modem', 'Modem']);
+  else t.push(['tab', n.type === 'router' ? 'Tables' : 'Table de commutation']);
+  t.push(['ech', 'Échanges']); if (isHost(n)) t.push(['soft', 'Logiciels']);
+  return t;
+}
+function buildSimPanel(n) {
+  const p = els.panel; p.className = 'wide'; UI.termOut = null; UI.exTbody = null;
+  const tabs = simTabs(n); if (!tabs.some(t => t[0] === UI.tab)) UI.tab = tabs[0][0];
+  const ips = labelLines(n).join('  ');
+  p.append(headEl(n.name, ips, n.type));
+  p.append(h('div', { class: 'tabs', role: 'tablist' }, tabs.map(t => h('button', { type: 'button', role: 'tab', 'aria-selected': t[0] === UI.tab ? 'true' : 'false', onclick: () => { UI.tab = t[0]; renderPanel(); } }, t[1]))));
+  const fill = ['term', 'br', 'ech', 'mail'].includes(UI.tab), body = h('div', { class: 'pbody' + (fill ? ' fill' : '') });
+  const t = UI.tab;
+  if (t === 'term') body.append(termUI(n)); else if (t === 'br') body.append(...browserUI(n)); else if (t === 'web') body.append(webUI(n)); else if (t === 'dns') body.append(dnsUI(n));
+  else if (t === 'dhcpd') body.append(dhcpUI(n)); else if (t === 'mail') body.append(mailUI(n)); else if (t === 'msrv') body.append(mailSrvUI(n)); else if (t === 'modem') body.append(modemUI(n)); else if (t === 'tab') body.append(tablesUI(n)); else if (t === 'ech') body.append(...exchangeUI(n)); else body.append(softUI(n));
+  p.append(body);
+}
+function renderPanel() {
+  const p = els.panel; p.innerHTML = ''; p.className = ''; UI.termOut = null; UI.exTbody = null;
+  if (UI.mode === 'sim') { const n = UI.simNode && nodeById(UI.simNode); if (!n || !rt(n)) { p.hidden = true; return; } buildSimPanel(n); p.hidden = false; if (isSmall() && AS.open) { AS.open = false; renderAct(); } return; }
+  if (!UI.sel) { p.hidden = true; return; }
+  buildInspector(UI.sel); if (p.children.length) { p.hidden = false; if (isSmall() && AS.open) { AS.open = false; renderAct(); } }
+}
+
+/* ---------- terminal ---------- */
+function lineEl(l) { return h('div', { class: l.c || '' }, l.t); }
+function termPrint(n, text, cls) {
+  const R = rt(n); if (!R) return; const T = R.term;
+  if (text === '\f') { T.lines.length = 0; if (UI.termOut && UI.termNode === n.id) UI.termOut.innerHTML = ''; return; }
+  T.lines.push({ t: text, c: cls }); if (T.lines.length > 500) T.lines.shift();
+  if (UI.termOut && UI.termNode === n.id && UI.termOut.isConnected) { UI.termOut.append(lineEl({ t: text, c: cls })); UI.termOut.scrollTop = 1e9; }
+}
+function termUI(n) {
+  const T = rt(n).term, prm = n.name.toLowerCase().replace(/\s+/g, '-') + ':~$';
+  if (!T.lines.length) T.lines.push({ t: 'Terminal de ' + n.name + '. Tapez « aide » pour la liste des commandes.', c: 'dim' });
+  const out = h('div', { class: 'tout', role: 'log', 'aria-live': 'polite' });
+  T.lines.forEach(l => out.append(lineEl(l)));
+  const input = h('input', { type: 'text', autocomplete: 'off', autocapitalize: 'off', autocorrect: 'off', spellcheck: 'false', 'aria-label': 'Commande' });
+  const stop = h('button', { class: 'btn sm', type: 'button', hidden: !T.busy, onclick: () => { if (T.tok) T.tok.cancel = true; T.busy = false; stop.hidden = true; termPrint(n, '^C', 'dim'); } }, 'Stop');
+  const form = h('form', { class: 'tin' }, h('span', { class: 'prm' }, prm), input, stop);
+  form.addEventListener('submit', ev => {
+    ev.preventDefault(); if (T.busy) return;
+    const v = input.value; input.value = ''; termPrint(n, prm + ' ' + v, 'cmd'); if (!v.trim()) return;
+    T.hist.push(v); T.hi = T.hist.length; T.busy = true; stop.hidden = false;
+    const tok = { cancel: false }; T.tok = tok;
+    runCommand(n, v, (t, c) => { if (!tok.cancel) termPrint(n, t, c); }, tok).catch(e => termPrint(n, 'Erreur : ' + e.message, 'err')).finally(() => { if (T.tok === tok) { T.busy = false; T.tok = null; } stop.hidden = true; });
+  });
+  input.addEventListener('keydown', ev => {
+    if (ev.key === 'ArrowUp' && T.hist.length) { ev.preventDefault(); T.hi = Math.max(0, T.hi - 1); input.value = T.hist[T.hi] || ''; }
+    else if (ev.key === 'ArrowDown') { ev.preventDefault(); T.hi = Math.min(T.hist.length, T.hi + 1); input.value = T.hist[T.hi] || ''; }
+    else if (ev.key === 'c' && ev.ctrlKey && T.tok) { T.tok.cancel = true; T.busy = false; stop.hidden = true; termPrint(n, '^C', 'dim'); }
+  });
+  UI.termOut = out; UI.termNode = n.id; setTimeout(() => { out.scrollTop = 1e9; if (!(window.matchMedia && matchMedia('(pointer:coarse)').matches)) input.focus(); }, 0);
+  return h('div', { class: 'term' }, out, form);
+}
+
+/* ---------- browser ---------- */
+function renderHtml(html, onLink) {
+  const doc = new DOMParser().parseFromString(html, 'text/html'), out = document.createElement('div');
+  const ok = new Set(['H1', 'H2', 'H3', 'H4', 'P', 'A', 'B', 'I', 'U', 'STRONG', 'EM', 'UL', 'OL', 'LI', 'BR', 'DIV', 'SPAN', 'HR', 'TABLE', 'TR', 'TD', 'TH', 'THEAD', 'TBODY', 'PRE', 'CODE', 'SMALL', 'BLOCKQUOTE']);
+  (function walk(src, dst) {
+    for (const c of src.childNodes) {
+      if (c.nodeType === 3) dst.append(c.textContent);
+      else if (c.nodeType === 1) {
+        const t = c.tagName; if (['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'TITLE'].includes(t)) continue;
+        if (ok.has(t)) {
+          const e = document.createElement(t.toLowerCase());
+          if (t === 'A') { const href = c.getAttribute('href') || ''; e.setAttribute('href', '#'); e.addEventListener('click', ev => { ev.preventDefault(); onLink(href); }); }
+          walk(c, e); dst.append(e);
+        } else walk(c, dst);
+      }
+    }
+  })(doc.body, out);
+  return out;
+}
+function browserUI(n) {
+  const B = rt(n).br;
+  const url = h('input', { type: 'text', class: 'mono', value: B.url || '', placeholder: 'http://www.exemple.fr/', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', 'aria-label': 'Adresse' });
+  const st = h('div', { class: 'bstat' }, B.status || 'Saisissez un nom de domaine ou une adresse IP.'), view = h('div', { class: 'page' });
+  const show = () => { view.innerHTML = ''; if (B.html != null) view.append(renderHtml(B.html, href => go(link(href)))); };
+  const link = href => { const m = /^http:\/\/([^\/?#]+)/i.exec(B.url || ''); if (/^http:\/\//i.test(href)) return href; if (!m) return href; return 'http://' + m[1] + (href.startsWith('/') ? href : '/' + href); };
+  async function go(u) {
+    if (!u.trim()) return; url.value = u; B.url = u; B.status = 'Chargement…'; B.html = null; st.textContent = B.status; show();
+    const r = await httpGet(n, u, s => { B.status = s; if (st.isConnected) st.textContent = s; });
+    if (r.ok) { B.url = 'http://' + r.host + r.path; B.html = r.body; B.status = r.status + ' : reçu de ' + r.ip; }
+    else { B.html = '<h2>Impossible d’afficher la page</h2><p>' + esc(r.err) + '</p>'; B.status = 'Erreur : ' + r.err; }
+    if (view.isConnected) { url.value = B.url; st.textContent = B.status; show(); }
+  }
+  const form = h('form', { class: 'bar-url' }, url, h('button', { class: 'btn pri', type: 'submit' }, 'Aller'));
+  form.addEventListener('submit', ev => { ev.preventDefault(); go(url.value); });
+  show(); return [form, st, view];
+}
+
+/* ---------- tables ---------- */
+function tablesUI(n) {
+  const R = rt(n), box = h('div');
+  const tbl = (head, rows) => rows.length ? h('table', { class: 'mono-tbl' }, h('tr', null, head.map(x => h('th', null, x))), rows.map(r => h('tr', null, r.map(c => h('td', null, c))))) : h('p', { class: 'small' }, 'Aucune entrée pour le moment.');
+  if (n.type === 'switch') {
+    box.append(h('p', { class: 'small' }, 'Le commutateur apprend l’adresse MAC de l’expéditeur de chaque trame et le port par lequel elle arrive. Tant qu’une adresse est inconnue, il diffuse la trame sur tous les autres ports.'));
+    box.append(tbl(['Adresse MAC', 'Port (appareil relié)'], Object.keys(R.macTable).map(m => { const i = ifaceById(n, R.macTable[m]), nb = i && neighbor(n, i); return [m, nb ? nb.name : '?']; })));
+  } else {
+    box.append(h('h3', { class: 'small' }, 'Table de routage'));
+    const rows = n.ifaces.filter(okIface).map(i => [netOf(i.ip, i.mask), i.mask, 'direct', i.ip]);
+    n.routes.filter(r => isIp(r.net) && isMask(r.mask) && isIp(r.gw)).forEach(r => rows.push([r.net, r.mask, r.gw, '']));
+    box.append(tbl(['Réseau', 'Masque', 'Passerelle', 'Interface'], rows));
+    box.append(h('h3', { class: 'small' }, 'Table ARP'));
+    box.append(tbl(['Adresse IP', 'Adresse MAC'], Object.keys(R.arp).map(ip => [ip, R.arp[ip].mac])));
+  }
+  return box;
+}
+
+/* ---------- data exchange ---------- */
+const PKNAME = { arp: 'ARP', icmp: 'ICMP', dns: 'DNS / UDP', dhcp: 'DHCP', tcp: 'TCP', http: 'HTTP', mail: 'SMTP / POP3' };
+function fmtTime(t) { const d = new Date(t); return d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0'); }
+function layersOf(f) {
+  const L = { app: [], tr: [], net: [], link: [] };
+  L.link = [['MAC source', f.src], ['MAC destination', f.dst === BCAST ? f.dst + ' (diffusion)' : f.dst], ['Type', f.type === 'ARP' ? 'ARP (0x0806)' : 'IPv4 (0x0800)']];
+  if (f.type === 'ARP') { const a = f.p; L.net = [['Protocole', 'ARP'], ['Opération', a.op === 'request' ? 'Requête : qui a cette adresse IP ?' : 'Réponse'], ['MAC émetteur', a.sha], ['IP émetteur', a.spa], ['MAC cible', a.op === 'request' ? '00:00:00:00:00:00 (inconnue)' : a.tha], ['IP cible', a.tpa]]; return L; }
+  const p = f.p; L.net = [['IP source', p.src], ['IP destination', p.dst], ['TTL', p.ttl], ['Protocole', p.proto]];
+  if (p.proto === 'ICMP') { const d = p.data; L.net.push(['Message ICMP', d.type === 8 ? 'Demande d’écho (type 8)' : d.type === 0 ? 'Réponse d’écho (type 0)' : d.type === 11 ? 'TTL expiré (type 11)' : 'Destination inaccessible (type 3)']); if (d.seq != null) L.net.push(['Identifiant / séquence', d.id + ' / ' + d.seq]); }
+  else if (p.proto === 'UDP') {
+    const u = p.data, a = u.data; L.tr = [['Protocole', 'UDP'], ['Port source', u.sport], ['Port destination', u.dport]];
+    if (a && a.kind === 'DNS') { L.app = [['Protocole', 'DNS'], ['Message', a.qr === 0 ? 'Requête' : 'Réponse'], ['Nom', a.qname], ['Type', 'A (adresse IPv4)']]; if (a.qr === 1) L.app.push(['Réponse', a.rcode === 0 ? a.answer : 'Introuvable (NXDOMAIN)']); }
+    else if (a && a.kind === 'DHCP') { L.app = [['Protocole', 'DHCP'], ['Message', a.msg], ['MAC du client', a.chaddr]]; if (a.yiaddr) L.app.push(['Adresse proposée', a.yiaddr]); if (a.mask && a.msg === 'OFFER') L.app.push(['Masque', a.mask], ['Passerelle', a.gw || '-'], ['Serveur DNS', a.dns || '-']); }
+  } else {
+    const t = p.data; L.tr = [['Protocole', 'TCP'], ['Port source', t.sport], ['Port destination', t.dport], ['Drapeaux', t.flags.join(' ')], ['Numéro de séquence', t.seq]]; if (t.flags.includes('ACK')) L.tr.push(['Accusé (ack)', t.ack]);
+    if (t.payload) L.app = [['Protocole', t.payload.kind], ['Message', t.payload.text]];
+  }
+  return L;
+}
+function detailEl(e) {
+  const L = layersOf(e.frame), box = h('div');
+  const mk = (title, sub, rows) => h('div', { class: 'layer' + (rows.length ? '' : ' empty') }, h('h4', null, title, h('span', null, sub)), rows.length ? h('dl', { class: 'kv' }, rows.map(r => [h('dt', null, r[0]), h('dd', null, String(r[1]))])) : h('div', { class: 'kv' }, 'Pas d’en-tête à cette couche'));
+  box.append(mk('Couche application', 'DNS, DHCP, HTTP', L.app), mk('Couche transport', 'TCP, UDP', L.tr), mk('Couche internet', 'IP, ICMP, ARP', L.net), mk('Couche liaison', 'Ethernet', L.link));
+  if (e.note) box.prepend(h('p', { class: 'small' }, e.note));
+  return box;
+}
+function exRow(n, e, detail) {
+  const i = ifaceById(n, e.iface), nb = i && neighbor(n, i);
+  const tr = h('tr', { 'data-pk': e.d.pk, 'data-no': e.no, class: e.note ? 'ign' : '' }, h('td', null, e.no), h('td', null, fmtTime(e.t)), h('td', null, e.dir === 'in' ? '← ' : '→ ', nb ? nb.name : ''), h('td', null, e.d.src), h('td', null, e.d.dst), h('td', { style: 'color:var(--c-' + e.d.pk + ');font-weight:500' }, e.d.proto), h('td', { class: 'info' }, e.d.info));
+  tr.addEventListener('click', () => { UI.exSel = e.no; UI.exTbody.querySelectorAll('tr.sel').forEach(x => x.classList.remove('sel')); tr.classList.add('sel'); detail.innerHTML = ''; detail.append(detailEl(e)); });
+  return tr;
+}
+let exDetail = null;
+function exAppend(n, e) { const tb = UI.exTbody; if (!tb || !tb.isConnected) return; const sc = tb.parentElement.parentElement; const bottom = sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 30; tb.append(exRow(n, e, exDetail)); if (bottom) sc.scrollTop = sc.scrollHeight; }
+function exchangeUI(n) {
+  const R = rt(n), detail = h('div', { class: 'detail' }); exDetail = detail;
+  const tb = h('tbody'); UI.exTbody = tb; UI.exSel = null;
+  R.log.forEach(e => tb.append(exRow(n, e, detail)));
+  const clear = h('button', { class: 'btn sm', type: 'button', onclick: () => { R.log.length = 0; tb.innerHTML = ''; detail.innerHTML = ''; detail.append(h('p', { class: 'small' }, 'Cliquez sur une ligne pour voir les en-têtes de chaque couche.')); } }, 'Effacer');
+  const legend = h('div', { class: 'legend' }, Object.keys(PKNAME).map(k => h('span', null, h('i', { style: 'background:var(--c-' + k + ')' }), PKNAME[k])));
+  const sc = h('div', { class: 'tscroll' }, h('table', { class: 'tbl' }, h('thead', null, h('tr', null, ['N°', 'Heure', 'Sens, voisin', 'Source', 'Destination', 'Protocole', 'Informations'].map(x => h('th', null, x)))), tb));
+  detail.append(h('p', { class: 'small' }, 'Cliquez sur une ligne pour voir les en-têtes de chaque couche.'));
+  setTimeout(() => { sc.scrollTop = sc.scrollHeight; }, 0);
+  return [h('div', { class: 'extop' }, legend, clear), sc, detail];
+}
+
+/* ---------- dialogs and files ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body, buttons) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body), buttons && buttons.length ? h('footer', null, buttons) : null));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+function loadText(txt) {
+  try { deserialize(txt); } catch (e) { toast('Chargement impossible : ' + e.message); return false; }
+  if (UI.mode === 'sim') { stopSim(); UI.mode = 'design'; }
+  UI.sel = null; UI.simNode = null; UI.tool = 'select'; UI.link = null; syncChrome(); touch(); renderPanel(); closeDlg(); return true;
+}
+function loadExample(k) {
+  if (UI.mode === 'sim') { stopSim(); UI.mode = 'design'; }
+  ({ cables: exampleCables, lan: exampleLan, router: exampleRouter, internet: exampleInternet, mail: exampleMail, modem: exampleModem })[k](); UI.sel = null; UI.simNode = null; UI.tool = 'select'; syncChrome(); touch(); renderPanel(); actSet(k, true);
+}
+$('#ex').addEventListener('change', e => { if (e.target.value) loadExample(e.target.value); e.target.value = ''; });
+let newArmed = null;
+$('#bNew').addEventListener('click', e => {
+  const b = e.currentTarget;
+  if (!newArmed) { b.textContent = 'Confirmer ?'; newArmed = setTimeout(() => { b.textContent = 'Nouveau'; newArmed = null; }, 3000); return; }
+  clearTimeout(newArmed); newArmed = null; b.textContent = 'Nouveau';
+  if (UI.mode === 'sim') { stopSim(); UI.mode = 'design'; }
+  resetModel(); UI.sel = null; UI.simNode = null; syncChrome(); touch(); renderPanel(); actSet(null);
+});
+$('#bSave').addEventListener('click', () => {
+  const ta = h('textarea', { rows: 10, class: 'mono', readonly: true, 'aria-label': 'Contenu du fichier' }, JSON.stringify(JSON.parse(serialize()), null, 1));
+  const copy = h('button', { class: 'btn pri', type: 'button', onclick: async () => { try { await navigator.clipboard.writeText(ta.value); toast('Copié dans le presse-papiers'); } catch (x) { ta.select(); toast('Sélectionné : copiez avec Ctrl+C'); } } }, 'Copier');
+  openDlg('Enregistrer le réseau', h('div', null, h('p', null, 'Copiez ce texte et collez-le dans un fichier ',  h('code', null, 'reseau.json'), ' pour le garder ou le partager. Le réseau est aussi sauvegardé automatiquement dans ce navigateur.'), ta), [copy]);
+});
+$('#bOpen').addEventListener('click', () => {
+  const ta = h('textarea', { rows: 9, class: 'mono', placeholder: 'Collez ici le contenu d’un fichier reseau.json', 'aria-label': 'Contenu à charger' });
+  const file = h('input', { type: 'file', accept: '.json,application/json', 'aria-label': 'Choisir un fichier' });
+  file.addEventListener('change', () => { const f = file.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { ta.value = String(r.result); }; r.readAsText(f); });
+  openDlg('Ouvrir un réseau', h('div', null, h('p', null, 'Choisissez un fichier .json ou collez son contenu.'), file, h('div', { style: 'height:8px' }), ta), [h('button', { class: 'btn pri', type: 'button', onclick: () => ta.value.trim() ? loadText(ta.value) : toast('Rien à charger') }, 'Charger')]);
+});
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Reproduction en une page des fonctions principales de Filius, pour étudier le fonctionnement d’un réseau (SNT, seconde). Ce n’est pas le logiciel officiel.</p>' +
+    '<h3>Conception</h3><ul><li>Choisissez un appareil dans la palette, puis cliquez dans la zone de travail.</li><li>Outil <b>Câble</b> : cliquez sur deux appareils pour les relier.</li><li>Cliquez sur un appareil pour régler son adresse IP, son masque, sa passerelle, son serveur DNS, ses logiciels.</li><li>Un routeur reçoit une interface par câble : donnez-lui une adresse dans chaque réseau.</li></ul>' +
+    '<h3>Simulation</h3><ul><li>Cliquez sur un appareil pour ouvrir son poste : terminal, navigateur, serveurs, échanges de données.</li><li>Les paquets circulent sur les câbles : ARP, ICMP, DNS, DHCP, TCP, HTTP, chacun avec sa couleur. Réglez la vitesse ou mettez en pause.</li><li>L’onglet <b>Échanges</b> liste les trames reçues et envoyées. Cliquez sur une ligne pour voir les en-têtes des quatre couches.</li></ul>' +
+    '<h3>Commandes du terminal</h3><p><code>ipconfig</code> <code>ping</code> <code>traceroute</code> <code>host</code> <code>arp</code> <code>route</code> <code>dhclient</code> <code>hostname</code> <code>clear</code></p>' +
+    '<h3>Documentation</h3><p>Ajoutez des notes de texte sur le schéma pour annoter un réseau.</p>' +
+    '<h3>Activités et cours</h3><p>Le bouton <b>Activité</b> affiche les consignes et le QCM de l’exemple choisi. Le bouton <b>Cours</b> détaille toutes les notions, avec une calculatrice de masque.</p>' }));
+});
+
+/* ---------- start ---------- */
+(function init() {
+  let ok = false;
+  try { const s = localStorage.getItem(KEY); if (s) { deserialize(s); ok = M.nodes.length > 0; } } catch (e) { ok = false; }
+  if (!ok) exampleCables();
+  syncChrome(); renderCanvas(); renderPanel(); requestAnimationFrame(loop);
+  actSet(ok ? null : 'cables', !ok && !isSmall());
+})();
+</script>
+
+</body></html>

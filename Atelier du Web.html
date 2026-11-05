@@ -1,0 +1,1494 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Atelier du Web</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : barre d'outils en haut, palette à gauche, zone de travail blanche, panneau de l'appareil à droite (feuille basse sur téléphone). */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;
+  --canvas:#ffffff;--grid:#ffffff;--cable:#000000;--node-fill:#dfe7f0;--node-stroke:#33475b;--screen:#8ec1e6;
+  --note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;--page-bg:#ffffff;--page-fg:#1d2733;
+  --term-bg:#121a22;--term-fg:#d5e0ea;
+  --ok:#1e7a2e;--warn:#9a5b00;--bad:#c0281f;
+  --c-arp:#c98a00;--c-icmp:#7b4fc2;--c-dns:#1478b8;--c-dhcp:#c2347f;--c-tcp:#6d8a14;--c-http:#0f8c68;--c-mail:#d1561b;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:.01em}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn.del{color:var(--bad)}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.seg button[data-mode=sim][aria-pressed="true"]{background:var(--run)}
+#simctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#simctl label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+#simctl select{width:auto}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--run);font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.paused{color:var(--warn)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#palette{flex:none;width:92px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.tool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;font-weight:500;font-size:11.5px;min-width:74px;text-align:center}
+.tool svg{width:34px;height:34px;overflow:visible}
+.tool:hover{border-color:var(--accent)}
+.tool.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.sep{height:1px;background:var(--line);flex:none;margin:2px 0}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#svg{display:block;width:1400px;height:900px;touch-action:none;user-select:none;-webkit-user-select:none}
+.node{cursor:pointer}
+.mode-design .node,.mode-doc .note{cursor:grab}
+.ic-body{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:2;stroke-linejoin:round}
+.ic-screen{fill:var(--screen);stroke:var(--node-stroke);stroke-width:1.2}
+.ic-acc{stroke:var(--accent);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic-led{fill:var(--accent)}
+.nlabel{font:600 12.5px var(--font-ui);fill:var(--fg)}
+.nip{font:11px var(--font-mono);fill:var(--muted)}
+.selbox{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.lk .selbox{stroke-dasharray:none;stroke-width:2.5}
+.cab{stroke:var(--cable);stroke-width:2.2;stroke-linecap:round}
+.cab.on{stroke:var(--accent);stroke-width:4}
+.hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.note rect{fill:var(--note-bg);stroke:var(--note-line)}
+.note text{font:12.5px var(--font-ui);fill:var(--note-fg)}
+#panel{flex:none;width:360px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0}
+#panel.wide{width:clamp(380px,38vw,600px)}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.pbody.fill{display:flex;flex-direction:column;gap:8px}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.fld.chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);font-size:13px}
+.fld.chk input{width:auto}
+input[type=text],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.mono{font-family:var(--font-mono);font-size:12.5px}
+textarea{resize:vertical;min-height:70px}
+.bad{border-color:var(--bad)!important}
+.grp{border:1px solid var(--line);border-radius:8px;padding:10px 10px 2px;margin-bottom:10px}
+.grp>h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.line3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.line2{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.small{font-size:12px;color:var(--muted);margin:0 0 9px}
+.term{display:flex;flex-direction:column;flex:1;min-height:240px;background:var(--term-bg);color:var(--term-fg);border-radius:8px;font:12.5px/1.5 var(--font-mono);overflow:hidden}
+.tout{flex:1;overflow:auto;padding:10px;white-space:pre-wrap;word-break:break-word}
+.tout .ok{color:#6fdc9a}.tout .err{color:#ff9a94}.tout .dim{color:#8da0b5}.tout .cmd{color:#fff}
+.tin{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid #2a3542}
+.tin:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.tin input{flex:1;background:transparent;border:0;color:inherit;font:inherit;outline:none;padding:2px 0}
+.tin .prm{color:#6fdc9a;white-space:nowrap}
+.bar-url{display:flex;gap:6px}
+.bstat{font-size:12.5px;color:var(--muted)}
+.page{flex:1;min-height:180px;overflow:auto;background:var(--page-bg);color:var(--page-fg);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font:15px/1.5 Georgia,'Times New Roman',serif}
+.page h1{font-size:24px;margin:.2em 0 .4em}.page h2{font-size:19px}.page a{color:#1558c0;text-decoration:underline;cursor:pointer}
+.exch{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.extop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex:none}
+.tscroll{overflow:auto;border:1px solid var(--line);border-radius:8px;flex:1;min-height:110px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px}
+.tbl th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:5px 8px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tbl td{padding:4px 8px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--font-mono)}
+.tbl td.info{white-space:normal;min-width:150px}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover{background:var(--panel2)}
+.tbl tbody tr.sel{background:var(--accent-soft)}
+.tbl tr.ign td{opacity:.55}
+tr[data-pk=arp] td:first-child{box-shadow:inset 4px 0 var(--c-arp)}tr[data-pk=icmp] td:first-child{box-shadow:inset 4px 0 var(--c-icmp)}
+tr[data-pk=dns] td:first-child{box-shadow:inset 4px 0 var(--c-dns)}tr[data-pk=dhcp] td:first-child{box-shadow:inset 4px 0 var(--c-dhcp)}
+tr[data-pk=tcp] td:first-child{box-shadow:inset 4px 0 var(--c-tcp)}tr[data-pk=http] td:first-child{box-shadow:inset 4px 0 var(--c-http)}
+.detail{overflow:auto;flex:none;max-height:46%}
+.layer{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.layer h4{margin:0;padding:4px 10px;font-size:12px;background:var(--panel2);display:flex;justify-content:space-between}
+.layer h4 span{color:var(--muted);font-weight:400}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:1px 12px;padding:6px 10px;font-size:12px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-family:var(--font-mono);white-space:pre-wrap;word-break:break-word}
+.layer.empty .kv{color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;background:var(--panel2)}
+.mono-tbl{font:12px var(--font-mono);width:100%;border-collapse:collapse;margin-bottom:10px}
+.mono-tbl th{text-align:left;color:var(--muted);font-weight:500;padding:3px 6px;border-bottom:1px solid var(--line)}
+.mono-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlgbox h3{margin:14px 0 4px;font-size:14px}.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}.dlgbox code{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px;white-space:nowrap}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+.score{font-weight:600;font-size:15px;margin:4px 0 8px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px;text-wrap:balance}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.cbody table{display:block;overflow-x:auto;max-width:100%}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.ctable.narrow td,.ctable.narrow th{text-align:center;font-family:var(--font-mono);font-size:13px}
+.ctable td.on1{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+.bits{font:13px var(--font-mono);overflow-x:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0;background:var(--panel2)}
+.bits>div{display:flex;white-space:nowrap;align-items:baseline;line-height:1.8}
+.bits .lbl{width:96px;flex:none;color:var(--muted);font-family:var(--font-ui);font-size:12px}
+.bits .n{color:var(--accent-ink);font-weight:600}.bits .m{color:#8a949f}
+.bits .dec{margin-left:14px;color:var(--fg);font-family:var(--font-ui);font-size:12.5px}
+.encap{display:flex;flex-wrap:wrap;margin:8px 0 12px}
+.encap span{padding:7px 14px;font:13px var(--font-mono);border:1px solid var(--node-stroke);margin-left:-1px}
+.encap .e4{background:#f6dede}.encap .e3{background:#dfeaf7}.encap .e2{background:#e0f1dc}.encap .e1{background:#fff4c2}
+.widget{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0 14px;background:var(--panel)}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}.bars>div{display:flex;align-items:center;gap:8px}
+.bars .bl{width:44px;flex:none;font-size:12.5px;color:var(--muted)}.bars .bar{display:inline-block;height:14px;background:var(--accent);border-radius:3px}.bars .bar.alt{background:var(--run)}.bars .bv{font:13px var(--font-mono)}
+input[type=range]{width:100%;padding:0}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .work{flex-direction:column;gap:8px}
+  #palette{flex-direction:row;width:auto;overflow-x:auto;overflow-y:hidden;flex:none}
+  .sep{width:1px;height:auto;margin:0 2px}
+  .tool{min-width:70px}
+  #panel,#panel.wide{position:fixed;left:0;right:0;bottom:0;width:auto;height:62%;max-height:none;border-radius:14px 14px 0 0;z-index:30;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .line3{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:no-preference){.tool,.btn{transition:border-color .12s,background .12s}}
+/* ---- ateliers : commun, 1 et 2 ---- */
+#ws{padding:16px max(16px,env(safe-area-inset-left,0px)) 30px;max-width:980px}
+#ws h2{font-size:24px;margin:0 0 8px;text-wrap:balance}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.55}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.stack{margin:14px 0;display:flex;flex-direction:column;gap:6px}
+.stk-row{display:flex;gap:6px;flex-wrap:wrap}
+.stk{border:1px solid var(--node-stroke);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stk b{font-size:15px}.stk span{font-size:12.5px;color:var(--muted)}
+.stk.web{background:#dfeaf7;flex:2 1 260px}.stk.oth{background:var(--panel2);flex:1 1 170px}.stk.net{background:#e0f1dc}
+.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:6px 0}
+.ev{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);border-top:4px solid var(--muted);min-width:0}
+.ev.web{border-top-color:var(--accent)}.ev.net{border-top-color:var(--run)}
+.ev .yr{font:600 17px var(--font-mono)}.ev .et{margin-left:8px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ev p{margin:4px 0 0;font-size:13.5px}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px}
+.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.score{font-weight:600;font-size:15px;margin:6px 0}
+.urlseg{font:15px var(--font-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow-x:auto;white-space:nowrap;background:var(--panel2)}
+.urlseg span{padding:2px 1px;border-bottom:3px solid transparent}
+.u-s{border-bottom-color:#c98a00!important}.u-h{border-bottom-color:#1478b8!important}.u-p{border-bottom-color:#7b4fc2!important}
+.u-c{border-bottom-color:#1e7a2e!important}.u-q{border-bottom-color:#c2347f!important}.u-a{border-bottom-color:#d1561b!important}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border-bottom:3px solid transparent;background:var(--panel2);white-space:nowrap}
+.bar-url{display:flex;gap:6px;margin:8px 0}
+.wout{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.stepc{border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.stepc.k-dns{border-left-color:var(--c-dns)}.stepc.k-tcp{border-left-color:var(--c-tcp)}.stepc.k-http{border-left-color:var(--c-http)}.stepc.k-tls{border-left-color:var(--c-icmp)}.stepc.k-nav{border-left-color:var(--accent)}
+.sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stag{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 8px}
+pre.code{font:12.5px/1.5 var(--font-mono);margin:6px 0 0;white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:6px;padding:7px 9px;overflow-x:auto}
+.pgbar{font-size:12.5px;color:var(--muted);margin-top:4px}
+.broken{display:inline-block;border:1px dashed var(--muted);padding:2px 6px;font:12px var(--font-mono);color:var(--muted)}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ---- atelier 3 ---- */
+.ed{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:14px;margin-top:10px;align-items:start}
+.ed>div{min-width:0}
+.code-in{width:100%;min-height:270px;font:13px/1.5 var(--font-mono);tab-size:2;white-space:pre;overflow:auto;resize:vertical;border-radius:0 0 6px 6px}
+.prevbox{border:1px solid var(--line);border-radius:0 0 8px 8px;min-height:270px;overflow:auto;background:#fff;max-width:100%}
+.tree{border:1px solid var(--line);border-radius:0 0 8px 8px;min-height:270px;padding:8px 10px;font:12.5px/1.6 var(--font-mono);overflow:auto;background:var(--panel)}
+.tree .tg{color:var(--accent-ink)}.tree .tx{color:var(--muted)}
+.checks{list-style:none;margin:6px 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.checks li{border:1px solid var(--line);border-radius:8px;padding:6px 10px;display:flex;gap:10px;align-items:flex-start;font-size:14px}
+.checks li.ok{background:rgba(30,122,46,.12);border-color:var(--ok)}
+.checks .ck{font-weight:700;width:16px;flex:none;color:var(--muted)}.checks li.ok .ck{color:var(--ok)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#ws .small{font-size:12.5px}
+
+/* ---- atelier 4 ---- */
+.gwrap{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:#fff}
+.webg{display:block;width:100%;min-width:640px;height:auto}
+.gn{cursor:pointer}.gn:focus-visible{outline:none}.gn:focus-visible circle{stroke:#111;stroke-width:3}
+.pcard{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;background:var(--panel)}
+.pcard p{margin:4px 0}
+.purl{font:12.5px var(--font-mono);color:var(--ok)}
+.rlog{margin:6px 0;padding-left:22px;font:12.5px/1.6 var(--font-mono);max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding-top:6px;padding-bottom:6px;background:var(--panel2);list-style-position:inside}
+.rlog:empty{display:none}
+.res{display:flex;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--panel)}
+.res .rk{font:600 18px var(--font-mono);color:var(--muted);width:26px;flex:none;text-align:center}
+.res .rb{min-width:0;flex:1}.res .rt{font-weight:600;color:#1558c0;font-size:15px}
+.res .rs{margin:3px 0 6px;font-size:13.5px}.res mark{background:#fff0a8;padding:0 1px}
+.sc{display:flex;gap:6px 10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.bar2{display:inline-block;width:70px;height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--accent)}.bar2.alt i{background:var(--run)}
+.sc .tot{margin-left:auto;font-weight:600;color:var(--fg);font-size:13px}
+
+/* ---- atelier 5 ---- */
+.opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:center;margin:6px 0 10px}.opts .fld{margin:0}
+.brw{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0;background:#fff}
+.addr{display:flex;gap:10px;align-items:center;font:13px var(--font-mono);padding:6px 12px;background:var(--bar);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.addr .badge{font:600 12px var(--font-ui);padding:1px 8px;border-radius:10px;display:inline-flex;align-items:center;gap:4px}
+.addr.sec .badge{background:rgba(30,122,46,.16);color:var(--ok)}.addr.insec .badge{background:rgba(192,40,31,.14);color:var(--bad)}
+.brw .page.mini{border:0;border-radius:0;min-height:120px;margin:0}
+.brw .page.mini h2{font-size:20px;margin:.1em 0 .4em}
+.ad{margin-top:12px;border:1px dashed #8a949f;border-radius:6px;padding:8px 12px;background:#f6f6f0;font-family:var(--font-ui);font-size:14px}
+.ad .adl{display:block;font-size:11px;color:#5a6068;text-transform:uppercase;letter-spacing:.06em}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}.two2>div{min-width:0}
+.loginf{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;font-family:var(--font-ui)}.loginf .fld{margin:0;flex:1 1 150px}
+pre.code.leak{background:rgba(192,40,31,.1);color:var(--bad)}
+.warn{font-size:12.5px;color:var(--bad);margin:0 0 9px}
+.urlx{font:13.5px var(--font-mono);word-break:break-all}.urlx .dim{color:#8a949f}.urlx .okd{color:var(--ok)}.urlx .kod{color:var(--bad)}
+
+#act code.k{white-space:normal;word-break:break-all}
+.seg{max-width:100%;overflow-x:auto}.seg button{white-space:nowrap}
+#act.sheet{position:fixed;left:0;right:0;bottom:0;max-height:72vh;z-index:20}
+
+</style>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="var(--fg)" stroke-width="1.6"/><ellipse cx="13" cy="13" rx="4.2" ry="10" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M3.5 13h19M5 8h16M5 18h16" stroke="var(--accent)" stroke-width="1.4" fill="none"/></svg><span>Atelier du Web <small>SNT</small></span></div>
+    <div class="files">
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band" id="modes"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <main class="inner work" id="work">
+    <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+/*CORE-START*/
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'atelier-web-activites-v1', code: 'atelier-web-code-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
+const cm = t => '<code class="k">' + t + '</code>';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- images virtuelles (pour le HTML des élèves) ---------- */
+const dataSvg = s => 'data:image/svg+xml;utf8,' + encodeURIComponent(s);
+const IMGS = {
+  'logo.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' rx='18' fill='#2e6da4'/><path d='M28 88V44l32-18 32 18v44z' fill='#fff'/><rect x='51' y='58' width='18' height='30' fill='#2e6da4'/><rect x='34' y='52' width='12' height='12' fill='#2e6da4'/><rect x='74' y='52' width='12' height='12' fill='#2e6da4'/></svg>"),
+  'planete.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='160' height='120' viewBox='0 0 160 120'><rect width='160' height='120' fill='#101c33'/><circle cx='80' cy='60' r='28' fill='#e0a458'/><ellipse cx='80' cy='60' rx='54' ry='11' fill='none' stroke='#f3d9a4' stroke-width='4' transform='rotate(-18 80 60)'/><circle cx='30' cy='24' r='2' fill='#fff'/><circle cx='132' cy='96' r='2' fill='#fff'/><circle cx='122' cy='22' r='1.5' fill='#fff'/></svg>")
+};
+
+/* ---------- assainisseur : le HTML d'un élève ne peut rien exécuter ---------- */
+const OKTAGS = new Set('a b i u em strong small mark code pre br hr p div span h1 h2 h3 h4 h5 h6 ul ol li dl dt dd table thead tbody tfoot tr td th caption img header footer nav main section article aside figure figcaption blockquote'.split(' '));
+const DROPTAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'title', 'head', 'meta', 'link', 'noscript', 'template', 'svg', 'math', 'form', 'input', 'button', 'select', 'textarea', 'audio', 'video', 'canvas', 'base']);
+function safeDom(html, o) {
+  o = o || {};
+  const doc = new DOMParser().parseFromString('<!doctype html><body>' + html, 'text/html');
+  const css = [...doc.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  const out = document.createElement('div');
+  (function walk(src, dst) {
+    for (const c of src.childNodes) {
+      if (c.nodeType === 3) { dst.append(c.textContent); continue; }
+      if (c.nodeType !== 1) continue;
+      const t = c.tagName.toLowerCase();
+      if (DROPTAGS.has(t)) continue;
+      if (!OKTAGS.has(t)) { walk(c, dst); continue; }
+      const e = document.createElement(t);
+      for (const a of c.attributes) {
+        const n = a.name.toLowerCase(), v = a.value;
+        if (['class', 'title', 'lang', 'colspan', 'rowspan', 'width', 'height', 'alt'].includes(n)) e.setAttribute(n, v);
+        else if (n === 'id' && !o.light) e.setAttribute('id', v);
+        else if (n === 'style' && !/url\s*\(|expression|@import/i.test(v)) e.setAttribute('style', v);
+      }
+      if (t === 'a') {
+        const href = c.getAttribute('href') || ''; e.setAttribute('href', '#'); e.dataset.href = href;
+        e.addEventListener('click', ev => { ev.preventDefault(); if (o.onLink) o.onLink(href); });
+      }
+      if (t === 'img') {
+        const src = (c.getAttribute('src') || '').trim();
+        if (IMGS[src]) { e.setAttribute('src', IMGS[src]); e.dataset.ok = '1'; }
+        else { const sp = document.createElement('span'); sp.className = 'broken'; sp.textContent = '[image introuvable : ' + (src || 'attribut src manquant') + (c.getAttribute('alt') ? ', texte alternatif : ' + c.getAttribute('alt') : '') + ']'; dst.append(sp); continue; }
+      }
+      walk(c, e); dst.append(e);
+    }
+  })(doc.body, out);
+  return { el: out, css, doc };
+}
+function scopeCss(css) {
+  return String(css).replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none').replace(/(^|[\s,{}>+~])(html|body)(?=[\s,{.:#\[>+~]|$)/gi, '$1#body');
+}
+
+/* ---------- URL ---------- */
+function parseUrl(u) {
+  const m = /^([a-z][a-z0-9+.-]*):\/\/([^\/?#:]*)(?::(\d+))?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(u).trim());
+  if (!m) return null;
+  return { scheme: m[1].toLowerCase(), host: m[2].toLowerCase(), port: m[3] || '', path: m[4] || '/', query: m[5] || '', hash: m[6] || '' };
+}
+function domainSplit(host) { const p = host.split('.'); return p.length <= 2 ? { sub: '', dom: host } : { sub: p.slice(0, -2).join('.'), dom: p.slice(-2).join('.') }; }
+function widgetUrl(root, start) {
+  const inp = h('input', { type: 'text', class: 'mono', value: start || 'https://www.lycee-exemple.fr/snt/reseaux.html?page=2&lang=fr#masques', 'aria-label': 'Adresse à décoder', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+  const out = h('div');
+  const draw = () => {
+    out.innerHTML = ''; const u = parseUrl(inp.value);
+    inp.classList.toggle('bad', !!inp.value.trim() && !u);
+    if (!u) { out.append(h('p', { class: 'small' }, 'Saisissez une adresse complète, par exemple https://www.exemple.fr/page.html')); return; }
+    const d = domainSplit(u.host), dport = u.scheme === 'https' ? '443' : u.scheme === 'http' ? '80' : '';
+    const seg = [['u-s', u.scheme + '://'], ['u-h', u.host]];
+    if (u.port) seg.push(['u-p', ':' + u.port]);
+    seg.push(['u-c', u.path === '/' && !/\/$/.test(inp.value.split(/[?#]/)[0]) ? '' : u.path]);
+    if (u.query) seg.push(['u-q', u.query]); if (u.hash) seg.push(['u-a', u.hash]);
+    out.append(h('div', { class: 'urlseg', 'aria-label': 'Adresse découpée' }, seg.filter(s => s[1]).map(s => h('span', { class: s[0] }, s[1]))));
+    const q = u.query ? u.query.slice(1).split('&').map(x => x.split('=')).map(p => p[0] + ' = ' + (p[1] || '')).join(' ; ') : '';
+    out.append(h('table', { class: 'ctable' }, h('tbody', null,
+      h('tr', null, h('td', null, h('span', { class: 'u-s tag' }, 'Protocole')), h('td', null, u.scheme + (u.scheme === 'https' ? ' : HTTP chiffré (TLS)' : u.scheme === 'http' ? ' : HTTP non chiffré' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-h tag' }, 'Nom de domaine')), h('td', null, u.host + (d.sub ? ' : sous-domaine « ' + d.sub + ' », domaine principal « ' + d.dom + ' »' : ' : domaine principal « ' + d.dom + ' »'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-p tag' }, 'Port')), h('td', null, u.port ? u.port : (dport ? 'non précisé : ' + dport + ' par défaut' : 'non précisé'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-c tag' }, 'Chemin')), h('td', null, u.path + (u.path === '/' ? ' : page d’accueil' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-q tag' }, 'Paramètres')), h('td', null, q || 'aucun')),
+      h('tr', null, h('td', null, h('span', { class: 'u-a tag' }, 'Ancre')), h('td', null, u.hash ? u.hash + ' : endroit précis de la page' : 'aucune')))));
+  };
+  inp.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Adresse (URL)'), inp), out);
+}
+/*CORE-END*/
+
+/*W12-START*/
+const WORKSHOPS = [];
+
+/* ================= Atelier 1 : Web et Internet ================= */
+const EVENTS = [
+  [1969, 'net', 'ARPANET : premiers ordinateurs reliés en réseau, aux États-Unis.'],
+  [1983, 'net', 'Adoption de TCP/IP : Internet devient un réseau de réseaux.'],
+  [1989, 'web', 'Tim Berners-Lee propose au CERN un système de pages reliées par des liens.'],
+  [1990, 'web', 'Premier navigateur et premier serveur web, au CERN.'],
+  [1991, 'web', 'Premier site web ouvert au public : il présente le Web lui-même.'],
+  [1993, 'web', 'Le CERN place le Web dans le domaine public. Mosaic, premier navigateur grand public.'],
+  [1994, 'web', 'Création du W3C, qui définit les standards du Web (HTML, CSS…).'],
+  [1998, 'web', 'Google : un moteur de recherche qui classe les pages d’après leurs liens.'],
+  [2001, 'web', 'Wikipédia : une encyclopédie écrite par ses lecteurs.'],
+  [2004, 'web', 'Les réseaux sociaux se généralisent : le Web devient participatif.'],
+  [2007, 'web', 'Premiers smartphones modernes : le Web dans la poche.'],
+  [2016, 'web', 'Des certificats gratuits (Let’s Encrypt) généralisent le HTTPS.']
+];
+const SORT_ITEMS = [
+  ['Un câble sous-marin en fibre optique', 'net', 'C’est une infrastructure physique d’Internet.'],
+  ['Un routeur', 'net', 'Il achemine des paquets IP : c’est Internet.'],
+  ['Le protocole IP', 'net', 'IP fait partie de la famille TCP/IP qui fait fonctionner Internet.'],
+  ['Un navigateur', 'web', 'Il sert à consulter les pages du Web.'],
+  ['Une adresse comme http://www.exemple.fr/page', 'web', 'Une URL désigne une ressource du Web.'],
+  ['Le protocole HTTP', 'web', 'HTTP est le protocole du Web.'],
+  ['Un fichier HTML', 'web', 'Le HTML décrit le contenu d’une page web.'],
+  ['Un lien hypertexte', 'web', 'Les liens qui relient les pages entre elles sont l’idée centrale du Web.'],
+  ['L’envoi d’un courriel (SMTP)', 'net', 'Le courriel utilise Internet, mais ce n’est pas le Web : c’est un autre service.']
+];
+const W1 = { filter: 'all', ans: {} };
+function mountW1(root) {
+  root.append(h('h2', null, 'Le Web n’est pas Internet'),
+    h('p', null, 'On confond souvent les deux. Internet est le réseau qui relie les machines. Le Web est un service parmi d’autres qui fonctionne sur ce réseau : des pages, reliées par des liens, qu’on consulte avec un navigateur.'),
+    h('div', { class: 'stack', role: 'img', 'aria-label': 'Le Web et les autres services reposent sur Internet' },
+      h('div', { class: 'stk-row' },
+        h('div', { class: 'stk web' }, h('b', null, 'Le Web'), h('span', null, 'pages HTML, liens, URL, protocole HTTP, navigateurs')),
+        h('div', { class: 'stk oth' }, h('b', null, 'Courrier électronique'), h('span', null, 'protocoles SMTP, POP3')),
+        h('div', { class: 'stk oth' }, h('b', null, 'Visioconférence, jeux…'), h('span', null, 'autres protocoles'))),
+      h('div', { class: 'stk net' }, h('b', null, 'Internet'), h('span', null, 'réseau de réseaux : TCP/IP, routeurs, câbles, fibres, Wi-Fi'))));
+  /* frise */
+  const tl = h('div', { class: 'tl' }), chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Filtrer la frise' });
+  const drawTl = () => {
+    tl.innerHTML = '';
+    EVENTS.filter(e => W1.filter === 'all' || e[1] === W1.filter).forEach(e => tl.append(h('div', { class: 'ev ' + e[1] }, h('span', { class: 'yr' }, String(e[0])), h('span', { class: 'et' }, e[1] === 'web' ? 'Web' : 'Internet'), h('p', null, e[2]))));
+    chips.innerHTML = '';
+    [['all', 'Tout'], ['net', 'Internet'], ['web', 'Web']].forEach(c => chips.append(h('button', { type: 'button', class: 'chip' + (W1.filter === c[0] ? ' on' : ''), 'aria-pressed': W1.filter === c[0] ? 'true' : 'false', onclick: () => { W1.filter = c[0]; drawTl(); } }, c[1])));
+  };
+  root.append(h('h3', null, 'Frise historique'), chips, tl); drawTl();
+  /* tri */
+  const list = h('div', { class: 'sorts' }), score = h('p', { class: 'score' });
+  const drawSort = () => {
+    list.innerHTML = ''; let ok = 0, done = 0;
+    SORT_ITEMS.forEach((it, i) => {
+      const a = W1.ans[i], right = a === it[1]; if (a) { done++; if (right) ok++; }
+      const btn = (v, lab) => h('button', { type: 'button', class: 'btn sm' + (a === v ? (right ? ' good' : ' badc') : ''), disabled: !!a, onclick: () => { W1.ans[i] = v; drawSort(); } }, lab);
+      list.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, it[0]), h('span', { class: 'sb' }, btn('net', 'Internet'), btn('web', 'Web')),
+        a ? h('span', { class: 'sf ' + (right ? 'ok' : 'ko') }, (right ? 'Exact. ' : 'Non, c’est ' + (it[1] === 'web' ? 'le Web. ' : 'Internet. ')) + it[2]) : null));
+    });
+    score.textContent = done ? 'Score : ' + ok + ' / ' + SORT_ITEMS.length + (done === SORT_ITEMS.length ? ' (terminé)' : '') : '';
+  };
+  root.append(h('h3', null, 'Internet ou Web ?'), h('p', { class: 'small' }, 'Pour chaque élément, choisissez s’il relève d’Internet (l’infrastructure et ses protocoles) ou du Web (les pages et leur protocole).'), list, score,
+    h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W1.ans = {}; drawSort(); } }, 'Recommencer le tri')));
+  drawSort();
+}
+WORKSHOPS.push({ id: 'w1', title: 'Web et Internet', hint: 'Parcourez la frise, puis classez les éléments : Internet ou Web ?', mount: mountW1, reset: () => { W1.filter = 'all'; W1.ans = {}; } });
+
+/* ================= Atelier 2 : URL et HTTP ================= */
+const SITES = { 'www.lycee-exemple.fr': 'lycee', 'lycee-exemple.fr': 'lycee', 'cours-reseaux.fr': 'cours' };
+const IPS = { lycee: '10.8.0.80', cours: '10.8.0.90' };
+const PAGES = {
+  lycee: {
+    '/': '<h1>Lycée Exemple</h1><p>Bienvenue sur le site du lycée.</p><p><a href="/snt">Page de SNT</a> · <a href="http://cours-reseaux.fr/">Cours sur les réseaux</a></p>',
+    '/snt': '<h1>SNT en seconde</h1><ul><li>Internet</li><li>Le Web</li><li>Les réseaux sociaux</li></ul><p><a href="/">Retour à l’accueil</a></p>'
+  },
+  cours: { '/': '<h1>Cours sur les réseaux</h1><p>Adresses IP, masques, DNS, routage.</p><p><a href="http://www.lycee-exemple.fr/snt">Retour à la page de SNT</a></p>' }
+};
+const STATUS = { 200: 'OK', 301: 'Moved Permanently', 403: 'Forbidden', 404: 'Not Found', 500: 'Internal Server Error' };
+function serve(site, path) {
+  path = path.replace(/\/index\.html$/, '/') || '/';
+  const hd = { 'Content-Type': 'text/html; charset=utf-8', Server: 'serveur-exemple' };
+  const rep = (status, body, extra) => ({ status, text: STATUS[status], headers: Object.assign({}, hd, extra || {}, { 'Content-Length': String(body.length) }), body });
+  if (site === 'lycee') {
+    if (path === '/ancien') return rep(301, '', { Location: '/snt' });
+    if (path === '/secret') return rep(403, '<h1>Erreur 403</h1><p>Accès interdit à cette page.</p>');
+    if (path === '/panne') return rep(500, '<h1>Erreur 500</h1><p>Le serveur a rencontré un problème.</p>');
+  }
+  const p = PAGES[site][path];
+  return p ? rep(200, p) : rep(404, '<h1>Erreur 404</h1><p>Page introuvable : ' + esc(path) + '</p>');
+}
+function planRequest(url) {
+  const steps = []; let cur = url.trim(), hops = 0, final = null; const known = {};
+  for (;;) {
+    const u = parseUrl(cur);
+    if (!u || !/^https?$/.test(u.scheme)) { steps.push({ k: 'nav', t: 'Adresse non reconnue', d: 'Le navigateur ne peut pas traiter « ' + cur + ' ».\nUne adresse complète commence par http:// ou https://' }); final = { err: 'Adresse non valide' }; break; }
+    const sec = u.scheme === 'https', port = u.port || (sec ? '443' : '80'), site = SITES[u.host];
+    steps.push({ k: 'nav', t: 'Le navigateur lit l’adresse', d: 'protocole : ' + u.scheme + '\nnom de domaine : ' + u.host + '\nchemin : ' + u.path });
+    if (known[u.host]) steps.push({ k: 'nav', t: 'Adresse IP déjà connue', d: u.host + ' → ' + IPS[site] + ' (mémorisée par le navigateur, pas de nouvelle requête DNS)' });
+    else {
+      steps.push({ k: 'dns', t: 'Requête DNS', d: 'Quelle est l’adresse IP de ' + u.host + ' ?' });
+      if (!site) { steps.push({ k: 'dns', t: 'Réponse DNS : introuvable', d: 'NXDOMAIN : ce nom de domaine n’existe pas.' }); final = { err: 'Le serveur ' + u.host + ' est introuvable.' }; break; }
+      steps.push({ k: 'dns', t: 'Réponse DNS', d: u.host + ' → ' + IPS[site] }); known[u.host] = 1;
+    }
+    steps.push({ k: 'tcp', t: 'Connexion TCP', d: 'SYN → ' + IPS[site] + ':' + port + '\nSYN, ACK ←\nACK →\nLa connexion est ouverte.' });
+    if (sec) steps.push({ k: 'tls', t: 'Négociation TLS', d: 'Le serveur présente son certificat pour ' + u.host + '.\nLe navigateur le vérifie, puis les deux côtés choisissent une clé de chiffrement.\nLa suite de l’échange est chiffrée sur le réseau.' });
+    const r = serve(site, u.path);
+    steps.push({ k: 'http', t: 'Requête HTTP', d: 'GET ' + u.path + u.query + ' HTTP/1.1\nHost: ' + u.host + '\nUser-Agent: navigateur-exemple\nAccept: text/html', note: sec ? 'Sur le réseau, ce texte serait chiffré.' : 'Sur le réseau, ce texte est lisible par tous.' });
+    steps.push({ k: 'http', t: 'Réponse HTTP : ' + r.status + ' ' + r.text, d: 'HTTP/1.1 ' + r.status + ' ' + r.text + '\n' + Object.entries(r.headers).map(x => x[0] + ': ' + x[1]).join('\n') + (r.body ? '\n\n' + r.body : ''), status: r.status });
+    if (r.status === 301 && hops < 3) {
+      hops++; cur = r.headers.Location.startsWith('/') ? u.scheme + '://' + u.host + r.headers.Location : r.headers.Location;
+      steps.push({ k: 'nav', t: 'Redirection', d: 'Le serveur indique que la page a changé d’adresse (301).\nLe navigateur envoie une nouvelle requête vers ' + cur }); continue;
+    }
+    steps.push({ k: 'nav', t: 'Le navigateur affiche la page', d: r.status === 200 ? 'Il lit le HTML reçu et construit la page.' : 'Il affiche la page d’erreur envoyée par le serveur.' });
+    final = { status: r.status, body: r.body, url: cur }; break;
+  }
+  return { steps, final };
+}
+const W2 = { url: 'http://www.lycee-exemple.fr/snt', plan: null, shown: 0 };
+const STEP_TAG = { nav: 'Navigateur', dns: 'DNS', tcp: 'TCP', tls: 'TLS', http: 'HTTP' };
+function mountW2(root) {
+  root.append(h('h2', null, 'URL et requête HTTP'),
+    h('h3', null, 'Décoder une URL'), h('p', { class: 'small' }, 'Modifiez l’adresse et observez chaque morceau : protocole, nom de domaine, chemin, paramètres, ancre.'));
+  const dec = h('div', { class: 'widget' }); widgetUrl(dec); root.append(dec);
+  root.append(h('h3', null, 'Du clic à la page : ce que fait le navigateur'),
+    h('p', { class: 'small' }, 'Tapez une adresse puis cliquez sur « Aller ». Les étapes s’affichent une à une. Les noms de domaine connus de ce petit Web : www.lycee-exemple.fr et cours-reseaux.fr.'));
+  const url = h('input', { type: 'text', class: 'mono', value: W2.url, 'aria-label': 'Adresse du navigateur', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+  const out = h('div', { class: 'wout' });
+  const go = u => { W2.url = u; url.value = u; W2.plan = planRequest(u); W2.shown = 1; draw(); };
+  const form = h('form', { class: 'bar-url' }, url, h('button', { class: 'btn pri', type: 'submit' }, 'Aller'));
+  form.addEventListener('submit', e => { e.preventDefault(); go(url.value); });
+  const EX = [['Accueil', 'http://www.lycee-exemple.fr/'], ['/snt', 'http://www.lycee-exemple.fr/snt'], ['/ancien (redirigée)', 'http://www.lycee-exemple.fr/ancien'], ['/secret', 'http://www.lycee-exemple.fr/secret'], ['/panne', 'http://www.lycee-exemple.fr/panne'], ['/introuvable', 'http://www.lycee-exemple.fr/introuvable'], ['Nom inconnu', 'http://www.lycee-inconnu.fr/'], ['En https', 'https://www.lycee-exemple.fr/snt']];
+  root.append(form, h('div', { class: 'chips' }, EX.map(e => h('button', { type: 'button', class: 'chip', onclick: () => go(e[1]) }, e[0]))), out);
+  function draw() {
+    out.innerHTML = ''; const p = W2.plan; if (!p) { out.append(h('p', { class: 'small' }, 'Aucune requête pour le moment.')); return; }
+    const all = W2.shown >= p.steps.length;
+    const ctl = h('div', { class: 'files' },
+      h('button', { class: 'btn pri', type: 'button', disabled: all, onclick: () => { W2.shown++; draw(); } }, 'Étape suivante'),
+      h('button', { class: 'btn', type: 'button', disabled: all, onclick: () => { W2.shown = p.steps.length; draw(); } }, 'Tout afficher'),
+      h('span', { class: 'small' }, 'Étape ' + Math.min(W2.shown, p.steps.length) + ' sur ' + p.steps.length));
+    out.append(ctl);
+    p.steps.slice(0, W2.shown).forEach((s, i) => out.append(h('div', { class: 'stepc k-' + s.k }, h('div', { class: 'sh' }, h('span', { class: 'stag' }, STEP_TAG[s.k]), h('b', null, s.t)), h('pre', { class: 'code' }, s.d), s.note ? h('p', { class: 'small' }, s.note) : null)));
+    if (all && p.final) {
+      const f = p.final, view = h('div', { class: 'page' });
+      if (f.err) view.append(h('h2', null, 'Impossible d’afficher la page'), h('p', null, f.err));
+      else view.append(safeDom(f.body, { light: true, onLink: href => go(/^https?:\/\//.test(href) ? href : (parseUrl(f.url) ? parseUrl(f.url).scheme + '://' + parseUrl(f.url).host + (href.startsWith('/') ? href : '/' + href) : href)) }).el);
+      out.append(h('div', { class: 'pgbar' }, f.status ? 'Code ' + f.status + ' ' + STATUS[f.status] : 'Échec'), view);
+    }
+  }
+  draw();
+}
+WORKSHOPS.push({ id: 'w2', title: 'URL et HTTP', hint: 'Décodez une URL, puis suivez pas à pas ce que fait le navigateur pour afficher une page.', mount: mountW2, reset: () => { W2.plan = null; W2.shown = 0; W2.url = 'http://www.lycee-exemple.fr/snt'; } });
+/*W12-END*/
+
+/*W3-START*/
+/* ================= Atelier 3 : HTML et CSS ================= */
+const HTML0 = '<h1>Lycée Exemple</h1>\n<p>Bienvenue sur le site du lycée.</p>\n<h2>Nos clubs</h2>\n<p>Robotique, théâtre et photo.</p>\n';
+const CSS0 = '/* Le CSS décrit la présentation de la page. */\nbody {\n  font-family: sans-serif;\n}\n\nh1 {\n  /* essayez : color: darkblue; */\n}\n';
+const W3 = Object.assign({ html: HTML0, css: CSS0 }, lsGet(KEYS.code, {}));
+W3.tabIn = 'html'; W3.tabOut = 'view';
+const W3_BASE = '#body{font:16px/1.5 Georgia,"Times New Roman",serif;color:#1d2733;background:#fff;min-height:250px;padding:14px 16px;contain:layout paint;overflow:auto;box-sizing:border-box}a{color:#1558c0;text-decoration:underline;cursor:pointer}img{max-width:100%}.broken{display:inline-block;border:1px dashed #8a949f;padding:2px 6px;font:12px monospace;color:#5a6068}';
+const W3_CHECKS = [
+  ['Le titre principal (h1) contient « SNT ».', sr => { const e = sr.querySelector('h1'); return !!e && /SNT/i.test(e.textContent); }],
+  ['Une liste à puces (ul) contient au moins 3 éléments (li).', sr => [...sr.querySelectorAll('ul')].some(u => u.querySelectorAll(':scope > li').length >= 3)],
+  ['Un lien (a) mène vers cours-reseaux.fr.', sr => [...sr.querySelectorAll('a')].some(a => /cours-reseaux\.fr/.test(a.dataset.href || ''))],
+  ['L’image logo.svg est affichée, avec un texte alternatif (alt).', sr => [...sr.querySelectorAll('img[data-ok]')].some(i => (i.getAttribute('alt') || '').trim() !== '')],
+  ['CSS : la couleur du titre h1 est modifiée.', sr => { const e = sr.querySelector('h1'); return !!e && getComputedStyle(e).color !== 'rgb(29, 39, 51)'; }],
+  ['CSS : la page a une couleur de fond autre que le blanc.', sr => { const b = sr.getElementById('body'); if (!b) return false; const c = getComputedStyle(b).backgroundColor; return c !== 'rgb(255, 255, 255)' && c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent'; }]
+];
+function treeEl(node, depth) {
+  const box = h('div', { class: 'tn', style: 'margin-left:' + (depth ? 16 : 0) + 'px' });
+  for (const c of node.childNodes) {
+    if (c.nodeType === 1) {
+      const t = c.tagName.toLowerCase(), at = [...c.attributes].map(a => ' ' + a.name + '="' + (a.value.length > 22 ? a.value.slice(0, 22) + '…' : a.value) + '"').join('');
+      const kids = [...c.childNodes].some(x => x.nodeType === 1 || (x.nodeType === 3 && x.textContent.trim()));
+      box.append(h('div', { class: 'tl1' }, h('span', { class: 'tg' }, '<' + t + at + '>')), kids ? treeEl(c, depth + 1) : null);
+    } else if (c.nodeType === 3 && c.textContent.trim()) {
+      const s = c.textContent.trim(); box.append(h('div', { class: 'tl1 tx' }, '« ' + (s.length > 42 ? s.slice(0, 42) + '…' : s) + ' »'));
+    }
+  }
+  return box;
+}
+function mountW3(root) {
+  root.append(h('h2', null, 'HTML et CSS : construire une page'),
+    h('p', null, 'Le <b>HTML</b> décrit le contenu et la structure de la page. Le <b>CSS</b> décrit sa présentation. Modifiez le code : l’aperçu se met à jour tout de suite, et les défis se valident au fur et à mesure.'.replace(/<\/?b>/g, '')));
+  const taH = h('textarea', { id: 'wHtml', class: 'code-in', spellcheck: 'false', 'aria-label': 'Code HTML', autocapitalize: 'off' }, W3.html);
+  const taC = h('textarea', { id: 'wCss', class: 'code-in', spellcheck: 'false', 'aria-label': 'Code CSS', autocapitalize: 'off' }, W3.css);
+  [taH, taC].forEach(t => t.addEventListener('keydown', e => { if (e.key === 'Tab' && !e.shiftKey) { e.preventDefault(); const s = t.selectionStart; t.setRangeText('  ', s, t.selectionEnd, 'end'); t.dispatchEvent(new Event('input')); } }));
+  const host = h('div', { class: 'prevbox' }), shadowHost = h('div'); host.append(shadowHost);
+  const sr = shadowHost.attachShadow({ mode: 'open' });
+  const tree = h('div', { class: 'tree' }), status = h('div', { class: 'pgbar' }, 'Survolez ou cliquez un lien : l’adresse visée s’affiche ici.');
+  const checks = h('ul', { class: 'checks' }), sumEl = h('p', { class: 'score' });
+  const tabsIn = h('div', { class: 'tabs', role: 'tablist' }), tabsOut = h('div', { class: 'tabs', role: 'tablist' });
+  const drawTabs = () => {
+    const mk = (box, cur, items, set) => { box.innerHTML = ''; items.forEach(i => box.append(h('button', { type: 'button', role: 'tab', 'aria-selected': cur === i[0] ? 'true' : 'false', onclick: () => { set(i[0]); drawTabs(); } }, i[1]))); };
+    mk(tabsIn, W3.tabIn, [['html', 'HTML'], ['css', 'CSS']], v => { W3.tabIn = v; });
+    mk(tabsOut, W3.tabOut, [['view', 'Aperçu'], ['tree', 'Structure']], v => { W3.tabOut = v; });
+    taH.hidden = W3.tabIn !== 'html'; taC.hidden = W3.tabIn !== 'css'; host.hidden = W3.tabOut !== 'view'; tree.hidden = W3.tabOut !== 'tree'; status.hidden = W3.tabOut !== 'view';
+  };
+  let tmr = null;
+  const refresh = () => {
+    const r = safeDom(W3.html);
+    sr.innerHTML = '';
+    sr.append(h('style', null, W3_BASE + '\n' + scopeCss(r.css) + '\n' + scopeCss(W3.css)));
+    const body = h('div', { id: 'body' }); while (r.el.firstChild) body.append(r.el.firstChild);
+    sr.append(body);
+    sr.querySelectorAll('a').forEach(a => { a.addEventListener('click', () => { status.textContent = 'Lien vers : ' + (a.dataset.href || '(vide)'); }); a.addEventListener('mouseenter', () => { status.textContent = 'Lien vers : ' + (a.dataset.href || '(vide)'); }); });
+    tree.innerHTML = ''; tree.append(treeEl(r.doc.body, 0));
+    checks.innerHTML = ''; let ok = 0;
+    W3_CHECKS.forEach(c => { let v = false; try { v = !!c[1](sr); } catch (e) { v = false; } if (v) ok++; checks.append(h('li', { class: v ? 'ok' : '' }, h('span', { class: 'ck', 'aria-hidden': 'true' }, v ? '✓' : '○'), c[0], h('span', { class: 'sr-only' }, v ? ' : réussi' : ' : à faire'))); });
+    sumEl.textContent = ok + ' défi' + (ok > 1 ? 's' : '') + ' réussi' + (ok > 1 ? 's' : '') + ' sur ' + W3_CHECKS.length + (ok === W3_CHECKS.length ? ' : bravo !' : '');
+    W3.ok = ok;
+  };
+  const onIn = () => { W3.html = taH.value; W3.css = taC.value; lsSet(KEYS.code, { html: W3.html, css: W3.css }); clearTimeout(tmr); tmr = setTimeout(refresh, 120); };
+  taH.addEventListener('input', onIn); taC.addEventListener('input', onIn);
+  const reset = h('button', { class: 'btn sm', type: 'button', onclick: () => { W3.html = HTML0; W3.css = CSS0; taH.value = HTML0; taC.value = CSS0; lsSet(KEYS.code, { html: W3.html, css: W3.css }); refresh(); toast('Code réinitialisé'); } }, 'Réinitialiser le code');
+  root.append(h('div', { class: 'ed' },
+    h('div', null, tabsIn, taH, taC, h('p', { class: 'small', style: 'margin-top:6px' }, 'Images disponibles : ', h('code', { class: 'k' }, 'logo.svg'), ' et ', h('code', { class: 'k' }, 'planete.svg'), '. Le CSS peut aussi s’écrire dans une balise ', h('code', { class: 'k' }, '<style>'), '.'), h('p', null, reset)),
+    h('div', null, tabsOut, host, tree, status)),
+    h('h3', null, 'Défis'), checks, sumEl);
+  drawTabs(); refresh();
+}
+WORKSHOPS.push({ id: 'w3', title: 'HTML et CSS', hint: 'Modifiez le HTML et le CSS : l’aperçu se met à jour, les défis se valident tout seuls.', mount: mountW3, reset: () => { W3.html = HTML0; W3.css = CSS0; lsSet(KEYS.code, { html: HTML0, css: CSS0 }); W3.tabIn = 'html'; W3.tabOut = 'view'; } });
+/*W3-END*/
+
+/*W4-START*/
+/* ================= Atelier 4 : moteurs de recherche ================= */
+const WEB = [
+  { id: 0, u: 'annuaire-web.fr', t: 'Annuaire du web : une sélection de sites', x: 'Une sélection de sites utiles : le lycée, la cuisine, l’astronomie, le sport et les voyages. Recette du jour.', l: [1, 7, 8, 10, 11, 12], p: [380, 36] },
+  { id: 1, u: 'lycee-exemple.fr', t: 'Lycée Exemple : accueil', x: 'Bienvenue au lycée Exemple. Découvrez nos clubs, le CDI et les cours de SNT. Le lycée accueille 900 élèves.', l: [2, 3, 4], p: [110, 120] },
+  { id: 2, u: 'lycee-exemple.fr/snt', t: 'SNT : sciences numériques et technologie', x: 'Cours de SNT en seconde : Internet, le Web, les réseaux sociaux. Consultez le cours sur les réseaux et l’histoire du Web.', l: [5, 6, 1], p: [60, 235] },
+  { id: 3, u: 'lycee-exemple.fr/clubs', t: 'Clubs du lycée', x: 'Club robotique le mardi, club théâtre le jeudi, club photo le vendredi. Inscription au CDI.', l: [1, 4], p: [190, 235] },
+  { id: 4, u: 'lycee-exemple.fr/cdi', t: 'CDI du lycée', x: 'Le CDI propose des livres, des revues et des ordinateurs. Recherche documentaire, aide aux devoirs de SNT, histoire du Web en ressources.', l: [1, 6], p: [120, 340] },
+  { id: 5, u: 'cours-reseaux.fr', t: 'Cours sur les réseaux informatiques', x: 'Un réseau relie des ordinateurs. Le routeur relie des réseaux. Internet est un réseau de réseaux. Adresse IP, masque, DNS et protocole TCP. Le Web fonctionne sur Internet.', l: [6], p: [300, 340] },
+  { id: 6, u: 'web-histoire.fr', t: 'Histoire du Web', x: 'Le Web est inventé au CERN en 1989 par Tim Berners-Lee. Premier site, premier navigateur, HTML, URL et HTTP. Le Web n’est pas Internet.', l: [5], p: [290, 235] },
+  { id: 7, u: 'cuisine-facile.fr', t: 'Cuisine facile : recettes simples', x: 'Des recettes faciles pour tous : gâteau au chocolat, crêpes, soupe de légumes.', l: [8], p: [480, 125] },
+  { id: 8, u: 'cuisine-facile.fr/gateau', t: 'Gâteau au chocolat facile', x: 'Recette du gâteau au chocolat : 200 g de chocolat, du beurre, des oeufs, du sucre et de la farine. Ce gâteau est facile et rapide. Cuisson 25 minutes pour un gâteau fondant.', l: [7], p: [470, 235] },
+  { id: 9, u: 'gateau-gratuit.fr', t: 'GATEAU gratuit chocolat', x: 'gateau gateau gateau gateau gateau chocolat chocolat gratuit gratuit gagnez un gateau gratuit cliquez ici gateau gateau', l: [], p: [590, 345] },
+  { id: 10, u: 'astro-ciel.fr', t: 'Astro-ciel : étoiles et planètes', x: 'Observer les étoiles et les planètes. Jupiter, Saturne, la Lune. Conseils pour débuter l’astronomie.', l: [], p: [660, 125] },
+  { id: 11, u: 'sport-info.fr', t: 'Sport info : football et rugby', x: 'Résultats du football, du rugby et du tennis. Classement du championnat.', l: [], p: [710, 215] },
+  { id: 12, u: 'blog-voyage.fr', t: 'Blog voyage : le Japon en 15 jours', x: 'Notre voyage au Japon : Tokyo, Kyoto, les trains et la cuisine. Une recette de gâteau japonais à essayer.', l: [8, 9, 10], p: [590, 235] },
+  { id: 13, u: 'monclub-robot.fr', t: 'Club robotique : page oubliée', x: 'Le club robotique se réunit le mardi. Construction de robots et programmation.', l: [], p: [715, 345] }
+];
+const INLINKS = WEB.map(p => WEB.filter(q => q.l.includes(p.id)).map(q => q.id));
+const STOP = new Set('le la les l un une des de du d et en au aux est a ce ces cette pour par sur dans qui que n y ne pas on se son sa ses nos notre vos vous nous il elle ils elles ou mais'.split(' '));
+const normW = s => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const wordsOf = s => normW(s).split(/[^a-z0-9]+/).filter(w => w.length > 1 && !STOP.has(w));
+const W4 = { visited: [], seeds: [0], q: 'gateau', w: 50, sel: null, running: false, log: [], idxWord: 'web', timer: null };
+function crawlOrder(seeds) {
+  const seen = new Set(), order = [], queue = [...seeds];
+  while (queue.length) { const id = queue.shift(); if (seen.has(id)) continue; seen.add(id); order.push(id); WEB[id].l.forEach(n => { if (!seen.has(n)) queue.push(n); }); }
+  return order;
+}
+function buildIndex(ids) {
+  const idx = new Map();
+  ids.forEach(id => {
+    const p = WEB[id], add = (w, k) => { if (!idx.has(w)) idx.set(w, new Map()); const m = idx.get(w); if (!m.has(id)) m.set(id, { tf: 0, tt: 0 }); m.get(id)[k]++; };
+    wordsOf(p.x).forEach(w => add(w, 'tf')); wordsOf(p.t).forEach(w => add(w, 'tt'));
+  });
+  return idx;
+}
+function searchWeb(q, idx, w) {
+  const qs = [...new Set(wordsOf(q))]; if (!qs.length) return [];
+  let ids = null;
+  qs.forEach(t => { const m = idx.get(t); const s = new Set(m ? m.keys() : []); ids = ids ? new Set([...ids].filter(x => s.has(x))) : s; });
+  const res = [...ids].map(id => { const rel = qs.reduce((a, t) => { const e = idx.get(t).get(id); return a + e.tf + 3 * e.tt; }, 0); return { id, rel, pop: INLINKS[id].length }; });
+  const rm = Math.max(1, ...res.map(r => r.rel)), pm = Math.max(1, ...res.map(r => r.pop));
+  res.forEach(r => { r.score = (1 - w) * r.rel / rm + w * r.pop / pm; r.rn = r.rel / rm; r.pn = r.pop / pm; });
+  return res.sort((a, b) => b.score - a.score || a.id - b.id);
+}
+function hlNodes(text, qs) { return text.split(/([\p{L}\p{N}]+)/gu).map(s => (/^[\p{L}\p{N}]+$/u.test(s) && qs.has(normW(s))) ? h('mark', null, s) : s); }
+function mountW4(root) {
+  root.append(h('h2', null, 'Comment un moteur de recherche trouve une page'),
+    h('p', null, 'Un moteur ne cherche pas sur le Web au moment de votre requête. Il a d’abord exploré les pages avec un robot, construit un index, puis il classe les pages qui contiennent vos mots. Ce mini-web a 14 pages et un moteur très simplifié.'));
+  /* graphe */
+  const svgNS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(svgNS, 'svg');
+  svg.setAttribute('viewBox', '0 0 780 400'); svg.setAttribute('class', 'webg'); svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Graphe des liens entre les pages du mini-web');
+  const card = h('div', { class: 'pcard' });
+  const drawGraph = () => {
+    const cur = W4.running ? W4.visited[W4.visited.length - 1] : -1;
+    let s = '<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5a6068"/></marker></defs>';
+    WEB.forEach(p => p.l.forEach(t => { const a = p.p, b = WEB[t].p, dx = b[0] - a[0], dy = b[1] - a[1], d = Math.hypot(dx, dy) || 1, r1 = 15 + 2 * INLINKS[p.id].length, r2 = 15 + 2 * INLINKS[t].length;
+      const on = W4.visited.includes(p.id); s += '<line x1="' + (a[0] + dx / d * r1).toFixed(1) + '" y1="' + (a[1] + dy / d * r1).toFixed(1) + '" x2="' + (b[0] - dx / d * (r2 + 3)).toFixed(1) + '" y2="' + (b[1] - dy / d * (r2 + 3)).toFixed(1) + '" stroke="' + (on ? '#2e6da4' : '#b9bfc7') + '" stroke-width="' + (on ? 1.8 : 1.2) + '" marker-end="url(#ar)"/>'; }));
+    WEB.forEach(p => { const v = W4.visited.includes(p.id), r = 15 + 2 * INLINKS[p.id].length, isSel = W4.sel === p.id;
+      s += '<g class="gn" data-id="' + p.id + '" tabindex="0" role="button" aria-label="' + esc(p.u) + ', ' + INLINKS[p.id].length + ' lien(s) entrant(s)"><circle cx="' + p.p[0] + '" cy="' + p.p[1] + '" r="' + r + '" fill="' + (p.id === cur ? '#d1561b' : v ? '#2e6da4' : '#eef2f6') + '" stroke="' + (isSel ? '#111' : '#33475b') + '" stroke-width="' + (isSel ? 3 : 1.5) + '"/><text x="' + p.p[0] + '" y="' + (p.p[1] + 4) + '" text-anchor="middle" font-size="12" font-weight="600" fill="' + (v || p.id === cur ? '#fff' : '#1c2733') + '">' + INLINKS[p.id].length + '</text><text x="' + p.p[0] + '" y="' + (p.p[1] + r + 14) + '" text-anchor="middle" font-size="11" fill="#1c2733">' + esc(p.u.replace(/\/.*/, '') === p.u ? p.u : p.u) + '</text></g>'; });
+    svg.innerHTML = s;
+    svg.querySelectorAll('.gn').forEach(g => { const pick = () => { W4.sel = +g.dataset.id; drawGraph(); drawCard(); }; g.addEventListener('click', pick); g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } }); });
+  };
+  const drawCard = () => {
+    card.innerHTML = ''; if (W4.sel == null) { card.append(h('p', { class: 'small' }, 'Cliquez sur une page du graphe pour la lire. Le nombre dans chaque rond est son nombre de liens entrants.')); return; }
+    const p = WEB[W4.sel];
+    card.append(h('b', null, p.t), h('div', { class: 'purl' }, 'http://' + p.u), h('p', null, p.x),
+      h('p', { class: 'small' }, 'Liens sortants : ' + (p.l.length ? p.l.map(i => WEB[i].u).join(', ') : 'aucun') + '.'),
+      h('p', { class: 'small' }, 'Liens entrants (' + INLINKS[p.id].length + ') : ' + (INLINKS[p.id].length ? INLINKS[p.id].map(i => WEB[i].u).join(', ') : 'aucun : aucune page ne mène ici') + '.'));
+  };
+  root.append(h('h3', null, 'Le mini-web'), h('div', { class: 'gwrap' }, svg), card);
+  /* robot */
+  const log = h('ol', { class: 'rlog' }), stat = h('p', { class: 'score' }), idxBox = h('div'), resBox = h('div');
+  const startBtn = h('button', { class: 'btn pri', type: 'button' }), allBtn = h('button', { class: 'btn', type: 'button' }), subBtn = h('button', { class: 'btn', type: 'button' }), rstBtn = h('button', { class: 'btn', type: 'button' }, 'Vider l’index');
+  const drawBot = () => {
+    startBtn.textContent = W4.running ? 'Robot en route…' : (W4.visited.length ? 'Relancer le robot' : 'Lancer le robot'); startBtn.disabled = W4.running; allBtn.textContent = 'Terminer d’un coup'; allBtn.disabled = !W4.running;
+    subBtn.textContent = W4.seeds.includes(13) ? 'Adresse soumise : monclub-robot.fr' : 'Soumettre monclub-robot.fr au moteur'; subBtn.disabled = W4.seeds.includes(13) || W4.running; rstBtn.disabled = W4.running || !W4.visited.length;
+    log.innerHTML = ''; W4.log.forEach(l => log.append(h('li', null, l)));
+    stat.textContent = 'Pages indexées : ' + W4.visited.length + ' sur ' + WEB.length;
+  };
+  const step = () => {
+    if (!root.isConnected) { clearInterval(W4.timer); W4.running = false; return; }
+    const order = W4.order, k = W4.visited.length;
+    if (k >= order.length) { finish(); return; }
+    const id = order[k]; W4.visited = order.slice(0, k + 1); const idx = buildIndex([id]);
+    W4.log.push('Visite de ' + WEB[id].u + ' : ' + WEB[id].l.length + ' lien(s) trouvé(s), ' + idx.size + ' mot(s) distinct(s) indexé(s).');
+    drawGraph(); drawBot(); drawIdx(); drawRes();
+    if (W4.visited.length >= order.length) finish();
+  };
+  const finish = () => { clearInterval(W4.timer); W4.timer = null; W4.running = false; W4.visited = W4.order.slice(); W4.log.push('Terminé : le robot ne trouve plus de nouveau lien.'); drawGraph(); drawBot(); drawIdx(); drawRes(); };
+  startBtn.addEventListener('click', () => { W4.order = crawlOrder(W4.seeds); W4.visited = []; W4.log = ['Départ : ' + W4.seeds.map(i => WEB[i].u).join(', ') + '.']; W4.running = true; clearInterval(W4.timer); W4.timer = setInterval(step, 650); drawBot(); drawGraph(); });
+  allBtn.addEventListener('click', () => { W4.order.slice(W4.visited.length).forEach(id => W4.log.push('Visite de ' + WEB[id].u + '.')); finish(); });
+  subBtn.addEventListener('click', () => { W4.seeds.push(13); toast('Adresse soumise : relancez le robot'); W4.log.push('Adresse soumise au moteur : monclub-robot.fr. Relancez le robot pour l’explorer.'); drawBot(); });
+  rstBtn.addEventListener('click', () => { W4.visited = []; W4.log = []; W4.seeds = [0]; drawGraph(); drawBot(); drawIdx(); drawRes(); });
+  root.append(h('h3', null, 'Le robot d’indexation'), h('p', { class: 'small' }, 'Le robot part de l’annuaire, visite chaque page et suit tous ses liens. Il note les mots de chaque page dans un index. Une page qu’aucun lien ne désigne reste invisible.'),
+    h('div', { class: 'files' }, startBtn, allBtn, subBtn, rstBtn), stat, log);
+  /* index */
+  const idxIn = h('input', { type: 'text', class: 'mono', value: W4.idxWord, 'aria-label': 'Mot à chercher dans l’index', autocomplete: 'off', spellcheck: 'false', style: 'max-width:200px' });
+  const drawIdx = () => {
+    idxBox.innerHTML = ''; const idx = buildIndex(W4.visited), k = normW(idxIn.value.trim());
+    if (!W4.visited.length) { idxBox.append(h('p', { class: 'small' }, 'L’index est vide : lancez le robot.')); return; }
+    const m = idx.get(k);
+    idxBox.append(m ? h('table', { class: 'ctable' }, h('thead', null, h('tr', null, ['Page', 'Dans le texte', 'Dans le titre'].map(x => h('th', null, x)))), h('tbody', null, [...m.entries()].map(e => h('tr', null, h('td', null, WEB[e[0]].u), h('td', null, String(e[1].tf)), h('td', null, String(e[1].tt))))))
+      : h('p', { class: 'small' }, k ? '« ' + k + ' » n’apparaît dans aucune page indexée.' : 'Saisissez un mot.'));
+    idxBox.append(h('p', { class: 'small' }, 'L’index contient ' + idx.size + ' mots différents (sans les mots vides comme « le » ou « de »).'));
+  };
+  idxIn.addEventListener('input', () => { W4.idxWord = idxIn.value; drawIdx(); });
+  root.append(h('h3', null, 'L’index : mot → pages'), h('label', { class: 'fld' }, h('span', null, 'Mot'), idxIn), idxBox);
+  /* requête */
+  const qIn = h('input', { type: 'text', value: W4.q, 'aria-label': 'Requête', autocomplete: 'off', spellcheck: 'false' });
+  const wR = h('input', { type: 'range', min: 0, max: 100, step: 10, value: W4.w, 'aria-label': 'Importance de la popularité' }), wLab = h('span', { class: 'small' });
+  const drawRes = () => {
+    resBox.innerHTML = ''; wLab.textContent = 'Popularité : ' + W4.w + ' % · Mots-clés : ' + (100 - W4.w) + ' %';
+    if (!W4.visited.length) { resBox.append(h('p', { class: 'small' }, 'Le moteur n’a rien indexé. Lancez d’abord le robot.')); return; }
+    const res = searchWeb(W4.q, buildIndex(W4.visited), W4.w / 100), qs = new Set(wordsOf(W4.q));
+    if (!qs.size) { resBox.append(h('p', { class: 'small' }, 'Saisissez un ou plusieurs mots.')); return; }
+    if (!res.length) { resBox.append(h('p', null, 'Aucune page indexée ne contient tous ces mots.'), W4.visited.length < WEB.length ? h('p', { class: 'small' }, 'Certaines pages du Web ne sont pas indexées (voir le graphe).') : null); return; }
+    resBox.append(h('p', { class: 'small' }, res.length + ' résultat' + (res.length > 1 ? 's' : '') + '.'));
+    res.forEach((r, i) => { const p = WEB[r.id];
+      resBox.append(h('div', { class: 'res' }, h('div', { class: 'rk' }, String(i + 1)), h('div', { class: 'rb' }, h('div', { class: 'rt' }, p.t), h('div', { class: 'purl' }, 'http://' + p.u), h('p', { class: 'rs' }, hlNodes(p.x, qs)),
+        h('div', { class: 'sc' }, h('span', null, 'Mots-clés ' + r.rel), h('span', { class: 'bar2' }, h('i', { style: 'width:' + Math.round(r.rn * 100) + '%' })), h('span', null, 'Liens entrants ' + r.pop), h('span', { class: 'bar2 alt' }, h('i', { style: 'width:' + Math.round(r.pn * 100) + '%' })), h('span', { class: 'tot' }, 'Note ' + Math.round(r.score * 100))))));
+    });
+  };
+  qIn.addEventListener('input', () => { W4.q = qIn.value; drawRes(); });
+  wR.addEventListener('input', () => { W4.w = +wR.value; drawRes(); });
+  root.append(h('h3', null, 'Interroger le moteur'), h('p', { class: 'small' }, 'Le moteur garde les pages qui contiennent tous vos mots, puis les classe. Réglez le poids de la popularité (nombre de liens entrants) face au nombre de mots-clés. Essayez « gateau », « web », « robotique », « chocolat ».'),
+    h('label', { class: 'fld' }, h('span', null, 'Requête'), qIn), h('label', { class: 'fld' }, h('span', null, 'Importance de la popularité (0 à 100 %)'), wR), wLab, resBox);
+  drawGraph(); drawCard(); drawBot(); drawIdx(); drawRes();
+}
+WORKSHOPS.push({ id: 'w4', title: 'Moteurs de recherche', hint: 'Lancez le robot, regardez l’index, puis interrogez le moteur en jouant sur la popularité.', mount: mountW4, reset: () => { clearInterval(W4.timer); Object.assign(W4, { visited: [], seeds: [0], q: 'gateau', w: 50, sel: null, running: false, log: [], idxWord: 'web', timer: null }); } });
+/*W4-END*/
+
+/*W5-START*/
+/* ================= Atelier 5 : cookies, HTTPS, hameçonnage ================= */
+const DOMS = { boutique: 'boutique-exemple.fr', blog: 'blog-voyage.fr', ad: 'pub-reseau.com' };
+const PRODUCTS = ['Stylo', 'Cahier', 'Sac à dos'];
+function newW5() { return { tab: 'cookies', site: 'boutique', accept: true, block: false, jar: {}, srv: { sessions: {}, next: 1000 }, ad: { profiles: {}, next: 1, anon: 0 }, cart: [], note: '', last: '', lastAd: '', loaded: false, net: { proto: 'http', user: 'alice', pass: 'azerty123', sent: null }, ph: {} }; }
+const W5 = newW5();
+const jarHeader = d => { const j = W5.jar[d]; return j ? Object.entries(j).map(e => e[0] + '=' + e[1]).join('; ') : ''; };
+function boutiqueReq(method, path, body) {
+  const d = DOMS.boutique, sent = jarHeader(d); let sid = W5.jar[d] && W5.jar[d].session, set = '';
+  if (!sid || !W5.srv.sessions[sid]) { sid = 'S' + (W5.srv.next++); W5.srv.sessions[sid] = { cart: [] }; set = 'session=' + sid + '; Path=/; HttpOnly'; if (W5.accept) (W5.jar[d] = W5.jar[d] || {}).session = sid; }
+  if (body) W5.srv.sessions[sid].cart.push(body);
+  W5.cart = W5.srv.sessions[sid].cart.slice();
+  W5.note = !sent && !body ? (W5.accept ? 'Première visite : le serveur crée une session.' : 'Cookies refusés : le serveur ne peut pas vous reconnaître.') : (sent ? 'Le navigateur envoie le cookie : le serveur retrouve votre panier.' : 'Aucun cookie envoyé : le serveur crée une nouvelle session, le panier est vide.');
+  W5.last = method + ' ' + path + ' HTTP/1.1\nHost: ' + d + (sent ? '\nCookie: ' + sent : '') + (body ? '\n\nproduit=' + body : '') + '\n\n→ HTTP/1.1 200 OK' + (set ? '\n→ Set-Cookie: ' + set : '') + '\n→ (la page contient le panier de la session ' + sid + ')';
+}
+function adReq(siteDom) {
+  const d = DOMS.ad, allowed = W5.accept && !W5.block, sent = allowed ? jarHeader(d) : ''; let id = allowed && W5.jar[d] && W5.jar[d].id_pub, set = '', known = !!id;
+  if (!id) { id = 'u' + (W5.ad.next++); set = 'id_pub=' + id + '; SameSite=None; Secure'; if (allowed) (W5.jar[d] = W5.jar[d] || {}).id_pub = id; }
+  if (allowed) { const p = W5.ad.profiles[id] = W5.ad.profiles[id] || { sites: [] }; p.sites.push(siteDom); }
+  else W5.ad.anon++;
+  W5.lastAd = 'GET /banniere.png HTTP/1.1\nHost: ' + d + '\nReferer: https://' + siteDom + '/' + (sent ? '\nCookie: ' + sent : '') + '\n\n→ HTTP/1.1 200 OK' + (set ? '\n→ Set-Cookie: ' + set : '') + (allowed ? '' : '\n(cookie tiers bloqué ou refusé : le navigateur ne le garde pas)');
+  const sites = allowed ? W5.ad.profiles[id].sites : [siteDom], u = [...new Set(sites)];
+  return u.includes(DOMS.boutique) && u.includes(DOMS.blog) ? 'Voyage au Japon + stylos : -20 %' : u.includes(DOMS.boutique) ? 'Stylos et cahiers en promotion' : u.includes(DOMS.blog) ? 'Vols pour le Japon dès 599 €' : 'Publicité générique';
+}
+const PADLOCK = '<svg class="lock" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="currentColor"/><path d="M5 7V5a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+function cipherHex(text) {
+  let s = Math.floor(Math.random() * 65535) + 1, out = [];
+  for (let i = 0; i < text.length + 24; i++) { s = (s * 1103515245 + 12345) & 0x7fffffff; out.push(((s >> 8) & 255).toString(16).padStart(2, '0')); }
+  return out.join(' ').replace(/(.{47}) /g, '$1\n');
+}
+const PHISH = [
+  ['https://www.banque-exemple.fr/compte', true, 'Le domaine principal est banque-exemple.fr. « www » est un sous-domaine du site.'],
+  ['https://banque-exemple.fr.verif-securite.com/compte', false, 'Le domaine principal est verif-securite.com : « banque-exemple.fr » n’est qu’un sous-domaine choisi par le pirate. Le HTTPS ne prouve pas que le site est honnête.'],
+  ['https://secure.banque-exemple.fr/connexion', true, 'Le domaine principal est banque-exemple.fr. « secure » est un sous-domaine.'],
+  ['http://banque-exemple.fr-connexion.net/', false, 'Le domaine principal est fr-connexion.net : le tiret fait partie du nom. De plus, http n’est pas chiffré.'],
+  ['https://www.banque-exemp1e.fr/', false, 'Le nom contient le chiffre 1 à la place de la lettre l : c’est un autre domaine.'],
+  ['https://banque-exemple.fr/aide', true, 'Le domaine principal est banque-exemple.fr.']
+];
+function mountW5(root) {
+  root.append(h('h2', null, 'Cookies, HTTPS et hameçonnage'));
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div');
+  const draw = () => {
+    tabs.innerHTML = ''; [['cookies', 'Cookies'], ['https', 'HTTP et HTTPS'], ['phish', 'Hameçonnage']].forEach(t => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': W5.tab === t[0] ? 'true' : 'false', onclick: () => { W5.tab = t[0]; draw(); } }, t[1])));
+    body.innerHTML = ''; (W5.tab === 'cookies' ? cookiesTab : W5.tab === 'https' ? httpsTab : phishTab)(body, draw);
+  };
+  root.append(tabs, body); draw();
+}
+function cookiesTab(box, redraw) {
+  if (!W5.loaded) { W5.loaded = true; loadSite(); }
+  box.append(h('p', null, 'Visitez deux sites qui affichent la même publicité, fournie par une régie tierce (pub-reseau.com). Observez les cookies, les requêtes HTTP, et ce que la régie apprend de votre navigation.'));
+  const acc = h('input', { type: 'checkbox', id: 'cAcc', checked: W5.accept, onchange: e => { W5.accept = e.target.checked; redraw(); } });
+  const blk = h('input', { type: 'checkbox', id: 'cBlk', checked: W5.block, onchange: e => { W5.block = e.target.checked; redraw(); } });
+  box.append(h('div', { class: 'opts' }, h('label', { class: 'fld chk' }, acc, 'Accepter les cookies'), h('label', { class: 'fld chk' }, blk, 'Bloquer les cookies tiers'),
+    h('button', { class: 'btn sm', type: 'button', onclick: () => { W5.jar = {}; toast('Cookies du navigateur effacés'); redraw(); } }, 'Effacer les cookies du navigateur'),
+    h('button', { class: 'btn sm', type: 'button', onclick: () => { const t = W5.tab; Object.assign(W5, newW5()); W5.tab = t; W5.loaded = false; redraw(); } }, 'Tout réinitialiser')));
+  /* navigateur */
+  const sites = h('div', { class: 'chips', role: 'group', 'aria-label': 'Site visité' }, ['boutique', 'blog'].map(s => h('button', { type: 'button', class: 'chip' + (W5.site === s ? ' on' : ''), 'aria-pressed': W5.site === s ? 'true' : 'false', onclick: () => { W5.site = s; loadSite(); redraw(); } }, 'Aller sur ' + DOMS[s])),
+    h('button', { type: 'button', class: 'chip', onclick: () => { loadSite(); redraw(); } }, 'Recharger la page'));
+  const page = h('div', { class: 'page mini' });
+  if (W5.site === 'boutique') {
+    page.append(h('h2', null, 'Boutique Exemple'), h('p', null, 'Cliquez sur un produit pour l’ajouter au panier.'),
+      h('div', { class: 'files' }, PRODUCTS.map(p => h('button', { class: 'btn', type: 'button', onclick: () => { boutiqueReq('POST', '/panier/ajouter', p); redraw(); } }, 'Ajouter : ' + p))),
+      h('p', null, h('b', null, 'Panier : '), W5.cart.length ? W5.cart.join(', ') : 'vide'));
+  } else page.append(h('h2', null, 'Blog voyage : le Japon en 15 jours'), h('p', null, 'Tokyo, Kyoto, les trains rapides et la cuisine. Voici notre itinéraire et nos conseils pour préparer le voyage.'));
+  page.append(h('div', { class: 'ad' }, h('span', { class: 'adl' }, 'Publicité de pub-reseau.com'), h('b', null, W5.adText || '')));
+  const jar = Object.entries(W5.jar).flatMap(([d, c]) => Object.entries(c).map(([k, v]) => [d, k, v]));
+  const prof = Object.entries(W5.ad.profiles);
+  box.append(sites, h('div', { class: 'brw' }, h('div', { class: 'addr' }, 'https://' + DOMS[W5.site] + '/'), page), h('p', { class: 'small' }, W5.note));
+  box.append(h('h3', null, 'Cookies enregistrés dans le navigateur'),
+    jar.length ? h('table', { class: 'ctable' }, h('thead', null, h('tr', null, ['Domaine', 'Nom', 'Valeur', 'Type'].map(x => h('th', null, x)))), h('tbody', null, jar.map(r => h('tr', null, h('td', null, r[0]), h('td', null, r[1]), h('td', null, r[2]), h('td', null, r[0] === DOMS.ad ? 'Tiers (autre domaine que la page)' : 'Propre au site'))))) : h('p', { class: 'small' }, 'Aucun cookie enregistré.'));
+  box.append(h('div', { class: 'two2' }, h('div', null, h('h3', null, 'Dernière requête vers le site'), h('pre', { class: 'code' }, W5.last || '(aucune)')), h('div', null, h('h3', null, 'Requête vers la régie publicitaire'), h('pre', { class: 'code' }, W5.lastAd || '(aucune)'))));
+  box.append(h('h3', null, 'Ce que voit la régie pub-reseau.com'),
+    prof.length || W5.ad.anon ? h('table', { class: 'ctable' }, h('thead', null, h('tr', null, ['Visiteur', 'Sites où il a été reconnu'].map(x => h('th', null, x)))), h('tbody', null, prof.map(([id, p]) => h('tr', null, h('td', null, id + ' (cookie id_pub)'), h('td', null, [...new Set(p.sites)].join(' et ') + ' : ' + p.sites.length + ' visite(s)'))), W5.ad.anon ? h('tr', null, h('td', null, 'Visiteurs sans cookie'), h('td', null, W5.ad.anon + ' visite(s) impossibles à relier entre elles')) : null)) : h('p', { class: 'small' }, 'Rien pour le moment.'));
+}
+function loadSite() {
+  const site = W5.site; if (site === 'boutique') boutiqueReq('GET', '/', null); else { W5.cart = []; W5.last = 'GET / HTTP/1.1\nHost: ' + DOMS.blog + '\n\n→ HTTP/1.1 200 OK\n→ (ce site ne dépose pas de cookie)'; W5.note = 'Ce blog ne dépose pas de cookie, mais il charge une publicité depuis un autre domaine.'; }
+  W5.adText = adReq(DOMS[site]);
+}
+function httpsTab(box, redraw) {
+  const N = W5.net, sec = N.proto === 'https';
+  box.append(h('p', null, 'Alice se connecte à un site depuis un Wi-Fi public. Quelqu’un écoute le réseau. Comparez ce que voit le serveur et ce que voit l’espion. N’utilisez jamais un vrai mot de passe ici.'));
+  const radios = h('div', { class: 'chips', role: 'group', 'aria-label': 'Protocole' }, ['http', 'https'].map(p => h('button', { type: 'button', class: 'chip' + (N.proto === p ? ' on' : ''), 'aria-pressed': N.proto === p ? 'true' : 'false', onclick: () => { N.proto = p; N.sent = null; redraw(); } }, p + '://')));
+  const user = h('input', { type: 'text', id: 'nUser', value: N.user, 'aria-label': 'Identifiant', autocomplete: 'off' }), pass = h('input', { type: 'text', id: 'nPass', value: N.pass, 'aria-label': 'Mot de passe (fictif)', autocomplete: 'off' });
+  user.addEventListener('input', () => { N.user = user.value; }); pass.addEventListener('input', () => { N.pass = pass.value; });
+  const form = h('form', { class: 'loginf' }, h('label', { class: 'fld' }, h('span', null, 'Identifiant'), user), h('label', { class: 'fld' }, h('span', null, 'Mot de passe (fictif)'), pass), h('button', { class: 'btn pri', type: 'submit' }, 'Se connecter'));
+  form.addEventListener('submit', e => { e.preventDefault(); const t = 'POST /connexion HTTP/1.1\nHost: boutique-exemple.fr\nContent-Type: application/x-www-form-urlencoded\n\nidentifiant=' + N.user + '&mdp=' + N.pass; N.sent = { plain: t, hex: cipherHex(t), proto: N.proto }; redraw(); });
+  box.append(radios, h('div', { class: 'brw' }, h('div', { class: 'addr ' + (sec ? 'sec' : 'insec') }, h('span', { class: 'badge', html: sec ? PADLOCK + ' Connexion sécurisée' : 'Non sécurisé' }), h('span', null, N.proto + '://boutique-exemple.fr/connexion')), h('div', { class: 'page mini' }, h('h2', null, 'Connexion'), form)));
+  if (sec) box.append(h('details', { class: 'defi' }, h('summary', null, 'Voir le certificat du site'), h('table', { class: 'ctable' }, h('tbody', null, [['Délivré pour', 'boutique-exemple.fr'], ['Émis par', 'Autorité de certification Exemple (fictive)'], ['Valable', '90 jours'], ['Rôle', 'Prouver que la clé de chiffrement appartient bien à ce nom de domaine']].map(r => h('tr', null, h('td', null, r[0]), h('td', null, r[1])))))));
+  if (!N.sent) { box.append(h('p', { class: 'small' }, 'Cliquez sur « Se connecter » pour envoyer l’identifiant et le mot de passe.')); return; }
+  const S = N.sent, shown = S.proto === 'https';
+  box.append(h('div', { class: 'two2' }, h('div', null, h('h3', null, 'Ce que reçoit le serveur'), h('pre', { class: 'code' }, S.plain), h('p', { class: 'small' }, 'Le serveur déchiffre la requête : il reçoit toujours les informations en clair.')),
+    h('div', null, h('h3', null, 'Ce que voit l’espion sur le réseau'), h('pre', { class: 'code ' + (shown ? '' : 'leak') }, shown ? S.hex : S.plain),
+      h('p', { class: shown ? 'small' : 'warn' }, shown ? 'En HTTPS, la requête est chiffrée avant de quitter l’ordinateur : l’espion ne voit que des octets illisibles. (Illustration : ce n’est pas le vrai algorithme.) Il peut seulement savoir à quel serveur Alice parle.' : 'En HTTP, tout circule en clair : l’espion lit l’identifiant et le mot de passe.'))));
+}
+function phishTab(box, redraw) {
+  box.append(h('p', null, 'Un message vous demande de confirmer votre compte bancaire et vous propose un lien. Le vrai site de la banque est banque-exemple.fr. Dites pour chaque adresse si c’est le vrai site.'));
+  let ok = 0, done = 0; const list = h('div', { class: 'sorts' });
+  PHISH.forEach((it, i) => {
+    const a = W5.ph[i], right = a === (it[1] ? 'v' : 'f'); if (a) { done++; if (right) ok++; }
+    const u = parseUrl(it[0]), d = domainSplit(u.host);
+    const urlEl = a ? h('code', { class: 'urlx' }, u.scheme + '://', h('span', { class: 'dim' }, d.sub ? d.sub + '.' : ''), h('b', { class: it[1] ? 'okd' : 'kod' }, d.dom), u.path) : h('code', { class: 'urlx' }, it[0]);
+    const btn = (v, lab) => h('button', { type: 'button', class: 'btn sm' + (a === v ? (right ? ' good' : ' badc') : ''), disabled: !!a, onclick: () => { W5.ph[i] = v; redraw(); } }, lab);
+    list.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, urlEl), h('span', { class: 'sb' }, btn('v', 'Vrai site'), btn('f', 'Faux site')), a ? h('span', { class: 'sf ' + (right ? 'ok' : 'ko') }, (right ? 'Exact. ' : 'Non. ') + it[2]) : null));
+  });
+  box.append(list, h('p', { class: 'score' }, done ? 'Score : ' + ok + ' / ' + PHISH.length : ''),
+    h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W5.ph = {}; redraw(); } }, 'Recommencer')),
+    h('div', { class: 'retain' }, h('b', null, 'À retenir. '), 'Pour savoir où l’on est, on lit le nom de domaine de droite à gauche, jusqu’au premier point avant l’extension (.fr, .com…). Le cadenas ou le « https » indiquent une connexion chiffrée, pas un site honnête.'));
+}
+WORKSHOPS.push({ id: 'w5', title: 'Cookies et sécurité', hint: 'Visitez deux sites, comparez HTTP et HTTPS, puis démasquez les fausses adresses.', mount: mountW5, reset: () => { const t = W5.tab; Object.assign(W5, newW5()); W5.tab = t; } });
+/*W5-END*/
+
+/*ACT-START*/
+const ACT = {
+  w1: {
+    title: 'Web et Internet', level: 'Niveau 1 · Distinguer', time: '15 min', course: 'web',
+    goal: 'Distinguer Internet et le Web, et situer les grandes étapes de l’histoire du Web.',
+    steps: [
+      'Lisez le schéma en haut de l’atelier : Internet est en bas, et les services (dont le Web) reposent dessus.',
+      'Parcourez la <b>frise historique</b>. Filtrez avec « Internet » puis « Web » : lequel des deux existe en premier ?',
+      'Repérez les dates : ARPANET (1969), TCP/IP (1983), proposition de Tim Berners-Lee (1989), premier site web (1991).',
+      'Faites le tri <b>« Internet ou Web ? »</b> : 9 éléments. Lisez l’explication quand vous vous trompez.',
+      'Cherchez le piège : le courriel électronique est-il le Web ?'
+    ],
+    defi: { q: 'Internet existait avant le Web, et le Web ne peut pas exister sans Internet. Expliquez cette phrase, puis citez deux services d’Internet qui ne sont pas le Web.',
+      a: 'Le Web est un service qui utilise les protocoles d’Internet (TCP/IP) pour transporter ses pages. Internet date de 1969 à 1983, le Web de 1989 à 1991. Autres services : courrier électronique, messagerie instantanée, visioconférence, jeux en ligne, transfert de fichiers.' },
+    qcm: [
+      { q: 'Internet est…', o: ['Un service qui permet de consulter des pages', 'Un réseau de réseaux', 'Un navigateur', 'Un moteur de recherche'], a: 1, w: 'Internet relie des millions de réseaux. Le Web n’est qu’un des services qui l’utilisent.' },
+      { q: 'Qui a proposé le Web, et où ?', o: ['Tim Berners-Lee, au CERN', 'Bill Gates, chez Microsoft', 'Vint Cerf, à l’ARPA', 'Larry Page, à Stanford'], a: 0, w: 'Tim Berners-Lee, au CERN, en 1989.' },
+      { q: 'Lequel de ces éléments appartient au Web et non à l’infrastructure d’Internet ?', o: ['Un routeur', 'Une URL', 'Un câble en fibre optique', 'Le protocole IP'], a: 1, w: 'Une URL désigne une page ou une ressource du Web.' },
+      { q: 'Le courrier électronique est-il le Web ?', o: ['Oui, c’est la même chose', 'Non, c’est un autre service d’Internet, avec d’autres protocoles (SMTP, POP3)', 'Oui, il utilise HTTP', 'Non, il n’utilise pas Internet'], a: 1, w: 'Le courriel utilise Internet mais ses protocoles sont SMTP et POP3 ou IMAP, pas HTTP.' },
+      { q: 'Quel est le protocole du Web ?', o: ['SMTP', 'HTTP', 'TCP', 'DNS'], a: 1, w: 'HTTP (HyperText Transfer Protocol).' },
+      { q: 'Lequel est apparu en premier ?', o: ['Le Web', 'Les réseaux sociaux', 'Les deux en même temps', 'Internet (ARPANET dès 1969)'], a: 3, w: 'Les premiers réseaux datent de 1969, le Web de 1989 à 1991.' }
+    ]
+  },
+  w2: {
+    title: 'URL et HTTP', level: 'Niveau 2 · Comprendre', time: '20 min', course: 'url',
+    goal: 'Décoder une URL et suivre pas à pas ce que fait le navigateur : DNS, connexion TCP, requête et réponse HTTP.',
+    steps: [
+      'Dans <b>« Décoder une URL »</b>, lisez les morceaux colorés de l’adresse. Quel est le protocole ? le domaine principal ? le chemin ? les paramètres ?',
+      'Modifiez l’adresse : retirez « www. », ajoutez un port <code class="k">:8080</code>, passez de http à https. Qu’est-ce qui change dans le tableau ?',
+      'Dans <b>« Du clic à la page »</b>, laissez l’adresse proposée et cliquez sur « Aller ». Avancez avec « Étape suivante » : repérez les étapes DNS, TCP et HTTP.',
+      'Lisez la <b>requête</b> HTTP, puis la <b>réponse</b> : ligne d’état, en-têtes, contenu HTML.',
+      'Essayez les boutons d’exemple : « /ancien (redirigée) », « /secret », « /introuvable », « /panne », « Nom inconnu ». Notez le code obtenu pour chacun.',
+      'Essayez « En https » : quelle étape apparaît en plus ?',
+      'Dans la page affichée, cliquez sur un lien : une nouvelle requête part.'
+    ],
+    defi: { q: 'Relevez la requête envoyée quand vous cliquez sur « Page de SNT » depuis l’accueil. Que contient sa première ligne ? Pourquoi la ligne « Host » est-elle nécessaire ?',
+      a: 'La première ligne est « GET /snt HTTP/1.1 » : la méthode GET (demander une ressource), le chemin /snt, la version du protocole. L’en-tête Host indique le nom de domaine voulu : un même serveur, avec une même adresse IP, peut héberger plusieurs sites.' },
+    qcm: [
+      { q: 'Dans http://www.lycee-exemple.fr/snt?page=2, quel est le nom de domaine ?', o: ['http', 'www.lycee-exemple.fr', '/snt', 'page=2'], a: 1, w: 'http est le protocole, /snt le chemin, page=2 un paramètre.' },
+      { q: 'Dans quel ordre le navigateur procède-t-il pour afficher une page ?', o: ['TCP, DNS, HTTP', 'HTTP, DNS, TCP', 'DNS, TCP, HTTP', 'DNS, HTTP, TCP'], a: 2, w: 'Il lui faut l’adresse IP (DNS), puis une connexion (TCP), puis il demande la page (HTTP).' },
+      { q: 'Que signifie le code 404 ?', o: ['Accès interdit', 'Page introuvable', 'Erreur du serveur', 'La page a changé d’adresse'], a: 1, w: '404 Not Found : le serveur n’a pas cette page.' },
+      { q: 'Que signifie le code 301 ?', o: ['Le serveur est en panne', 'Accès refusé', 'Succès', 'La page a changé d’adresse : le navigateur suit la redirection'], a: 3, w: '301 Moved Permanently : l’en-tête Location donne la nouvelle adresse.' },
+      { q: 'Qu’ajoute https:// par rapport à http:// ?', o: ['Une connexion chiffrée (TLS)', 'Un accès plus rapide', 'Une page plus jolie', 'Un moteur de recherche'], a: 0, w: 'HTTPS = HTTP dans une connexion chiffrée par TLS.' },
+      { q: 'Un code 500 signifie…', o: ['La page n’existe pas', 'Vous n’avez pas le droit d’y accéder', 'Le serveur a rencontré une erreur interne', 'Tout s’est bien passé'], a: 2, w: 'Les codes 5xx sont des erreurs côté serveur, les 4xx des erreurs côté client.' },
+      { q: 'À quoi sert la requête DNS ?', o: ['À chiffrer la page', 'À obtenir l’adresse IP qui correspond au nom de domaine', 'À demander la page au serveur web', 'À afficher la page'], a: 1, w: 'Le DNS traduit un nom de domaine en adresse IP.' }
+    ]
+  },
+  w3: {
+    title: 'HTML et CSS', level: 'Niveau 2 · Construire', time: '25 min', course: 'html',
+    goal: 'Écrire une page simple : structurer le contenu avec le HTML, mettre en forme avec le CSS.',
+    steps: [
+      'Lisez le code de l’onglet <b>HTML</b> et comparez avec l’aperçu. Quelle balise produit le grand titre ? un paragraphe ?',
+      'Ouvrez l’onglet <b>Structure</b> à droite : le document est un arbre de balises imbriquées.',
+      '<b>Défi 1.</b> Modifiez le titre pour qu’il contienne « SNT ».',
+      '<b>Défis 2 et 3.</b> Ajoutez une liste de 3 éléments : <code class="k">&lt;ul&gt;&lt;li&gt;…&lt;/li&gt;&lt;/ul&gt;</code>, puis un lien : <code class="k">&lt;a href="http://cours-reseaux.fr"&gt;Cours&lt;/a&gt;</code>.',
+      '<b>Défi 4.</b> Ajoutez l’image : <code class="k">&lt;img src="logo.svg" alt="Logo du lycée"&gt;</code>. À quoi sert « alt » ?',
+      'Onglet <b>CSS</b>. <b>Défi 5</b> : dans la règle h1, écrivez <code class="k">color: darkblue;</code>. <b>Défi 6</b> : dans la règle body, ajoutez <code class="k">background-color: lightyellow;</code>.',
+      'Cassez volontairement le code (supprimez un <code class="k">&gt;</code> ou une balise fermante) : que fait le navigateur ?'
+    ],
+    defi: { q: 'Sans modifier le HTML, utilisez seulement le CSS pour centrer le titre, mettre en gras les éléments de la liste et encadrer les images. Quelles propriétés avez-vous utilisées ? Que montre cet exercice ?',
+      a: 'text-align: center; sur h1, font-weight: bold; sur li, border: 2px solid black; sur img. Le HTML décrit le contenu et la structure, le CSS décrit la présentation : on peut changer l’aspect de la page sans toucher à son contenu.' },
+    qcm: [
+      { q: 'HTML signifie…', o: ['HyperText Markup Language', 'High Tech Modern Language', 'HyperText Transfer Language', 'Hyper Tool Making Language'], a: 0, w: 'Langage à balises pour décrire des pages hypertextes.' },
+      { q: 'Quel est le rôle du CSS ?', o: ['Transmettre les pages', 'Décrire la présentation (couleurs, polices, mise en page)', 'Traduire les noms de domaine', 'Chiffrer les pages'], a: 1, w: 'CSS : Cascading Style Sheets, feuilles de style.' },
+      { q: 'Quelle balise crée un lien ?', o: ['<link>', '<a>', '<url>', '<href>'], a: 1, w: 'Le lien s’écrit <a href="adresse">texte</a> : href est un attribut de la balise a.' },
+      { q: 'À quoi sert l’attribut alt d’une image ?', o: ['À changer sa taille', 'À donner l’adresse de l’image', 'À donner un texte de remplacement, lu par les lecteurs d’écran', 'À ajouter une bordure'], a: 2, w: 'Il aide les personnes malvoyantes et s’affiche si l’image est introuvable.' },
+      { q: 'Dans « h1 { color: red; } », que sont h1, color et red ?', o: ['propriété, sélecteur, valeur', 'sélecteur, propriété, valeur', 'valeur, propriété, sélecteur', 'balise, attribut, texte'], a: 1, w: 'h1 est le sélecteur (ce qu’on met en forme), color la propriété, red la valeur.' },
+      { q: 'Une balise <p> n’est pas fermée. Que fait en général le navigateur ?', o: ['Il affiche une page blanche', 'Il refuse la page', 'Il envoie une erreur 404', 'Il corrige comme il peut et affiche la page'], a: 3, w: 'Les navigateurs sont tolérants, mais le résultat peut ne pas être celui attendu : mieux vaut un HTML correct.' },
+      { q: 'Pourquoi sépare-t-on HTML et CSS ?', o: ['Pour pouvoir changer l’apparence sans modifier le contenu', 'Pour que la page soit chiffrée', 'Pour accélérer Internet', 'Parce que le navigateur l’impose'], a: 0, w: 'Une même feuille de style peut servir à toutes les pages d’un site.' }
+    ]
+  },
+  w4: {
+    title: 'Moteurs de recherche', level: 'Niveau 3 · Analyser', time: '25 min', course: 'moteurs',
+    goal: 'Comprendre les trois étapes d’un moteur de recherche : exploration, indexation, classement.',
+    steps: [
+      'Dans <b>« Le mini-web »</b>, cliquez sur quelques pages : lisez leur contenu, leurs liens sortants et entrants. Le nombre dans chaque rond est son nombre de liens entrants.',
+      'Quelle page a le plus de liens entrants ? Laquelle n’en a aucun ?',
+      'Cliquez sur <b>« Lancer le robot »</b> (ou « Terminer d’un coup »). Il part de l’annuaire et suit les liens. Quelle page n’est jamais visitée ?',
+      'Dans <b>« L’index »</b>, cherchez le mot « web » : l’index donne les pages qui le contiennent et combien de fois.',
+      'Dans <b>« Interroger le moteur »</b>, cherchez « gateau » avec la popularité à 0 %, puis 50 %, puis 100 %. Comparez l’ordre. Quel site répète le mot pour monter ?',
+      'Cherchez « robotique ». Une seule page est trouvée. Cliquez sur « Soumettre monclub-robot.fr », relancez le robot, puis cherchez de nouveau.',
+      'Essayez aussi « web » et « chocolat ».'
+    ],
+    defi: { q: 'Avec la requête « gateau », à partir de quel réglage de popularité la vraie recette (cuisine-facile.fr/gateau) passe-t-elle devant gateau-gratuit.fr ? Que montre cette expérience sur le référencement abusif ?',
+      a: 'Jusqu’à 30 %, le faux site est premier ; à partir de 40 %, la vraie recette passe devant. Le faux site répète le mot et gagne en mots-clés, mais il n’a presque aucun lien entrant. En combinant plusieurs critères dont la popularité, les moteurs limitent ce genre de triche.' },
+    qcm: [
+      { q: 'Quelle est la première étape d’un moteur de recherche ?', o: ['Classer les résultats', 'Explorer le Web avec un robot', 'Afficher la publicité', 'Chiffrer les pages'], a: 1, w: 'Exploration (robot), puis indexation, puis classement à chaque requête.' },
+      { q: 'Qu’est-ce que l’index d’un moteur ?', o: ['La liste des pages les plus visitées', 'Un historique de navigation', 'Une table qui associe chaque mot aux pages qui le contiennent', 'La liste des cookies'], a: 2, w: 'C’est ce qui permet de répondre vite sans relire tout le Web.' },
+      { q: 'Pourquoi une page qu’aucun lien ne désigne n’est-elle pas trouvée ?', o: ['Elle est trop courte', 'Le robot suit les liens : il ne la découvre pas, sauf si on la lui soumet', 'Elle est interdite', 'Elle n’est pas en HTML'], a: 1, w: 'Un robot ne connaît que ce qu’il peut atteindre en suivant des liens.' },
+      { q: 'Que mesure la « popularité » dans cet atelier ?', o: ['Le nombre de visites', 'Le nombre de mots', 'Le nombre de liens entrants', 'La date de création'], a: 2, w: 'Plus de pages pointent vers une page, plus elle est jugée importante.' },
+      { q: 'Pourquoi un moteur ne se contente-t-il pas de compter les mots-clés ?', o: ['Pour aller plus vite', 'Pour limiter la triche : on peut répéter un mot des dizaines de fois', 'Parce que les mots sont secrets', 'Parce que le HTML est illisible'], a: 1, w: 'C’est le « bourrage de mots-clés », pénalisé par les moteurs.' },
+      { q: 'Deux personnes tapent la même requête sur un vrai moteur mais ne voient pas les mêmes résultats. Pourquoi ?', o: ['C’est une panne', 'Les moteurs tirent au sort', 'Le moteur peut personnaliser (localisation, langue, historique)', 'Ils n’utilisent pas le même navigateur'], a: 2, w: 'La personnalisation n’est pas simulée ici, mais elle existe dans les vrais moteurs.' },
+      { q: 'Les résultats sponsorisés sont…', o: ['Classés uniquement selon leur pertinence', 'Payés par des annonceurs et placés en tête', 'Interdits', 'Toujours les plus fiables'], a: 1, w: 'Ils sont signalés comme publicités : un résultat sponsorisé n’est pas un gage de qualité.' }
+    ]
+  },
+  w5: {
+    title: 'Cookies et sécurité', level: 'Niveau 3 · Se protéger', time: '25 min', course: 'cookies',
+    goal: 'Comprendre les cookies et le traçage publicitaire, l’intérêt du HTTPS, et repérer une adresse trompeuse.',
+    steps: [
+      'Onglet <b>Cookies</b> : sur boutique-exemple.fr, ajoutez 2 produits au panier. Regardez « Cookies enregistrés » : un cookie « session » est apparu. Relisez la requête : la ligne « Cookie: session=… ».',
+      'Cliquez sur « Recharger la page » : le panier est retrouvé. Pourquoi ?',
+      'Décochez « Accepter les cookies », rechargez, ajoutez un produit, puis rechargez encore. Que devient le panier ?',
+      'Recochez, puis allez sur blog-voyage.fr et revenez à la boutique. Dans « Ce que voit la régie pub-reseau.com », le même visiteur est reconnu sur deux sites. La publicité change-t-elle ?',
+      'Cochez « Bloquer les cookies tiers », effacez les cookies, refaites la visite des deux sites. La régie peut-elle vous relier ?',
+      'Onglet <b>HTTP et HTTPS</b> : « Se connecter » en http:// puis en https://. Comparez ce que voit l’espion.',
+      'Onglet <b>Hameçonnage</b> : classez les 6 adresses.'
+    ],
+    defi: { q: 'Un site affiche un bandeau avec un gros bouton « Accepter » et un « Refuser » caché dans un sous-menu. Pourquoi est-ce un problème ? Quels cookies peut-on refuser sans empêcher le site de fonctionner ?',
+      a: 'En France, la CNIL demande que refuser soit aussi simple qu’accepter. On peut généralement refuser les cookies de traçage publicitaire. Les cookies strictement nécessaires (session, panier) ne demandent pas de consentement.' },
+    qcm: [
+      { q: 'Un cookie est…', o: ['Un virus', 'Une petite information enregistrée par le navigateur et renvoyée au site à chaque requête', 'Une page web', 'Un moteur de recherche'], a: 1, w: 'Le serveur le demande avec Set-Cookie, le navigateur le renvoie avec Cookie.' },
+      { q: 'Pourquoi un cookie de session permet-il de garder un panier ?', o: ['Il contient tous les produits', 'Il chiffre la page', 'Il identifie le visiteur : le serveur retrouve son panier', 'Il accélère le réseau'], a: 2, w: 'Le panier est stocké côté serveur, le cookie contient seulement un identifiant de session.' },
+      { q: 'Qu’est-ce qu’un cookie tiers ?', o: ['Un cookie déposé par un domaine autre que celui de la page visitée', 'Un cookie de troisième génération', 'Un cookie volé', 'Un cookie chiffré'], a: 0, w: 'Ici, pub-reseau.com dépose un cookie sur des pages qui n’appartiennent pas à pub-reseau.com.' },
+      { q: 'Comment une régie publicitaire reconnaît-elle un visiteur sur deux sites différents ?', o: ['Grâce à son adresse e-mail', 'Grâce à un cookie tiers qui revient avec la même valeur', 'Grâce au certificat', 'Elle ne le peut pas'], a: 1, w: 'Les deux sites chargent la même publicité : le cookie id_pub revient avec le même identifiant.' },
+      { q: 'Que voit un espion sur un Wi-Fi public quand on utilise HTTP ?', o: ['Rien', 'Seulement l’adresse du site', 'Seulement l’heure', 'Tout le contenu, y compris les mots de passe'], a: 3, w: 'HTTP n’est pas chiffré. HTTPS protège le contenu des échanges.' },
+      { q: 'Un site affiche un cadenas et https://. Est-il forcément honnête ?', o: ['Oui', 'Non : la connexion est chiffrée, mais le site peut être un faux', 'Oui, le certificat garantit l’honnêteté', 'Non, car https n’existe pas'], a: 1, w: 'Le HTTPS protège la connexion, pas l’identité réelle ni les intentions du propriétaire du site.' },
+      { q: 'Dans https://banque-exemple.fr.verif-securite.com/compte, quel est le domaine principal ?', o: ['banque-exemple.fr', 'https', 'verif-securite.com', 'compte'], a: 2, w: 'On lit de droite à gauche jusqu’au premier point avant l’extension.' }
+    ]
+  }
+};
+/*ACT-END*/
+
+/*COURSE-START*/
+const COURSE = [];
+COURSE.push({ id: 'web', t: 'Web et Internet', h: `
+<p>On emploie souvent « Internet » et « Web » pour la même chose. Ce sont pourtant deux notions différentes.</p>
+<table class="ctable"><thead><tr><th></th><th>Internet</th><th>Le Web</th></tr></thead><tbody>
+<tr><td><b>Nature</b></td><td>Un réseau de réseaux : câbles, routeurs, protocoles.</td><td>Un service : des pages reliées par des liens.</td></tr>
+<tr><td><b>Protocoles</b></td><td>IP, TCP, UDP, DNS…</td><td>HTTP (et HTTPS)</td></tr>
+<tr><td><b>Langages et formats</b></td><td>-</td><td>HTML, CSS, URL</td></tr>
+<tr><td><b>Matériel et logiciels</b></td><td>Routeurs, commutateurs, modems.</td><td>Navigateurs, serveurs web.</td></tr>
+</tbody></table>
+<p>D’autres services utilisent Internet sans être le Web : le courrier électronique (SMTP, POP3, IMAP), la visioconférence, les jeux en ligne, le transfert de fichiers.</p>
+<h3>Client et serveur</h3>
+<ul>
+<li>Le <b>navigateur</b> (Firefox, Chrome, Safari, Edge…) est le <b>client</b> : il demande des pages.</li>
+<li>Le <b>serveur web</b> est un programme, sur une machine toujours allumée, qui répond aux demandes en envoyant des pages.</li>
+<li>Le client demande, le serveur répond : c’est toujours le client qui commence.</li>
+</ul>
+<h3>Vocabulaire</h3>
+<ul>
+<li>Une <b>page web</b> est un document (en HTML) affiché par un navigateur. Un <b>site web</b> est un ensemble de pages d’un même domaine.</li>
+<li>Un <b>lien hypertexte</b> relie une page à une autre : en cliquant, on passe de l’une à l’autre. C’est l’idée centrale du Web.</li>
+<li>Une <b>ressource</b> est n’importe quel élément qu’on peut demander : page, image, feuille de style, vidéo.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Internet = l’infrastructure. Le Web = un service qui l’utilise, fondé sur HTTP, HTML et les URL. Navigateur = client, serveur web = serveur.</div>` });
+
+COURSE.push({ id: 'histoire', t: 'Histoire du Web', h: `
+<table class="ctable"><thead><tr><th>Date</th><th>Événement</th></tr></thead><tbody>
+<tr><td>1969</td><td>ARPANET : premiers ordinateurs reliés en réseau, aux États-Unis.</td></tr>
+<tr><td>1983</td><td>TCP/IP est adopté : Internet devient un réseau de réseaux.</td></tr>
+<tr><td>1989</td><td>Au CERN (Suisse), Tim Berners-Lee propose un système de documents reliés par des liens, pour partager les connaissances des chercheurs.</td></tr>
+<tr><td>1990</td><td>Premier navigateur et premier serveur web. Il invente HTML, HTTP et les URL, avec l’aide de collègues dont Robert Cailliau.</td></tr>
+<tr><td>1991</td><td>Premier site web ouvert au public : il présente le projet lui-même.</td></tr>
+<tr><td>1993</td><td>Le CERN place la technologie du Web dans le domaine public : n’importe qui peut l’utiliser librement. Le navigateur Mosaic popularise le Web.</td></tr>
+<tr><td>1994</td><td>Création du W3C, qui publie les standards du Web (HTML, CSS…).</td></tr>
+<tr><td>1998</td><td>Google : un moteur qui classe les pages en tenant compte des liens.</td></tr>
+<tr><td>2001</td><td>Wikipédia : l’encyclopédie écrite par ses lecteurs.</td></tr>
+<tr><td>2004 et après</td><td>Les réseaux sociaux : le Web devient participatif. Chacun publie du contenu.</td></tr>
+<tr><td>2007 et après</td><td>Les smartphones : le Web dans la poche.</td></tr>
+<tr><td>vers 2016</td><td>Des certificats gratuits généralisent le HTTPS.</td></tr>
+</tbody></table>
+<h3>Trois idées qui ont fait le succès du Web</h3>
+<ul>
+<li><b>Un standard ouvert et gratuit</b> : tout le monde peut créer un site ou un navigateur.</li>
+<li><b>Une adresse unique par ressource</b> : l’URL.</li>
+<li><b>Le lien hypertexte</b> : n’importe quelle page peut pointer vers n’importe quelle autre.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Internet date de 1969 à 1983. Le Web a été inventé en 1989-1991 par Tim Berners-Lee au CERN. Le W3C maintient ses standards.</div>` });
+
+COURSE.push({ id: 'url', t: 'Client, serveur et URL', h: `
+<p>Une <b>URL</b> (<i>Uniform Resource Locator</i>) est l’adresse d’une ressource du Web. Elle contient tout ce qu’il faut pour la trouver. Modifiez celle-ci pour voir chaque morceau :</p>
+<div class="widget" data-w="url"></div>
+<h3>Les parties d’une URL</h3>
+<table class="ctable"><thead><tr><th>Partie</th><th>Exemple</th><th>Rôle</th></tr></thead><tbody>
+<tr><td>Protocole</td><td><code>https://</code></td><td>Comment dialoguer : http (non chiffré) ou https (chiffré).</td></tr>
+<tr><td>Nom de domaine</td><td><code>www.lycee-exemple.fr</code></td><td>Quel serveur. Traduit en adresse IP par le DNS.</td></tr>
+<tr><td>Port (facultatif)</td><td><code>:8080</code></td><td>Quel programme du serveur. Par défaut 80 pour http, 443 pour https.</td></tr>
+<tr><td>Chemin</td><td><code>/snt/reseaux.html</code></td><td>Quelle page sur le serveur.</td></tr>
+<tr><td>Paramètres (facultatif)</td><td><code>?page=2&amp;lang=fr</code></td><td>Informations envoyées au serveur, sous la forme clé=valeur séparées par &amp;.</td></tr>
+<tr><td>Ancre (facultative)</td><td><code>#masques</code></td><td>Endroit précis de la page. Elle n’est pas envoyée au serveur.</td></tr>
+</tbody></table>
+<h3>Lire un nom de domaine</h3>
+<p>On le lit de <b>droite à gauche</b>.</p>
+<div class="encap"><span class="e4">fr</span><span class="e3">lycee-exemple</span><span class="e2">www</span></div>
+<ul>
+<li><b>fr</b> : le domaine de premier niveau (extension : .fr, .com, .org…).</li>
+<li><b>lycee-exemple.fr</b> : le <b>domaine principal</b>, choisi et réservé par le propriétaire.</li>
+<li><b>www</b> : un <b>sous-domaine</b>. Le propriétaire du domaine peut en créer autant qu’il veut : aide.lycee-exemple.fr, par exemple.</li>
+</ul>
+<p>Pour savoir à qui appartient un site, on regarde le domaine principal, c’est-à-dire ce qui précède immédiatement l’extension. Tout ce qui est à gauche est choisi par le propriétaire du domaine.</p>
+<p>Le <b>nom de domaine</b> est traduit en <b>adresse IP</b> par le DNS (voir la page sur le réseau).</p>
+<div class="retain"><b>À retenir.</b> URL = protocole + nom de domaine + chemin (+ port, paramètres, ancre). Le domaine principal est juste avant l’extension.</div>` });
+
+COURSE.push({ id: 'http', t: 'Le protocole HTTP', h: `
+<p><b>HTTP</b> (<i>HyperText Transfer Protocol</i>) fixe comment un navigateur demande une ressource et comment le serveur répond.</p>
+<h3>Ce qui se passe quand on tape une adresse</h3>
+<ol>
+<li><b>DNS</b> : le navigateur obtient l’adresse IP du nom de domaine.</li>
+<li><b>TCP</b> : il ouvre une connexion vers cette adresse (port 80, ou 443 pour https).</li>
+<li><b>TLS</b> (seulement en https) : le serveur présente son certificat, les deux côtés choisissent une clé de chiffrement.</li>
+<li><b>HTTP</b> : requête, puis réponse.</li>
+<li>Le navigateur affiche la page. S’il manque des ressources (images, feuille de style), il envoie d’autres requêtes : une page web demande en général plusieurs dizaines de requêtes.</li>
+</ol>
+<h3>La requête</h3>
+<pre class="code">GET /snt HTTP/1.1
+Host: www.lycee-exemple.fr
+User-Agent: navigateur-exemple
+Accept: text/html</pre>
+<ul>
+<li><b>Première ligne</b> : la méthode, le chemin, la version du protocole.</li>
+<li><b>GET</b> demande une ressource. <b>POST</b> envoie des données au serveur (par exemple un formulaire de connexion) dans le corps de la requête.</li>
+<li><b>Host</b> : le nom de domaine voulu. Un même serveur peut héberger plusieurs sites.</li>
+</ul>
+<h3>La réponse</h3>
+<pre class="code">HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 118
+
+&lt;h1&gt;SNT en seconde&lt;/h1&gt; ...</pre>
+<ul>
+<li><b>Ligne d’état</b> : version, code, texte du code.</li>
+<li><b>En-têtes</b> : informations sur la réponse (type de contenu, taille, cookie…).</li>
+<li><b>Corps</b> : le contenu (ici du HTML).</li>
+</ul>
+<h3>Les codes de réponse</h3>
+<table class="ctable"><thead><tr><th>Code</th><th>Famille</th><th>Signification</th></tr></thead><tbody>
+<tr><td><b>200</b> OK</td><td rowspan="1">2xx : succès</td><td>La ressource est envoyée.</td></tr>
+<tr><td><b>301</b> Moved Permanently</td><td>3xx : redirection</td><td>La page a changé d’adresse (en-tête <code>Location</code>). Le navigateur renvoie une requête vers la nouvelle adresse.</td></tr>
+<tr><td><b>403</b> Forbidden</td><td rowspan="2">4xx : erreur du client</td><td>Accès interdit.</td></tr>
+<tr><td><b>404</b> Not Found</td><td>La ressource n’existe pas.</td></tr>
+<tr><td><b>500</b> Internal Server Error</td><td>5xx : erreur du serveur</td><td>Le serveur a rencontré un problème.</td></tr>
+</tbody></table>
+<h3>HTTP ne se souvient de rien</h3>
+<p>Chaque requête est indépendante : le serveur ne sait pas, a priori, que deux requêtes viennent du même visiteur. Pour garder un panier ou une connexion, les sites utilisent des <b>cookies</b> (voir la section suivante sur les cookies).</p>
+<div class="retain"><b>À retenir.</b> Le client envoie une requête (méthode, chemin, en-têtes), le serveur répond (code, en-têtes, corps). 200 = succès, 301 = redirection, 404 = introuvable, 500 = erreur serveur.</div>` });
+
+COURSE.push({ id: 'html', t: 'HTML : structurer une page', h: `
+<p>Le <b>HTML</b> (<i>HyperText Markup Language</i>) est un langage à <b>balises</b> qui décrit le <b>contenu</b> et la <b>structure</b> d’une page : ceci est un titre, ceci un paragraphe, ceci un lien.</p>
+<h3>Anatomie d’une balise</h3>
+<pre class="code">&lt;a href="http://cours-reseaux.fr"&gt;Cours sur les réseaux&lt;/a&gt;
+ ↑ balise ouvrante + attribut        ↑ contenu          ↑ balise fermante</pre>
+<ul>
+<li>Une balise s’écrit entre <code>&lt;</code> et <code>&gt;</code>. La plupart vont par paires : ouvrante <code>&lt;p&gt;</code> et fermante <code>&lt;/p&gt;</code>.</li>
+<li>Un <b>attribut</b> précise une balise : <code>href</code> donne l’adresse d’un lien, <code>src</code> la source d’une image, <code>alt</code> son texte de remplacement.</li>
+<li>Certaines balises n’ont pas de contenu et ne se ferment pas : <code>&lt;img&gt;</code>, <code>&lt;br&gt;</code>, <code>&lt;hr&gt;</code>.</li>
+<li>Les balises s’<b>imbriquent</b> : une liste contient des éléments, un élément contient du texte. On obtient un <b>arbre</b> (voir l’onglet « Structure » de l’atelier).</li>
+</ul>
+<h3>Structure d’un document</h3>
+<pre class="code">&lt;!doctype html&gt;
+&lt;html lang="fr"&gt;
+  &lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;Titre de l’onglet&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Titre de la page&lt;/h1&gt;
+    &lt;p&gt;Un paragraphe.&lt;/p&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre>
+<p>Le <code>head</code> contient des informations sur la page (titre de l’onglet, jeu de caractères, feuille de style). Le <code>body</code> contient ce qui s’affiche.</p>
+<h3>Balises courantes</h3>
+<table class="ctable"><thead><tr><th>Balise</th><th>Rôle</th></tr></thead><tbody>
+<tr><td><code>h1</code> à <code>h6</code></td><td>Titres, du plus important au moins important.</td></tr>
+<tr><td><code>p</code></td><td>Paragraphe.</td></tr>
+<tr><td><code>a href="…"</code></td><td>Lien hypertexte.</td></tr>
+<tr><td><code>img src="…" alt="…"</code></td><td>Image avec texte de remplacement.</td></tr>
+<tr><td><code>ul</code>, <code>ol</code>, <code>li</code></td><td>Liste à puces, liste numérotée, élément de liste.</td></tr>
+<tr><td><code>table</code>, <code>tr</code>, <code>td</code>, <code>th</code></td><td>Tableau, ligne, cellule, cellule d’en-tête.</td></tr>
+<tr><td><code>strong</code>, <code>em</code></td><td>Texte important, texte mis en relief.</td></tr>
+<tr><td><code>div</code>, <code>span</code></td><td>Regroupements sans signification particulière (bloc, ou dans une ligne).</td></tr>
+<tr><td><code>header</code>, <code>nav</code>, <code>main</code>, <code>footer</code></td><td>Parties de la page : en-tête, menu, contenu principal, pied de page.</td></tr>
+</tbody></table>
+<h3>Pourquoi bien écrire son HTML ?</h3>
+<ul>
+<li>Un navigateur est <b>tolérant</b> : il corrige un code incorrect de son mieux, mais le résultat peut être surprenant.</li>
+<li>Les <b>textes alternatifs</b> (<code>alt</code>) et les titres bien hiérarchisés rendent la page accessible aux lecteurs d’écran.</li>
+<li>Les moteurs de recherche lisent la structure : le contenu de <code>h1</code> ou de <code>title</code> compte plus que le reste du texte.</li>
+</ul>
+<h3>À faire dans votre navigateur</h3>
+<p>Sur n’importe quel site : <b>Ctrl + U</b> affiche le code source de la page, <b>F12</b> ouvre les outils de développement, avec l’arbre des balises. Vous voyez le HTML que le serveur a envoyé.</p>
+<div class="retain"><b>À retenir.</b> HTML = contenu et structure, avec des balises et des attributs imbriqués. Le navigateur transforme ce code en page affichée.</div>` });
+
+COURSE.push({ id: 'css', t: 'CSS : mettre en forme', h: `
+<p>Le <b>CSS</b> (<i>Cascading Style Sheets</i>, « feuilles de style en cascade ») décrit la <b>présentation</b> : couleurs, polices, tailles, marges, positions.</p>
+<h3>Une règle CSS</h3>
+<pre class="code">h1 {
+  color: darkblue;
+  text-align: center;
+}</pre>
+<ul>
+<li><b>h1</b> est le <b>sélecteur</b> : il désigne les éléments concernés.</li>
+<li><b>color</b> et <b>text-align</b> sont des <b>propriétés</b>.</li>
+<li><b>darkblue</b> et <b>center</b> sont les <b>valeurs</b>. Chaque déclaration se termine par un point-virgule.</li>
+</ul>
+<h3>Les sélecteurs</h3>
+<table class="ctable"><thead><tr><th>Sélecteur</th><th>Désigne</th></tr></thead><tbody>
+<tr><td><code>p</code></td><td>Tous les paragraphes.</td></tr>
+<tr><td><code>.important</code></td><td>Tous les éléments avec <code>class="important"</code>.</td></tr>
+<tr><td><code>#titre</code></td><td>L’élément avec <code>id="titre"</code> (un id est unique dans la page).</td></tr>
+<tr><td><code>ul li</code></td><td>Les <code>li</code> situés à l’intérieur d’un <code>ul</code>.</td></tr>
+</tbody></table>
+<h3>Quelques propriétés</h3>
+<table class="ctable"><thead><tr><th>Propriété</th><th>Effet</th><th>Exemple</th></tr></thead><tbody>
+<tr><td><code>color</code></td><td>Couleur du texte</td><td><code>color: red;</code></td></tr>
+<tr><td><code>background-color</code></td><td>Couleur de fond</td><td><code>background-color: lightyellow;</code></td></tr>
+<tr><td><code>font-family</code>, <code>font-size</code></td><td>Police, taille</td><td><code>font-size: 18px;</code></td></tr>
+<tr><td><code>font-weight</code></td><td>Gras</td><td><code>font-weight: bold;</code></td></tr>
+<tr><td><code>text-align</code></td><td>Alignement</td><td><code>text-align: center;</code></td></tr>
+<tr><td><code>margin</code>, <code>padding</code></td><td>Espace autour, espace dedans</td><td><code>padding: 10px;</code></td></tr>
+<tr><td><code>border</code></td><td>Bordure</td><td><code>border: 2px solid black;</code></td></tr>
+</tbody></table>
+<p>Une couleur s’écrit par son <b>nom</b> (<code>red</code>), en <b>hexadécimal</b> <code>#rrggbb</code> (<code>#2e6da4</code> : rouge 2e, vert 6d, bleu a4) ou avec <code>rgb(46, 109, 164)</code>.</p>
+<h3>Cascade et héritage</h3>
+<ul>
+<li>Quand deux règles s’appliquent au même élément, la plus <b>précise</b> l’emporte ; à précision égale, la <b>dernière</b> écrite l’emporte.</li>
+<li>Beaucoup de propriétés (couleur du texte, police) sont <b>héritées</b> : un élément les reprend de son parent.</li>
+</ul>
+<h3>Où écrire le CSS ?</h3>
+<ul>
+<li>Dans un fichier à part <code>style.css</code>, relié avec <code>&lt;link rel="stylesheet" href="style.css"&gt;</code> (la meilleure solution : une feuille pour tout un site).</li>
+<li>Dans une balise <code>&lt;style&gt;</code> de la page.</li>
+<li>Dans un attribut <code>style="…"</code> sur un élément.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> HTML = quoi (contenu, structure). CSS = comment (présentation). Une règle : sélecteur { propriété: valeur; }. Séparer les deux permet de changer l’apparence sans toucher au contenu.</div>` });
+
+COURSE.push({ id: 'moteurs', t: 'Les moteurs de recherche', h: `
+<p>Un moteur de recherche ne parcourt pas le Web quand vous tapez une requête : il l’a fait avant. Il travaille en trois étapes.</p>
+<h3>1. Explorer</h3>
+<p>Des programmes appelés <b>robots d’indexation</b> (<i>crawlers</i>) partent de pages connues, lisent chaque page et <b>suivent tous ses liens</b>, de proche en proche. Une page que personne ne cite n’est jamais découverte, sauf si son propriétaire la signale au moteur. Un fichier <code>robots.txt</code> permet à un site de demander aux robots d’éviter certaines pages.</p>
+<h3>2. Indexer</h3>
+<p>Pour chaque page lue, le moteur note les mots qu’elle contient (sans les mots vides comme « le » ou « de »). Il construit un <b>index</b> : pour chaque mot, la liste des pages qui le contiennent.</p>
+<table class="ctable"><thead><tr><th>Mot</th><th>Pages qui le contiennent</th></tr></thead><tbody>
+<tr><td>web</td><td>web-histoire.fr, lycee-exemple.fr/snt, cours-reseaux.fr…</td></tr>
+<tr><td>chocolat</td><td>cuisine-facile.fr/gateau, gateau-gratuit.fr…</td></tr>
+</tbody></table>
+<p>Grâce à cet index, le moteur répond en une fraction de seconde sans relire le Web.</p>
+<h3>3. Classer</h3>
+<p>À chaque requête, le moteur retrouve les pages qui contiennent les mots demandés, puis les <b>classe</b> avec plusieurs critères :</p>
+<ul>
+<li>la <b>pertinence</b> : combien de fois et où les mots apparaissent (le titre compte plus que le texte) ;</li>
+<li>la <b>popularité</b> : combien de pages pointent vers elle. L’idée du <b>PageRank</b> de Google (1998) est qu’une page est importante si des pages importantes pointent vers elle ;</li>
+<li>d’autres critères : langue, lieu, fraîcheur, vitesse de chargement, et la <b>personnalisation</b> d’après l’historique de l’utilisateur.</li>
+</ul>
+<h3>Référencement et triche</h3>
+<ul>
+<li>Le <b>référencement</b> (SEO) consiste à améliorer la position d’un site : bons titres, contenu utile, liens depuis d’autres sites.</li>
+<li>Répéter un mot-clé des dizaines de fois (le <b>bourrage de mots-clés</b>) est une triche que les moteurs pénalisent : c’est le rôle des critères de popularité. C’est ce que montre le faux site « gateau-gratuit.fr » de l’atelier.</li>
+</ul>
+<h3>Publicité, biais et esprit critique</h3>
+<ul>
+<li>Les résultats <b>sponsorisés</b> sont payés par des annonceurs et signalés comme tels.</li>
+<li>Le moteur garde souvent trace de vos requêtes : ce sont des données personnelles.</li>
+<li>L’ordre des résultats n’est pas une mesure de vérité. Il faut croiser plusieurs sources et regarder qui publie.</li>
+<li>Une grande partie du Web n’est pas indexée : pages derrière un mot de passe, messageries, pages sans lien entrant.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Un moteur explore (robot et liens), indexe (mot → pages), puis classe (pertinence et popularité) pour chaque requête. Les résultats dépendent du moteur, de l’utilisateur et de la publicité.</div>` });
+
+COURSE.push({ id: 'cookies', t: 'Cookies et traces', h: `
+<h3>Qu’est-ce qu’un cookie ?</h3>
+<p>Un <b>cookie</b> est une petite information qu’un site demande au navigateur de mémoriser, et que le navigateur lui <b>renvoie à chaque requête suivante</b> vers ce site.</p>
+<pre class="code">Réponse du serveur :   Set-Cookie: session=S1000; Path=/
+Requêtes suivantes :   Cookie: session=S1000</pre>
+<h3>À quoi servent-ils ?</h3>
+<ul>
+<li><b>Garder une session</b> : rester connecté, garder un panier. Le cookie contient seulement un identifiant ; le panier est stocké sur le serveur, qui retrouve votre session grâce à cet identifiant.</li>
+<li><b>Mémoriser des préférences</b> : langue, thème.</li>
+<li><b>Mesurer l’audience</b>, et surtout <b>suivre les internautes</b> pour la publicité.</li>
+</ul>
+<p>Un cookie de <b>session</b> disparaît à la fermeture du navigateur ; un cookie <b>persistant</b> a une date d’expiration (parfois très lointaine).</p>
+<h3>Cookies propres et cookies tiers</h3>
+<ul>
+<li>Un cookie <b>propre</b> est déposé par le site que vous visitez.</li>
+<li>Un cookie <b>tiers</b> est déposé par un autre domaine dont le contenu est intégré dans la page (publicité, bouton de partage…).</li>
+</ul>
+<p>Si deux sites intègrent la publicité du même tiers, le navigateur renvoie à ce tiers <b>le même cookie</b> depuis les deux sites. Le tiers reconnaît alors le visiteur et reconstitue sa navigation, pour lui proposer des publicités ciblées. C’est ce que montre l’atelier.</p>
+<h3>Autres traceurs</h3>
+<ul>
+<li>Les <b>pixels espions</b> : images invisibles chargées depuis un serveur de suivi.</li>
+<li>L’<b>empreinte numérique</b> (<i>fingerprinting</i>) : combinaison de réglages du navigateur (écran, polices, langue…) assez unique pour reconnaître un visiteur sans cookie.</li>
+<li>L’<b>adresse IP</b>, que tout site visité reçoit.</li>
+</ul>
+<h3>Le cadre juridique</h3>
+<ul>
+<li>Les traces laissées sur le Web sont des <b>données personnelles</b> : elles permettent de reconnaître une personne.</li>
+<li>Le <b>RGPD</b> (règlement européen, en vigueur depuis 2018) encadre leur usage. En France, la <b>CNIL</b> contrôle son application.</li>
+<li>Pour les cookies qui ne sont pas indispensables (traçage publicitaire), le site doit demander le <b>consentement</b> : libre, éclairé, spécifique. <b>Refuser doit être aussi simple qu’accepter.</b></li>
+<li>Les cookies strictement nécessaires (session, panier) ne demandent pas de consentement.</li>
+</ul>
+<h3>Se protéger</h3>
+<ul>
+<li>Refuser les cookies non nécessaires, effacer régulièrement les cookies, bloquer les cookies tiers dans les paramètres du navigateur.</li>
+<li>La <b>navigation privée</b> n’enregistre ni l’historique ni les cookies après fermeture de la fenêtre, mais ne rend pas anonyme : le site visité, votre fournisseur d’accès, ou votre établissement voient quand même la connexion.</li>
+</ul>
+<h3>À faire dans votre navigateur</h3>
+<p>Ouvrez les outils de développement (<b>F12</b>), onglet « Application » ou « Stockage », rubrique « Cookies » : vous voyez les cookies du site avec leur nom, leur valeur et leur date d’expiration. Les réglages de confidentialité du navigateur permettent de les effacer ou de les bloquer.</p>
+<div class="retain"><b>À retenir.</b> Cookie = information renvoyée au site à chaque requête (Set-Cookie puis Cookie). Les cookies tiers permettent de suivre un internaute d’un site à l’autre. Le RGPD exige un consentement clair pour les cookies non nécessaires.</div>` });
+
+COURSE.push({ id: 'secu', t: 'Sécurité : HTTPS et hameçonnage', h: `
+<h3>HTTP et HTTPS</h3>
+<p>En <b>HTTP</b>, tout circule en clair : une personne qui écoute le réseau (Wi-Fi public, par exemple) peut lire les pages, les mots de passe, les formulaires. <b>HTTPS</b> est HTTP à l’intérieur d’une connexion chiffrée par le protocole <b>TLS</b> (successeur de SSL), sur le port 443. Il apporte :</p>
+<ul>
+<li>la <b>confidentialité</b> : un espion ne voit que des données illisibles ;</li>
+<li>l’<b>intégrité</b> : le contenu ne peut pas être modifié en route sans que cela se voie ;</li>
+<li>l’<b>authenticité</b> : on a la preuve que l’on parle bien au serveur qui détient le certificat du nom de domaine.</li>
+</ul>
+<h3>Chiffrer, en deux mots</h3>
+<ul>
+<li>Chiffrer transforme un message en suite illisible à l’aide d’une <b>clé</b> ; sans la clé, on ne peut pas retrouver le message.</li>
+<li>Au début d’une connexion TLS, le navigateur et le serveur utilisent un <b>chiffrement à clé publique</b> pour se mettre d’accord sur une clé secrète commune, puis chiffrent toute la suite avec elle.</li>
+</ul>
+<h3>Le certificat</h3>
+<p>Un <b>certificat</b> associe une clé à un <b>nom de domaine</b>. Il est signé par une <b>autorité de certification</b> que le navigateur connaît. Le navigateur vérifie que le nom du certificat correspond au site visité, que l’autorité est reconnue et que le certificat n’est pas expiré. Sinon, il affiche un avertissement.</p>
+<p><b>Attention</b> : le cadenas prouve que la <b>connexion</b> est protégée vers le domaine affiché, pas que le site est honnête. Des sites frauduleux utilisent aussi HTTPS.</p>
+<h3>L’hameçonnage (<i>phishing</i>)</h3>
+<p>Un message (courriel, SMS) imite une banque, une administration ou un service connu et pousse à cliquer sur un lien vers un <b>faux site</b> pour récupérer identifiants, mots de passe ou numéros de carte.</p>
+<ul>
+<li><b>Lire le domaine</b> : de droite à gauche, jusqu’au premier point avant l’extension. <code>banque-exemple.fr.verif-securite.com</code> appartient à <code>verif-securite.com</code>.</li>
+<li>Repérer les <b>fausses lettres</b> (<code>banque-exemp1e.fr</code>), les tirets ajoutés, les extensions inhabituelles.</li>
+<li>Se méfier de l’<b>urgence</b>, de la menace (« compte bloqué »), des fautes, des pièces jointes inattendues.</li>
+<li>Ne pas cliquer : taper soi-même l’adresse du site ou utiliser ses favoris.</li>
+<li>Signaler le message, et si l’on a donné ses informations, changer le mot de passe et prévenir l’organisme concerné. Le site <b>cybermalveillance.gouv.fr</b> propose de l’aide.</li>
+</ul>
+<h3>Quelques bonnes pratiques</h3>
+<ul>
+<li>Un mot de passe <b>long</b>, <b>différent pour chaque site</b>, éventuellement géré par un gestionnaire de mots de passe.</li>
+<li>La <b>double authentification</b> quand elle existe.</li>
+<li>Mettre à jour le système et le navigateur.</li>
+<li>Éviter de saisir des informations sensibles sur un site en HTTP, ou depuis un Wi-Fi public sans protection.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> HTTPS = HTTP + TLS : confidentialité, intégrité, authenticité du serveur. Le cadenas ne garantit pas l’honnêteté. Contre l’hameçonnage : lire le domaine principal, ne pas cliquer sous la pression.</div>` });
+
+COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
+<p>Cette page est un outil pédagogique. Elle simplifie la réalité sur plusieurs points :</p>
+<ul>
+<li>Le Web des ateliers est <b>fictif</b> : aucun vrai site n’est affiché ni consulté.</li>
+<li>Le simulateur HTTP ne montre qu’une requête par page : en réalité, images, feuilles de style et scripts déclenchent d’autres requêtes. Il n’y a ni cache ni compression.</li>
+<li>L’aperçu HTML n’exécute <b>aucun script</b> ; les formulaires et les images extérieures sont ignorés. Seules deux images sont disponibles : logo.svg et planete.svg.</li>
+<li>Le moteur de recherche est très simplifié : il exige tous les mots, compte les occurrences et les liens entrants, sans calcul itératif de type PageRank, sans personnalisation.</li>
+<li>Les cookies sont simplifiés (pas de durée de vie, pas de SameSite détaillé). Le « chiffrement » affiché pour HTTPS est une illustration, pas un vrai algorithme.</li>
+<li>Les durées et les identifiants sont fictifs.</li>
+</ul>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>Attribut</dt><dd>Précision donnée à une balise HTML (href, src, alt…).</dd>
+<dt>Balise</dt><dd>Élément de syntaxe HTML écrit entre &lt; et &gt;.</dd>
+<dt>Certificat</dt><dd>Document qui associe une clé à un nom de domaine, signé par une autorité.</dd>
+<dt>Chiffrement</dt><dd>Transformation d’un message en suite illisible sans la clé.</dd>
+<dt>Client</dt><dd>Programme qui demande un service (le navigateur).</dd>
+<dt>CNIL</dt><dd>Autorité française qui veille à la protection des données personnelles.</dd>
+<dt>Cookie</dt><dd>Information mémorisée par le navigateur et renvoyée au site à chaque requête.</dd>
+<dt>CSS</dt><dd>Langage de mise en forme des pages.</dd>
+<dt>Domaine principal</dt><dd>Nom situé juste avant l’extension (lycee-exemple.fr).</dd>
+<dt>Hameçonnage</dt><dd>Fraude qui imite un site ou un message connu pour voler des informations.</dd>
+<dt>HTML</dt><dd>Langage à balises qui décrit le contenu d’une page.</dd>
+<dt>HTTP, HTTPS</dt><dd>Protocole du Web ; sa version chiffrée.</dd>
+<dt>Hyperlien</dt><dd>Lien qui relie une page à une autre.</dd>
+<dt>Index</dt><dd>Table qui associe chaque mot aux pages qui le contiennent.</dd>
+<dt>Moteur de recherche</dt><dd>Service qui explore, indexe et classe les pages du Web.</dd>
+<dt>Navigateur</dt><dd>Logiciel qui demande et affiche les pages du Web.</dd>
+<dt>PageRank</dt><dd>Méthode de classement de Google fondée sur les liens entre pages.</dd>
+<dt>RGPD</dt><dd>Règlement européen sur la protection des données personnelles.</dd>
+<dt>Robot d’indexation</dt><dd>Programme qui parcourt le Web en suivant les liens.</dd>
+<dt>Serveur web</dt><dd>Programme qui répond aux requêtes HTTP.</dd>
+<dt>TLS</dt><dd>Protocole qui chiffre les échanges (HTTPS).</dd>
+<dt>URL</dt><dd>Adresse d’une ressource du Web.</dd>
+<dt>W3C</dt><dd>Organisme qui définit les standards du Web.</dd>
+</dl>` });
+/*COURSE-END*/
+
+/* ---------- interface ---------- */
+const UI = { cur: 'w1' };
+const AS = { key: 'w1', tab: 'steps', open: false, st: lsGet(KEYS.act, {}), arm: null };
+const CS = { open: false, id: 'web' };
+function actSave() { lsSet(KEYS.act, AS.st); }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function wsById(id) { return WORKSHOPS.find(w => w.id === id) || WORKSHOPS[0]; }
+
+function renderSeg() {
+  const seg = $('#wsSeg'); seg.innerHTML = '';
+  WORKSHOPS.forEach((w, i) => seg.append(h('button', { type: 'button', role: 'tab', 'aria-pressed': w.id === UI.cur ? 'true' : 'false', 'aria-selected': w.id === UI.cur ? 'true' : 'false', onclick: () => gotoWs(w.id) }, (i + 1) + '. ' + w.title)));
+}
+function mountWs() {
+  const w = wsById(UI.cur), root = $('#ws');
+  $('#hint').textContent = w.hint; root.innerHTML = '';
+  w.mount(root);
+  const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
+}
+function gotoWs(id) {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  UI.cur = id; AS.key = id; AS.tab = 'steps';
+  renderSeg(); mountWs(); renderAct();
+}
+
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
+  if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: s }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: a.defi.q }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: a.defi.a }))));
+    if (a.course) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(a.course) }, 'Voir le cours : ' + courseSection(a.course).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Votre travail sera effacé'; AS.arm = setTimeout(() => { b.textContent = 'Recommencer l’atelier'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; wsById(UI.cur).reset(); mountWs(); renderAct(); } }, 'Recommencer l’atelier')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open; renderAct();
+}
+$('#bAct').addEventListener('click', actToggle);
+
+/* ---------- cours ---------- */
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const go = id => { CS.id = id; renderCourse(); };
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => go(s.id) }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => go(e.target.value) }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+  art.querySelectorAll('[data-w]').forEach(w => { if (w.dataset.w === 'url') widgetUrl(w); });
+  art.append(h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => go(COURSE[idx - 1].id) }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => go(COURSE[idx + 1].id) }, COURSE[idx + 1].t + ' →') : h('span')));
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : notions du Web'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+  const sc = box.querySelector('.cwrap'); if (sc) sc.scrollTop = 0; box.scrollTop = 0;
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+
+/* ---------- aide ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre le Web (SNT, seconde). Le Web utilisé ici est fictif : aucun vrai site n’est consulté.</p>' +
+    '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction.</li><li>Le bouton <b>Cours</b> détaille toutes les notions.</li></ul>' +
+    '<h3>Vos données</h3><p>Les réponses au QCM et votre code HTML/CSS sont mémorisés dans ce navigateur uniquement.</p>' }));
+});
+
+/* ---------- démarrage ---------- */
+(function init() {
+  const cd = lsGet(KEYS.code, null);
+  AS.open = !isSmall();
+  renderSeg(); mountWs(); renderAct(); renderCourse();
+})();
+
+</script>
+
+</body></html>

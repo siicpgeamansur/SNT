@@ -1,0 +1,1186 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Atelier Données</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : barre d'outils en haut, palette à gauche, zone de travail blanche, panneau de l'appareil à droite (feuille basse sur téléphone). */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;
+  --canvas:#ffffff;--grid:#ffffff;--cable:#000000;--node-fill:#dfe7f0;--node-stroke:#33475b;--screen:#8ec1e6;
+  --note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;--page-bg:#ffffff;--page-fg:#1d2733;
+  --term-bg:#121a22;--term-fg:#d5e0ea;
+  --ok:#1e7a2e;--warn:#9a5b00;--bad:#c0281f;
+  --c-arp:#c98a00;--c-icmp:#7b4fc2;--c-dns:#1478b8;--c-dhcp:#c2347f;--c-tcp:#6d8a14;--c-http:#0f8c68;--c-mail:#d1561b;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:.01em}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn.del{color:var(--bad)}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.seg button[data-mode=sim][aria-pressed="true"]{background:var(--run)}
+#simctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#simctl label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+#simctl select{width:auto}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--run);font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.paused{color:var(--warn)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#palette{flex:none;width:92px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.tool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;font-weight:500;font-size:11.5px;min-width:74px;text-align:center}
+.tool svg{width:34px;height:34px;overflow:visible}
+.tool:hover{border-color:var(--accent)}
+.tool.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.sep{height:1px;background:var(--line);flex:none;margin:2px 0}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#svg{display:block;width:1400px;height:900px;touch-action:none;user-select:none;-webkit-user-select:none}
+.node{cursor:pointer}
+.mode-design .node,.mode-doc .note{cursor:grab}
+.ic-body{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:2;stroke-linejoin:round}
+.ic-screen{fill:var(--screen);stroke:var(--node-stroke);stroke-width:1.2}
+.ic-acc{stroke:var(--accent);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic-led{fill:var(--accent)}
+.nlabel{font:600 12.5px var(--font-ui);fill:var(--fg)}
+.nip{font:11px var(--font-mono);fill:var(--muted)}
+.selbox{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.lk .selbox{stroke-dasharray:none;stroke-width:2.5}
+.cab{stroke:var(--cable);stroke-width:2.2;stroke-linecap:round}
+.cab.on{stroke:var(--accent);stroke-width:4}
+.hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.note rect{fill:var(--note-bg);stroke:var(--note-line)}
+.note text{font:12.5px var(--font-ui);fill:var(--note-fg)}
+#panel{flex:none;width:360px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0}
+#panel.wide{width:clamp(380px,38vw,600px)}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.pbody.fill{display:flex;flex-direction:column;gap:8px}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.fld.chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);font-size:13px}
+.fld.chk input{width:auto}
+input[type=text],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.mono{font-family:var(--font-mono);font-size:12.5px}
+textarea{resize:vertical;min-height:70px}
+.bad{border-color:var(--bad)!important}
+.grp{border:1px solid var(--line);border-radius:8px;padding:10px 10px 2px;margin-bottom:10px}
+.grp>h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.line3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.line2{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.small{font-size:12px;color:var(--muted);margin:0 0 9px}
+.term{display:flex;flex-direction:column;flex:1;min-height:240px;background:var(--term-bg);color:var(--term-fg);border-radius:8px;font:12.5px/1.5 var(--font-mono);overflow:hidden}
+.tout{flex:1;overflow:auto;padding:10px;white-space:pre-wrap;word-break:break-word}
+.tout .ok{color:#6fdc9a}.tout .err{color:#ff9a94}.tout .dim{color:#8da0b5}.tout .cmd{color:#fff}
+.tin{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid #2a3542}
+.tin:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.tin input{flex:1;background:transparent;border:0;color:inherit;font:inherit;outline:none;padding:2px 0}
+.tin .prm{color:#6fdc9a;white-space:nowrap}
+.bar-url{display:flex;gap:6px}
+.bstat{font-size:12.5px;color:var(--muted)}
+.page{flex:1;min-height:180px;overflow:auto;background:var(--page-bg);color:var(--page-fg);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font:15px/1.5 Georgia,'Times New Roman',serif}
+.page h1{font-size:24px;margin:.2em 0 .4em}.page h2{font-size:19px}.page a{color:#1558c0;text-decoration:underline;cursor:pointer}
+.exch{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.extop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex:none}
+.tscroll{overflow:auto;border:1px solid var(--line);border-radius:8px;flex:1;min-height:110px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px}
+.tbl th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:5px 8px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tbl td{padding:4px 8px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--font-mono)}
+.tbl td.info{white-space:normal;min-width:150px}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover{background:var(--panel2)}
+.tbl tbody tr.sel{background:var(--accent-soft)}
+.tbl tr.ign td{opacity:.55}
+tr[data-pk=arp] td:first-child{box-shadow:inset 4px 0 var(--c-arp)}tr[data-pk=icmp] td:first-child{box-shadow:inset 4px 0 var(--c-icmp)}
+tr[data-pk=dns] td:first-child{box-shadow:inset 4px 0 var(--c-dns)}tr[data-pk=dhcp] td:first-child{box-shadow:inset 4px 0 var(--c-dhcp)}
+tr[data-pk=tcp] td:first-child{box-shadow:inset 4px 0 var(--c-tcp)}tr[data-pk=http] td:first-child{box-shadow:inset 4px 0 var(--c-http)}
+.detail{overflow:auto;flex:none;max-height:46%}
+.layer{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.layer h4{margin:0;padding:4px 10px;font-size:12px;background:var(--panel2);display:flex;justify-content:space-between}
+.layer h4 span{color:var(--muted);font-weight:400}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:1px 12px;padding:6px 10px;font-size:12px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-family:var(--font-mono);white-space:pre-wrap;word-break:break-word}
+.layer.empty .kv{color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;background:var(--panel2)}
+.mono-tbl{font:12px var(--font-mono);width:100%;border-collapse:collapse;margin-bottom:10px}
+.mono-tbl th{text-align:left;color:var(--muted);font-weight:500;padding:3px 6px;border-bottom:1px solid var(--line)}
+.mono-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlgbox h3{margin:14px 0 4px;font-size:14px}.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}.dlgbox code{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px;white-space:nowrap}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+.score{font-weight:600;font-size:15px;margin:4px 0 8px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px;text-wrap:balance}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.cbody table{display:block;overflow-x:auto;max-width:100%}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.ctable.narrow td,.ctable.narrow th{text-align:center;font-family:var(--font-mono);font-size:13px}
+.ctable td.on1{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+.bits{font:13px var(--font-mono);overflow-x:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0;background:var(--panel2)}
+.bits>div{display:flex;white-space:nowrap;align-items:baseline;line-height:1.8}
+.bits .lbl{width:96px;flex:none;color:var(--muted);font-family:var(--font-ui);font-size:12px}
+.bits .n{color:var(--accent-ink);font-weight:600}.bits .m{color:#8a949f}
+.bits .dec{margin-left:14px;color:var(--fg);font-family:var(--font-ui);font-size:12.5px}
+.encap{display:flex;flex-wrap:wrap;margin:8px 0 12px}
+.encap span{padding:7px 14px;font:13px var(--font-mono);border:1px solid var(--node-stroke);margin-left:-1px}
+.encap .e4{background:#f6dede}.encap .e3{background:#dfeaf7}.encap .e2{background:#e0f1dc}.encap .e1{background:#fff4c2}
+.widget{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0 14px;background:var(--panel)}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}.bars>div{display:flex;align-items:center;gap:8px}
+.bars .bl{width:44px;flex:none;font-size:12.5px;color:var(--muted)}.bars .bar{display:inline-block;height:14px;background:var(--accent);border-radius:3px}.bars .bar.alt{background:var(--run)}.bars .bv{font:13px var(--font-mono)}
+input[type=range]{width:100%;padding:0}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .work{flex-direction:column;gap:8px}
+  #palette{flex-direction:row;width:auto;overflow-x:auto;overflow-y:hidden;flex:none}
+  .sep{width:1px;height:auto;margin:0 2px}
+  .tool{min-width:70px}
+  #panel,#panel.wide{position:fixed;left:0;right:0;bottom:0;width:auto;height:62%;max-height:none;border-radius:14px 14px 0 0;z-index:30;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .line3{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:no-preference){.tool,.btn{transition:border-color .12s,background .12s}}
+/* ---- ateliers : commun, 1 et 2 ---- */
+#ws{padding:16px max(16px,env(safe-area-inset-left,0px)) 30px;max-width:980px}
+#ws h2{font-size:24px;margin:0 0 8px;text-wrap:balance}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.55}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.stack{margin:14px 0;display:flex;flex-direction:column;gap:6px}
+.stk-row{display:flex;gap:6px;flex-wrap:wrap}
+.stk{border:1px solid var(--node-stroke);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stk b{font-size:15px}.stk span{font-size:12.5px;color:var(--muted)}
+.stk.web{background:#dfeaf7;flex:2 1 260px}.stk.oth{background:var(--panel2);flex:1 1 170px}.stk.net{background:#e0f1dc}
+.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:6px 0}
+.ev{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);border-top:4px solid var(--muted);min-width:0}
+.ev.web{border-top-color:var(--accent)}.ev.net{border-top-color:var(--run)}
+.ev .yr{font:600 17px var(--font-mono)}.ev .et{margin-left:8px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ev p{margin:4px 0 0;font-size:13.5px}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px}
+.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.score{font-weight:600;font-size:15px;margin:6px 0}
+.urlseg{font:15px var(--font-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow-x:auto;white-space:nowrap;background:var(--panel2)}
+.urlseg span{padding:2px 1px;border-bottom:3px solid transparent}
+.u-s{border-bottom-color:#c98a00!important}.u-h{border-bottom-color:#1478b8!important}.u-p{border-bottom-color:#7b4fc2!important}
+.u-c{border-bottom-color:#1e7a2e!important}.u-q{border-bottom-color:#c2347f!important}.u-a{border-bottom-color:#d1561b!important}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border-bottom:3px solid transparent;background:var(--panel2);white-space:nowrap}
+.bar-url{display:flex;gap:6px;margin:8px 0}
+.wout{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.stepc{border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.stepc.k-dns{border-left-color:var(--c-dns)}.stepc.k-tcp{border-left-color:var(--c-tcp)}.stepc.k-http{border-left-color:var(--c-http)}.stepc.k-tls{border-left-color:var(--c-icmp)}.stepc.k-nav{border-left-color:var(--accent)}
+.sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stag{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 8px}
+pre.code{font:12.5px/1.5 var(--font-mono);margin:6px 0 0;white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:6px;padding:7px 9px;overflow-x:auto}
+.pgbar{font-size:12.5px;color:var(--muted);margin-top:4px}
+.broken{display:inline-block;border:1px dashed var(--muted);padding:2px 6px;font:12px var(--font-mono);color:var(--muted)}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ---- réseaux sociaux ---- */
+.gwrap{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:#fff}
+.webg{display:block;width:100%;min-width:640px;height:auto}
+.gn{cursor:pointer}.gn circle{fill:#eef1f6;stroke:#4a5a6e;stroke-width:1.6}
+.gn.onp circle{fill:#cfe3f7;stroke:var(--accent);stroke-width:2.4}.gn.inf circle{fill:#f6c9c4;stroke:var(--bad);stroke-width:2.4}
+.gn.blk circle{stroke:var(--ok);stroke-width:3.2;stroke-dasharray:4 2}.gn.sel circle{stroke:#111;stroke-width:3.2}
+.gn.off{opacity:.35}.gn.off circle{stroke-dasharray:3 3}.gn:focus-visible{outline:none}.gn:focus-visible circle{stroke:#111;stroke-width:3.4}
+.gd{font:600 12px var(--font-ui);fill:#1d2733}.gl{font:12.5px var(--font-ui);fill:#1d2733}
+.ge{stroke:#aab3bf;stroke-width:1.6}.ge.path{stroke:var(--accent);stroke-width:4}.ge.off{stroke-dasharray:3 4;opacity:.3}
+.pcard{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;background:var(--panel)}
+.pcard p{margin:6px 0 2px}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px}.stat span{font-size:12px;color:var(--muted)}.stat b{font-size:15px}
+.opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0 10px}.opts .fld{margin:0}
+.rlog{margin:6px 0;padding:6px 8px 6px 22px;font:12.5px/1.6 var(--font-mono);max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}.rlog:empty{display:none}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.two2>div{min-width:0}
+.post{display:flex;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--panel)}
+.post .rk{font:600 18px var(--font-mono);color:var(--muted);width:24px;flex:none;text-align:center}.post .pb{flex:1;min-width:0}.post p{margin:3px 0 6px}
+.pa{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pf{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;padding:1px 8px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.ibar{display:grid;grid-template-columns:90px 1fr 24px;gap:8px;align-items:center;font-size:13px;margin:3px 0}
+.bar2{display:block;height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}.bar2 i{display:block;height:100%;background:var(--accent)}.bar2.big{height:12px;margin:6px 0}
+.ad{margin-top:10px;border:1px dashed #8a949f;border-radius:6px;padding:8px 12px;background:#f6f6f0;font-size:14px}.ad .adl{display:block;font-size:11px;color:#5a6068;text-transform:uppercase;letter-spacing:.06em}
+.dd{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:5px 0;font-size:14px}.dd.exp{background:rgba(192,40,31,.1);border-color:var(--bad)}.dd.safe{background:rgba(30,122,46,.1);border-color:var(--ok)}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px;flex-wrap:wrap}.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.files{display:flex;gap:6px;flex-wrap:wrap}
+#ws .small{font-size:12.5px}
+.seg{max-width:100%;overflow-x:auto}.seg button{white-space:nowrap}
+#act code.k{white-space:normal;word-break:break-all}
+#act.sheet{position:fixed;left:0;right:0;bottom:0;max-height:72vh;z-index:20}
+.dwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:8px 0;max-height:360px}
+.dt{border-collapse:collapse;width:100%;font-size:13.5px}.dt th,.dt td{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.dt thead th{position:sticky;top:0;background:var(--panel2);font-weight:600;z-index:1}.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
+.dt .hl{background:rgba(46,109,164,.12)}.dt tr.uq td{background:rgba(192,40,31,.12)}.dt .bcell{width:30%}
+.code-in{width:100%;font:13px/1.5 var(--font-mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;resize:vertical;box-sizing:border-box}
+.mono{font-family:var(--font-mono);font-size:13px}
+.warn{font-size:12.5px;color:var(--bad);margin:0 0 9px}
+
+
+</style>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="var(--fg)" stroke-width="1.6"/><ellipse cx="13" cy="13" rx="4.2" ry="10" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M3.5 13h19M5 8h16M5 18h16" stroke="var(--accent)" stroke-width="1.4" fill="none"/></svg><span>Atelier Données <small>SNT</small></span></div>
+    <div class="files">
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band" id="modes"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <main class="inner work" id="work">
+    <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+/*CORE-START*/
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'atelier-donnees-v1', code: 'atelier-donnees-extra-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
+const cm = t => '<code class="k">' + t + '</code>';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- images virtuelles (pour le HTML des élèves) ---------- */
+const dataSvg = s => 'data:image/svg+xml;utf8,' + encodeURIComponent(s);
+const IMGS = {
+  'logo.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' rx='18' fill='#2e6da4'/><path d='M28 88V44l32-18 32 18v44z' fill='#fff'/><rect x='51' y='58' width='18' height='30' fill='#2e6da4'/><rect x='34' y='52' width='12' height='12' fill='#2e6da4'/><rect x='74' y='52' width='12' height='12' fill='#2e6da4'/></svg>"),
+  'planete.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='160' height='120' viewBox='0 0 160 120'><rect width='160' height='120' fill='#101c33'/><circle cx='80' cy='60' r='28' fill='#e0a458'/><ellipse cx='80' cy='60' rx='54' ry='11' fill='none' stroke='#f3d9a4' stroke-width='4' transform='rotate(-18 80 60)'/><circle cx='30' cy='24' r='2' fill='#fff'/><circle cx='132' cy='96' r='2' fill='#fff'/><circle cx='122' cy='22' r='1.5' fill='#fff'/></svg>")
+};
+
+/* ---------- assainisseur : le HTML d'un élève ne peut rien exécuter ---------- */
+const OKTAGS = new Set('a b i u em strong small mark code pre br hr p div span h1 h2 h3 h4 h5 h6 ul ol li dl dt dd table thead tbody tfoot tr td th caption img header footer nav main section article aside figure figcaption blockquote'.split(' '));
+const DROPTAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'title', 'head', 'meta', 'link', 'noscript', 'template', 'svg', 'math', 'form', 'input', 'button', 'select', 'textarea', 'audio', 'video', 'canvas', 'base']);
+function safeDom(html, o) {
+  o = o || {};
+  const doc = new DOMParser().parseFromString('<!doctype html><body>' + html, 'text/html');
+  const css = [...doc.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  const out = document.createElement('div');
+  (function walk(src, dst) {
+    for (const c of src.childNodes) {
+      if (c.nodeType === 3) { dst.append(c.textContent); continue; }
+      if (c.nodeType !== 1) continue;
+      const t = c.tagName.toLowerCase();
+      if (DROPTAGS.has(t)) continue;
+      if (!OKTAGS.has(t)) { walk(c, dst); continue; }
+      const e = document.createElement(t);
+      for (const a of c.attributes) {
+        const n = a.name.toLowerCase(), v = a.value;
+        if (['class', 'title', 'lang', 'colspan', 'rowspan', 'width', 'height', 'alt'].includes(n)) e.setAttribute(n, v);
+        else if (n === 'id' && !o.light) e.setAttribute('id', v);
+        else if (n === 'style' && !/url\s*\(|expression|@import/i.test(v)) e.setAttribute('style', v);
+      }
+      if (t === 'a') {
+        const href = c.getAttribute('href') || ''; e.setAttribute('href', '#'); e.dataset.href = href;
+        e.addEventListener('click', ev => { ev.preventDefault(); if (o.onLink) o.onLink(href); });
+      }
+      if (t === 'img') {
+        const src = (c.getAttribute('src') || '').trim();
+        if (IMGS[src]) { e.setAttribute('src', IMGS[src]); e.dataset.ok = '1'; }
+        else { const sp = document.createElement('span'); sp.className = 'broken'; sp.textContent = '[image introuvable : ' + (src || 'attribut src manquant') + (c.getAttribute('alt') ? ', texte alternatif : ' + c.getAttribute('alt') : '') + ']'; dst.append(sp); continue; }
+      }
+      walk(c, e); dst.append(e);
+    }
+  })(doc.body, out);
+  return { el: out, css, doc };
+}
+function scopeCss(css) {
+  return String(css).replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none').replace(/(^|[\s,{}>+~])(html|body)(?=[\s,{.:#\[>+~]|$)/gi, '$1#body');
+}
+
+/* ---------- URL ---------- */
+function parseUrl(u) {
+  const m = /^([a-z][a-z0-9+.-]*):\/\/([^\/?#:]*)(?::(\d+))?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(u).trim());
+  if (!m) return null;
+  return { scheme: m[1].toLowerCase(), host: m[2].toLowerCase(), port: m[3] || '', path: m[4] || '/', query: m[5] || '', hash: m[6] || '' };
+}
+function domainSplit(host) { const p = host.split('.'); return p.length <= 2 ? { sub: '', dom: host } : { sub: p.slice(0, -2).join('.'), dom: p.slice(-2).join('.') }; }
+function widgetUrl(root, start) {
+  const inp = h('input', { type: 'text', class: 'mono', value: start || 'https://www.lycee-exemple.fr/snt/reseaux.html?page=2&lang=fr#masques', 'aria-label': 'Adresse à décoder', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+  const out = h('div');
+  const draw = () => {
+    out.innerHTML = ''; const u = parseUrl(inp.value);
+    inp.classList.toggle('bad', !!inp.value.trim() && !u);
+    if (!u) { out.append(h('p', { class: 'small' }, 'Saisissez une adresse complète, par exemple https://www.exemple.fr/page.html')); return; }
+    const d = domainSplit(u.host), dport = u.scheme === 'https' ? '443' : u.scheme === 'http' ? '80' : '';
+    const seg = [['u-s', u.scheme + '://'], ['u-h', u.host]];
+    if (u.port) seg.push(['u-p', ':' + u.port]);
+    seg.push(['u-c', u.path === '/' && !/\/$/.test(inp.value.split(/[?#]/)[0]) ? '' : u.path]);
+    if (u.query) seg.push(['u-q', u.query]); if (u.hash) seg.push(['u-a', u.hash]);
+    out.append(h('div', { class: 'urlseg', 'aria-label': 'Adresse découpée' }, seg.filter(s => s[1]).map(s => h('span', { class: s[0] }, s[1]))));
+    const q = u.query ? u.query.slice(1).split('&').map(x => x.split('=')).map(p => p[0] + ' = ' + (p[1] || '')).join(' ; ') : '';
+    out.append(h('table', { class: 'ctable' }, h('tbody', null,
+      h('tr', null, h('td', null, h('span', { class: 'u-s tag' }, 'Protocole')), h('td', null, u.scheme + (u.scheme === 'https' ? ' : HTTP chiffré (TLS)' : u.scheme === 'http' ? ' : HTTP non chiffré' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-h tag' }, 'Nom de domaine')), h('td', null, u.host + (d.sub ? ' : sous-domaine « ' + d.sub + ' », domaine principal « ' + d.dom + ' »' : ' : domaine principal « ' + d.dom + ' »'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-p tag' }, 'Port')), h('td', null, u.port ? u.port : (dport ? 'non précisé : ' + dport + ' par défaut' : 'non précisé'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-c tag' }, 'Chemin')), h('td', null, u.path + (u.path === '/' ? ' : page d’accueil' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-q tag' }, 'Paramètres')), h('td', null, q || 'aucun')),
+      h('tr', null, h('td', null, h('span', { class: 'u-a tag' }, 'Ancre')), h('td', null, u.hash ? u.hash + ' : endroit précis de la page' : 'aucune')))));
+  };
+  inp.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Adresse (URL)'), inp), out);
+}
+/*CORE-END*/
+
+/* ---------- données et outils de tableau ---------- */
+const WORKSHOPS = [];
+const QUARTIERS = ['Centre', 'Gare', 'Université', 'Port', 'Parc'];
+const NOMS = ['Place de la Mairie', 'Rue du Marché', 'Gare Nord', 'Gare Sud', 'Faculté de Lettres', 'Résidence Étudiante', 'Quai des Pêcheurs', 'Capitainerie', 'Grand Parc', 'Lac Vert', 'Bibliothèque', 'Cinéma Rex', 'Parvis de la Gare', 'Bureau de Poste', 'Campus Sciences', 'Restaurant Universitaire', 'Marina', 'Halles du Port', 'Jardin des Plantes', 'Stade Municipal', 'Église Saint-Paul', 'Hôpital', 'Piscine', 'Lycée Exemple'];
+const STATIONS = (() => {
+  let s = 11; const r = n => { s = (s * 1103515245 + 12345) % 2147483648; return (s >> 8) % n; };
+  const Q = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 0, 1, 2, 4];
+  return NOMS.map((n, i) => { const places = [10, 12, 14, 16, 20, 24][r(6)]; return { id: i + 1, nom: n, quartier: QUARTIERS[Q[i]], places, velos: r(places + 1), annee: 2018 + r(7), elec: r(3) ? 'oui' : 'non', usage: 20 + r(110) }; });
+})();
+const SCOLS = [['id', 'num'], ['nom', 'txt'], ['quartier', 'txt'], ['places', 'num'], ['velos', 'num'], ['annee', 'num'], ['elec', 'txt'], ['usage', 'num']];
+const SLAB = { id: 'id', nom: 'nom', quartier: 'quartier', places: 'places', velos: 'vélos dispo', annee: 'année', elec: 'électrique', usage: 'trajets par jour' };
+function tableEl(rows, cols, labels, hi) {
+  const t = h('table', { class: 'dt' }), tr = h('tr');
+  cols.forEach(c => tr.append(h('th', { scope: 'col', class: hi === c ? 'hl' : '' }, (labels && labels[c]) || c)));
+  t.append(h('thead', null, tr));
+  const tb = h('tbody'); rows.forEach(r => { const x = h('tr'); cols.forEach(c => x.append(h('td', { class: (typeof r[c] === 'number' ? 'num ' : '') + (hi === c ? 'hl' : '') }, String(r[c] == null ? '' : r[c])))); tb.append(x); }); t.append(tb);
+  return h('div', { class: 'dwrap' }, t);
+}
+function csvOf(rows, cols, sep) { return [cols.join(sep)].concat(rows.map(r => cols.map(c => r[c]).join(sep))).join('\n'); }
+function csvParse(text, sep) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
+  if (!lines.length) return { cols: [], rows: [], bad: [] };
+  const cols = lines[0].split(sep).map(s => s.trim()), rows = [], bad = [];
+  lines.slice(1).forEach((l, i) => { const v = l.split(sep).map(s => s.trim()); if (v.length !== cols.length) { bad.push(i + 2); return; } const o = {}; cols.forEach((c, k) => { o[c] = /^-?\d+([.]\d+)?$/.test(v[k]) ? +v[k] : v[k]; }); rows.push(o); });
+  return { cols, rows, bad };
+}
+const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
+function sortWidget(box, items, labels, store, redraw) {
+  const done = Object.keys(store).length; let ok = 0;
+  items.forEach((it, i) => { const a = store[i], right = a === it.a; if (a != null && right) ok++;
+    box.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, it.card ? it.card : it.t), h('span', { class: 'sb' }, labels.map((lab, j) => h('button', { type: 'button', class: 'btn sm' + (a === j ? (right ? ' good' : ' badc') : ''), disabled: a != null, onclick: () => { store[i] = j; redraw(); } }, lab))),
+      a != null ? h('span', { class: 'sf ' + (right ? 'ok' : 'ko') }, (right ? 'Exact. ' : 'Pas tout à fait : il fallait « ' + labels[it.a] + ' ». ') + it.w) : null)); });
+  box.append(h('p', { class: 'score' }, done ? 'Score : ' + ok + ' / ' + items.length + (done === items.length ? ' (terminé)' : '') : ''));
+}
+
+/* ---------- Atelier 1 : du fichier au tableau ---------- */
+const TYPES = ['Entier', 'Décimal', 'Texte', 'Date', 'Booléen (oui/non)'];
+const TYPE_ITEMS = [
+  { t: '42 (nombre de vélos)', a: 0, w: 'Un nombre entier : on peut calculer avec.' },
+  { t: '3,5 (distance en km)', a: 1, w: 'Un nombre décimal. En CSV français, attention à la virgule décimale.' },
+  { t: 'Gare Nord', a: 2, w: 'Du texte : on peut trier par ordre alphabétique, pas additionner.' },
+  { t: '2024-05-12', a: 3, w: 'Une date : on peut les comparer et calculer des durées.' },
+  { t: 'oui / non (station électrique)', a: 4, w: 'Une valeur à deux états : un booléen.' },
+  { t: '07 12 34 56 78 (numéro de téléphone)', a: 2, w: 'On n’additionne pas des téléphones : c’est du texte, même si ce sont des chiffres.' },
+  { t: '0042 (code d’une station)', a: 2, w: 'Un code qui commence par des zéros doit rester du texte, sinon les zéros disparaissent.' }];
+const W1 = { sep: ';', view: 'csv', sel: null, ans: {} };
+function mountW1(root) {
+  root.append(h('h2', null, 'Du fichier au tableau'),
+    h('p', null, 'Les données du réseau de vélos en libre-service de Valmont (fictif) sont stockées dans un fichier texte au format ', h('b', null, 'CSV'), ' (« Comma-Separated Values »). Chaque ligne est un ', h('b', null, 'enregistrement'), ', chaque colonne un ', h('b', null, 'descripteur'), ' (ou attribut), chaque case une ', h('b', null, 'valeur'), '.'));
+  const rows6 = STATIONS.slice(0, 6), box = h('div'), info = h('p', { class: 'pcard' });
+  const modes = h('div', { class: 'chips', role: 'group', 'aria-label': 'Affichage' }), seps = h('div', { class: 'chips', role: 'group', 'aria-label': 'Séparateur' });
+  function draw() {
+    modes.innerHTML = ''; [['csv', 'Fichier brut (CSV)'], ['tab', 'Tableau']].forEach(m => modes.append(h('button', { type: 'button', class: 'chip' + (W1.view === m[0] ? ' on' : ''), 'aria-pressed': W1.view === m[0] ? 'true' : 'false', onclick: () => { W1.view = m[0]; draw(); } }, m[1])));
+    seps.innerHTML = ''; [[';', 'séparateur « ; »'], [',', 'séparateur « , »'], ['\t', 'tabulation']].forEach(m => seps.append(h('button', { type: 'button', class: 'chip' + (W1.sep === m[0] ? ' on' : ''), 'aria-pressed': W1.sep === m[0] ? 'true' : 'false', onclick: () => { W1.sep = m[0]; draw(); } }, m[1])));
+    box.innerHTML = '';
+    const cols = SCOLS.map(c => c[0]);
+    if (W1.view === 'csv') box.append(h('pre', { class: 'code' }, csvOf(rows6, cols, W1.sep === '\t' ? '\t' : W1.sep)));
+    else box.append(tableEl(rows6, cols, SLAB, W1.sel));
+    const nc = cols.length;
+    info.innerHTML = ''; info.append(h('b', null, 'Structure : '), STATIONS.length + ' enregistrements (lignes) × ' + nc + ' descripteurs (colonnes) = ' + STATIONS.length * nc + ' valeurs. Ici : 6 lignes affichées sur ' + STATIONS.length + '.', h('br'),
+      'La première ligne contient les noms des descripteurs. Le séparateur sépare les valeurs ; il ne doit pas apparaître dans une valeur (sinon, il faut la mettre entre guillemets).');
+  }
+  const selc = h('select', { 'aria-label': 'Descripteur à surligner', onchange: e => { W1.sel = e.target.value || null; draw(); } }, h('option', { value: '' }, 'Aucun'), SCOLS.map(c => h('option', { value: c[0], selected: W1.sel === c[0] }, SLAB[c[0]])));
+  root.append(h('h3', null, 'Le même jeu de données, deux représentations'), modes, seps, h('label', { class: 'fld' }, h('span', null, 'Surligner un descripteur dans le tableau'), selc), box, info);
+  const sb = h('div', { class: 'sorts' });
+  const dr = () => { sb.innerHTML = ''; sortWidget(sb, TYPE_ITEMS, TYPES, W1.ans, dr); };
+  root.append(h('h3', null, 'Quel est le type de chaque donnée ?'), h('p', { class: 'small' }, 'Le type d’une valeur détermine ce qu’on peut faire avec : calculer, trier, comparer.'), sb, h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W1.ans = {}; dr(); } }, 'Recommencer')));
+  draw(); dr();
+}
+WORKSHOPS.push({ id: 'd1', title: 'Fichier et tableau', hint: 'Passez du fichier CSV au tableau, repérez descripteurs et enregistrements, puis identifiez les types de données.', mount: mountW1, reset: () => { Object.assign(W1, { sep: ';', view: 'csv', sel: null, ans: {} }); } });
+
+/* ---------- Atelier 2 : trier, filtrer, rechercher ---------- */
+const OPS = [['=', 'est égal à'], ['!=', 'est différent de'], ['>', 'est supérieur à'], ['<', 'est inférieur à'], ['contient', 'contient']];
+const W2 = { conds: [{ c: 'quartier', o: '=', v: 'Gare' }], sort: [{ c: 'usage', d: 'desc' }] };
+function condOk(r, k) {
+  const v = r[k.c], x = k.v.trim(); if (x === '') return true;
+  const nv = typeof v === 'number' ? +x : x.toLowerCase();
+  const vv = typeof v === 'number' ? v : String(v).toLowerCase();
+  if (typeof v === 'number' && isNaN(nv)) return false;
+  switch (k.o) { case '=': return vv === nv; case '!=': return vv !== nv; case '>': return vv > nv; case '<': return vv < nv; default: return String(vv).includes(String(nv)); }
+}
+function runQuery(conds, sort) {
+  let r = STATIONS.filter(x => conds.every(k => condOk(x, k)));
+  r = r.slice().sort((a, b) => { for (const s of sort) { if (a[s.c] === b[s.c]) continue; const cmp = a[s.c] > b[s.c] ? 1 : -1; return s.d === 'asc' ? cmp : -cmp; } return a.id - b.id; });
+  return r;
+}
+function mountW2(root) {
+  root.append(h('h2', null, 'Trier, filtrer, rechercher'),
+    h('p', null, 'Un tableau de 24 stations est difficile à lire à l’œil nu. Un programme sait ', h('b', null, 'filtrer'), ' (garder les lignes qui vérifient une condition), ', h('b', null, 'trier'), ' (ordonner selon une colonne) et ', h('b', null, 'rechercher'), ' (retrouver une valeur).'));
+  const cbox = h('div'), sbox = h('div'), out = h('div'), cnt = h('p', { class: 'score' });
+  const colSel = (val, fn) => h('select', { 'aria-label': 'Colonne', onchange: e => fn(e.target.value) }, SCOLS.map(c => h('option', { value: c[0], selected: c[0] === val }, SLAB[c[0]])));
+  function draw() {
+    cbox.innerHTML = '';
+    W2.conds.forEach((k, i) => cbox.append(h('div', { class: 'opts' },
+      h('label', { class: 'fld' }, h('span', null, i ? 'ET la colonne' : 'La colonne'), colSel(k.c, v => { k.c = v; draw(); })),
+      h('label', { class: 'fld' }, h('span', null, 'condition'), h('select', { 'aria-label': 'Condition', onchange: e => { k.o = e.target.value; draw(); } }, OPS.map(o => h('option', { value: o[0], selected: o[0] === k.o }, o[1])))),
+      h('label', { class: 'fld' }, h('span', null, 'valeur'), h('input', { type: 'text', value: k.v, 'aria-label': 'Valeur', autocomplete: 'off', oninput: e => { k.v = e.target.value; update(); } })),
+      W2.conds.length > 1 ? h('button', { class: 'btn sm', type: 'button', onclick: () => { W2.conds.splice(i, 1); draw(); } }, 'Retirer') : null)));
+    cbox.append(W2.conds.length < 3 ? h('button', { class: 'btn sm', type: 'button', onclick: () => { W2.conds.push({ c: 'places', o: '>', v: '' }); draw(); } }, 'Ajouter une condition') : null);
+    sbox.innerHTML = '';
+    W2.sort.forEach((s, i) => sbox.append(h('div', { class: 'opts' },
+      h('label', { class: 'fld' }, h('span', null, i ? 'puis par' : 'Trier par'), colSel(s.c, v => { s.c = v; update(); })),
+      h('label', { class: 'fld' }, h('span', null, 'ordre'), h('select', { 'aria-label': 'Ordre', onchange: e => { s.d = e.target.value; update(); } }, h('option', { value: 'asc', selected: s.d === 'asc' }, 'croissant'), h('option', { value: 'desc', selected: s.d === 'desc' }, 'décroissant'))),
+      W2.sort.length > 1 ? h('button', { class: 'btn sm', type: 'button', onclick: () => { W2.sort.splice(i, 1); draw(); } }, 'Retirer') : null)));
+    sbox.append(W2.sort.length < 2 ? h('button', { class: 'btn sm', type: 'button', onclick: () => { W2.sort.push({ c: 'nom', d: 'asc' }); draw(); } }, 'Ajouter un second critère') : null);
+    update();
+  }
+  function update() {
+    const r = runQuery(W2.conds, W2.sort);
+    out.innerHTML = ''; out.append(tableEl(r, SCOLS.map(c => c[0]), SLAB, W2.sort[0].c));
+    cnt.textContent = r.length + ' ligne(s) sur ' + STATIONS.length + (r.length === 0 ? ' : aucune station ne vérifie toutes les conditions.' : '.');
+  }
+  root.append(h('h3', null, '1. Filtrer'), h('p', { class: 'small' }, 'Toutes les conditions doivent être vraies en même temps (ET). Les valeurs de texte ne tiennent pas compte des majuscules.'), cbox, h('h3', null, '2. Trier'), sbox, h('h3', null, 'Résultat'), cnt, out);
+  root.append(h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W2.conds = [{ c: 'quartier', o: '=', v: 'Gare' }]; W2.sort = [{ c: 'usage', d: 'desc' }]; draw(); } }, 'Réinitialiser')));
+  draw();
+}
+WORKSHOPS.push({ id: 'd2', title: 'Trier et filtrer', hint: 'Combinez des conditions de filtre et des critères de tri pour interroger les 24 stations.', mount: mountW2, reset: () => { W2.conds = [{ c: 'quartier', o: '=', v: 'Gare' }]; W2.sort = [{ c: 'usage', d: 'desc' }]; } });
+
+/* ---------- Atelier 3 : calculer et regrouper ---------- */
+const FUNCS = [['compter', 'Nombre de lignes'], ['somme', 'Somme'], ['moyenne', 'Moyenne'], ['min', 'Minimum'], ['max', 'Maximum']];
+const W3 = { group: 'quartier', fn: 'moyenne', col: 'usage', outlier: 20, vals: [3, 4, 4, 5, 5, 6, 40] };
+function agg(rows, fn, col) {
+  if (fn === 'compter') return rows.length; if (!rows.length) return 0;
+  const v = rows.map(r => r[col]);
+  if (fn === 'somme') return v.reduce((a, b) => a + b, 0); if (fn === 'moyenne') return v.reduce((a, b) => a + b, 0) / v.length;
+  return fn === 'min' ? Math.min(...v) : Math.max(...v);
+}
+function median(a) { const s = a.slice().sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+function mountW3(root) {
+  root.append(h('h2', null, 'Calculer et regrouper'),
+    h('p', null, 'Traiter des données, c’est aussi les résumer : compter, additionner, calculer une moyenne, un minimum, un maximum, éventuellement ', h('b', null, 'par groupe'), ' (par quartier, par année…).'));
+  const out = h('div'), msg = h('p', { class: 'score' });
+  const numCols = SCOLS.filter(c => c[1] === 'num' && c[0] !== 'id' && c[0] !== 'annee').map(c => c[0]);
+  const groups = [['', 'Aucun (tout le tableau)'], ['quartier', 'Quartier'], ['elec', 'Électrique'], ['annee', 'Année de mise en service']];
+  function draw() {
+    out.innerHTML = '';
+    const g = W3.group, keys = g ? [...new Set(STATIONS.map(r => r[g]))].sort() : ['Toutes les stations'];
+    const res = keys.map(k => { const rs = g ? STATIONS.filter(r => r[g] === k) : STATIONS; return { k, n: rs.length, v: agg(rs, W3.fn, W3.col) }; });
+    const mx = Math.max(1, ...res.map(r => r.v));
+    const t = h('table', { class: 'dt' }, h('thead', null, h('tr', null, h('th', null, g ? groups.find(x => x[0] === g)[1] : 'Groupe'), h('th', null, 'Lignes'), h('th', null, FUNCS.find(f => f[0] === W3.fn)[1] + (W3.fn === 'compter' ? '' : ' de « ' + SLAB[W3.col] + ' »')), h('th', null, ''))),
+      h('tbody', null, res.map(r => h('tr', null, h('td', null, String(r.k)), h('td', { class: 'num' }, String(r.n)), h('td', { class: 'num' }, fmt(r.v)), h('td', { class: 'bcell' }, h('span', { class: 'bar2' }, h('i', { style: 'width:' + Math.max(0, r.v / mx * 100) + '%' })))))));
+    out.append(h('div', { class: 'dwrap' }, t));
+    msg.textContent = 'Total des lignes : ' + res.reduce((a, r) => a + r.n, 0) + ' (chaque station est dans exactement un groupe).';
+  }
+  const mk = (lab, opts, val, fn) => h('label', { class: 'fld' }, h('span', null, lab), h('select', { onchange: e => fn(e.target.value) }, opts.map(o => h('option', { value: o[0], selected: o[0] === val }, o[1]))));
+  root.append(h('h3', null, '1. Regrouper et calculer'), h('div', { class: 'opts' },
+    mk('Regrouper par', groups, W3.group, v => { W3.group = v; draw(); }), mk('Calcul', FUNCS, W3.fn, v => { W3.fn = v; draw(); }), mk('Sur la colonne', numCols.map(c => [c, SLAB[c]]), W3.col, v => { W3.col = v; draw(); })), out, msg);
+  /* moyenne vs médiane */
+  const list = h('p', { class: 'mono' }), st = h('div', { class: 'gstats' });
+  const rg = h('input', { type: 'range', min: 5, max: 200, step: 5, value: W3.outlier * 2, 'aria-label': 'Valeur extrême' });
+  function dr2() { const v = W3.vals.slice(0, 6).concat(+rg.value); list.textContent = 'Nombre de trajets par jour (7 stations de quartier) : ' + v.join(' ; ');
+    st.innerHTML = ''; [['Moyenne', fmt(v.reduce((a, b) => a + b, 0) / v.length)], ['Médiane', fmt(median(v))], ['Minimum', Math.min(...v)], ['Maximum', Math.max(...v)]].forEach(k => st.append(h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, String(k[1]))))); }
+  rg.addEventListener('input', dr2);
+  root.append(h('h3', null, '2. Moyenne ou médiane ?'), h('p', null, 'Six stations de quartier ont entre 3 et 6 trajets par jour. Une septième station très fréquentée peut fausser la moyenne. Déplacez le curseur :'),
+    h('label', { class: 'fld' }, h('span', null, 'Valeur de la septième station'), rg), list, st,
+    h('p', { class: 'small' }, 'La médiane partage les valeurs en deux moitiés égales : elle résiste aux valeurs extrêmes. La moyenne, non.'));
+  draw(); dr2();
+}
+WORKSHOPS.push({ id: 'd3', title: 'Calculs et regroupements', hint: 'Regroupez les stations, calculez des statistiques, puis comparez moyenne et médiane.', mount: mountW3, reset: () => { Object.assign(W3, { group: 'quartier', fn: 'moyenne', col: 'usage' }); } });
+
+/* ---------- Atelier 4 : croiser des tables ---------- */
+const ELEVES = [
+  { id_eleve: 1, prenom: 'Inès', classe: '2de A', club: 1 }, { id_eleve: 2, prenom: 'Malo', classe: '2de A', club: 2 }, { id_eleve: 3, prenom: 'Yanis', classe: '2de B', club: 1 },
+  { id_eleve: 4, prenom: 'Léa', classe: '2de B', club: 3 }, { id_eleve: 5, prenom: 'Hugo', classe: '2de C', club: 2 }, { id_eleve: 6, prenom: 'Camille', classe: '2de C', club: '' },
+  { id_eleve: 7, prenom: 'Sofia', classe: '2de A', club: 3 }, { id_eleve: 8, prenom: 'Nathan', classe: '2de B', club: 9 }];
+const CLUBS = [{ id_club: 1, nom_club: 'Robotique', salle: 'B12', jour: 'mardi' }, { id_club: 2, nom_club: 'Théâtre', salle: 'Salle des fêtes', jour: 'jeudi' }, { id_club: 3, nom_club: 'Photo', salle: 'C03', jour: 'lundi' }, { id_club: 4, nom_club: 'Échecs', salle: 'CDI', jour: 'vendredi' }];
+const W4 = { l: 'club', r: 'id_club', ran: false };
+function joinTables(lk, rk) {
+  const rows = [], noMatch = [];
+  ELEVES.forEach(e => { const m = CLUBS.filter(c => String(c[rk]) === String(e[lk]) && String(e[lk]) !== ''); if (!m.length) noMatch.push(e); m.forEach(c => rows.push({ prenom: e.prenom, classe: e.classe, nom_club: c.nom_club, salle: c.salle, jour: c.jour })); });
+  return { rows, noMatch };
+}
+function mountW4(root) {
+  root.append(h('h2', null, 'Croiser des données de plusieurs tables'),
+    h('p', null, 'Pour éviter de répéter les informations, on range les données dans plusieurs tables reliées entre elles. Ici, la table ', h('b', null, 'élèves'), ' contient le numéro du club de chaque élève, et la table ', h('b', null, 'clubs'), ' décrit chaque club une seule fois.'));
+  root.append(h('div', { class: 'two2' }, h('div', null, h('h3', null, 'Table « élèves »'), tableEl(ELEVES, ['id_eleve', 'prenom', 'classe', 'club'], { club: 'club (n° du club)' })), h('div', null, h('h3', null, 'Table « clubs »'), tableEl(CLUBS, ['id_club', 'nom_club', 'salle', 'jour']))));
+  const out = h('div'), msg = h('div', { class: 'pcard' });
+  const lsel = h('select', { 'aria-label': 'Colonne de la table élèves', onchange: e => { W4.l = e.target.value; draw(); } }, ['id_eleve', 'prenom', 'classe', 'club'].map(c => h('option', { value: c, selected: c === W4.l }, c)));
+  const rsel = h('select', { 'aria-label': 'Colonne de la table clubs', onchange: e => { W4.r = e.target.value; draw(); } }, ['id_club', 'nom_club', 'salle', 'jour'].map(c => h('option', { value: c, selected: c === W4.r }, c)));
+  function draw() {
+    const { rows, noMatch } = joinTables(W4.l, W4.r), good = W4.l === 'club' && W4.r === 'id_club';
+    out.innerHTML = ''; out.append(rows.length ? tableEl(rows, ['prenom', 'classe', 'nom_club', 'salle', 'jour']) : h('p', { class: 'small' }, 'Aucune ligne : aucune valeur de la colonne choisie ne se retrouve dans l’autre table.'));
+    msg.innerHTML = ''; msg.append(h('b', null, rows.length + ' ligne(s) dans la jointure sur ' + ELEVES.length + ' élèves.'), h('br'));
+    if (good) msg.append('Jointure correcte : on relie « club » (clé étrangère) à « id_club » (clé primaire). ', noMatch.length ? 'Les élèves suivants n’ont pas de correspondance : ' + noMatch.map(e => e.prenom + (e.club === '' ? ' (pas de club)' : ' (club n° ' + e.club + ' qui n’existe pas)')).join(', ') + '.' : '');
+    else msg.append('Cette jointure n’a pas de sens : on compare des colonnes qui ne représentent pas la même chose. Une jointure relie la clé étrangère « club » à la clé primaire « id_club ».');
+  }
+  root.append(h('h3', null, 'Relier les deux tables (jointure)'), h('p', { class: 'small' }, 'Une jointure associe chaque ligne de la première table aux lignes de la seconde qui ont la même valeur dans les colonnes choisies.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'Colonne de « élèves »'), lsel), h('label', { class: 'fld' }, h('span', null, 'Colonne de « clubs »'), rsel)), out, msg);
+  /* redondance */
+  const nm = h('p', { class: 'score' });
+  const redo = h('div', { class: 'widget' });
+  let single = true;
+  const dr = () => { redo.innerHTML = ''; redo.append(h('h3', null, 'Pourquoi deux tables ?'), h('p', null, 'Le club Robotique change de salle : la salle B12 devient A07. Combien de cellules faut-il modifier ?'),
+    h('div', { class: 'chips' }, [[true, 'Deux tables (clubs séparés)'], [false, 'Une seule grande table']].map(o => h('button', { type: 'button', class: 'chip' + (single === o[0] ? ' on' : ''), 'aria-pressed': single === o[0] ? 'true' : 'false', onclick: () => { single = o[0]; dr(); } }, o[1]))),
+    h('p', { class: 'score' }, single ? '1 cellule à modifier (dans la table des clubs).' : ELEVES.filter(e => e.club === 1).length + ' cellules à modifier (une par élève du club) : le risque d’oubli ou d’incohérence est grand.')); };
+  root.append(redo); draw(); dr();
+}
+WORKSHOPS.push({ id: 'd4', title: 'Croiser des tables', hint: 'Reliez la table des élèves à celle des clubs, et repérez les lignes sans correspondance.', mount: mountW4, reset: () => { W4.l = 'club'; W4.r = 'id_club'; } });
+
+/* ---------- Atelier 5 : formats, métadonnées, anonymisation ---------- */
+const CSV0 = 'prenom;classe;note\nInès;2de A;14.5\nMalo;2de B;9\nYanis;2de B;12\nLéa;2de C;17.5';
+const W5 = { tab: 'fmt', csv: CSV0, sep: ';', meta: { date: true, gps: true, appareil: true, nom: true }, gen: { age: false, ville: false }, sel: 0 };
+const META = [['nom', 'Nom du fichier', 'IMG_20250314_174211.jpg'], ['date', 'Date et heure de prise de vue', '14 mars 2025, 17 h 42'], ['gps', 'Position GPS', '45,1234 N ; 5,4321 E (devant le lycée Exemple)'], ['appareil', 'Appareil', 'Téléphone modèle X-12, numéro de série 4F7A-…']];
+const META_DED = { nom: 'Le nom du fichier contient la date et l’heure.', date: 'Quand la photo a été prise : l’emploi du temps d’une personne se déduit.', gps: 'Où elle a été prise : lieu fréquenté, domicile, établissement.', appareil: 'Quel appareil : on peut relier plusieurs photos au même téléphone.' };
+const ANON = [[34, 'Valmont', 'F'], [34, 'Valmont', 'F'], [34, 'Valmont', 'M'], [52, 'Valmont', 'M'], [52, 'Rivemont', 'F'], [29, 'Rivemont', 'M'], [29, 'Rivemont', 'F'], [41, 'Bellevue', 'M'], [41, 'Bellevue', 'F'], [67, 'Bellevue', 'F'], [23, 'Valmont', 'M'], [58, 'Rivemont', 'F']];
+function anonRows() { return ANON.map(r => ({ age: W5.gen.age ? (Math.floor(r[0] / 20) * 20) + '-' + (Math.floor(r[0] / 20) * 20 + 19) + ' ans' : r[0] + ' ans', ville: W5.gen.ville ? 'Région Est' : r[1], sexe: r[2] })); }
+function mountW5(root) {
+  root.append(h('h2', null, 'Formats, métadonnées et vie privée'));
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div');
+  const draw = () => {
+    tabs.innerHTML = ''; [['fmt', 'Formats'], ['meta', 'Métadonnées'], ['anon', 'Anonymisation']].forEach(t => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': W5.tab === t[0] ? 'true' : 'false', onclick: () => { W5.tab = t[0]; draw(); } }, t[1])));
+    body.innerHTML = ''; (W5.tab === 'fmt' ? fmtTab : W5.tab === 'meta' ? metaTab : anonTab)(body, draw);
+  };
+  root.append(tabs, body); draw();
+}
+function fmtTab(box) {
+  box.append(h('p', null, 'Le même tableau peut être écrit dans plusieurs formats. Modifiez le CSV : le tableau et le format JSON se mettent à jour.'));
+  const ta = h('textarea', { class: 'code-in', rows: 6, spellcheck: 'false', 'aria-label': 'Fichier CSV' }); ta.value = W5.csv;
+  const out = h('div'), seps = h('div', { class: 'chips' });
+  function upd() {
+    W5.csv = ta.value; const p = csvParse(ta.value, W5.sep);
+    out.innerHTML = '';
+    if (p.bad.length) out.append(h('p', { class: 'warn' }, 'Ligne(s) mal formée(s) (nombre de valeurs différent de l’en-tête) : ' + p.bad.join(', ') + '. Elles sont ignorées.'));
+    out.append(h('div', { class: 'two2' }, h('div', null, h('h3', null, 'Tableau'), p.cols.length ? tableEl(p.rows, p.cols) : null), h('div', null, h('h3', null, 'JSON'), h('pre', { class: 'code' }, JSON.stringify(p.rows, null, 2)))));
+    if (p.cols.length === 1 && ta.value.includes(';') && W5.sep === ',') out.append(h('p', { class: 'small' }, 'Une seule colonne détectée : le séparateur du fichier n’est peut-être pas celui choisi.'));
+  }
+  function drawSeps() { seps.innerHTML = ''; [[';', 'séparateur « ; »'], [',', 'séparateur « , »']].forEach(m => seps.append(h('button', { type: 'button', class: 'chip' + (W5.sep === m[0] ? ' on' : ''), 'aria-pressed': W5.sep === m[0] ? 'true' : 'false', onclick: () => { W5.sep = m[0]; drawSeps(); upd(); } }, m[1]))); }
+  ta.addEventListener('input', upd); drawSeps();
+  box.append(seps, ta, out, h('p', { class: 'small' }, 'Essayez : changer le séparateur, supprimer une valeur sur une ligne, ajouter une ligne. Remarquez que les nombres décimaux utilisent un point (14.5) : avec une virgule (14,5), il y aurait confusion avec le séparateur « , ».'),
+    h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W5.csv = CSV0; W5.sep = ';'; ta.value = CSV0; drawSeps(); upd(); } }, 'Rétablir l’exemple'))); upd();
+}
+function metaTab(box, redraw) {
+  box.append(h('p', null, 'Une photo contient, en plus de l’image, des ', h('b', null, 'métadonnées'), ' : des données sur la donnée. Elles sont ajoutées automatiquement par l’appareil. Désactivez celles que vous voulez retirer avant de publier.'));
+  const list = h('div', { class: 'sorts' });
+  META.forEach(m => list.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, h('b', null, m[1] + ' : '), m[2]), h('span', { class: 'sb' },
+    h('button', { type: 'button', class: 'btn sm' + (W5.meta[m[0]] ? ' badc' : ''), 'aria-pressed': W5.meta[m[0]] ? 'true' : 'false', onclick: () => { W5.meta[m[0]] = true; redraw(); } }, 'Présente'),
+    h('button', { type: 'button', class: 'btn sm' + (!W5.meta[m[0]] ? ' good' : ''), 'aria-pressed': !W5.meta[m[0]] ? 'true' : 'false', onclick: () => { W5.meta[m[0]] = false; redraw(); } }, 'Supprimée')))));
+  const ded = Object.keys(META_DED).filter(k => W5.meta[k]);
+  box.append(list, h('h3', null, 'Ce qu’on peut en déduire'), ded.length ? h('ul', null, ded.map(k => h('li', null, META_DED[k]))) : h('p', { class: 'score' }, 'Plus aucune information annexe : seule l’image reste.'),
+    h('p', { class: 'small' }, 'Beaucoup de réseaux sociaux suppriment les métadonnées des photos publiées, mais pas tous, et pas les messageries qui envoient le fichier original.'));
+}
+function anonTab(box, redraw) {
+  const rows = anonRows(), key = r => r.age + '|' + r.ville + '|' + r.sexe, cnt = {}; rows.forEach(r => { cnt[key(r)] = (cnt[key(r)] || 0) + 1; });
+  const uniq = rows.filter(r => cnt[key(r)] === 1).length, k = Math.min(...Object.values(cnt));
+  box.append(h('p', null, 'Un fichier est « anonymisé » : les noms ont été retirés. Mais on a laissé l’âge, la ville et le sexe. Une personne peut-elle encore être reconnue ? Elle l’est si une combinaison de valeurs n’appartient qu’à une seule ligne.'));
+  box.append(h('div', { class: 'chips', role: 'group', 'aria-label': 'Généralisations' },
+    h('button', { type: 'button', class: 'chip' + (W5.gen.age ? ' on' : ''), 'aria-pressed': W5.gen.age ? 'true' : 'false', onclick: () => { W5.gen.age = !W5.gen.age; redraw(); } }, 'Âge en tranches de 20 ans'),
+    h('button', { type: 'button', class: 'chip' + (W5.gen.ville ? ' on' : ''), 'aria-pressed': W5.gen.ville ? 'true' : 'false', onclick: () => { W5.gen.ville = !W5.gen.ville; redraw(); } }, 'Ville remplacée par la région')));
+  const t = h('table', { class: 'dt' }, h('thead', null, h('tr', null, h('th', null, 'âge'), h('th', null, 'ville'), h('th', null, 'sexe'), h('th', null, 'personnes identiques'))),
+    h('tbody', null, rows.map(r => h('tr', { class: cnt[key(r)] === 1 ? 'uq' : '' }, h('td', null, r.age), h('td', null, r.ville), h('td', null, r.sexe), h('td', { class: 'num' }, String(cnt[key(r)]))))));
+  box.append(h('div', { class: 'dwrap' }, t), h('div', { class: 'gstats' }, h('div', { class: 'stat' }, h('span', null, 'Lignes uniques (personne reconnaissable)'), h('b', null, uniq + ' sur ' + rows.length)), h('div', { class: 'stat' }, h('span', null, 'Plus petit groupe identique'), h('b', null, String(k)))),
+    h('p', { class: 'small' }, 'Si quelqu’un sait que sa voisine de 52 ans, qui habite Rivemont, est dans le fichier, il retrouve sa ligne. Généraliser les valeurs (tranches, régions) regroupe les personnes mais fait perdre en précision : c’est le compromis entre utilité des données et protection de la vie privée.'));
+}
+WORKSHOPS.push({ id: 'd5', title: 'Formats et vie privée', hint: 'Convertissez un CSV en JSON, supprimez des métadonnées, puis testez l’anonymisation.', mount: mountW5, reset: () => { Object.assign(W5, { tab: 'fmt', csv: CSV0, sep: ';', meta: { date: true, gps: true, appareil: true, nom: true }, gen: { age: false, ville: false } }); } });
+
+/*ACT-START*/
+const ACT = {
+  d1: {
+    title: 'Du fichier au tableau', level: 'Niveau 1 · Découvrir', time: '20 min', course: 'table',
+    goal: 'Comprendre comment des données sont organisées en table : enregistrements, descripteurs, valeurs et types, et lire un fichier CSV.',
+    steps: [
+      'Observez le <b>fichier brut (CSV)</b> : que contient la première ligne ? Que sépare le « ; » ?',
+      'Passez à l’affichage <b>« Tableau »</b>. Retrouvez chaque ligne du fichier brut dans le tableau.',
+      'Changez le séparateur du fichier brut (virgule, tabulation). Qu’est-ce qui change dans le texte ? Est-ce toujours le même jeu de données ?',
+      'Surlignez le descripteur « vélos dispo » : combien de valeurs contient cette colonne ?',
+      'Calculez le nombre de valeurs du fichier complet (lignes × colonnes) et comparez avec l’encadré « Structure ».',
+      'Terminez par <b>« Quel est le type de chaque donnée ? »</b>. Attention au numéro de téléphone et au code qui commence par des zéros.'
+    ],
+    defi: { q: 'Une station s’appelle « Gare, côté ouest » et on enregistre le fichier avec la virgule comme séparateur. Que va-t-il se passer à la lecture ? Comment l’éviter ?',
+      a: 'La virgule du nom sera prise pour un séparateur : la ligne aura une colonne de trop et sera mal lue. On l’évite en choisissant un autre séparateur (« ; » ou tabulation) ou en mettant la valeur entre guillemets : "Gare, côté ouest".' },
+    qcm: [
+      { q: 'Dans un tableau de données, une ligne est…', o: ['Un descripteur', 'Un type', 'Un enregistrement (un objet décrit)', 'Un format'], a: 2, w: 'Chaque ligne décrit un objet (ici une station). Chaque colonne est un descripteur.' },
+      { q: 'Que contient en général la première ligne d’un fichier CSV ?', o: ['Les données les plus importantes', 'Le nom des descripteurs (des colonnes)', 'Le nombre de lignes', 'La date du fichier'], a: 1, w: 'L’en-tête nomme les colonnes.' },
+      { q: 'CSV signifie…', o: ['Computer Stored Values', 'Comma-Separated Values (valeurs séparées par des virgules)', 'Common System Version', 'Coded Standard Variables'], a: 1, w: 'C’est un format texte où les valeurs sont séparées par un caractère (virgule, point-virgule, tabulation).' },
+      { q: 'Un fichier a 24 lignes de données et 8 colonnes. Combien de valeurs contient-il (sans compter l’en-tête) ?', o: ['32', '192', '24', '8'], a: 1, w: '24 × 8 = 192 valeurs.' },
+      { q: 'Quel est le type le plus adapté pour un numéro de téléphone ?', o: ['Entier', 'Décimal', 'Texte', 'Booléen'], a: 2, w: 'On ne calcule pas avec un numéro de téléphone et les zéros du début comptent : c’est du texte.' },
+      { q: 'Pourquoi le type d’une donnée est-il important ?', o: ['Il change la couleur d’affichage', 'Il détermine les opérations possibles (calculer, trier, comparer)', 'Il augmente la vitesse du réseau', 'Il est obligatoire pour les images'], a: 1, w: 'On additionne des nombres, on compare des dates, on trie du texte par ordre alphabétique.' }
+    ]
+  },
+  d2: {
+    title: 'Trier et filtrer', level: 'Niveau 2 · Manipuler', time: '25 min', course: 'traitement',
+    goal: 'Interroger une collection de données : filtrer avec des conditions, trier selon un ou plusieurs critères, rechercher.',
+    steps: [
+      'Laissez le filtre « quartier est égal à Gare » : combien de lignes ? Triez-les par trajets décroissants.',
+      'Ajoutez la condition « trajets par jour est supérieur à 100 ». Quelles stations restent ?',
+      'Remplacez par « nom contient gare ». Que remarquez-vous (majuscules, mots complets) ?',
+      'Triez toute la table par « année » croissant, puis ajoutez un second critère « trajets par jour décroissant ». Comment sont classées les stations d’une même année ?',
+      'Triez par « nom » : dans quel ordre apparaissent les noms avec un accent, comme « Église Saint-Paul » ?',
+      'Cherchez une condition qui ne donne aucun résultat. Comment l’interprétez-vous ?'
+    ],
+    defi: { q: 'Trouvez les stations non électriques qui ont au moins 10 vélos disponibles, classées par nombre de trajets décroissant. Quelles conditions avez-vous utilisées ?',
+      a: 'Conditions : « électrique est égal à non » ET « vélos dispo est supérieur à 9 », tri par « trajets par jour » décroissant. Résultat : Parvis de la Gare (126), Hôpital (38), Marina (26).' },
+    qcm: [
+      { q: 'Filtrer un tableau, c’est…', o: ['Changer l’ordre des lignes', 'Ne garder que les lignes qui vérifient une condition', 'Supprimer les colonnes inutiles', 'Convertir en un autre format'], a: 1, w: 'Un filtre sélectionne des lignes ; un tri les ordonne.' },
+      { q: 'On filtre avec deux conditions reliées par ET. Une ligne est conservée si…', o: ['Une des conditions est vraie', 'Aucune condition n’est vraie', 'Les deux conditions sont vraies', 'Elle est la première du tableau'], a: 2, w: 'ET exige que toutes les conditions soient vraies en même temps.' },
+      { q: 'Trier par « année » puis par « trajets décroissants », cela signifie que…', o: ['Les stations de même année sont départagées par le nombre de trajets', 'On trie d’abord par trajets', 'On supprime les doublons', 'On ne garde qu’une station par année'], a: 0, w: 'Le second critère ne sert qu’en cas d’égalité sur le premier.' },
+      { q: 'Quel filtre garde uniquement les stations de plus de 100 trajets par jour ?', o: ['trajets inférieur à 100', 'trajets égal à 100', 'trajets supérieur à 100', 'nom contient 100'], a: 2, w: '« Supérieur à 100 » garde les valeurs strictement plus grandes.' },
+      { q: 'Un filtre ne donne aucun résultat. Cela veut dire que…', o: ['Le tableau est vide', 'Aucune ligne du tableau ne vérifie toutes les conditions', 'Le fichier est abîmé', 'Les colonnes sont mal nommées'], a: 1, w: 'Le tableau n’est pas vide : simplement, aucune ligne ne correspond à ces conditions.' },
+      { q: 'Pourquoi trier un tableau est-il utile ?', o: ['Pour réduire sa taille', 'Pour repérer plus facilement les extrêmes et retrouver une valeur', 'Pour changer les valeurs', 'Pour le chiffrer'], a: 1, w: 'Un tableau trié permet de repérer maximum, minimum, doublons, et de rechercher plus vite.' }
+    ]
+  },
+  d3: {
+    title: 'Calculs et regroupements', level: 'Niveau 2 · Analyser', time: '25 min', course: 'calculs',
+    goal: 'Résumer des données par des calculs (somme, moyenne, minimum, maximum), par groupes, et interpréter les résultats avec esprit critique.',
+    steps: [
+      'Laissez « regrouper par quartier » et « moyenne des trajets par jour ». Quel quartier a la plus forte moyenne ? la plus faible ?',
+      'Passez à « Nombre de lignes » : combien de stations par quartier ? Vérifiez que la somme fait bien 24.',
+      'Choisissez « Somme » des « places » : combien de places au total ? Comparez avec la somme des « vélos dispo ».',
+      'Regroupez par « Électrique » avec la moyenne des trajets. Les stations électriques sont-elles plus utilisées ?',
+      'Dans <b>« Moyenne ou médiane ? »</b>, déplacez le curseur. Que devient la moyenne ? la médiane ?'
+    ],
+    defi: { q: 'Les stations électriques ont-elles en moyenne plus de trajets par jour que les autres ? Peut-on en conclure que l’électrique attire plus d’usagers ?',
+      a: 'Non, au contraire : 57,94 trajets en moyenne pour 18 stations électriques, contre 62,33 pour les 6 non électriques. On ne peut pas conclure : seulement 6 stations non électriques, et d’autres facteurs jouent (le quartier, par exemple : les gares sont très fréquentées). Une moyenne sur un petit groupe ne prouve pas une cause.' },
+    qcm: [
+      { q: 'Quelle est la moyenne des valeurs 4, 6 et 11 ?', o: ['6', '7', '21', '5'], a: 1, w: '(4 + 6 + 11) ÷ 3 = 7.' },
+      { q: 'Que fait « regrouper par quartier » ?', o: ['Il supprime les doublons', 'Il calcule séparément pour chaque quartier', 'Il trie les stations', 'Il change le format'], a: 1, w: 'Le calcul est fait groupe par groupe (une ligne de résultat par quartier).' },
+      { q: 'Dans l’atelier, le nombre de lignes de tous les groupes additionnés vaut…', o: ['5', '24, le nombre total de stations', '8', '100'], a: 1, w: 'Chaque station est dans un seul groupe : la somme des effectifs est le total.' },
+      { q: 'Quand la médiane est-elle plus adaptée que la moyenne ?', o: ['Quand il y a une valeur extrême qui fausserait la moyenne', 'Quand les valeurs sont toutes identiques', 'Jamais', 'Seulement pour les textes'], a: 0, w: 'La médiane partage les valeurs en deux moitiés : elle n’est presque pas influencée par une valeur extrême.' },
+      { q: 'Sur les valeurs 3, 4, 4, 5, 5, 6, 40, quelle est la médiane ?', o: ['9,57', '4', '5', '40'], a: 2, w: 'La 4e valeur sur 7, une fois triées, est 5. La moyenne, elle, vaut environ 9,57.' },
+      { q: 'La moyenne des stations électriques est plus faible que celle des autres. Que peut-on dire ?', o: ['Les stations électriques sont inutiles', 'Il faut les supprimer', 'Cette comparaison seule ne prouve rien : petit échantillon et autres facteurs possibles', 'Les autres sont forcément meilleures'], a: 2, w: 'Corrélation n’est pas causalité : taille des groupes, quartier et autres facteurs interviennent.' },
+      { q: 'Quel calcul donne la plus grande valeur parmi un groupe ?', o: ['Moyenne', 'Maximum', 'Somme', 'Médiane'], a: 1, w: 'Le maximum est la plus grande valeur.' }
+    ]
+  },
+  d4: {
+    title: 'Croiser des tables', level: 'Niveau 3 · Relier', time: '25 min', course: 'croiser',
+    goal: 'Comprendre pourquoi on répartit les données en plusieurs tables, ce que sont une clé primaire et une clé étrangère, et comment fonctionne une jointure.',
+    steps: [
+      'Lisez les deux tables. Dans « élèves », la colonne « club » contient un numéro : à quelle colonne de la table « clubs » correspond-il ?',
+      'Gardez les colonnes proposées par défaut (club et id_club) : combien de lignes dans la jointure ? Pourquoi moins de 8 ?',
+      'Repérez les deux élèves absents du résultat : l’un n’a pas de club, l’autre a un numéro de club qui n’existe pas.',
+      'Changez la colonne de gauche (par exemple « prenom ») : que se passe-t-il ? Pourquoi cette jointure n’a-t-elle pas de sens ?',
+      'Répondez à la question « Pourquoi deux tables ? » avec les deux options.'
+    ],
+    defi: { q: 'Quels élèves ne figurent pas dans la jointure, et pour quelle raison pour chacun ? Que faudrait-il faire dans la table pour corriger ?',
+      a: 'Camille : la colonne club est vide (elle n’a pas de club, ou la donnée est manquante). Nathan : club n° 9, un numéro qui n’existe pas dans la table des clubs (clé étrangère orpheline, donc erreur de saisie). Pour corriger : renseigner le club de Camille si elle en a un, et remplacer le n° 9 de Nathan par un numéro valide de 1 à 4.' },
+    qcm: [
+      { q: 'Pourquoi sépare-t-on les données en plusieurs tables ?', o: ['Pour utiliser plus de place', 'Pour éviter de répéter les informations et les incohérences', 'Pour ralentir les recherches', 'Pour cacher des colonnes'], a: 1, w: 'Chaque information n’est écrite qu’une fois : une modification n’a lieu qu’à un seul endroit.' },
+      { q: 'Une clé primaire est…', o: ['Une colonne qui identifie de façon unique chaque ligne', 'Un mot de passe', 'La première colonne, toujours', 'Une colonne de dates'], a: 0, w: 'Exemple : id_club identifie un seul club.' },
+      { q: 'La colonne « club » de la table élèves est une clé étrangère. Cela signifie que…', o: ['Elle est écrite en anglais', 'Elle contient des valeurs de la clé primaire d’une autre table', 'Elle ne sert à rien', 'Elle est cachée'], a: 1, w: 'Une clé étrangère renvoie vers la clé primaire d’une autre table.' },
+      { q: 'Dans la jointure par défaut, Camille n’apparaît pas car…', o: ['Elle est absente', 'Son club n’est pas renseigné, il n’y a pas de correspondance', 'Elle est dans une autre classe', 'Son prénom est trop long'], a: 1, w: 'La valeur est vide : aucune ligne de clubs ne correspond.' },
+      { q: 'Nathan a le club n° 9. Que dit-on de cette valeur ?', o: ['Elle est correcte', 'Elle ne correspond à aucun club : c’est une erreur d’intégrité', 'Elle est un décimal', 'Elle est une clé primaire'], a: 1, w: 'La clé étrangère doit toujours renvoyer à une clé primaire existante.' },
+      { q: 'Si le club Robotique change de salle, combien de cellules faut-il modifier avec deux tables ?', o: ['1', '2', '8', 'Toutes'], a: 0, w: 'La salle n’est écrite qu’une seule fois, dans la table des clubs.' },
+      { q: 'Pourquoi relier « prenom » à « id_club » n’a-t-il pas de sens ?', o: ['Ce sont des types différents mais ça marche', 'Ces colonnes ne désignent pas la même chose', 'Parce que c’est interdit par la loi', 'Parce que les tables sont trop grandes'], a: 1, w: 'Une jointure compare des colonnes qui représentent la même information (ici le numéro de club).' }
+    ]
+  },
+  d5: {
+    title: 'Formats et vie privée', level: 'Niveau 3 · Protéger', time: '30 min', course: 'protection',
+    goal: 'Connaître quelques formats de données (CSV, JSON), comprendre ce que sont les métadonnées, et mesurer le risque de ré-identification dans des données « anonymisées ».',
+    steps: [
+      'Onglet <b>Formats</b> : modifiez une note dans le CSV. Que devient le JSON ? Supprimez une valeur sur une ligne : que se passe-t-il ?',
+      'Passez le séparateur de « ; » à « , » : pourquoi le tableau devient-il illisible ?',
+      'Onglet <b>Métadonnées</b> : laquelle de ces informations révèle où se trouve la personne ? Supprimez-les une à une.',
+      'Onglet <b>Anonymisation</b> : repérez les lignes surlignées (uniques). Comment une personne peut-elle être reconnue sans son nom ?',
+      'Activez les deux généralisations. Reste-t-il des lignes uniques ? Que faudrait-il faire de plus ?'
+    ],
+    defi: { q: 'Après avoir activé les deux généralisations (âge en tranches, ville par région), reste-t-il une personne reconnaissable ? Laquelle, et que proposez-vous ?',
+      a: 'Oui : la ligne « 60-79 ans, F » reste unique (la femme de 67 ans). On peut élargir encore les tranches, retirer la colonne « sexe », ou supprimer cette ligne du fichier publié. C’est le compromis entre précision des données et protection de la vie privée.' },
+    qcm: [
+      { q: 'Que sont des métadonnées ?', o: ['Des données sur les données (date, lieu, appareil, auteur…)', 'Des données très volumineuses', 'Des mots de passe', 'Des images retouchées'], a: 0, w: 'Exemples : date et lieu de prise de vue d’une photo, auteur d’un document.' },
+      { q: 'Pourquoi les métadonnées d’une photo peuvent-elles être un risque ?', o: ['Elles alourdissent le fichier', 'Elles peuvent révéler l’endroit, l’heure et l’appareil', 'Elles changent la couleur', 'Elles sont toujours fausses'], a: 1, w: 'Les coordonnées GPS et l’horodatage renseignent sur les déplacements de la personne.' },
+      { q: 'Le format JSON sert à…', o: ['Compresser des vidéos', 'Représenter des données structurées sous forme de texte (objets, listes)', 'Dessiner des images', 'Chiffrer un fichier'], a: 1, w: 'JSON est un format texte très utilisé pour échanger des données sur le Web.' },
+      { q: 'Un fichier « anonymisé » ne contient plus les noms. Peut-on encore reconnaître quelqu’un ?', o: ['Non, jamais', 'Oui, en croisant âge, ville, sexe… avec d’autres informations', 'Seulement si on connaît son mot de passe', 'Seulement avec des images'], a: 1, w: 'Un petit groupe de caractéristiques peut suffire à identifier une personne : c’est la ré-identification.' },
+      { q: 'Généraliser un âge (en tranches de 20 ans) permet de…', o: ['Rendre les personnes plus difficiles à distinguer', 'Les rendre plus faciles à identifier', 'Augmenter la précision', 'Supprimer le fichier'], a: 0, w: 'Les personnes sont regroupées : moins de lignes uniques. En contrepartie, on perd en précision.' },
+      { q: 'Quelle autorité française veille à l’application du RGPD ?', o: ['L’ARCEP', 'La CNIL', 'L’INSEE', 'La SNCF'], a: 1, w: 'La Commission nationale de l’informatique et des libertés.' },
+      { q: 'Dans un fichier CSV, une ligne avec une valeur en moins que l’en-tête est…', o: ['Valide', 'Mal formée : le nombre de valeurs ne correspond pas aux colonnes', 'Supprimée par le navigateur', 'Convertie en texte'], a: 1, w: 'Chaque ligne doit avoir autant de valeurs que de colonnes.' }
+    ]
+  }
+};
+/*ACT-END*/
+
+/*COURSE-START*/
+const COURSE = [];
+COURSE.push({ id: 'donnees', t: 'Donnée, information, collection', h: `
+<p>Une <b>donnée</b> est une valeur brute qui décrit un fait : « 24 », « Gare Nord », « 2024-05-12 ». Prise seule, elle ne dit pas grand-chose. Une <b>information</b> est une donnée mise en contexte : « la station Gare Nord a 24 places ».</p>
+<h3>Où trouve-t-on des données ?</h3>
+<ul>
+<li>Dans des fichiers (tableur, CSV), des bases de données, des sites web.</li>
+<li>Dans les <b>capteurs</b> : GPS, thermomètres, podomètres, caméras.</li>
+<li>Dans les <b>traces d’usage</b> : historique de navigation, achats, messages, « J’aime ».</li>
+<li>Dans les <b>enquêtes</b> et les recensements.</li>
+</ul>
+<h3>Données structurées</h3>
+<p>Des données sont <b>structurées</b> quand elles sont organisées de façon régulière : chaque objet est décrit par les mêmes descripteurs. Un tableau de stations en est un exemple. À l’inverse, un texte libre, une photo ou une vidéo sont des données <b>non structurées</b> (il faut des traitements particuliers pour en tirer des informations).</p>
+<h3>Collection</h3>
+<p>Un ensemble d’objets décrits de la même façon s’appelle une <b>collection</b> : les 24 stations de vélos, les élèves d’un lycée, les livres d’une médiathèque. On manipule une collection en la <b>filtrant</b>, la <b>triant</b>, en <b>calculant</b> dessus, en la <b>croisant</b> avec une autre.</p>
+<div class="retain"><b>À retenir.</b> Donnée = valeur brute ; information = donnée avec un sens. Données structurées = mêmes descripteurs pour tous les objets d’une collection.</div>` });
+
+COURSE.push({ id: 'table', t: 'Le tableau : enregistrements et descripteurs', h: `
+<p>La façon la plus courante d’organiser des données structurées est la <b>table</b> (un tableau).</p>
+<table class="ctable"><thead><tr><th>Mot</th><th>Dans le tableau</th><th>Exemple</th></tr></thead><tbody>
+<tr><td><b>Enregistrement</b> (ou ligne, objet)</td><td>Une ligne</td><td>La station « Gare Nord »</td></tr>
+<tr><td><b>Descripteur</b> (ou attribut, champ, colonne)</td><td>Une colonne</td><td>« places »</td></tr>
+<tr><td><b>Valeur</b></td><td>Une case</td><td>10</td></tr>
+</tbody></table>
+<p>Une table de <i>n</i> lignes et <i>p</i> colonnes contient <i>n</i> × <i>p</i> valeurs (sans compter l’en-tête).</p>
+<h3>Les types de données</h3>
+<table class="ctable"><thead><tr><th>Type</th><th>Exemples</th><th>Opérations possibles</th></tr></thead><tbody>
+<tr><td>Entier</td><td>42, 2024</td><td>calculs, comparaison, tri numérique</td></tr>
+<tr><td>Décimal (flottant)</td><td>3.5, 14.25</td><td>calculs, comparaison</td></tr>
+<tr><td>Texte (chaîne de caractères)</td><td>Gare Nord, 07 12 34 56 78</td><td>comparaison, recherche, tri alphabétique</td></tr>
+<tr><td>Date</td><td>2024-05-12</td><td>comparaison, durées</td></tr>
+<tr><td>Booléen</td><td>vrai / faux, oui / non</td><td>conditions</td></tr>
+</tbody></table>
+<ul>
+<li>Un <b>code</b> ou un <b>numéro de téléphone</b> est du texte : on n’additionne pas des téléphones et les zéros au début comptent.</li>
+<li>Dans une colonne, toutes les valeurs doivent avoir le <b>même type</b>.</li>
+<li>Une <b>valeur manquante</b> est une case vide : il faut décider comment la traiter.</li>
+</ul>
+<p>Une bonne table est <b>propre</b> : mêmes écritures pour une même chose (« Gare » partout, pas « gare » ni « GARE »), mêmes formats de dates, pas de lignes à moitié remplies.</p>
+<div class="retain"><b>À retenir.</b> Ligne = enregistrement, colonne = descripteur, case = valeur. Chaque colonne a un type qui détermine les traitements possibles.</div>` });
+
+COURSE.push({ id: 'formats', t: 'Formats de fichiers : CSV et JSON', h: `
+<p>Pour stocker et échanger des données, on les écrit dans un fichier. Voici deux formats texte très répandus, lisibles par l’humain et par les programmes.</p>
+<h3>CSV</h3>
+<p>Une ligne par enregistrement, les valeurs séparées par un caractère : la virgule, le point-virgule ou la tabulation. La première ligne contient les noms des descripteurs.</p>
+<pre class="code">nom;places;electrique
+Gare Nord;10;oui
+Marina;20;non</pre>
+<ul>
+<li>Le séparateur ne doit pas apparaître dans une valeur, sinon il faut mettre la valeur entre <b>guillemets</b>.</li>
+<li>Dans les pays où la virgule est la marque décimale (comme la France), on utilise souvent le point-virgule comme séparateur : sinon 14,5 serait lu comme deux valeurs.</li>
+<li>Le CSV s’ouvre dans un tableur et se lit facilement par programme.</li>
+</ul>
+<h3>JSON</h3>
+<p>Le <b>JSON</b> décrit des objets sous forme de paires « clé : valeur » entre accolades, et des listes entre crochets. Il est très utilisé pour échanger des données entre sites et applications.</p>
+<pre class="code">[
+  { "nom": "Gare Nord", "places": 10, "electrique": "oui" },
+  { "nom": "Marina", "places": 20, "electrique": "non" }
+]</pre>
+<p>Essayez de passer d’un format à l’autre :</p>
+<div class="widget" data-w="csv"></div>
+<h3>Autres formats</h3>
+<ul>
+<li><b>XML</b> : balises imbriquées, comme le HTML, utilisé pour des échanges de données.</li>
+<li><b>Fichiers de tableur</b> (xlsx, ods) : des tableaux avec mise en forme et formules.</li>
+<li><b>Bases de données</b> : pour de grands volumes (voir la section dédiée).</li>
+</ul>
+<div class="retain"><b>À retenir.</b> CSV : lignes et séparateurs, simple, très répandu. JSON : objets « clé : valeur » et listes. Un format standard permet à des logiciels différents d’échanger des données.</div>` });
+
+COURSE.push({ id: 'traitement', t: 'Rechercher, trier, filtrer', h: `
+<p>Traiter des données, c’est d’abord les interroger. Trois opérations de base :</p>
+<h3>Rechercher</h3>
+<p>Retrouver une valeur ou un enregistrement dans la collection. On peut chercher une valeur exacte (« Marina ») ou contenant un motif (« gare »).</p>
+<h3>Filtrer (sélectionner)</h3>
+<p>Ne garder que les lignes qui vérifient une <b>condition</b>.</p>
+<ul>
+<li>Conditions simples : égal à, différent de, supérieur à, inférieur à, contient.</li>
+<li>On combine avec <b>ET</b> (toutes vraies) ou <b>OU</b> (au moins une vraie).</li>
+<li>Exemple : électrique = « non » ET vélos dispo ≥ 10.</li>
+</ul>
+<h3>Trier</h3>
+<p>Ordonner les lignes selon un ou plusieurs <b>critères</b> (croissant ou décroissant). Le second critère sert à départager les égalités du premier.</p>
+<ul>
+<li>Les nombres sont triés par valeur ; les textes, par ordre alphabétique (selon le code des caractères : les lettres accentuées majuscules peuvent passer à la fin).</li>
+<li>Trier ne change pas les données : seulement leur ordre d’affichage.</li>
+</ul>
+<h3>Et dans un tableur ?</h3>
+<p>Ces opérations sont disponibles dans les fonctions « trier », « filtrer » et « rechercher ». En programmation, on les écrit avec des boucles et des conditions, en parcourant la liste des enregistrements.</p>
+<div class="retain"><b>À retenir.</b> Filtrer = sélectionner des lignes selon une condition. Trier = ordonner selon un ou plusieurs critères. Rechercher = retrouver une valeur.</div>` });
+
+COURSE.push({ id: 'calculs', t: 'Calculs et statistiques', h: `
+<p>Pour résumer une collection, on calcule des <b>indicateurs</b>.</p>
+<table class="ctable"><thead><tr><th>Indicateur</th><th>Définition</th><th>Exemple (3, 4, 4, 5, 5, 6, 40)</th></tr></thead><tbody>
+<tr><td>Effectif</td><td>Nombre de lignes</td><td>7</td></tr>
+<tr><td>Somme</td><td>Total des valeurs</td><td>67</td></tr>
+<tr><td>Moyenne</td><td>Somme ÷ effectif</td><td>67 ÷ 7 ≈ 9,57</td></tr>
+<tr><td>Minimum, maximum</td><td>Plus petite et plus grande valeur</td><td>3 et 40</td></tr>
+<tr><td>Médiane</td><td>Valeur qui partage la série triée en deux moitiés</td><td>5</td></tr>
+</tbody></table>
+<h3>Regrouper</h3>
+<p>On peut calculer <b>par groupe</b> : par quartier, par année, par classe. On regroupe les lignes qui ont la même valeur dans un descripteur, puis on calcule un indicateur pour chaque groupe.</p>
+<h3>Moyenne ou médiane ?</h3>
+<p>La moyenne est sensible aux <b>valeurs extrêmes</b> : une seule valeur très grande la tire vers le haut (ici 9,57, alors que six valeurs sur sept sont entre 3 et 6). La médiane y résiste mieux.</p>
+<h3>Interpréter avec prudence</h3>
+<ul>
+<li>Un petit groupe (6 stations) donne une moyenne peu fiable.</li>
+<li>Deux groupes différents peuvent s’expliquer par un <b>troisième facteur</b> (le quartier, par exemple).</li>
+<li>Une <b>corrélation</b> (deux valeurs qui varient ensemble) ne prouve pas une <b>causalité</b> (l’une provoque l’autre).</li>
+<li>Vérifier les <b>valeurs manquantes</b> et les <b>erreurs de saisie</b> avant de calculer.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Effectif, somme, moyenne, min, max, médiane. On peut regrouper pour calculer par catégorie. Une moyenne n’est pas toujours représentative ; corrélation ≠ causalité.</div>` });
+
+COURSE.push({ id: 'croiser', t: 'Croiser des tables : clés et jointures', h: `
+<p>Quand une information concerne plusieurs objets (le club d’un élève, l’auteur d’un livre), la répéter à chaque ligne crée des <b>redondances</b> : de la place perdue, et des risques d’incohérence à la moindre modification. On préfère mettre cette information dans <b>une autre table</b>.</p>
+<h3>Clé primaire et clé étrangère</h3>
+<ul>
+<li>La <b>clé primaire</b> est un descripteur dont la valeur identifie de façon <b>unique</b> chaque enregistrement (par exemple <code>id_club</code>).</li>
+<li>Une <b>clé étrangère</b> est un descripteur dont les valeurs sont des clés primaires d’une autre table (la colonne <code>club</code> de la table des élèves).</li>
+</ul>
+<h3>La jointure</h3>
+<p>Une <b>jointure</b> associe chaque ligne d’une table aux lignes d’une autre qui ont la même valeur de clé. On obtient un tableau plus complet, sans avoir répété les données.</p>
+<h3>Qualité des données</h3>
+<ul>
+<li>Une clé étrangère vide ou qui renvoie à une clé inexistante est une erreur d’<b>intégrité</b> : la ligne ne trouve pas de correspondance.</li>
+<li>Une modification (changer la salle d’un club) ne se fait qu’à un seul endroit.</li>
+<li>Croiser des tables d’origines différentes (par exemple, des données publiques et des données privées) peut <b>révéler des informations sur des personnes</b> (voir la section sur la protection).</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Clé primaire = identifiant unique d’une ligne. Clé étrangère = renvoi vers la clé primaire d’une autre table. La jointure relie les tables et évite les redondances.</div>` });
+
+COURSE.push({ id: 'bases', t: 'Bases de données', h: `
+<p>Quand les données sont nombreuses, partagées par beaucoup d’utilisateurs et modifiées en permanence, un simple fichier ne suffit plus. On utilise une <b>base de données</b>, gérée par un <b>système de gestion de base de données</b> (SGBD).</p>
+<h3>Ce que fait un SGBD</h3>
+<ul>
+<li>Stocker les données dans plusieurs tables reliées.</li>
+<li>Permettre à plusieurs utilisateurs d’y accéder en même temps sans conflit.</li>
+<li>Garantir la <b>cohérence</b> (une clé étrangère ne doit pas être orpheline) et la <b>sécurité</b> (qui a le droit de lire ou modifier).</li>
+<li>Répondre rapidement à des <b>requêtes</b>, grâce à des index.</li>
+</ul>
+<h3>Une requête</h3>
+<p>Un langage répandu est le SQL. Cette requête filtre et trie les stations de l’atelier :</p>
+<pre class="code">SELECT nom, usage
+FROM stations
+WHERE quartier = 'Gare' AND usage > 100
+ORDER BY usage DESC;</pre>
+<p>On retrouve les trois idées vues dans les ateliers : choisir des colonnes, filtrer avec une condition, trier.</p>
+<h3>Exemples d’usage</h3>
+<ul>
+<li>Un site marchand (produits, clients, commandes).</li>
+<li>Un réseau social (profils, publications, relations).</li>
+<li>L’ENT du lycée (élèves, classes, notes).</li>
+</ul>
+<h3>Données massives (big data)</h3>
+<p>Quand le volume, la vitesse d’arrivée et la variété des données dépassent les outils ordinaires (milliards de lignes, capteurs en continu), on parle de <b>données massives</b>. On les traite en répartissant le travail sur de nombreux ordinateurs (cloud, centres de données).</p>
+<div class="retain"><b>À retenir.</b> Une base de données regroupe des tables reliées, gérées par un SGBD qui garantit accès partagé, cohérence et sécurité. On l’interroge par des requêtes (filtrer, trier, joindre).</div>` });
+
+COURSE.push({ id: 'metadonnees', t: 'Métadonnées', h: `
+<p>Les <b>métadonnées</b> sont des données qui décrivent d’autres données.</p>
+<table class="ctable"><thead><tr><th>Objet</th><th>Données</th><th>Métadonnées possibles</th></tr></thead><tbody>
+<tr><td>Photo</td><td>Les pixels</td><td>Date et heure, position GPS, appareil, réglages</td></tr>
+<tr><td>Document</td><td>Le texte</td><td>Auteur, dates de création et de modification, logiciel</td></tr>
+<tr><td>Message</td><td>Le contenu</td><td>Expéditeur, destinataire, heure, taille</td></tr>
+<tr><td>Fichier musical</td><td>Le son</td><td>Titre, artiste, album, année</td></tr>
+</tbody></table>
+<h3>À quoi servent-elles ?</h3>
+<ul>
+<li>Classer et <b>retrouver</b> des contenus (par date, par lieu, par auteur).</li>
+<li>Savoir d’où vient un document et si on peut lui faire confiance.</li>
+<li>Faire fonctionner des services (cartes de photos, recommandations).</li>
+</ul>
+<h3>Quels risques ?</h3>
+<p>Les métadonnées sont ajoutées automatiquement et on les oublie. Pourtant, une photo peut révéler où et quand elle a été prise, un document qui l’a écrit. En croisant les métadonnées de plusieurs fichiers, on reconstitue des habitudes de vie. Même sans lire le contenu des messages, savoir <b>qui écrit à qui, quand et combien</b> en dit beaucoup.</p>
+<h3>Que faire ?</h3>
+<ul>
+<li>Désactiver la <b>localisation</b> de l’appareil photo si on partage des photos.</li>
+<li>Supprimer les métadonnées avant de diffuser un fichier (des outils le permettent).</li>
+<li>Savoir que la plupart des réseaux sociaux les retirent à l’affichage, mais ne le font pas toujours.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Les métadonnées décrivent les données. Utiles pour classer et retrouver, elles peuvent révéler lieu, date, appareil, relations : il faut y faire attention avant de partager un fichier.</div>` });
+
+COURSE.push({ id: 'opendata', t: 'Collecte et données ouvertes', h: `
+<h3>Comment les données sont-elles collectées ?</h3>
+<ul>
+<li>Saisie par des personnes (formulaires, enquêtes).</li>
+<li>Mesures automatiques par des <b>capteurs</b> (météo, circulation, vélos disponibles).</li>
+<li>Traces numériques des utilisateurs (navigation, achats, applications).</li>
+</ul>
+<p>La qualité du résultat dépend de la qualité des données collectées : des erreurs, des oublis ou des biais (qui a répondu ?) se retrouvent dans les conclusions.</p>
+<h3>Données ouvertes (open data)</h3>
+<p>Les <b>données ouvertes</b> sont des données publiques mises à disposition de tous, gratuitement, dans des formats réutilisables (CSV, JSON), avec une licence qui autorise leur réutilisation. Les collectivités et l’État en publient : horaires de transports, qualité de l’air, budgets, stations de vélos en libre-service, résultats d’élections. En France, le portail national est data.gouv.fr.</p>
+<ul>
+<li><b>Intérêts</b> : transparence, innovation (applications de transport), recherche, journalisme de données.</li>
+<li><b>Limites</b> : qualité inégale, mises à jour variables, risque de ré-identification si des données personnelles mal anonymisées sont publiées.</li>
+</ul>
+<h3>Utiliser des données avec esprit critique</h3>
+<ul>
+<li>Qui a produit ces données ? Quand ? Dans quel but ?</li>
+<li>Comment ont-elles été collectées ? Sur combien de personnes ?</li>
+<li>Y a-t-il des valeurs manquantes, des doublons, des erreurs ?</li>
+<li>Les conclusions sont-elles justifiées par les chiffres, ou simplement suggérées ?</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Les données sont collectées par saisie, capteurs et traces numériques. L’open data met des données publiques à disposition de tous. Il faut toujours en vérifier la source et la qualité.</div>` });
+
+COURSE.push({ id: 'protection', t: 'Protection des données et anonymisation', h: `
+<h3>Données personnelles</h3>
+<p>Une <b>donnée personnelle</b> est une information qui permet d’identifier une personne, directement (nom, photo, numéro de sécurité sociale) ou indirectement par recoupement (âge, ville, établissement, plaque d’immatriculation).</p>
+<h3>Le RGPD</h3>
+<p>Le <b>règlement général sur la protection des données</b> (RGPD) s’applique dans toute l’Union européenne. La <b>CNIL</b> en assure le contrôle en France. Il impose notamment :</p>
+<ul>
+<li>un <b>but précis</b> pour toute collecte (finalité) ;</li>
+<li>de ne collecter que le <b>nécessaire</b> (minimisation) ;</li>
+<li>une <b>durée de conservation</b> limitée ;</li>
+<li>le <b>consentement</b> clair pour certains usages ;</li>
+<li>des <b>droits</b> pour chacun : être informé, accéder à ses données, les rectifier, demander leur effacement, s’opposer.</li>
+</ul>
+<h3>Anonymiser, est-ce suffisant ?</h3>
+<p>Retirer les noms ne suffit pas toujours. Si des descripteurs restants (âge, ville, sexe, profession) forment une combinaison <b>unique</b>, quelqu’un qui connaît ces informations peut retrouver la ligne : c’est la <b>ré-identification</b>. Plus il y a de descripteurs, plus c’est probable.</p>
+<p>Pour l’éviter, on <b>généralise</b> les valeurs (âge exact → tranche d’âge ; ville → région), on supprime les lignes trop rares ou certaines colonnes. On vise des groupes d’au moins <i>k</i> personnes identiques. L’atelier 5 montre le compromis : plus on généralise, plus on protège, mais moins les données sont précises et utiles.</p>
+<h3>Bonnes pratiques</h3>
+<ul>
+<li>Ne pas collecter plus que nécessaire.</li>
+<li>Ne pas publier des données sur des personnes sans leur accord.</li>
+<li>Savoir que des jeux de données séparés, une fois croisés, peuvent identifier quelqu’un.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Le RGPD protège les données personnelles (finalité, minimisation, droits). Anonymiser en retirant les noms ne suffit pas : une combinaison unique de valeurs permet de ré-identifier une personne.</div>` });
+
+COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
+<ul>
+<li>Les stations, les élèves, les clubs, les photos et les fichiers sont <b>fictifs</b>. Les 24 stations sont générées de façon fixe pour que les résultats soient reproductibles.</li>
+<li>Le filtre accepte plusieurs conditions reliées uniquement par « ET ». Le « OU » n’est pas proposé.</li>
+<li>La jointure de l’atelier 4 est une jointure simple entre deux tables de quelques lignes. Un vrai SGBD gère des millions de lignes, plusieurs types de jointures et des index.</li>
+<li>Le tri des textes suit le code des caractères : une vraie application tient compte de la langue (accents, majuscules).</li>
+<li>L’anonymisation n’étudie que trois descripteurs. Dans la réalité, les risques de ré-identification sont plus étendus.</li>
+<li>Les chiffres statistiques portent sur de très petits échantillons : ils servent à comprendre les calculs, pas à tirer des conclusions.</li>
+</ul>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>Anonymisation</dt><dd>Suppression ou transformation des données pour qu’on ne puisse plus identifier les personnes.</dd>
+<dt>Base de données</dt><dd>Ensemble organisé de tables reliées, géré par un SGBD.</dd>
+<dt>Clé étrangère</dt><dd>Descripteur dont les valeurs renvoient à la clé primaire d’une autre table.</dd>
+<dt>Clé primaire</dt><dd>Descripteur qui identifie de façon unique chaque enregistrement.</dd>
+<dt>Collection</dt><dd>Ensemble d’objets décrits par les mêmes descripteurs.</dd>
+<dt>CSV</dt><dd>Format texte où les valeurs d’une ligne sont séparées par un caractère.</dd>
+<dt>Descripteur</dt><dd>Propriété décrite pour chaque objet (colonne d’une table).</dd>
+<dt>Donnée</dt><dd>Valeur brute qui décrit un fait.</dd>
+<dt>Données ouvertes</dt><dd>Données publiques accessibles et réutilisables par tous.</dd>
+<dt>Enregistrement</dt><dd>Ligne d’une table, qui décrit un objet.</dd>
+<dt>Filtre</dt><dd>Sélection des lignes qui vérifient une condition.</dd>
+<dt>Jointure</dt><dd>Association de lignes de deux tables ayant la même valeur de clé.</dd>
+<dt>JSON</dt><dd>Format texte d’objets « clé : valeur » et de listes.</dd>
+<dt>Médiane</dt><dd>Valeur qui partage une série ordonnée en deux moitiés.</dd>
+<dt>Métadonnées</dt><dd>Données qui décrivent d’autres données.</dd>
+<dt>Ré-identification</dt><dd>Retrouver l’identité d’une personne dans des données anonymisées.</dd>
+<dt>RGPD</dt><dd>Règlement européen sur la protection des données personnelles.</dd>
+<dt>SGBD</dt><dd>Système de gestion de base de données.</dd>
+<dt>Table</dt><dd>Tableau de données : des lignes (enregistrements) et des colonnes (descripteurs).</dd>
+<dt>Tri</dt><dd>Ordonnancement des lignes selon un ou plusieurs critères.</dd>
+<dt>Valeur manquante</dt><dd>Case vide dans un tableau.</dd>
+</dl>` });
+/*COURSE-END*/
+
+/* ---------- interface ---------- */
+const UI = { cur: 'd1' };
+const AS = { key: 'd1', tab: 'steps', open: false, st: lsGet(KEYS.act, {}), arm: null };
+const CS = { open: false, id: 'web' };
+function actSave() { lsSet(KEYS.act, AS.st); }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function wsById(id) { return WORKSHOPS.find(w => w.id === id) || WORKSHOPS[0]; }
+
+function renderSeg() {
+  const seg = $('#wsSeg'); seg.innerHTML = '';
+  WORKSHOPS.forEach((w, i) => seg.append(h('button', { type: 'button', role: 'tab', 'aria-pressed': w.id === UI.cur ? 'true' : 'false', 'aria-selected': w.id === UI.cur ? 'true' : 'false', onclick: () => gotoWs(w.id) }, (i + 1) + '. ' + w.title)));
+}
+function mountWs() {
+  const w = wsById(UI.cur), root = $('#ws');
+  $('#hint').textContent = w.hint; root.innerHTML = '';
+  w.mount(root);
+  const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
+}
+function gotoWs(id) {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  UI.cur = id; AS.key = id; AS.tab = 'steps';
+  renderSeg(); mountWs(); renderAct();
+}
+
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
+  if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: s }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: a.defi.q }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: a.defi.a }))));
+    if (a.course) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(a.course) }, 'Voir le cours : ' + courseSection(a.course).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Votre travail sera effacé'; AS.arm = setTimeout(() => { b.textContent = 'Recommencer l’atelier'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; wsById(UI.cur).reset(); mountWs(); renderAct(); } }, 'Recommencer l’atelier')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open; renderAct();
+}
+$('#bAct').addEventListener('click', actToggle);
+
+/* ---------- cours ---------- */
+function widgetCsv(root) {
+  const ta = h('textarea', { class: 'code-in', rows: 4, spellcheck: 'false', 'aria-label': 'Fichier CSV' }); ta.value = 'nom;places;electrique\nGare Nord;10;oui\nMarina;20;non';
+  const out = h('pre', { class: 'code' });
+  const upd = () => { const p = csvParse(ta.value, ';'); out.textContent = JSON.stringify(p.rows, null, 2) + (p.bad.length ? '\n// ligne(s) ignorée(s) : ' + p.bad.join(', ') : ''); };
+  ta.addEventListener('input', upd); upd();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'CSV (séparateur « ; »)'), ta), out);
+}
+
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const go = id => { CS.id = id; renderCourse(); };
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => go(s.id) }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => go(e.target.value) }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+  art.querySelectorAll('[data-w]').forEach(w => { if (w.dataset.w === 'csv') widgetCsv(w); });
+  art.append(h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => go(COURSE[idx - 1].id) }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => go(COURSE[idx + 1].id) }, COURSE[idx + 1].t + ' →') : h('span')));
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : notions des données'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+  const sc = box.querySelector('.cwrap'); if (sc) sc.scrollTop = 0; box.scrollTop = 0;
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+
+/* ---------- aide ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre les données structurées et leur traitement (SNT, seconde). Les stations, élèves, photos et fichiers sont fictifs.</p>' +
+    '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction.</li><li>Le bouton <b>Cours</b> détaille toutes les notions.</li></ul>' +
+    '<h3>Vos données</h3><p>Les réponses au QCM sont mémorisées dans ce navigateur uniquement.</p>' }));
+});
+
+/* ---------- démarrage ---------- */
+(function init() {
+    AS.open = !isSmall();
+  renderSeg(); mountWs(); renderAct(); renderCourse();
+})();
+
+</script>
+
+</body></html>

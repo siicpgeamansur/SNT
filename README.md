@@ -6,7 +6,11 @@ Voici une page interactive pour découvrir les réseaux en seconde :
 
 Voici une page interactive pour comprendre les dessous du Web en seconde :
 
-[Simulateur réseau](https://siicpgeamansur.github.io/SNT/activite_Web.html)
+[Web](https://siicpgeamansur.github.io/SNT/activite_Web.html)
+
+Voici une page interactive pour comprendre le fonctionnement des réseaux sociaux en seconde :
+
+[Reseaux sociaux](https://siicpgeamansur.github.io/SNT/snt_reseaux_sociaux.html)
 
 Voici une page pour tester une partie en "LAN" :
 

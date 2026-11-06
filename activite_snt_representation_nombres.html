@@ -1,16 +1,13 @@
-<!doctype html>
-<html lang="fr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Atelier Représentation des nombres — SNT</title>
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Atelier Représentation des nombres — SNT</title>
 <style>
-:root{color-scheme:light;--font-ui:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;--font-mono:ui-monospace,Consolas,Monaco,monospace;
+:root{color-scheme:light;--font-ui:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;--font-mono:ui-monospace,Consolas,Menlo,monospace;
 --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
 --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;--warn:#9a5b00;--bad:#c0281f;--ok:#1e7a2e;
 --netc:#2e6da4;--hostc:#c98a00}
-html,body{height:100%;}
+html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+[hidden]{display:none!important}
+input.bad,select.bad,textarea.bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
 button,input,select,textarea{font:inherit;color:inherit}
 .inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 #app{height:100%;display:flex;flex-direction:column;min-height:0}
@@ -24,10 +21,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn.sm{padding:3px 8px;font-size:12px}
 :is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);max-width:100%;overflow-x:auto}
-.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
-.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px;box-sizing:border-box}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
 #stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
 #hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
 #scroller{flex:1;min-height:0;overflow:auto}
@@ -40,7 +37,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .mono{font-family:var(--font-mono);font-size:13px}
 code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
-input[type=text],input[type=number],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg);box-sizing:border-box}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
 .fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
 .opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0}
 .opts .fld{margin:0}
@@ -83,7 +80,6 @@ button.bit{cursor:pointer}
 .bit.m1{background:var(--netc);border-color:var(--netc);color:#fff}
 .bit.m0{background:#eee;color:#999}
 #act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
-#act[hidden]{display:none !important;}
 #act .pbody{font-size:13.5px}
 .phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
 .phead b{font-size:15px}
@@ -104,7 +100,6 @@ fieldset.q legend{font-weight:600;padding:0 4px}
 .opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
 .why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
 #course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
-#course[hidden]{display:none !important;}
 .ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
 .cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
@@ -123,9 +118,7 @@ fieldset.q legend{font-weight:600;padding:0 4px}
 .gloss dt{font-weight:600}.gloss dd{margin:0}
 .cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
-#toast[hidden]{display:none !important;}
 #dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
-#dlg[hidden]{display:none !important;}
 .dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
 .dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
 .dlgbox header b{font-size:16px}
@@ -140,23 +133,18 @@ fieldset.q legend{font-weight:600;padding:0 4px}
   #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
   .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 }
-</style>
-<base target="_blank">
-</head>
-<body>
+</style><base target="_blank">
+</head><body>
 <div id="app">
   <header class="band"><div class="inner row">
-    <div class="brand">
-      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="5" width="6" height="16" fill="var(--accent)"/><rect x="10" y="9" width="6" height="12" fill="var(--run)"/><rect x="18" y="13" width="6" height="8" fill="var(--warn)"/></svg>
-      <span>Atelier Représentation des nombres <small>SNT</small></span>
-    </div>
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="5" width="6" height="16" fill="var(--accent)"/><rect x="10" y="9" width="6" height="12" fill="var(--run)"/><rect x="18" y="13" width="6" height="8" fill="var(--warn)"/></svg><span>Atelier Représentation des nombres <small>SNT</small></span></div>
     <div class="files" style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
       <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
       <button class="btn" id="bHelp" type="button">Aide</button>
     </div>
   </div></header>
-  <div class="band" id="modes"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <div class="band"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
   <main class="inner work" id="work">
     <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
     <aside id="act" hidden aria-label="Activité"></aside>
@@ -192,6 +180,7 @@ function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch
 /* ---------- outils ---------- */
 const toBin = (v, bits) => (v >>> 0).toString(2).padStart(bits || 8, '0');
 const toHex = v => (v >>> 0).toString(16).toUpperCase().padStart(2, '0');
+const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
 
 function bitRow(v, bits, o) {
   o = o || {};
@@ -227,6 +216,7 @@ const W1 = { v: 205, n: 205, hex: 'CD' };
 function mountW1(root) {
   root.append(h('h2', null, 'Décimal, binaire, hexadécimal'),
     h('p', null, 'Nous écrivons les nombres en ', h('b', null, 'base 10'), ' : dix chiffres, et chaque position vaut dix fois plus que celle de droite (205 = 2×100 + 0×10 + 5×1). Les ordinateurs utilisent la ', h('b', null, 'base 2'), ' (le binaire : deux chiffres, 0 et 1, chaque position vaut deux fois plus). Pour les humains, on regroupe les bits par paquets de 4 : la ', h('b', null, 'base 16'), ' (hexadécimal).'));
+  /* 1. octet interactif */
   const rowBox = h('div'), pw = h('p', { class: 'formula' }), sw = h('div', { class: 'gstats' });
   function drawOctet() {
     rowBox.innerHTML = ''; rowBox.append(bitRow(W1.v, 8, { onFlip: i => { W1.v = (W1.v ^ (1 << i)) & 255; drawOctet(); } }));
@@ -239,6 +229,7 @@ function mountW1(root) {
     powerRow(8), rowBox, pw, sw,
     h('p', { class: 'small' }, 'Pourquoi le binaire ? Le composant de base d’un processeur, le transistor, est un interrupteur électronique : soit passant, soit bloqué. Deux états stables, faciles à distinguer même avec du bruit électrique — donc deux chiffres, 0 et 1.'));
   drawOctet();
+  /* 2. méthode des divisions */
   const din = h('input', { type: 'number', min: 0, max: 255, value: W1.n, 'aria-label': 'Nombre à convertir' }), dsteps = h('div');
   function drawDiv() {
     W1.n = Math.max(0, Math.min(255, Math.round(+din.value || 0)));
@@ -254,6 +245,7 @@ function mountW1(root) {
     h('p', null, 'Pour convertir un nombre en binaire, on le divise par 2 et on note le reste (0 ou 1), puis on recommence avec le quotient, jusqu’à 0. ', h('b', null, 'Pourquoi ?'), ' Diviser par 2 donne le reste de la division par 2, c’est-à-dire le chiffre des unités en base 2 ; le quotient contient tous les autres chiffres, qu’on extrait de la même façon.'),
     h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:180px' }, h('span', null, 'Nombre (0 à 255)'), din)), dsteps);
   drawDiv();
+  /* 3. hexadécimal */
   const hexd = [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9'], [10, 'A'], [11, 'B'], [12, 'C'], [13, 'D'], [14, 'E'], [15, 'F']];
   const tbl = h('table', { class: 'ctable narrow' }, h('thead', null, h('tr', null, h('th', null, 'Décimal'), hexd.map(d => h('th', null, String(d[0]))))), h('tbody',
     h('tr', null, h('th', null, 'Binaire'), hexd.map(d => h('td', null, toBin(d[0], 4)))),
@@ -312,7 +304,7 @@ function addTab(box) {
 function subTab(box) {
   const ia = numIn(W2.a, 'Nombre A', v => { W2.a = v; draw(); }), ib = numIn(W2.b, 'Nombre B', v => { W2.b = v; draw(); }), out = h('div');
   function draw() {
-    const nb = (~W2.b) & 255, cp2 = (nb + 1) & 255, tot = W2.a + cp2, co = tot > 255 ? 1 : 0, res = tot & 255;
+    const nb = (~W2.b) & 255, cp2 = (nb + 1) & 255, tot = W2.a + (256 - W2.b), co = tot > 255 ? 1 : 0, res = tot & 255;
     const neg = !co, val = neg ? res - 256 : res;
     out.innerHTML = '';
     out.append(h('div', { class: 'gstats' }, [['B', W2.b + ' = ' + toBin(W2.b)], ['Inverser (NOT) : ~B', nb + ' = ' + toBin(nb)], ['Ajouter 1 : ~B + 1', cp2 + ' = ' + toBin(cp2)], ['A + (~B + 1) : total', tot + (co ? ' (9 bits, retenue 1)' : ' (retenue 0)')]].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', { class: 'mono' }, k[1])))));
@@ -388,6 +380,7 @@ function mountW3(root) {
   }
   root.append(chips, h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'A (0-255)'), ia), h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'B (0-255)'), ib)), out);
   draw();
+  /* XOR chiffrement */
   const msg = h('input', { type: 'text', value: 'SNT', maxlength: 12, 'aria-label': 'Message à chiffrer' }), key = numIn(200, 'Clé (0-255)', () => draw2());
   const enc = h('pre', { class: 'code' }), dec = h('pre', { class: 'code' }), cin = h('input', { type: 'text', class: 'mono', placeholder: 'codes reçus, séparés par des espaces', 'aria-label': 'Codes reçus' });
   function encBytes(t, k) { return Array.from(t).map(c => (c.charCodeAt(0) & 255) ^ k); }
@@ -395,7 +388,7 @@ function mountW3(root) {
     const k = Math.max(0, Math.min(255, +key.value || 0));
     const codes = encBytes(msg.value, k);
     enc.textContent = codes.map(c => toHex(c)).join(' ');
-    const parts = cin.value.trim().split(/\s+/).filter(x => /^[0-9a-fA-F]{2}$/.test(x));
+    const parts = cin.value.trim().split(/\s+/).filter(x => /^[0-9a-fA-F]{2}$/);
     const back = parts.map(x => String.fromCharCode(parseInt(x, 16) ^ k));
     dec.textContent = parts.length ? back.join('') + (back.every(c => (c >= ' ' && c <= '~')) ? '' : '  (caractères non affichables : vérifiez la clé)') : '—';
   }
@@ -465,6 +458,7 @@ function graySteps(g8) {
 function mountW5(root) {
   root.append(h('h2', null, 'Le code Gray : un seul bit qui change'),
     h('p', null, 'En binaire pur, passer d’un nombre au suivant peut changer ', h('b', null, 'plusieurs bits'), ' à la fois (0111 → 1000 : les 4 bits changent). Le ', h('b', null, 'code Gray'), ' est un autre codage des nombres où ', h('b', null, 'un seul bit change entre deux codes consécutifs'), '. Il est utilisé par les codeurs de position (axes de machines, volants, capteurs rotatifs).'));
+  /* 1. compteur */
   const rn = h('input', { type: 'range', min: 0, max: 15, step: 1, value: W5.n, 'aria-label': 'Nombre' }), cbin = h('div'), cgr = h('div'), ctxt = h('p', { class: 'score' }), cauto = h('button', { class: 'btn', type: 'button' }, 'Lecture automatique');
   function drawCount() {
     const gPrev = (W5.prev ^ (W5.prev >> 1)) & 15, gCur = (W5.n ^ (W5.n >> 1)) & 15;
@@ -487,6 +481,7 @@ function mountW5(root) {
     h('p', { class: 'mono', style: 'margin:8px 0 2px' }, 'Binaire'), cbin,
     h('p', { class: 'mono', style: 'margin:8px 0 2px' }, 'Code Gray'), cgr, ctxt);
   drawCount();
+  /* 2. convertisseur binaire -> gray */
   const iv = h('input', { type: 'number', min: 0, max: 255, value: W5.v, 'aria-label': 'Nombre à coder' }), o2 = h('div');
   function drawBG() {
     W5.v = Math.max(0, Math.min(255, Math.round(+iv.value || 0)));
@@ -499,6 +494,7 @@ function mountW5(root) {
   root.append(h('h3', null, '2. Convertir le binaire en Gray'),
     h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'Nombre (0-255)'), iv)), o2);
   drawBG();
+  /* 3. gray -> binaire */
   const gi = h('input', { type: 'text', class: 'mono', value: W5.gin, maxlength: 8, placeholder: 'ex. 01110100', 'aria-label': 'Code Gray à décoder', autocomplete: 'off', spellcheck: 'false' }), o3 = h('div');
   function drawGB() {
     o3.innerHTML = '';
@@ -599,7 +595,7 @@ const ACT = {
       { q: 'Le masque d’un /24 est :', o: ['255.0.0.0', '255.255.0.0', '255.255.255.0', '0.0.0.255'], a: 2, w: '24 bits à 1 : trois octets pleins.' },
       { q: '192.168.10.25 /24 : adresse réseau ?', o: ['192.168.10.25', '192.168.10.0', '192.168.0.0', '192.0.0.0'], a: 1, w: 'Le dernier octet (partie machine) est mis à 0 par le masque.' },
       { q: 'Le broadcast de 192.168.10.0 /24 est :', o: ['192.168.10.0', '192.168.10.1', '192.168.10.254', '192.168.10.255'], a: 3, w: 'Tous les bits machine à 1 : ...10.255.' },
-      { q: 'Combien d’hôtes utilisables dans un /24 ?', o: ['256', '255', '254', '24'], a: 2, w: '2⁸ − 2 = 254 : ou retire l’adresse réseau et le broadcast.' },
+      { q: 'Combien d’hôtes utilisables dans un /24 ?', o: ['256', '255', '254', '24'], a: 2, w: '2⁸ − 2 = 254 : on retire l’adresse réseau et le broadcast.' },
       { q: 'Un masque sert à :', o: ['chiffrer les communications', 'séparer la partie réseau de la partie machine dans une adresse IP', 'accélérer la connexion', 'compter les bits'], a: 1, w: 'Bits à 1 = réseau, bits à 0 = machines : c’est sa définition même.' },
       { q: 'Pour un /20, le nombre de bits disponibles pour les machines est :', o: ['20', '8', '12', '32'], a: 2, w: '32 − 20 = 12 bits machine → 2¹² − 2 = 4 094 machines.' }
     ]
@@ -622,7 +618,7 @@ const ACT = {
       { q: 'Décoder le Gray 0111 donne :', o: ['7', '6', '5', '3'], a: 2, w: 'De gauche à droite : chaque bit binaire est le XOR du bit Gray et du bit binaire précédent → 0000 0101 = 5.' },
       { q: 'Pourquoi le Gray est-il utilisé dans les codeurs rotatifs ?', o: ['Il est plus compact', 'Une lecture pendant une transition donne au pire une position voisine, jamais éloignée', 'Il est plus facile à mémoriser', 'Il évite les retenues'], a: 1, w: 'L’erreur transitoire est bornée à un pas : c’est exactement ce qu’on demande à un capteur de position.' },
       { q: 'En binaire pur, passer de 0111 à 1000 change :', o: ['1 bit', '2 bits', '3 bits', '4 bits'], a: 3, w: '0111 → 1000 : les 4 bits changent (c’est le pire cas, qui survient aux puissances de 2).' },
-      { q: 'Le passage binaire → Gray se calcule par :', o: ['g = n + 1', 'g = n XOR (n décalé d’un bit vers la droite)', 'g = NOT n', 'g = n × 2'], a: 1, w: 'Le bit de rang i du code Gray vaut b_i XOR b_{i+1} : le décalage aligne chaque bit avec son voisin de gauche.' }
+      { q: 'Le passage binaire → Gray se calcule par :', o: ['g = n + 1', 'g = n XOR (n décalé d’un bit vers la droite)', 'g = NOT n', 'g = n × 2'], a: 1, w: 'Le bit de rang i de g vaut b_i XOR b_{i+1} : le décalage aligne chaque bit avec son voisin de gauche.' }
     ]
   }
 };
@@ -661,7 +657,7 @@ COURSE.push({ id: 'addition', t: 'L’addition binaire et la retenue', h: `
 <tr><td>1 + 1 + 1 (retenue entrante)</td><td>=</td><td>11₂ → on écrit 1, on retient 1</td></tr></tbody></table>
 <p>La <b>retenue sortante</b> d'une colonne devient la <b>retenue entrante</b> de la colonne suivante. Exemple : 1011 0011 + 0110 1010 = 1 0001 1101 (en 9 bits).</p>
 <h3>Le dépassement (overflow)</h3>
-<p>Sur un octet, seules 256 valeurs existent (0 à 255). Si la somme dépasse 255, la retenue finale est <b>perdue</b> : le résultat affiché est la somme <b>modulo 256</b>. Exemple : 200 + 100 = 300, affiché 44 car 300 − 256 = 44. Ce n'est pas une erreur du processeur : c'est une convention arithmétique, à connaître lorsque les résultats intermédiaires sont grands.</p>
+<p>Sur un octet, seules 256 valeurs existent (0 à 255). Si la somme dépasse 255, la retenue finale est <b>perdue</b> : le résultat affiché est la somme <b>modulo 256</b>. Exemple : 200 + 100 = 300, affiché 44 car 300 − 256 = 44. Ce n'est pas une erreur du processeur : c'est une convention arithmétique, à connaître quand les résultats intermédiaires sont grands.</p>
 <div class="retain"><b>À retenir.</b> 1 + 1 = 10₂ (écrire 0, retenir 1). Sur n bits, le calcul se fait modulo 2ⁿ : la retenue sortante est perdue.</div>` });
 
 COURSE.push({ id: 'soustraction', t: 'La soustraction : complément à 2', h: `
@@ -766,6 +762,7 @@ function mountWs() {
   const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
 }
 function gotoWs(id) {
+  if (W5.auto) { clearInterval(W5.auto); W5.auto = null; }
   if (CS.open) { CS.open = false; renderCourse(); }
   UI.cur = id; AS.key = id; AS.tab = 'steps';
   renderSeg(); mountWs(); renderAct();
@@ -830,7 +827,7 @@ function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; 
 function renderCourse() {
   const box = $('#course'), btn = $('#bCourse'), work = $('#work');
   btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
-  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
+  box.hidden = !CS.open; work.hidden = CS.open;
   if (!CS.open) { box.innerHTML = ''; return; }
   box.innerHTML = '';
   const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
@@ -849,13 +846,13 @@ function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
 $('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
 
 /* ---------- aide ---------- */
-function closeDlg() { $('#dlg'].hidden = true; $('#dlg'].innerHTML = ''; }
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
 function openDlg(title, body) {
   const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
   d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
   d.onclick = ev => { if (ev.target === d) closeDlg(); };
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg'].hidden) closeDlg(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
 $('#bHelp').addEventListener('click', () => {
   openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre comment les nombres sont représentés et calculés en informatique (SNT, seconde) : les bases décimale, binaire et hexadécimale, les additions et soustractions binaires (retenue, dépassement, complément à 2), les opérations logiques, les masques de sous-réseau et le code Gray.</p>' +
     '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction et explications.</li><li>Le bouton <b>Cours</b> détaille toutes les notions, chaque point étant justifié.</li></ul>' +
@@ -868,5 +865,4 @@ $('#bHelp').addEventListener('click', () => {
   renderSeg(); mountWs(); renderAct(); renderCourse();
 })();
 </script>
-</body>
-</html>
+</body></html>

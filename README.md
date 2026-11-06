@@ -1,39 +1,73 @@
-Voici une page introductive sur les notions de Python utiles toute l'année en seconde :
+# 🖥️ SNT en seconde — Activités interactives
 
-[Python](https://siicpgeamansur.github.io/SNT/activite_snt_python.html)
+> **Sciences Numériques et Technologie** : un ensemble d'activités interactives en ligne pour découvrir, manipuler et comprendre les grandes notions du programme de seconde.
 
-Voici une page explicative de la représentation des nombres en seconde :
+![Statut](https://img.shields.io/badge/statut-en%20ligne-brightgreen) ![Niveau](https://img.shields.io/badge/niveau-seconde-blue) ![Langue](https://img.shields.io/badge/langue-Fran%C3%A7ais-red) ![Licence](https://img.shields.io/badge/usage-p%C3%A9dagogique-orange)
 
-[Représentation des nombres](https://siicpgeamansur.github.io/SNT/activite_snt_representation_nombres.html)
+---
 
-Voici une page interactive pour découvrir internet en seconde :
+## 📚 Les activités
 
-[Internet](https://siicpgeamansur.github.io/SNT/activite_snt_internet.html)
+### 🧠 Fondamentaux
 
-Voici une page interactive pour comprendre les dessous du Web en seconde :
+| Activité | Description |
+|---|---|
+| 🐍 [Python](https://siicpgeamansur.github.io/SNT/activite_snt_python.html) | Les notions de Python utiles toute l'année |
+| 🔢 [Représentation des nombres](https://siicpgeamansur.github.io/SNT/activite_snt_representation_nombres.html) | Comment un ordinateur représente les nombres (binaire, hexadécimal…) |
 
-[Web](https://siicpgeamansur.github.io/SNT/activite_snt_Web.html)
+### 🌐 Le Web et Internet
 
-Voici une page interactive pour comprendre le fonctionnement des réseaux sociaux en seconde :
+| Activité | Description |
+|---|---|
+| 🌍 [Internet](https://siicpgeamansur.github.io/SNT/activite_snt_internet.html) | Découvrir le fonctionnement d'Internet |
+| 🕸️ [Web](https://siicpgeamansur.github.io/SNT/activite_snt_Web.html) | Comprendre les dessous du Web (HTML, CSS, HTTP…) |
+| 🗺️ [Cartographie et GPS](https://siicpgeamansur.github.io/SNT/activite_snt_carte_GPS.html) | Comprendre le fonctionnement des cartes et du GPS |
 
-[Reseaux sociaux](https://siicpgeamansur.github.io/SNT/activite_snt_reseaux_sociaux.html)
+### 👥 Données et société
 
-Voici une page interactive pour comprendre les structurations de données en seconde :
+| Activité | Description |
+|---|---|
+| 💬 [Réseaux sociaux](https://siicpgeamansur.github.io/SNT/activite_snt_reseaux_sociaux.html) | Comprendre le fonctionnement des réseaux sociaux |
+| 📊 [Données structurées](https://siicpgeamansur.github.io/SNT/activite_snt_donnees_structurees.html) | Comprendre la structuration des données |
 
-[Donnees structurées](https://siicpgeamansur.github.io/SNT/activite_snt_donnees_structurees.html)
+### 📱 Objets et images numériques
 
-Voici une page interactive pour comprendre le fonctionnement des cartes et GPS en seconde :
+| Activité | Description |
+|---|---|
+| 📸 [Photographie numérique](https://siicpgeamansur.github.io/SNT/activite_snt_photographie_numerique.html) | Comprendre le fonctionnement de la photographie numérique |
+| 📡 [IoT / Objets connectés](https://siicpgeamansur.github.io/SNT/activite_snt_objets_connectes.html) | Comprendre le fonctionnement des objets connectés |
 
-[Cartographie et GPS](https://siicpgeamansur.github.io/SNT/activite_snt_carte_GPS.html)
+### 🎮 Bonus
 
-Voici une page interactive pour comprendre le fonctionnement de la photographie numérique en seconde :
+| Activité | Description |
+|---|---|
+| 🎯 [Mini LAN](https://siicpgeamansur.github.io/SNT/mini_lan_fps.html) | Tester une partie en « LAN » avec vos camarades |
 
-[Photographie numérique](https://siicpgeamansur.github.io/SNT/activite_snt_photographie_numerique.html)
+---
 
-Voici une page interactive pour comprendre le fonctionnement des IoT (internet of things)/ objets connectés en seconde :
+## 🧭 Thèmes officiels du programme
 
-[IoT](https://siicpgeamansur.github.io/SNT/activite_snt_objets_connectes.html)
+- [x] Internet
+- [x] Le Web
+- [x] Les réseaux sociaux
+- [x] Les données structurées et leurs traitements
+- [x] Localisation, cartographie et mobilité
+- [x] Informatique embarquée et objets connectés
+- [x] La photographie numérique
 
-Voici une page pour tester une partie en "LAN" :
+*(Python et la représentation des nombres sont transversaux à tous les thèmes.)*
 
-[Mini LAN](https://siicpgeamansur.github.io/SNT/mini_lan_fps.html)
+---
+
+## 🚀 Accès rapide
+
+🔗 Toutes les activités sont hébergées via **GitHub Pages** : [siicpgeamansur.github.io/SNT](https://siicpgeamansur.github.io/SNT/)
+
+📱 Compatible ordinateur, tablette et smartphone — aucune installation nécessaire.
+
+---
+
+## 🙏 Remerciements
+
+Activités conçues pour les élèves de seconde dans le cadre du programme de **SNT**.
+N'hésitez pas à ouvrir une *issue* pour signaler un bug ou proposer une amélioration.

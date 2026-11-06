@@ -18,6 +18,10 @@ Voici une page interactive pour comprendre le fonctionnement des cartes et GPS e
 
 [Cartographie et GPS](https://siicpgeamansur.github.io/SNT/activite_snt_carte_GPS.html)
 
+Voici une page interactive pour comprendre le fonctionnement de la photographie numérique en seconde :
+
+[Cartographie et GPS](https://siicpgeamansur.github.io/SNT/activite_snt_photographie_numerique.html)
+
 Voici une page pour tester une partie en "LAN" :
 
 [Mini LAN](https://siicpgeamansur.github.io/SNT/mini_lan_fps.html)

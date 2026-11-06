@@ -20,7 +20,7 @@ Voici une page interactive pour comprendre le fonctionnement des cartes et GPS e
 
 Voici une page interactive pour comprendre le fonctionnement de la photographie numérique en seconde :
 
-[Cartographie et GPS](https://siicpgeamansur.github.io/SNT/activite_snt_photographie_numerique.html)
+[Photographie numérique](https://siicpgeamansur.github.io/SNT/activite_snt_photographie_numerique.html)
 
 Voici une page pour tester une partie en "LAN" :
 

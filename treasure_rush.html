@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Treasure Rush : chasse au trésor en ligne — Activité SNT seconde</title>
+<meta name="description" content="Jeu en ligne Treasure Rush : ramasse le plus de trésors en 60 secondes ! Activité interactive SNT pour comprendre le jeu en réseau (P2P, WebRTC).">
+<link rel="canonical" href="https://siicpgeamansur.github.io/SNT/treasure_rush.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Treasure Rush — Jeu en ligne pour la SNT">
+<meta property="og:description" content="Résous la course aux trésurs avec tes camarades et découvre le fonctionnement d'un jeu en ligne.">
+<meta property="og:url" content="https://siicpgeamansur.github.io/SNT/treasure_rush.html">
+<meta property="og:locale" content="fr_FR">
+<style>
+:root{color-scheme:dark;--bg:#070a14;--panel:#101728;--line:#1e2d4a;--cyan:#00f0ff;--green:#00ff88;--red:#ff3366;--gold:#ffcc00;--text:#eaf1ff;--muted:#8ca2cc}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at center,#121d33,#070a14 70%);color:var(--text);font:15px system-ui,Segoe UI,sans-serif}
+main{max-width:1150px;margin:auto;padding:20px}
+header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:15px}
+h1{font-size:clamp(22px,3.5vw,32px);margin:0;letter-spacing:1px}h1 span{color:var(--gold);text-shadow:0 0 10px rgba(255,204,0,.4)}
+.tag{color:var(--green);border:1px solid #1a4d36;background:#0d261b;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600}
+.layout{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.5)}
+canvas{display:block;width:100%;aspect-ratio:16/9;background:#03050a;border-radius:12px;border:2px solid var(--line);box-shadow:inset 0 0 20px rgba(0,0,0,.8)}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+button,input{font:inherit;border-radius:10px;border:1px solid var(--line);padding:11px;background:#0a101f;color:var(--text)}
+button{cursor:pointer;font-weight:650;transition:all .2s}
+button:hover{border-color:var(--gold);background:#13203c}
+button.primary{background:linear-gradient(135deg,#7a5a10,#a8791a);border-color:#ffcc00;box-shadow:0 4px 12px rgba(255,204,0,.25)}
+button.primary:hover{background:linear-gradient(135deg,#a8791a,#caa52a)}
+button:disabled{opacity:.4;cursor:not-allowed}
+input{width:100%;min-width:0;outline:none}input:focus{border-color:var(--gold)}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1;min-width:0}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+.status{padding:12px;border-radius:10px;background:#070b14;border:1px solid #1a2740;margin-top:12px;min-height:46px;font-size:13px}
+.good{color:var(--green);border-color:#1a4d36;background:#0a1a12}
+.bad{color:var(--red);border-color:#4d1a26;background:#1a0a0f}
+.players{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.player{border:1px solid var(--line);background:#0a101f;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:500}
+.player b{color:var(--gold)}
+.kbd{display:inline-block;border:1px solid #324770;background:#131c31;border-radius:5px;padding:2px 6px;color:#fff;font-family:monospace;font-size:12px}
+.section{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.section h2{font-size:15px;margin:0 0 8px;color:var(--gold)}
+.footer{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}main{padding:10px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>💰 TREASURE <span>RUSH</span></h1>
+  <span class="tag">MODE CHASSE AU TRÉSOR SNT · 2 À 8 JOUEURS</span>
+</header>
+
+<div class="layout">
+  <section class="panel">
+    <canvas id="game" width="640" height="360" aria-label="Arène de chasse au trésor"></canvas>
+    <div class="controls">
+      <button id="start" class="primary">▶ Jouer / Reprendre</button>
+      <button id="stop">⏸ Pause</button>
+      <button id="reset">↻ Nouvelle partie</button>
+    </div>
+    <p class="small" style="margin-top:12px;">
+      Se déplacer : <span class="kbd">Z</span> <span class="kbd">Q</span> <span class="kbd">S</span> <span class="kbd">D</span> (ou flèches <span class="kbd">←</span> <span class="kbd">↑</span> <span class="kbd">↓</span> <span class="kbd">→</span>)
+      · Ramasse les 💎 et les 💰 avant les autres !
+    </p>
+    <div class="status" id="gameStatus">Bienvenue dans l'arène ! En solo, l'objectif : 15 trésors le plus vite possible.</div>
+  </section>
+
+  <aside class="panel">
+    <h2 style="margin-top:0">🗺️ Gestion de la chasse</h2>
+    <label for="nick">Ton Pseudo</label>
+    <input id="nick" maxlength="16" placeholder="Ex. IndianaLycée" value="Joueur">
+
+    <div class="row" style="margin-top:12px;">
+      <button id="create" class="primary">Créer une salle</button>
+      <button id="join">Rejoindre</button>
+    </div>
+
+    <label for="room" style="margin-top:12px;">Code de la Salle (généré par l'hôte)</label>
+    <input id="room" placeholder="Colle le code ici">
+
+    <div class="status" id="netStatus">Statut : Non connecté au réseau.</div>
+
+    <div class="section">
+      <h2>🏆 Scores (<span id="count">1</span> joueur(s))</h2>
+      <div id="players" class="players"></div>
+      <p class="small" id="scoreLine" style="margin-top:10px;">Ta collection : 0 trésor(s)</p>
+    </div>
+  </aside>
+</div>
+
+<div class="footer">Treasure Rush · Architecture PeerJS WebRTC P2P · Conçu pour SNT</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(()=> {
+"use strict";
+const $=id=>document.getElementById(id), canvas=$("game"), ctx=canvas.getContext("2d");
+const W=canvas.width, H=canvas.height;
+
+/* ---- labyrinthe (0 = libre, 1 = mur) ---- */
+const map=[
+"111111111111111",
+"100000000000001",
+"101100111011001",
+"100000100000001",
+"101100100101101",
+"100000000000001",
+"101101110110001",
+"100000000000001",
+"101100011011001",
+"100000000000001",
+"111111111111111"
+];
+const MW=map[0].length, MH=map.length, TS=32; /* taille d'une case en pixels */
+const wall=(x,y)=>{const cx=Math.floor(x),cy=Math.floor(y);return cx<0||cy<0||cx>=MW||cy>=MH||map[cy][cx]==="1";};
+const free=(x,y)=>!wall(x-.28,y-.28)&&!wall(x+.28,y-.28)&&!wall(x-.28,y+.28)&&!wall(x+.28,y+.28);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+const GOAL_SOLO=15, ROUND_SECONDS=90, GEM_VALUE=1, CHEST_VALUE=3, GEM_COUNT=8;
+
+let me={x:1.5,y:1.5,score:0,anim:0};
+let gems=[], running=false, over=false, soloTime=0, endMessage="";
+let netMode=false, peer=null, host=false, lastSend=0;
+let connections=new Map(), remote=new Map();
+let keys={};
+const palette=["#00f0ff","#ff3366","#00ff88","#ffcc00","#b866ff","#ff66b8","#66ccff","#ff8844"];
+const colorOf=id=>{let n=0;for(const c of String(id))n=(n*36+parseInt(c,36)||n)%997;return palette[n%palette.length];};
+
+function say(id,msg,cls=""){ $(id).innerHTML=msg; $(id).className="status "+cls; }
+function setGameMsg(msg){ say("gameStatus", msg); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---- trésors : positions tirées dans les cases libres ---- */
+function randFree(){
+  let tries=0;
+  while(tries++<400){
+    const x=1+Math.floor(Math.random()*(MW-2))+ (Math.random()*.6+.2);
+    const y=1+Math.floor(Math.random()*(MH-2))+ (Math.random()*.6+.2);
+    const fx=Math.floor(x),fy=Math.floor(y);
+    if(!wall(x,y)&&map[fy][fx]!=="1") return {x,y};
+  }
+  return {x:1.5,y:1.5};
+}
+function newGems(){
+  gems=[];
+  for(let i=0;i<GEM_COUNT;i++) gems.push({kind:"gem",...randFree(),pulse:Math.random()*6});
+  gems.push({kind:"chest",...randFree(),pulse:0});
+  gems.push({kind:"chest",...randFree(),pulse:3});
+}
+function respawnOne(idx){ const g=gems[idx]; if(!g) return; Object.assign(g,randFree(),{kind:g.kind,pulse:Math.random()*6}); }
+
+/* ---- dessin ---- */
+function px(x){return x*TS;} /* case -> pixel (canvas 480x352, on centre) */
+const OX=(W-MW*TS)/2, OY=(H-MH*TS)/2;
+function draw(t){
+  ctx.fillStyle="#03050a"; ctx.fillRect(0,0,W,H);
+  /* fond quadrillé */
+  ctx.strokeStyle="rgba(30,45,74,.35)"; ctx.lineWidth=1;
+  for(let x=0;x<=MW;x++){ctx.beginPath();ctx.moveTo(OX+x*TS,OY);ctx.lineTo(OX+x*TS,OY+MH*TS);ctx.stroke();}
+  for(let y=0;y<=MH;y++){ctx.beginPath();ctx.moveTo(OX,OY+y*TS);ctx.lineTo(OX+MW*TS,OY+y*TS);ctx.stroke();}
+  /* murs */
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++) if(map[y][x]==="1"){
+    ctx.fillStyle="#1e2d4a"; ctx.fillRect(OX+x*TS+1,OY+y*TS+1,TS-2,TS-2);
+    ctx.fillStyle="rgba(0,240,255,.06)"; ctx.fillRect(OX+x*TS+1,OY+y*TS+1,TS-2,4);
+  }
+  /* trésors */
+  for(const g of gems){
+    const gx=OX+g.x*TS, gy=OY+g.y*TS, bob=Math.sin(t/300+g.pulse)*3;
+    if(g.kind==="gem"){
+      ctx.fillStyle="#00ff88"; ctx.beginPath();
+      ctx.moveTo(gx,gy-8+bob);ctx.lineTo(gx+7,gy+bob);ctx.lineTo(gx,gy+8+bob);ctx.lineTo(gx-7,gy+bob);
+      ctx.closePath();ctx.fill();
+      ctx.strokeStyle="rgba(0,255,136,.35)";ctx.beginPath();ctx.arc(gx,gy+bob,11,0,7);ctx.stroke();
+    }else{
+      ctx.font="17px system-ui"; ctx.textAlign="center";
+      ctx.fillText("💰",gx,gy+6+bob);
+      ctx.strokeStyle="rgba(255,204,0,.35)";ctx.beginPath();ctx.arc(gx,gy+bob,12,0,7);ctx.stroke();
+    }
+  }
+  /* joueurs distants */
+  for(const [id,p] of remote){
+    const rx=OX+p.x*TS, ry=OY+p.y*TS;
+    ctx.fillStyle=colorOf(id);
+    ctx.beginPath();ctx.arc(rx,ry,9,0,7);ctx.fill();
+    ctx.fillStyle="#fff";ctx.font="bold 11px system-ui";ctx.textAlign="center";
+    ctx.fillText(String(p.name||"?").slice(0,10),rx,ry-14);
+    ctx.fillStyle="#071018";ctx.fillRect(rx-14,ry-20,28,4);
+    ctx.fillStyle=colorOf(id);ctx.fillRect(rx-14,ry-20,28*clamp(p.score/20,0,1),4);
+  }
+  /* moi */
+  const mx=OX+me.x*TS,my=OY+me.y*TS;
+  ctx.fillStyle=host||!netMode?"#00f0ff":"#ffcc00";
+  ctx.beginPath();ctx.arc(mx,my,9,0,7);ctx.fill();
+  ctx.fillStyle="#fff";ctx.font="bold 11px system-ui";ctx.textAlign="center";
+  ctx.fillText(($("nick").value||"Moi").slice(0,10),mx,my-14);
+  ctx.fillStyle="#071018";ctx.fillRect(mx-14,my-20,28,4);
+  ctx.fillStyle="#00ff88";ctx.fillRect(mx-14,my-20,28*clamp(me.score/20,0,1),4);
+  /* HUD */
+  ctx.fillStyle="#eaf1ff";ctx.font="bold 15px system-ui";ctx.textAlign="left";
+  ctx.fillText("💎 "+me.score+(netMode?"":" / "+GOAL_SOLO),14,26);
+  if(soloTime>0&&!netMode) ctx.fillText("⏱ "+Math.max(0,Math.ceil(soloTime))+" s",14,48);
+  else ctx.fillText(netMode?"🌐 CHASSE EN LIGNE":"🤖 MODE SOLO",14,48);
+  if(over){
+    ctx.fillStyle="rgba(0,0,0,.55)";ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#ffcc00";ctx.font="bold 26px system-ui";ctx.textAlign="center";
+    ctx.fillText("🏁 Partie terminée !",W/2,H/2-14);
+    ctx.fillStyle="#eaf1ff";ctx.font="15px system-ui";
+    ctx.fillText(endMessage,W/2,H/2+18);
+  }
+}
+
+/* ---- déplacement et ramassage ---- */
+function move(dt){
+  if(over)return;
+  const speed=4.2*dt;
+  let vx=0,vy=0;
+  if(keys["z"]||keys["w"]||keys["arrowup"])vy-=1;
+  if(keys["s"]||keys["arrowdown"])vy+=1;
+  if(keys["q"]||keys["a"]||keys["arrowleft"])vx-=1;
+  if(keys["d"]||keys["arrowright"])vx+=1;
+  const n=Math.hypot(vx,vy)||1;
+  vx=vx/n*speed;vy=vy/n*speed;
+  if(free(me.x+vx,me.y))me.x+=vx;
+  if(free(me.x,me.y+vy))me.y+=vy;
+  /* ramassage */
+  for(let i=0;i<gems.length;i++){
+    const g=gems[i]; if(!g)continue;
+    if(Math.hypot(g.x-me.x,g.y-me.y)<.55){
+      const val=g.kind==="chest"?CHEST_VALUE:GEM_VALUE;
+      if(netMode&&!host){ sendHost({type:"grab",idx:i}); }
+      else{ applyGrab(i,val); }
+    }
+  }
+  /* solo : chrono */
+  if(!netMode&&running){ soloTime-=dt; if(soloTime<=0)finishSolo(); }
+}
+function applyGrab(idx,val){
+  me.score+=val;
+  respawnOne(idx);
+  if(netMode) broadcast({type:"gem",idx,gems:[...gems]});
+  setGameMsg(val===CHEST_VALUE?"💰 Coffre ramassé ! +3":"💎 Trésor ramassé ! +1");
+  $("scoreLine").textContent="Ta collection : "+me.score+" trésor(s)";
+  if(!netMode&&me.score>=GOAL_SOLO)finishSolo();
+  updateRoster();
+}
+function finishSolo(){
+  over=true;running=false;
+  endMessage="Tu as récolté "+me.score+" trésors ! Relance une partie pour battre ton record.";
+  setGameMsg("🏁 Partie terminée : "+me.score+" trésors. « Nouvelle partie » pour rejouer !");
+}
+
+/* ---- réseau (même architecture que Mini LAN FPS) ---- */
+function newPeer(){
+  return new Peer(undefined,{config:{iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:global.stun.twilio.com:3478'}
+  ]}});
+}
+function sendHost(msg){ if(host){onHostMessage(peer.id,msg);return;} const c=connections.values().next().value; if(c&&c.open)c.send(msg); }
+function broadcast(msg){ for(const c of connections.values()) if(c.open) c.send(msg); }
+
+function connectConn(conn){
+  conn.on("open",()=>{
+    connections.set(conn.peer,conn);
+    conn.send({type:"welcome",name:$("nick").value||"Joueur",gems,scores:{[peer?peer.id:"host"]:me.score},state:me});
+    updateRoster();
+  });
+  conn.on("data",m=>onMessage(conn,m));
+  conn.on("close",()=>{connections.delete(conn.peer);remote.delete(conn.peer);updateRoster();});
+  conn.on("error",err=>say("netStatus","Erreur connexion : "+escapeHtml(err.message||err.type),"bad"));
+}
+
+function onHostMessage(from,msg){
+  if(!host)return;
+  const p=remote.get(from)||{score:0};
+  if(msg.type==="hello"||msg.type==="welcome"){
+    p.name=String(msg.name||"Joueur").slice(0,16);
+    remote.set(from,p);
+    if(msg.state){p.x=msg.state.x;p.y=msg.state.y;}
+    if(msg.scores&&msg.scores[from]!=null)p.score=msg.scores[from];
+    updateRoster();
+    broadcast({type:"sync",gems,players:[...remote.entries()].map(([id,q])=>({id,name:q.name,score:q.score}))});
+  }
+  if(msg.type==="state"){ p.x=msg.x;p.y=msg.y;p.name=msg.name; }
+  if(msg.type==="grab"){
+    const g=gems[msg.idx];
+    if(g&&Math.hypot(g.x-(p.x??me.x),g.y-(p.y??me.y))<1.2){
+      p.score=(p.score||0)+(g.kind==="chest"?CHEST_VALUE:GEM_VALUE);
+      respawnOne(msg.idx);
+      broadcast({type:"gem",idx:msg.idx,gems:[...gems]});
+      const c=connections.get(from); if(c&&c.open)c.send({type:"score",score:p.score});
+      updateRoster();
+    }
+  }
+}
+function onMessage(conn,msg){
+  if(host){onHostMessage(conn.peer,msg);return;}
+  if(msg.type==="sync"||msg.type==="welcome"){
+    if(msg.gems)gems=msg.gems;
+    if(msg.players){remote=new Map(msg.players.filter(q=>q.id!==peer.id).map(q=>[q.id,q]));}
+    updateRoster();
+  }
+  if(msg.type==="gem"){gems=msg.gems;}
+  if(msg.type==="score"){me.score=msg.score;$("scoreLine").textContent="Ta collection : "+me.score+" trésor(s)";}
+}
+
+function updateRoster(){
+  let list=[{name:($("nick").value||"Moi")+(host?" (hôte)":""),score:me.score}];
+  for(const [id,p] of remote) list.push({name:p.name||"?",score:p.score||0});
+  list.sort((a,b)=>b.score-a.score);
+  $("count").textContent=list.length;
+  $("players").innerHTML=list.map(p=>`<span class="player">${escapeHtml(p.name)} · <b>${p.score}</b></span>`).join("");
+}
+
+/* ---- boucle ---- */
+function frame(t){
+  if(!frame.last)frame.last=t;
+  const dt=Math.min(.05,(t-frame.last)/1000);frame.last=t;
+  if(running){
+    move(dt);
+    if(netMode&&peer&&t-lastSend>50){
+      lastSend=t;
+      const st={type:"state",x:me.x,y:me.y,name:($("nick").value||"Joueur").slice(0,16)};
+      if(host)broadcast(st);else sendHost(st);
+    }
+  }
+  draw(t);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+window.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  const k=e.key.toLowerCase();keys[k]=true;
+  if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(k))e.preventDefault();
+});
+window.addEventListener("keyup",e=>{ if(e.target.tagName==="INPUT")return; keys[e.key.toLowerCase()]=false; });
+
+/* ---- boutons ---- */
+$("start").onclick=()=>{ if(over){startRound();return;} running=true; setGameMsg("⛏️ La chasse est ouverte !"); };
+$("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
+$("reset").onclick=startRound;
+function startRound(){
+  me.score=0;me.x=1.5;me.y=1.5;over=false;running=true;soloTime=ROUND_SECONDS;
+  newGems();
+  if(netMode&&host)broadcast({type:"sync",gems,players:[...remote.entries()].map(([id,q])=>({id,name:q.name,score:q.score}))});
+  $("scoreLine").textContent="Ta collection : 0 trésor(s)";
+  setGameMsg(netMode?"⛏️ Nouvelle chasse : le plus riche gagne !":"⛏️ Objectif : "+GOAL_SOLO+" trésors avant la fin du chrono !");
+  updateRoster();
+}
+
+$("create").onclick=()=>{
+  if(typeof Peer==="undefined"){say("netStatus","Mode réseau indisponible ici (aperçu hors ligne). En ligne sur GitHub Pages, ça fonctionne !","bad");return;}
+  if(peer)return;
+  say("netStatus","Création de la salle...");
+  host=true;netMode=true;running=true;soloTime=ROUND_SECONDS;
+  peer=newPeer();
+  peer.on("open",id=>{
+    $("room").value=id;
+    say("netStatus","Salle créée ! Code à copier : <b style='color:var(--gold)'>"+escapeHtml(id)+"</b>","good");
+    startRound();
+  });
+  peer.on("connection",connectConn);
+  peer.on("error",err=>say("netStatus","Erreur : "+escapeHtml(err.type||err.message),"bad"));
+};
+$("join").onclick=()=>{
+  if(typeof Peer==="undefined"){say("netStatus","Mode réseau indisponible ici (aperçu hors ligne).","bad");return;}
+  const id=$("room").value.trim();
+  if(!id){say("netStatus","Colle d'abord le code de la salle.","bad");return;}
+  if(peer)return;
+  host=false;
+  say("netStatus","Connexion à la salle...");
+  peer=newPeer();
+  peer.on("open",()=>{
+    const c=peer.connect(id,{reliable:true});
+    connectConn(c);
+    c.on("open",()=>{
+      say("netStatus","Connecté à la chasse ! Bonne chance.","good");
+      netMode=true;running=true;over=false;soloTime=0;
+      me.score=0;me.x=1.5;me.y=1.5;
+      updateRoster();
+    });
+    c.on("error",()=>say("netStatus","Impossible de rejoindre. Vérifie le code.","bad"));
+  });
+  peer.on("error",err=>say("netStatus","Erreur : "+escapeHtml(err.type||err.message),"bad"));
+};
+
+newGems();updateRoster();draw(0);
+})();
+</script>
+</body>
+</html>

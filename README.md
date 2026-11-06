@@ -41,7 +41,7 @@
 
 | Activité | Description |
 |---|---|
-| 🎯 [Mini LAN](https://siicpgeamansur.github.io/SNT/mini_lan_fps.html) | Tester une partie en « LAN » avec vos camarades |
+ | 🎓 [Créer une LAN et jouer en ligne](https://siicpgeamansur.github.io/SNT/activite_snt_lan.html) | Comprendre le fonctionnement d'un réseau local, du client-serveur et du P2P, puis réussir le quiz pour débloquer l'arène |
 
 ---
 

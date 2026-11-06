@@ -1,7 +1,10 @@
+Voici une page introductive sur les notions de Python utiles toute l'année en seconde :
+
+[Python](https://siicpgeamansur.github.io/SNT/activite_snt_python.html)
+
 Voici une page explicative de la représentation des nombres en seconde :
 
 [Représentation des nombres](https://siicpgeamansur.github.io/SNT/activite_snt_representation_nombres.html)
-
 
 Voici une page interactive pour découvrir internet en seconde :
 

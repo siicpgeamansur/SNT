@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://siicpgeamansur.github.io/SNT/sitemap.xml

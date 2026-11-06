@@ -16,6 +16,10 @@ Voici une page interactive pour comprendre les dessous du Web en seconde :
 
 [Donnees structurées](https://siicpgeamansur.github.io/SNT/snt_donnees_structurees.html)
 
+Voici une page interactive pour comprendre le fonctionnement des réseaux sociaux en seconde :
+
+[Cartographie et GPS](https://siicpgeamansur.github.io/SNT/activite_carte_GPS.html)
+
 Voici une page pour tester une partie en "LAN" :
 
 [Mini LAN](https://siicpgeamansur.github.io/SNT/mini_lan_fps.html)

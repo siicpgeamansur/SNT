@@ -92,8 +92,10 @@ details.defi-d p{margin:6px 0;font-size:14px}
 .unlocked{text-align:center;padding:28px;border:2px solid var(--ok);border-radius:10px;background:rgba(46,139,58,.07)}
 .unlocked h3{color:var(--ok);font-size:20px;margin:0 0 8px}
 .unlocked p{font-size:14.5px;margin:6px 0}
-.gamebtn{display:inline-block;margin-top:12px;font-size:17px;font-weight:600;padding:14px 30px;border-radius:9px;background:var(--accent);color:var(--accent-fg);text-decoration:none;border:1px solid var(--accent)}
+.gamerow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.gamebtn{display:inline-block;font-size:16px;font-weight:600;padding:13px 24px;border-radius:9px;background:var(--accent);color:var(--accent-fg);text-decoration:none;border:1px solid var(--accent)}
 .gamebtn:hover{filter:brightness(1.12)}
+.gamebtn.gold{background:#a8791a;border-color:#ca9b2a}
 .progbar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:4px 0 10px}
 .progbar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--run));transition:width .4s}
 footer{border-top:1px solid var(--line);margin-top:20px;padding-top:10px;text-align:center;color:var(--muted);font-size:12.5px}
@@ -216,9 +218,11 @@ function renderWs(){
     gate.append(h('div',{class:'unlocked'},
       h('h3',null,'🏆 Arène débloquée !'),
       h('p',null,'Tu as compris le fonctionnement d\'une LAN, du client-serveur et du P2P.'),
-      h('p',null,'Crée une salle, partage ton code à un camarade… et que le meilleur réseau gagne !'),
-      h('a',{class:'gamebtn',href:'mini_lan_fps.html'},'🎮 ENTRER DANS L\'ARÈNE'),
-      h('p',{class:'small'},'Astuce : ouvre le jeu dans un second onglet pour tester seul, puis joue à deux sur deux ordinateurs du lycée (même LAN 😉).')));
+      h('p',null,'Choisis ton arène, crée une salle, partage ton code à un camarade… et que le meilleur réseau gagne !'),
+      h('div',{class:'gamerow'},
+        h('a',{class:'gamebtn',href:'mini_lan_fps.html'},'🎯 Mini LAN FPS'),
+        h('a',{class:'gamebtn gold',href:'treasure_rush.html'},'💰 Treasure Rush')),
+      h('p',{class:'small'},'Astuce : ouvre un jeu dans un second onglet pour tester seul, puis joue à deux sur deux ordinateurs du lycée (même LAN 😉).')));
   }else{
     gate.append(h('div',{class:'locked'},'🔒 Réussis le quiz du panneau « Activité » (7 réponses correctes) pour débloquer l\'arène de combat en ligne !'));
   }
@@ -279,7 +283,7 @@ function renderAct(){
   }
   row.append(h('button',{class:'btn',type:'button',onclick:()=>{st.answers={};st.unlocked=false;save();$('#liveTag').hidden=true;renderAct();renderWs();}},'Recommencer'));
   body.append(row);
-  if(st.unlocked)body.append(h('div',{class:'retain'},h('b',null,'Bravo ! '),h('a',{href:'mini_lan_fps.html'},'Entre dans l\'arène →')));
+  if(st.unlocked)body.append(h('div',{class:'retain'},h('b',null,'Bravo ! '),h('a',{href:'mini_lan_fps.html'},'Mini LAN FPS'),' · ',h('a',{href:'treasure_rush.html'},'Treasure Rush')));
   box.append(body);
 }
 

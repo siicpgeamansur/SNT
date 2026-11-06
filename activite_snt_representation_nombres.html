@@ -1,10 +1,15 @@
-<!doctype html><html lang="fr"><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Atelier Représentation des nombres — SNT</title>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atelier Représentation des nombres — SNT</title>
 <style>
-:root{color-scheme:light;--font-ui:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;--font-mono:ui-monospace,Consolas,Menlo,monospace;
+:root{color-scheme:light;--font-ui:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;--font-mono:ui-monospace,Consolas,Monaco,monospace;
 --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
 --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;--warn:#9a5b00;--bad:#c0281f;--ok:#1e7a2e;
 --netc:#2e6da4;--hostc:#c98a00}
-html,body{height:100%}
+html,body{height:100%;}
 body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
 button,input,select,textarea{font:inherit;color:inherit}
 .inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
@@ -22,7 +27,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
-.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px;box-sizing:border-box}
 #stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
 #hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
 #scroller{flex:1;min-height:0;overflow:auto}
@@ -35,7 +40,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .mono{font-family:var(--font-mono);font-size:13px}
 code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
-input[type=text],input[type=number],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg);box-sizing:border-box}
 .fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
 .opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0}
 .opts .fld{margin:0}
@@ -78,6 +83,7 @@ button.bit{cursor:pointer}
 .bit.m1{background:var(--netc);border-color:var(--netc);color:#fff}
 .bit.m0{background:#eee;color:#999}
 #act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act[hidden]{display:none !important;}
 #act .pbody{font-size:13.5px}
 .phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
 .phead b{font-size:15px}
@@ -98,6 +104,7 @@ fieldset.q legend{font-weight:600;padding:0 4px}
 .opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
 .why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
 #course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+#course[hidden]{display:none !important;}
 .ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
 .cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
@@ -116,8 +123,9 @@ fieldset.q legend{font-weight:600;padding:0 4px}
 .gloss dt{font-weight:600}.gloss dd{margin:0}
 .cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#toast[hidden]{display:none !important;}
 #dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
-#dlg[hidden] { display: none !important; }
+#dlg[hidden]{display:none !important;}
 .dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
 .dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
 .dlgbox header b{font-size:16px}
@@ -132,11 +140,16 @@ fieldset.q legend{font-weight:600;padding:0 4px}
   #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
   .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 }
-</style><base target="_blank">
-</head><body>
+</style>
+<base target="_blank">
+</head>
+<body>
 <div id="app">
   <header class="band"><div class="inner row">
-    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="5" width="6" height="16" fill="var(--accent)"/><rect x="10" y="9" width="6" height="12" fill="var(--run)"/><rect x="18" y="13" width="6" height="8" fill="var(--warn)"/></svg><span>Atelier Représentation des nombres <small>SNT</small></span></div>
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="5" width="6" height="16" fill="var(--accent)"/><rect x="10" y="9" width="6" height="12" fill="var(--run)"/><rect x="18" y="13" width="6" height="8" fill="var(--warn)"/></svg>
+      <span>Atelier Représentation des nombres <small>SNT</small></span>
+    </div>
     <div class="files" style="display:flex;gap:6px;flex-wrap:wrap">
       <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
       <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
@@ -179,7 +192,6 @@ function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch
 /* ---------- outils ---------- */
 const toBin = (v, bits) => (v >>> 0).toString(2).padStart(bits || 8, '0');
 const toHex = v => (v >>> 0).toString(16).toUpperCase().padStart(2, '0');
-const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
 
 function bitRow(v, bits, o) {
   o = o || {};
@@ -837,13 +849,13 @@ function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
 $('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
 
 /* ---------- aide ---------- */
-function closeDlg() { $('#dlg').hidden = true; $('#dlg'].innerHTML = ''; }
+function closeDlg() { $('#dlg'].hidden = true; $('#dlg'].innerHTML = ''; }
 function openDlg(title, body) {
   const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
   d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
   d.onclick = ev => { if (ev.target === d) closeDlg(); };
 }
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg'].hidden) closeDlg(); });
 $('#bHelp').addEventListener('click', () => {
   openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre comment les nombres sont représentés et calculés en informatique (SNT, seconde) : les bases décimale, binaire et hexadécimale, les additions et soustractions binaires (retenue, dépassement, complément à 2), les opérations logiques, les masques de sous-réseau et le code Gray.</p>' +
     '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction et explications.</li><li>Le bouton <b>Cours</b> détaille toutes les notions, chaque point étant justifié.</li></ul>' +
@@ -856,4 +868,5 @@ $('#bHelp').addEventListener('click', () => {
   renderSeg(); mountWs(); renderAct(); renderCourse();
 })();
 </script>
-</body></html>
+</body>
+</html>

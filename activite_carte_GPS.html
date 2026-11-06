@@ -1,0 +1,1240 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Atelier Cartes et GPS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : barre d'outils en haut, palette à gauche, zone de travail blanche, panneau de l'appareil à droite (feuille basse sur téléphone). */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;
+  --canvas:#ffffff;--grid:#ffffff;--cable:#000000;--node-fill:#dfe7f0;--node-stroke:#33475b;--screen:#8ec1e6;
+  --note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;--page-bg:#ffffff;--page-fg:#1d2733;
+  --term-bg:#121a22;--term-fg:#d5e0ea;
+  --ok:#1e7a2e;--warn:#9a5b00;--bad:#c0281f;
+  --c-arp:#c98a00;--c-icmp:#7b4fc2;--c-dns:#1478b8;--c-dhcp:#c2347f;--c-tcp:#6d8a14;--c-http:#0f8c68;--c-mail:#d1561b;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:.01em}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn.del{color:var(--bad)}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.seg button[data-mode=sim][aria-pressed="true"]{background:var(--run)}
+#simctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#simctl label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+#simctl select{width:auto}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--run);font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.paused{color:var(--warn)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#palette{flex:none;width:92px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.tool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;font-weight:500;font-size:11.5px;min-width:74px;text-align:center}
+.tool svg{width:34px;height:34px;overflow:visible}
+.tool:hover{border-color:var(--accent)}
+.tool.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.sep{height:1px;background:var(--line);flex:none;margin:2px 0}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#svg{display:block;width:1400px;height:900px;touch-action:none;user-select:none;-webkit-user-select:none}
+.node{cursor:pointer}
+.mode-design .node,.mode-doc .note{cursor:grab}
+.ic-body{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:2;stroke-linejoin:round}
+.ic-screen{fill:var(--screen);stroke:var(--node-stroke);stroke-width:1.2}
+.ic-acc{stroke:var(--accent);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic-led{fill:var(--accent)}
+.nlabel{font:600 12.5px var(--font-ui);fill:var(--fg)}
+.nip{font:11px var(--font-mono);fill:var(--muted)}
+.selbox{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.lk .selbox{stroke-dasharray:none;stroke-width:2.5}
+.cab{stroke:var(--cable);stroke-width:2.2;stroke-linecap:round}
+.cab.on{stroke:var(--accent);stroke-width:4}
+.hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.note rect{fill:var(--note-bg);stroke:var(--note-line)}
+.note text{font:12.5px var(--font-ui);fill:var(--note-fg)}
+#panel{flex:none;width:360px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0}
+#panel.wide{width:clamp(380px,38vw,600px)}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.pbody.fill{display:flex;flex-direction:column;gap:8px}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.fld.chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);font-size:13px}
+.fld.chk input{width:auto}
+input[type=text],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.mono{font-family:var(--font-mono);font-size:12.5px}
+textarea{resize:vertical;min-height:70px}
+.bad{border-color:var(--bad)!important}
+.grp{border:1px solid var(--line);border-radius:8px;padding:10px 10px 2px;margin-bottom:10px}
+.grp>h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.line3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.line2{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.small{font-size:12px;color:var(--muted);margin:0 0 9px}
+.term{display:flex;flex-direction:column;flex:1;min-height:240px;background:var(--term-bg);color:var(--term-fg);border-radius:8px;font:12.5px/1.5 var(--font-mono);overflow:hidden}
+.tout{flex:1;overflow:auto;padding:10px;white-space:pre-wrap;word-break:break-word}
+.tout .ok{color:#6fdc9a}.tout .err{color:#ff9a94}.tout .dim{color:#8da0b5}.tout .cmd{color:#fff}
+.tin{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid #2a3542}
+.tin:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.tin input{flex:1;background:transparent;border:0;color:inherit;font:inherit;outline:none;padding:2px 0}
+.tin .prm{color:#6fdc9a;white-space:nowrap}
+.bar-url{display:flex;gap:6px}
+.bstat{font-size:12.5px;color:var(--muted)}
+.page{flex:1;min-height:180px;overflow:auto;background:var(--page-bg);color:var(--page-fg);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font:15px/1.5 Georgia,'Times New Roman',serif}
+.page h1{font-size:24px;margin:.2em 0 .4em}.page h2{font-size:19px}.page a{color:#1558c0;text-decoration:underline;cursor:pointer}
+.exch{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.extop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex:none}
+.tscroll{overflow:auto;border:1px solid var(--line);border-radius:8px;flex:1;min-height:110px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px}
+.tbl th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:5px 8px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tbl td{padding:4px 8px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--font-mono)}
+.tbl td.info{white-space:normal;min-width:150px}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover{background:var(--panel2)}
+.tbl tbody tr.sel{background:var(--accent-soft)}
+.tbl tr.ign td{opacity:.55}
+tr[data-pk=arp] td:first-child{box-shadow:inset 4px 0 var(--c-arp)}tr[data-pk=icmp] td:first-child{box-shadow:inset 4px 0 var(--c-icmp)}
+tr[data-pk=dns] td:first-child{box-shadow:inset 4px 0 var(--c-dns)}tr[data-pk=dhcp] td:first-child{box-shadow:inset 4px 0 var(--c-dhcp)}
+tr[data-pk=tcp] td:first-child{box-shadow:inset 4px 0 var(--c-tcp)}tr[data-pk=http] td:first-child{box-shadow:inset 4px 0 var(--c-http)}
+.detail{overflow:auto;flex:none;max-height:46%}
+.layer{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.layer h4{margin:0;padding:4px 10px;font-size:12px;background:var(--panel2);display:flex;justify-content:space-between}
+.layer h4 span{color:var(--muted);font-weight:400}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:1px 12px;padding:6px 10px;font-size:12px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-family:var(--font-mono);white-space:pre-wrap;word-break:break-word}
+.layer.empty .kv{color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;background:var(--panel2)}
+.mono-tbl{font:12px var(--font-mono);width:100%;border-collapse:collapse;margin-bottom:10px}
+.mono-tbl th{text-align:left;color:var(--muted);font-weight:500;padding:3px 6px;border-bottom:1px solid var(--line)}
+.mono-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlgbox h3{margin:14px 0 4px;font-size:14px}.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}.dlgbox code{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px;white-space:nowrap}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+.score{font-weight:600;font-size:15px;margin:4px 0 8px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px;text-wrap:balance}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.cbody table{display:block;overflow-x:auto;max-width:100%}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.ctable.narrow td,.ctable.narrow th{text-align:center;font-family:var(--font-mono);font-size:13px}
+.ctable td.on1{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+.bits{font:13px var(--font-mono);overflow-x:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0;background:var(--panel2)}
+.bits>div{display:flex;white-space:nowrap;align-items:baseline;line-height:1.8}
+.bits .lbl{width:96px;flex:none;color:var(--muted);font-family:var(--font-ui);font-size:12px}
+.bits .n{color:var(--accent-ink);font-weight:600}.bits .m{color:#8a949f}
+.bits .dec{margin-left:14px;color:var(--fg);font-family:var(--font-ui);font-size:12.5px}
+.encap{display:flex;flex-wrap:wrap;margin:8px 0 12px}
+.encap span{padding:7px 14px;font:13px var(--font-mono);border:1px solid var(--node-stroke);margin-left:-1px}
+.encap .e4{background:#f6dede}.encap .e3{background:#dfeaf7}.encap .e2{background:#e0f1dc}.encap .e1{background:#fff4c2}
+.widget{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0 14px;background:var(--panel)}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}.bars>div{display:flex;align-items:center;gap:8px}
+.bars .bl{width:44px;flex:none;font-size:12.5px;color:var(--muted)}.bars .bar{display:inline-block;height:14px;background:var(--accent);border-radius:3px}.bars .bar.alt{background:var(--run)}.bars .bv{font:13px var(--font-mono)}
+input[type=range]{width:100%;padding:0}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .work{flex-direction:column;gap:8px}
+  #palette{flex-direction:row;width:auto;overflow-x:auto;overflow-y:hidden;flex:none}
+  .sep{width:1px;height:auto;margin:0 2px}
+  .tool{min-width:70px}
+  #panel,#panel.wide{position:fixed;left:0;right:0;bottom:0;width:auto;height:62%;max-height:none;border-radius:14px 14px 0 0;z-index:30;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .line3{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:no-preference){.tool,.btn{transition:border-color .12s,background .12s}}
+/* ---- ateliers : commun, 1 et 2 ---- */
+#ws{padding:16px max(16px,env(safe-area-inset-left,0px)) 30px;max-width:980px}
+#ws h2{font-size:24px;margin:0 0 8px;text-wrap:balance}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.55}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.stack{margin:14px 0;display:flex;flex-direction:column;gap:6px}
+.stk-row{display:flex;gap:6px;flex-wrap:wrap}
+.stk{border:1px solid var(--node-stroke);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stk b{font-size:15px}.stk span{font-size:12.5px;color:var(--muted)}
+.stk.web{background:#dfeaf7;flex:2 1 260px}.stk.oth{background:var(--panel2);flex:1 1 170px}.stk.net{background:#e0f1dc}
+.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:6px 0}
+.ev{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);border-top:4px solid var(--muted);min-width:0}
+.ev.web{border-top-color:var(--accent)}.ev.net{border-top-color:var(--run)}
+.ev .yr{font:600 17px var(--font-mono)}.ev .et{margin-left:8px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ev p{margin:4px 0 0;font-size:13.5px}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px}
+.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.score{font-weight:600;font-size:15px;margin:6px 0}
+.urlseg{font:15px var(--font-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow-x:auto;white-space:nowrap;background:var(--panel2)}
+.urlseg span{padding:2px 1px;border-bottom:3px solid transparent}
+.u-s{border-bottom-color:#c98a00!important}.u-h{border-bottom-color:#1478b8!important}.u-p{border-bottom-color:#7b4fc2!important}
+.u-c{border-bottom-color:#1e7a2e!important}.u-q{border-bottom-color:#c2347f!important}.u-a{border-bottom-color:#d1561b!important}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border-bottom:3px solid transparent;background:var(--panel2);white-space:nowrap}
+.bar-url{display:flex;gap:6px;margin:8px 0}
+.wout{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.stepc{border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.stepc.k-dns{border-left-color:var(--c-dns)}.stepc.k-tcp{border-left-color:var(--c-tcp)}.stepc.k-http{border-left-color:var(--c-http)}.stepc.k-tls{border-left-color:var(--c-icmp)}.stepc.k-nav{border-left-color:var(--accent)}
+.sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stag{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 8px}
+pre.code{font:12.5px/1.5 var(--font-mono);margin:6px 0 0;white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:6px;padding:7px 9px;overflow-x:auto}
+.pgbar{font-size:12.5px;color:var(--muted);margin-top:4px}
+.broken{display:inline-block;border:1px dashed var(--muted);padding:2px 6px;font:12px var(--font-mono);color:var(--muted)}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ---- réseaux sociaux ---- */
+.webg{display:block;width:100%;min-width:640px;height:auto}
+.ge{stroke:#aab3bf;stroke-width:1.6}.ge.path{stroke:var(--accent);stroke-width:4}.ge.off{stroke-dasharray:3 4;opacity:.3}
+.pcard{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;background:var(--panel)}
+.pcard p{margin:6px 0 2px}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px}.stat span{font-size:12px;color:var(--muted)}.stat b{font-size:15px}
+.opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0 10px}.opts .fld{margin:0}
+.rlog{margin:6px 0;padding:6px 8px 6px 22px;font:12.5px/1.6 var(--font-mono);max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}.rlog:empty{display:none}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.two2>div{min-width:0}
+.post{display:flex;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--panel)}
+.post .rk{font:600 18px var(--font-mono);color:var(--muted);width:24px;flex:none;text-align:center}.post .pb{flex:1;min-width:0}.post p{margin:3px 0 6px}
+.pa{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pf{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;padding:1px 8px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.ibar{display:grid;grid-template-columns:90px 1fr 24px;gap:8px;align-items:center;font-size:13px;margin:3px 0}
+.bar2{display:block;height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}.bar2 i{display:block;height:100%;background:var(--accent)}.bar2.big{height:12px;margin:6px 0}
+.ad{margin-top:10px;border:1px dashed #8a949f;border-radius:6px;padding:8px 12px;background:#f6f6f0;font-size:14px}.ad .adl{display:block;font-size:11px;color:#5a6068;text-transform:uppercase;letter-spacing:.06em}
+.dd{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:5px 0;font-size:14px}.dd.exp{background:rgba(192,40,31,.1);border-color:var(--bad)}.dd.safe{background:rgba(30,122,46,.1);border-color:var(--ok)}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px;flex-wrap:wrap}.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.files{display:flex;gap:6px;flex-wrap:wrap}
+#ws .small{font-size:12.5px}
+.seg{max-width:100%;overflow-x:auto}.seg button{white-space:nowrap}
+#act code.k{white-space:normal;word-break:break-all}
+#act.sheet{position:fixed;left:0;right:0;bottom:0;max-height:72vh;z-index:20}
+.dwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:8px 0;max-height:360px}
+.dt{border-collapse:collapse;width:100%;font-size:13.5px}.dt th,.dt td{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.dt thead th{position:sticky;top:0;background:var(--panel2);font-weight:600;z-index:1}.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
+.dt .hl{background:rgba(46,109,164,.12)}.dt tr.uq td{background:rgba(192,40,31,.12)}.dt .bcell{width:30%}
+.code-in{width:100%;font:13px/1.5 var(--font-mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;resize:vertical;box-sizing:border-box}
+.mono{font-family:var(--font-mono);font-size:13px}
+.warn{font-size:12.5px;color:var(--bad);margin:0 0 9px}
+.gl2{font:10.5px var(--font-ui);fill:#6b7684}
+.rd{stroke:#fff;stroke-width:5;stroke-linecap:round}.rd{filter:none}.rd.rue{stroke:#fff;stroke-width:4}.rd.avenue{stroke:#ffd98a;stroke-width:6}.rd.rocade{stroke:#f0a05a;stroke-width:8}
+.rd.route{stroke:var(--accent);stroke-width:8}.rd.off{opacity:.15}.rd.slow{stroke:#e46a5e}
+.pl{stroke:#1d2733;stroke-width:1.6;fill:#fff}.pl.transport{fill:#cfe3f7}.pl.éducation{fill:#ffe4a8}.pl.service{fill:#f5c6c0}.pl.commerce{fill:#d9eec9}.pl.santé{fill:#f7a8a2}.pl.loisirs{fill:#bfe5c3}.pl.culture{fill:#e3d3f2}.pl.carrefour{fill:#fff}
+.gcirc{fill:none;stroke-width:2}.gcirc.c0{stroke:#2e6da4}.gcirc.c1{stroke:#1e7a2e}.gcirc.c2{stroke:#c0281f}.gcirc.c3{stroke:#8a5cc0}
+.gbal{stroke:#1d2733;fill:#fff}.gtrue{fill:rgba(30,122,46,.25);stroke:var(--ok);stroke-width:2.5}.gguess{stroke:#111;stroke-width:3;fill:none}.gsol{fill:#fff;stroke:#8a5cc0;stroke-width:3}
+.gpin{stroke:#111;stroke-width:2}.gpin.p1{fill:#ffd24a}.gpin.p2{fill:#8ad0ff}.gseg{stroke:#111;stroke-width:2.5;stroke-dasharray:6 5}
+.bld{fill:#c9c2b6;stroke:#8a8478;stroke-width:.8}
+.ew{font:10.5px var(--font-ui);fill:#444;paint-order:stroke;stroke:#fff;stroke-width:3}
+.dn{fill:#fff;stroke:#4a5a6e;stroke-width:2}.dn.vis{fill:#cfe3f7}.dn.cur{fill:#fff0a8;stroke:#111;stroke-width:3}.dn.from{stroke:var(--ok);stroke-width:4}.dn.to{stroke:var(--bad);stroke-width:4}
+.dd.prt{background:rgba(224,160,40,.16);border-color:#d9a21b}
+.gwrap{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:#fff}
+.gl{font:12.5px var(--font-ui);fill:#1d2733;paint-order:stroke;stroke:#fff;stroke-width:3}
+
+
+</style>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="10" fill="none" stroke="var(--fg)" stroke-width="1.6"/><ellipse cx="13" cy="13" rx="4.2" ry="10" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M3.5 13h19M5 8h16M5 18h16" stroke="var(--accent)" stroke-width="1.4" fill="none"/></svg><span>Atelier Cartes et GPS <small>SNT</small></span></div>
+    <div class="files">
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band" id="modes"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <main class="inner work" id="work">
+    <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+/*CORE-START*/
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'atelier-geo-v1', code: 'atelier-geo-extra-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
+const cm = t => '<code class="k">' + t + '</code>';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- images virtuelles (pour le HTML des élèves) ---------- */
+const dataSvg = s => 'data:image/svg+xml;utf8,' + encodeURIComponent(s);
+const IMGS = {
+  'logo.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' rx='18' fill='#2e6da4'/><path d='M28 88V44l32-18 32 18v44z' fill='#fff'/><rect x='51' y='58' width='18' height='30' fill='#2e6da4'/><rect x='34' y='52' width='12' height='12' fill='#2e6da4'/><rect x='74' y='52' width='12' height='12' fill='#2e6da4'/></svg>"),
+  'planete.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='160' height='120' viewBox='0 0 160 120'><rect width='160' height='120' fill='#101c33'/><circle cx='80' cy='60' r='28' fill='#e0a458'/><ellipse cx='80' cy='60' rx='54' ry='11' fill='none' stroke='#f3d9a4' stroke-width='4' transform='rotate(-18 80 60)'/><circle cx='30' cy='24' r='2' fill='#fff'/><circle cx='132' cy='96' r='2' fill='#fff'/><circle cx='122' cy='22' r='1.5' fill='#fff'/></svg>")
+};
+
+/* ---------- assainisseur : le HTML d'un élève ne peut rien exécuter ---------- */
+const OKTAGS = new Set('a b i u em strong small mark code pre br hr p div span h1 h2 h3 h4 h5 h6 ul ol li dl dt dd table thead tbody tfoot tr td th caption img header footer nav main section article aside figure figcaption blockquote'.split(' '));
+const DROPTAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'title', 'head', 'meta', 'link', 'noscript', 'template', 'svg', 'math', 'form', 'input', 'button', 'select', 'textarea', 'audio', 'video', 'canvas', 'base']);
+function safeDom(html, o) {
+  o = o || {};
+  const doc = new DOMParser().parseFromString('<!doctype html><body>' + html, 'text/html');
+  const css = [...doc.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  const out = document.createElement('div');
+  (function walk(src, dst) {
+    for (const c of src.childNodes) {
+      if (c.nodeType === 3) { dst.append(c.textContent); continue; }
+      if (c.nodeType !== 1) continue;
+      const t = c.tagName.toLowerCase();
+      if (DROPTAGS.has(t)) continue;
+      if (!OKTAGS.has(t)) { walk(c, dst); continue; }
+      const e = document.createElement(t);
+      for (const a of c.attributes) {
+        const n = a.name.toLowerCase(), v = a.value;
+        if (['class', 'title', 'lang', 'colspan', 'rowspan', 'width', 'height', 'alt'].includes(n)) e.setAttribute(n, v);
+        else if (n === 'id' && !o.light) e.setAttribute('id', v);
+        else if (n === 'style' && !/url\s*\(|expression|@import/i.test(v)) e.setAttribute('style', v);
+      }
+      if (t === 'a') {
+        const href = c.getAttribute('href') || ''; e.setAttribute('href', '#'); e.dataset.href = href;
+        e.addEventListener('click', ev => { ev.preventDefault(); if (o.onLink) o.onLink(href); });
+      }
+      if (t === 'img') {
+        const src = (c.getAttribute('src') || '').trim();
+        if (IMGS[src]) { e.setAttribute('src', IMGS[src]); e.dataset.ok = '1'; }
+        else { const sp = document.createElement('span'); sp.className = 'broken'; sp.textContent = '[image introuvable : ' + (src || 'attribut src manquant') + (c.getAttribute('alt') ? ', texte alternatif : ' + c.getAttribute('alt') : '') + ']'; dst.append(sp); continue; }
+      }
+      walk(c, e); dst.append(e);
+    }
+  })(doc.body, out);
+  return { el: out, css, doc };
+}
+function scopeCss(css) {
+  return String(css).replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none').replace(/(^|[\s,{}>+~])(html|body)(?=[\s,{.:#\[>+~]|$)/gi, '$1#body');
+}
+
+/* ---------- URL ---------- */
+function parseUrl(u) {
+  const m = /^([a-z][a-z0-9+.-]*):\/\/([^\/?#:]*)(?::(\d+))?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(u).trim());
+  if (!m) return null;
+  return { scheme: m[1].toLowerCase(), host: m[2].toLowerCase(), port: m[3] || '', path: m[4] || '/', query: m[5] || '', hash: m[6] || '' };
+}
+function domainSplit(host) { const p = host.split('.'); return p.length <= 2 ? { sub: '', dom: host } : { sub: p.slice(0, -2).join('.'), dom: p.slice(-2).join('.') }; }
+function widgetUrl(root, start) {
+  const inp = h('input', { type: 'text', class: 'mono', value: start || 'https://www.lycee-exemple.fr/snt/reseaux.html?page=2&lang=fr#masques', 'aria-label': 'Adresse à décoder', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+  const out = h('div');
+  const draw = () => {
+    out.innerHTML = ''; const u = parseUrl(inp.value);
+    inp.classList.toggle('bad', !!inp.value.trim() && !u);
+    if (!u) { out.append(h('p', { class: 'small' }, 'Saisissez une adresse complète, par exemple https://www.exemple.fr/page.html')); return; }
+    const d = domainSplit(u.host), dport = u.scheme === 'https' ? '443' : u.scheme === 'http' ? '80' : '';
+    const seg = [['u-s', u.scheme + '://'], ['u-h', u.host]];
+    if (u.port) seg.push(['u-p', ':' + u.port]);
+    seg.push(['u-c', u.path === '/' && !/\/$/.test(inp.value.split(/[?#]/)[0]) ? '' : u.path]);
+    if (u.query) seg.push(['u-q', u.query]); if (u.hash) seg.push(['u-a', u.hash]);
+    out.append(h('div', { class: 'urlseg', 'aria-label': 'Adresse découpée' }, seg.filter(s => s[1]).map(s => h('span', { class: s[0] }, s[1]))));
+    const q = u.query ? u.query.slice(1).split('&').map(x => x.split('=')).map(p => p[0] + ' = ' + (p[1] || '')).join(' ; ') : '';
+    out.append(h('table', { class: 'ctable' }, h('tbody', null,
+      h('tr', null, h('td', null, h('span', { class: 'u-s tag' }, 'Protocole')), h('td', null, u.scheme + (u.scheme === 'https' ? ' : HTTP chiffré (TLS)' : u.scheme === 'http' ? ' : HTTP non chiffré' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-h tag' }, 'Nom de domaine')), h('td', null, u.host + (d.sub ? ' : sous-domaine « ' + d.sub + ' », domaine principal « ' + d.dom + ' »' : ' : domaine principal « ' + d.dom + ' »'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-p tag' }, 'Port')), h('td', null, u.port ? u.port : (dport ? 'non précisé : ' + dport + ' par défaut' : 'non précisé'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-c tag' }, 'Chemin')), h('td', null, u.path + (u.path === '/' ? ' : page d’accueil' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-q tag' }, 'Paramètres')), h('td', null, q || 'aucun')),
+      h('tr', null, h('td', null, h('span', { class: 'u-a tag' }, 'Ancre')), h('td', null, u.hash ? u.hash + ' : endroit précis de la page' : 'aucune')))));
+  };
+  inp.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Adresse (URL)'), inp), out);
+}
+/*CORE-END*/
+
+/* ---------- carte commune de Valmont (fictive) ---------- */
+const WORKSHOPS = [];
+const NS = 'http://www.w3.org/2000/svg';
+const sv = (t, a, txt) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (txt != null) e.textContent = txt; return e; };
+/* 1 px = 10 m ; lon 5,000 à gauche, lat 45,0414 en haut */
+const LON0 = 5.0, LAT0 = 45.0414, PXLON = 7870, PXLAT = 11120;
+const px2ll = (x, y) => ({ lat: LAT0 - y / PXLAT, lon: LON0 + x / PXLON });
+const ll2px = (lat, lon) => ({ x: (lon - LON0) * PXLON, y: (LAT0 - lat) * PXLAT });
+const f5 = n => n.toFixed(5).replace('.', ',');
+function decToDms(v, pos, neg) { const a = Math.abs(v), d = Math.floor(a), m = Math.floor((a - d) * 60), s = ((a - d) * 60 - m) * 60; return d + '° ' + m + '′ ' + s.toFixed(1).replace('.', ',') + '″ ' + (v >= 0 ? pos : neg); }
+function dmsToDec(d, m, s, hemi) { const v = Math.abs(d) + m / 60 + s / 3600; return (hemi === 'S' || hemi === 'O' || hemi === 'W') ? -v : v; }
+function haversine(a, b) { const R = 6371, r = x => x * Math.PI / 180, dl = r(b.lat - a.lat), dn = r(b.lon - a.lon), q = Math.sin(dl / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dn / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(q)); }
+const PLACES = [
+  { n: 'Gare', x: 120, y: 330, t: 'transport', a: '1 place de la Gare' }, { n: 'Lycée Exemple', x: 300, y: 120, t: 'éducation', a: '12 rue des Écoles' },
+  { n: 'Mairie', x: 330, y: 250, t: 'service', a: '1 place de la Mairie' }, { n: 'Marché couvert', x: 240, y: 200, t: 'commerce', a: '5 rue du Marché' },
+  { n: 'Hôpital', x: 560, y: 100, t: 'santé', a: '8 avenue de la Santé' }, { n: 'Parc de la Rivière', x: 520, y: 330, t: 'loisirs', a: '2 chemin de la Rivière' },
+  { n: 'Stade municipal', x: 650, y: 230, t: 'loisirs', a: '20 avenue des Sports' }, { n: 'Médiathèque', x: 200, y: 420, t: 'culture', a: '3 rue des Livres' },
+  { n: 'Port de plaisance', x: 700, y: 400, t: 'loisirs', a: '1 quai du Port' }, { n: 'Université', x: 90, y: 130, t: 'éducation', a: '40 avenue du Campus' },
+  { n: 'Carrefour Nord', x: 430, y: 190, t: 'carrefour', a: 'avenue de la Santé / rue de la Mairie' }, { n: 'Carrefour Est', x: 420, y: 330, t: 'carrefour', a: 'avenue du Parc / rue Centrale' },
+  { n: 'Carrefour Ouest', x: 200, y: 320, t: 'carrefour', a: 'avenue de la Gare / rue du Marché' }];
+const ROADS = [[9, 1, 'avenue'], [1, 3, 'rue'], [1, 10, 'avenue'], [3, 2, 'rue'], [2, 10, 'rue'], [10, 4, 'avenue'], [4, 6, 'rocade'], [6, 8, 'rocade'], [8, 5, 'avenue'], [5, 11, 'avenue'], [11, 2, 'rue'], [11, 10, 'rue'], [12, 0, 'avenue'], [12, 3, 'rue'], [12, 7, 'rue'], [7, 11, 'avenue'], [0, 9, 'avenue'], [10, 6, 'rue'], [5, 6, 'rue']];
+const SPEED = { rue: 30, avenue: 50, rocade: 70 };
+function roadLen(e) { const a = PLACES[e[0]], b = PLACES[e[1]]; return Math.hypot(a.x - b.x, a.y - b.y) * 10 / 1000; }
+function baseMap(svg, o) {
+  o = o || {};
+  svg.append(sv('rect', { x: 0, y: 0, width: 760, height: 460, fill: '#f4f1e8' }));
+  if (o.land !== false) {
+    svg.append(sv('path', { d: 'M0 380 C120 360 180 400 300 395 C420 390 460 440 560 430 C640 420 700 460 760 440 L760 460 L0 460 Z', fill: '#cfe3f2' }));
+    svg.append(sv('path', { d: 'M520 0 C500 80 560 130 540 200 C520 270 590 330 560 460 L600 460 C640 330 580 270 600 200 C620 130 560 70 575 0 Z', fill: '#cfe3f2', opacity: .9 }));
+    svg.append(sv('ellipse', { cx: 520, cy: 330, rx: 70, ry: 48, fill: '#d7e8cf' }));
+  }
+  if (o.grid) {
+    for (let lon = 5.01; lon < 5.097; lon += 0.01) { const x = (lon - LON0) * PXLON; svg.append(sv('line', { x1: x, y1: 0, x2: x, y2: 460, stroke: '#9aa5b1', 'stroke-width': .7, 'stroke-dasharray': '3 4' })); svg.append(sv('text', { x: x + 3, y: 12, class: 'gl2' }, lon.toFixed(2).replace('.', ',') + ' °E')); }
+    for (let lat = 45.04; lat > 45.0; lat -= 0.01) { const y = (LAT0 - lat) * PXLAT; svg.append(sv('line', { x1: 0, y1: y, x2: 760, y2: y, stroke: '#9aa5b1', 'stroke-width': .7, 'stroke-dasharray': '3 4' })); svg.append(sv('text', { x: 3, y: y - 3, class: 'gl2' }, lat.toFixed(2).replace('.', ',') + ' °N')); }
+  }
+}
+function drawRoads(svg, cls) { ROADS.forEach(e => { const a = PLACES[e[0]], b = PLACES[e[1]]; svg.append(sv('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: 'rd ' + e[2] + (cls ? ' ' + cls(e) : '') })); }); }
+function drawPlaces(svg, labels, skipCross) { PLACES.forEach(p => { if (skipCross && p.t === 'carrefour') return; svg.append(sv('circle', { cx: p.x, cy: p.y, r: p.t === 'carrefour' ? 4 : 7, class: 'pl ' + p.t })); if (labels !== false && p.t !== 'carrefour') svg.append(sv('text', { x: p.x, y: p.y - 11, 'text-anchor': 'middle', class: 'gl' }, p.n)); }); }
+function svgPoint(svg, ev) { const r = svg.getBoundingClientRect(); return { x: (ev.clientX - r.left) / r.width * 760, y: (ev.clientY - r.top) / r.height * 460 }; }
+
+/* ---------- Atelier 1 : le GPS ---------- */
+const BAL = [{ x: 110, y: 80 }, { x: 650, y: 90 }, { x: 380, y: 430 }, { x: 680, y: 390 }];
+const TRUE = { x: 300, y: 230 };
+const W1 = { nb: 3, e: 0, guess: null, sol: null, fix: false, reveal: false, ms: 67, nmea: '' };
+function nmeaSum(s) { let c = 0; for (const ch of s) c ^= ch.charCodeAt(0); return c.toString(16).toUpperCase().padStart(2, '0'); }
+const NMEA0 = (() => { const b = 'GPGGA,123519,4507.404,N,00505.800,E,1,08,0.9,545.4,M,46.9,M,,'; return '$' + b + '*' + nmeaSum(b); })();
+function parseNmea(s) {
+  const m = /^\$([^*]+)\*([0-9A-Fa-f]{2})\s*$/.exec(s.trim()); if (!m) return { err: 'Format incorrect : une trame commence par « $ » et se termine par « * » et deux caractères de contrôle.' };
+  const ok = nmeaSum(m[1]) === m[2].toUpperCase(), f = m[1].split(',');
+  if (f[0] !== 'GPGGA') return { err: 'Seules les trames GPGGA sont décodées ici.', ok };
+  const cv = (v, h) => { const d = Math.floor(parseFloat(v) / 100), mm = parseFloat(v) - d * 100; const x = d + mm / 60; return (h === 'S' || h === 'W') ? -x : x; };
+  return { ok, t: f[1].slice(0, 2) + ' h ' + f[1].slice(2, 4) + ' min ' + f[1].slice(4, 6) + ' s (UTC)', lat: cv(f[2], f[3]), lon: cv(f[4], f[5]), fix: f[6], sat: f[7], hdop: f[8], alt: f[9] + ' ' + f[10] };
+}
+function solveGps() {
+  const n = W1.nb, ms = BAL.slice(0, n).map(b => Math.hypot(b.x - TRUE.x, b.y - TRUE.y) * 10 + W1.e);
+  let best = null;
+  for (let x = 0; x <= 760; x += 2) for (let y = 0; y <= 460; y += 2) {
+    const r = BAL.slice(0, n).map((b, i) => ms[i] - Math.hypot(b.x - x, b.y - y) * 10);
+    const e = W1.fix ? r.reduce((a, c) => a + c, 0) / n : 0, q = r.reduce((a, c) => a + (c - e) ** 2, 0);
+    if (!best || q < best.q) best = { x, y, q, e };
+  }
+  return best;
+}
+function mountW1(root) {
+  root.append(h('h2', null, 'Comment un GPS sait-il où vous êtes ?'),
+    h('p', null, 'Un récepteur GPS mesure sa distance à plusieurs ', h('b', null, 'satellites'), ' dont les positions sont connues. Ici, des ', h('b', null, 'balises'), ' au sol jouent leur rôle sur un plan : chaque balise indique sa distance à vous. Votre position se trouve à l’intersection des cercles.'));
+  const svgBox = h('div', { class: 'gwrap' }), info = h('div'), chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Nombre de balises' });
+  function draw() {
+    chips.innerHTML = ''; [1, 2, 3, 4].forEach(n => chips.append(h('button', { type: 'button', class: 'chip' + (W1.nb === n ? ' on' : ''), 'aria-pressed': W1.nb === n ? 'true' : 'false', onclick: () => { W1.nb = n; W1.sol = null; draw(); } }, n + ' balise' + (n > 1 ? 's' : ''))));
+    const svg = sv('svg', { viewBox: '0 0 760 460', class: 'webg', role: 'img', 'aria-label': 'Plan avec des balises et leurs cercles de distance' });
+    svg.append(sv('rect', { x: 0, y: 0, width: 760, height: 460, fill: '#f4f1e8' }));
+    BAL.slice(0, W1.nb).forEach((b, i) => {
+      const r = (Math.hypot(b.x - TRUE.x, b.y - TRUE.y) * 10 + W1.e) / 10;
+      svg.append(sv('circle', { cx: b.x, cy: b.y, r, class: 'gcirc c' + i }));
+      svg.append(sv('rect', { x: b.x - 8, y: b.y - 8, width: 16, height: 16, class: 'gbal c' + i })); svg.append(sv('text', { x: b.x, y: b.y - 14, 'text-anchor': 'middle', class: 'gl' }, 'Balise ' + (i + 1)));
+    });
+    if (W1.reveal) { svg.append(sv('circle', { cx: TRUE.x, cy: TRUE.y, r: 9, class: 'gtrue' })); svg.append(sv('text', { x: TRUE.x + 12, y: TRUE.y + 4, class: 'gl' }, 'Vraie position')); }
+    if (W1.guess) { svg.append(sv('path', { d: 'M' + (W1.guess.x - 8) + ' ' + (W1.guess.y - 8) + 'l16 16m0 -16l-16 16', class: 'gguess' })); svg.append(sv('text', { x: W1.guess.x + 12, y: W1.guess.y - 6, class: 'gl' }, 'Votre estimation')); }
+    if (W1.sol) { svg.append(sv('circle', { cx: W1.sol.x, cy: W1.sol.y, r: 7, class: 'gsol' })); svg.append(sv('text', { x: W1.sol.x + 11, y: W1.sol.y + 20, class: 'gl' }, 'Calcul')); }
+    svg.addEventListener('click', ev => { W1.guess = svgPoint(svg, ev); draw(); });
+    svgBox.innerHTML = ''; svgBox.append(svg);
+    info.innerHTML = '';
+    const meas = BAL.slice(0, W1.nb).map(b => Math.hypot(b.x - TRUE.x, b.y - TRUE.y) * 10 + W1.e);
+    info.append(h('div', { class: 'gstats' }, meas.map((m, i) => h('div', { class: 'stat' }, h('span', null, 'Distance mesurée à la balise ' + (i + 1)), h('b', null, Math.round(m).toLocaleString('fr-FR') + ' m')))));
+    if (W1.guess) {
+      const gg = BAL.slice(0, W1.nb).map((b, i) => Math.round(Math.abs(Math.hypot(b.x - W1.guess.x, b.y - W1.guess.y) * 10 - meas[i])));
+      info.append(h('p', { class: 'pcard' }, h('b', null, 'Écarts de votre estimation : '), gg.map((g, i) => 'balise ' + (i + 1) + ' : ' + g + ' m').join(' · '), h('br'), gg.every(g => g < 30) ? 'Excellente estimation : vous êtes sur tous les cercles.' : 'Vous êtes sur un cercle quand l’écart est proche de 0. Déplacez-vous vers le point commun.'));
+    }
+    if (W1.nb < 3) info.append(h('p', { class: 'small' }, W1.nb === 1 ? 'Avec une seule balise : vous pouvez être n’importe où sur le cercle.' : 'Avec deux balises : deux positions possibles (les deux points d’intersection).'));
+    else if (W1.nb === 3 && W1.e === 0) info.append(h('p', { class: 'small' }, 'Avec trois balises : un seul point commun aux trois cercles. En 3D (vraie vie), le GPS exige au moins 4 satellites.'));
+    if (W1.e > 0) info.append(h('p', { class: 'small' }, 'L’horloge du récepteur est en avance : toutes les distances sont faussées de ' + W1.e + ' m, et les cercles ne se coupent plus en un seul point.'));
+    if (W1.sol && W1.fix && W1.nb >= 3) info.append(h('p', { class: 'small' }, 'Dans le plan, 3 inconnues (x, y et l’erreur d’horloge) demandent 3 balises. Dans l’espace réel, il y a une inconnue de plus (l’altitude) : il faut au moins 4 satellites.'));
+    if (W1.sol) info.append(h('p', { class: 'pcard' }, W1.nb < 3 ? 'Position non unique avec ' + W1.nb + ' balise(s).' : 'Position calculée. Écart avec la vraie position : ' + Math.round(Math.hypot(W1.sol.x - TRUE.x, W1.sol.y - TRUE.y) * 10) + ' m.' + (W1.fix ? ' Erreur d’horloge estimée : ' + Math.round(W1.sol.e) + ' m.' : '')));
+  }
+  const rg = h('input', { type: 'range', min: 0, max: 300, step: 20, value: W1.e, 'aria-label': 'Erreur d’horloge en mètres' }), rgv = h('b', null, W1.e + ' m');
+  rg.addEventListener('input', () => { W1.e = +rg.value; rgv.textContent = W1.e + ' m'; W1.sol = null; draw(); });
+  const fixc = h('input', { type: 'checkbox', checked: W1.fix, onchange: e => { W1.fix = e.target.checked; W1.sol = null; draw(); } });
+  root.append(h('h3', null, '1. Trouver sa position par trilatération'), chips, svgBox, h('p', { class: 'small' }, 'Cliquez sur le plan pour placer votre estimation. La croix ne doit pas dépasser les cercles.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'Erreur d’horloge du récepteur : ', rgv), rg), h('label', { class: 'fld chk' }, fixc, 'Corriger l’erreur d’horloge dans le calcul')),
+    h('div', { class: 'opts' }, h('button', { class: 'btn pri', type: 'button', onclick: () => { W1.sol = solveGps(); draw(); } }, 'Calculer la position'),
+      h('button', { class: 'btn', type: 'button', onclick: () => { W1.reveal = !W1.reveal; draw(); } }, 'Afficher / cacher la vraie position')), info);
+  /* temps de trajet */
+  const dv = h('p', { class: 'score' }), ms = h('input', { type: 'range', min: 60, max: 90, step: 1, value: W1.ms, 'aria-label': 'Temps de trajet du signal en millisecondes' }), msv = h('b', null);
+  const upd = () => { W1.ms = +ms.value; msv.textContent = W1.ms + ' ms'; dv.textContent = 'Distance au satellite : ' + Math.round(299792.458 * W1.ms / 1000).toLocaleString('fr-FR') + ' km. Une erreur de 1 µs sur l’horloge donne une erreur d’environ 300 m.'; };
+  ms.addEventListener('input', upd); upd();
+  root.append(h('h3', null, '2. Mesurer une distance avec le temps'), h('p', null, 'Un satellite envoie un signal radio qui voyage à la vitesse de la lumière (environ 300 000 km/s). Le récepteur mesure le temps de trajet : distance = vitesse × temps. Les satellites GPS orbitent à environ 20 200 km d’altitude.'),
+    h('label', { class: 'fld' }, h('span', null, 'Temps de trajet du signal : ', msv), ms), dv);
+  /* NMEA */
+  const ta = h('textarea', { class: 'code-in', rows: 2, spellcheck: 'false', 'aria-label': 'Trame NMEA' }), out = h('div');
+  ta.value = W1.nmea || NMEA0;
+  const dn = () => { W1.nmea = ta.value; const p = parseNmea(ta.value); out.innerHTML = '';
+    if (p.err) { out.append(h('p', { class: 'warn' }, p.err)); return; }
+    out.append(h('div', { class: 'gstats' }, [['Heure', p.t], ['Latitude', f5(p.lat) + ' °'], ['Longitude', f5(p.lon) + ' °'], ['Satellites utilisés', p.sat], ['Précision (HDOP)', p.hdop.replace('.', ',')], ['Altitude', p.alt]].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, k[1])))),
+      h('p', { class: p.ok ? 'score' : 'warn' }, p.ok ? 'Somme de contrôle valide : la trame n’a pas été altérée.' : 'Somme de contrôle invalide : la trame est corrompue.')); };
+  ta.addEventListener('input', dn); dn();
+  root.append(h('h3', null, '3. Lire ce que le récepteur envoie'), h('p', null, 'Un récepteur GPS envoie des phrases texte (format NMEA). Modifiez un caractère dans la trame : la somme de contrôle (les deux derniers caractères) détecte l’erreur.'), ta, out,
+    h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { ta.value = NMEA0; dn(); } }, 'Rétablir la trame')));
+  draw();
+}
+WORKSHOPS.push({ id: 'g1', title: 'Le GPS', hint: 'Trouvez votre position avec des balises, mesurez une distance avec le temps, décodez une trame GPS.', mount: mountW1, reset: () => { Object.assign(W1, { nb: 3, e: 0, guess: null, sol: null, fix: false, reveal: false, ms: 67, nmea: '' }); } });
+const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
+function tableEl(rows, cols, labels) {
+  const t = h('table', { class: 'dt' }), tr = h('tr'); cols.forEach(c => tr.append(h('th', { scope: 'col' }, (labels && labels[c]) || c))); t.append(h('thead', null, tr));
+  const tb = h('tbody'); rows.forEach(r => { const x = h('tr'); cols.forEach(c => x.append(h('td', { class: typeof r[c] === 'number' ? 'num' : '' }, String(r[c])))); tb.append(x); }); t.append(tb); return h('div', { class: 'dwrap' }, t);
+}
+
+/* ---------- Atelier 2 : coordonnées et échelle ---------- */
+const W2 = { a: null, b: null, goLat: '45,0214', goLon: '5,0400', den: 25000, cm: 4 };
+function mountW2(root) {
+  root.append(h('h2', null, 'Repérer un point : latitude et longitude'),
+    h('p', null, 'Pour situer un point sur Terre, on utilise deux angles : la ', h('b', null, 'latitude'), ' (de 0° à l’équateur à 90° aux pôles, vers le nord N ou le sud S) et la ', h('b', null, 'longitude'), ' (de 0° au méridien de Greenwich à 180°, vers l’est E ou l’ouest O). Cliquez sur la carte de Valmont (fictive) pour lire les coordonnées d’un point.'));
+  const svgBox = h('div', { class: 'gwrap' }), info = h('div');
+  function draw() {
+    const svg = sv('svg', { viewBox: '0 0 760 460', class: 'webg', role: 'img', 'aria-label': 'Carte de Valmont avec quadrillage de latitude et de longitude' });
+    baseMap(svg, { grid: true }); drawRoads(svg); drawPlaces(svg, false, true);
+    const pin = (p, c, lab) => { svg.append(sv('circle', { cx: p.x, cy: p.y, r: 7, class: 'gpin ' + c })); svg.append(sv('text', { x: p.x + 10, y: p.y - 8, class: 'gl' }, lab)); };
+    if (W2.a && W2.b) svg.append(sv('line', { x1: W2.a.x, y1: W2.a.y, x2: W2.b.x, y2: W2.b.y, class: 'gseg' }));
+    if (W2.a) pin(W2.a, 'p1', 'A'); if (W2.b) pin(W2.b, 'p2', 'B');
+    svg.append(sv('line', { x1: 20, y1: 440, x2: 70, y2: 440, stroke: '#111', 'stroke-width': 3 })); svg.append(sv('text', { x: 20, y: 430, class: 'gl' }, '500 m'));
+    svg.addEventListener('click', ev => { const p = svgPoint(svg, ev); if (!W2.a || (W2.a && W2.b)) { W2.a = p; W2.b = null; } else W2.b = p; draw(); });
+    svgBox.innerHTML = ''; svgBox.append(svg);
+    info.innerHTML = '';
+    const row = (n, p) => { const c = px2ll(p.x, p.y); return h('tr', null, h('th', { scope: 'row' }, n), h('td', null, f5(c.lat) + ' °'), h('td', null, f5(c.lon) + ' °'), h('td', null, decToDms(c.lat, 'N', 'S') + ' ; ' + decToDms(c.lon, 'E', 'O'))); };
+    const pts = [['A', W2.a], ['B', W2.b]].filter(x => x[1]);
+    if (pts.length) info.append(h('div', { class: 'dwrap' }, h('table', { class: 'dt' }, h('thead', null, h('tr', null, h('th', null, 'Point'), h('th', null, 'Latitude'), h('th', null, 'Longitude'), h('th', null, 'Degrés, minutes, secondes'))), h('tbody', null, pts.map(x => row(x[0], x[1]))))));
+    else info.append(h('p', { class: 'small' }, 'Cliquez une première fois pour placer le point A, une seconde fois pour le point B.'));
+    if (W2.a && W2.b) { const A = px2ll(W2.a.x, W2.a.y), B = px2ll(W2.b.x, W2.b.y), d = haversine(A, B), dp = Math.hypot(W2.a.x - W2.b.x, W2.a.y - W2.b.y) * 10;
+      info.append(h('p', { class: 'pcard' }, h('b', null, 'Distance à vol d’oiseau : '), (d * 1000 < 1000 ? Math.round(d * 1000) + ' m' : fmt(d) + ' km'), ' (calculée à partir des coordonnées, avec la formule de la haversine).', h('br'), 'Mesurée sur le plan avec l’échelle (1 px = 10 m) : ' + Math.round(dp) + ' m.')); }
+  }
+  root.append(h('h3', null, '1. Lire des coordonnées'), svgBox, info);
+  /* aller à */
+  const gl = h('input', { type: 'text', value: W2.goLat, 'aria-label': 'Latitude', autocomplete: 'off' }), gn = h('input', { type: 'text', value: W2.goLon, 'aria-label': 'Longitude', autocomplete: 'off' }), gm = h('p', { class: 'small' });
+  root.append(h('h3', null, '2. Aller à des coordonnées'), h('p', { class: 'small' }, 'Entrez une latitude entre 45,000 et 45,041 et une longitude entre 5,000 et 5,096 (écrites en degrés décimaux avec une virgule).'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'Latitude (°)'), gl), h('label', { class: 'fld' }, h('span', null, 'Longitude (°)'), gn),
+      h('button', { class: 'btn pri', type: 'button', onclick: () => { const la = parseFloat(gl.value.replace(',', '.')), lo = parseFloat(gn.value.replace(',', '.')); W2.goLat = gl.value; W2.goLon = gn.value; const p = ll2px(la, lo);
+        if (isNaN(la) || isNaN(lo) || p.x < 0 || p.x > 760 || p.y < 0 || p.y > 460) { gm.textContent = 'Ces coordonnées sont hors de la carte.'; return; }
+        gm.textContent = 'Point placé : A.'; W2.a = p; W2.b = null; draw(); } }, 'Placer le point A')), gm);
+  /* échelle */
+  const out = h('p', { class: 'score' }), dr = h('input', { type: 'range', min: 5000, max: 100000, step: 5000, value: W2.den, 'aria-label': 'Dénominateur de l’échelle' }), cr = h('input', { type: 'range', min: 1, max: 20, step: 0.5, value: W2.cm, 'aria-label': 'Longueur sur la carte en centimètres' });
+  const dv = h('b'), cv = h('b');
+  const upd = () => { W2.den = +dr.value; W2.cm = +cr.value; dv.textContent = '1 / ' + W2.den.toLocaleString('fr-FR'); cv.textContent = fmt(W2.cm) + ' cm'; const km = W2.cm * W2.den / 100000; out.textContent = fmt(W2.cm) + ' cm sur la carte représentent ' + (km < 1 ? Math.round(km * 1000) + ' m' : fmt(km) + ' km') + ' sur le terrain.'; };
+  dr.addEventListener('input', upd); cr.addEventListener('input', upd); upd();
+  root.append(h('h3', null, '3. L’échelle d’une carte'), h('p', null, 'L’échelle 1/25 000 signifie que 1 cm sur la carte représente 25 000 cm (250 m) sur le terrain. Plus le dénominateur est grand, plus la carte couvre un grand territoire, avec moins de détails.'),
+    h('label', { class: 'fld' }, h('span', null, 'Échelle : ', dv), dr), h('label', { class: 'fld' }, h('span', null, 'Longueur mesurée sur la carte : ', cv), cr), out);
+  /* convertisseur */
+  const mk = (lab, v) => h('input', { type: 'text', value: v, 'aria-label': lab, autocomplete: 'off', class: 'mono' });
+  const decI = mk('Degrés décimaux', '45,1234'), res = h('p', { class: 'score' });
+  const cv2 = () => { const v = parseFloat(decI.value.replace(',', '.')); res.textContent = isNaN(v) ? 'Entrez un nombre.' : fmt(v) + ' ° = ' + decToDms(v, 'N', 'S').replace(/ N$/, '').replace(/ S$/, '') + ' (positif = nord ou est, négatif = sud ou ouest)'; };
+  decI.addEventListener('input', cv2); cv2();
+  root.append(h('h3', null, '4. Degrés décimaux et degrés-minutes-secondes'), h('p', null, '1° = 60′ (minutes) et 1′ = 60″ (secondes). Entrez un nombre de degrés décimaux pour le convertir.'), h('label', { class: 'fld' }, h('span', null, 'Degrés décimaux'), decI), res);
+  draw();
+}
+WORKSHOPS.push({ id: 'g2', title: 'Coordonnées et échelle', hint: 'Lisez des coordonnées, placez un point, mesurez une distance et jouez avec l’échelle.', mount: mountW2, reset: () => { Object.assign(W2, { a: null, b: null, goLat: '45,0214', goLon: '5,0400', den: 25000, cm: 4 }); } });
+
+/* ---------- Atelier 3 : cartes en couches et géocodage ---------- */
+const LAYERS = [['eau', 'Eau et nature'], ['routes', 'Routes'], ['bat', 'Bâtiments'], ['serv', 'Services et lieux'], ['alt', 'Relief (altitudes)']];
+const W3 = { on: { eau: true, routes: true, bat: false, serv: true, alt: false }, q: '', hit: null, click: null };
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+function mountW3(root) {
+  root.append(h('h2', null, 'Une carte numérique, c’est des couches'),
+    h('p', null, 'Une carte numérique est un ', h('b', null, 'système d’information géographique'), ' (SIG) : un empilement de ', h('b', null, 'couches'), ' de données (routes, bâtiments, services, relief…), chacune avec ses éléments et ses attributs. Activez ou désactivez les couches.'));
+  const svgBox = h('div', { class: 'gwrap' }), chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Couches' }), info = h('div'), tbl = h('div');
+  function draw() {
+    chips.innerHTML = ''; LAYERS.forEach(l => chips.append(h('button', { type: 'button', class: 'chip' + (W3.on[l[0]] ? ' on' : ''), 'aria-pressed': W3.on[l[0]] ? 'true' : 'false', onclick: () => { W3.on[l[0]] = !W3.on[l[0]]; draw(); } }, l[1])));
+    const svg = sv('svg', { viewBox: '0 0 760 460', class: 'webg', role: 'img', 'aria-label': 'Carte de Valmont en couches' });
+    svg.append(sv('rect', { x: 0, y: 0, width: 760, height: 460, fill: W3.on.eau || W3.on.routes || W3.on.bat || W3.on.serv || W3.on.alt ? '#f4f1e8' : '#fff' }));
+    if (W3.on.eau) baseMap(svg, {});
+    if (W3.on.alt) [[330, 250, 190, 60], [330, 250, 130, 80], [330, 250, 70, 100]].forEach(c => { svg.append(sv('ellipse', { cx: 290, cy: 250, rx: c[2] * 1.2, ry: c[2] * 0.7, fill: 'none', stroke: '#b08968', 'stroke-width': 1.2 })); svg.append(sv('text', { x: 290 + c[2] * 1.2, y: 250, class: 'gl2' }, (c[3] + 40) + ' m')); });
+    if (W3.on.routes) drawRoads(svg);
+    if (W3.on.bat) PLACES.forEach(p => { if (p.t === 'carrefour') return; [[-18, 10], [14, 8], [-6, 18], [20, -16]].forEach((o, i) => svg.append(sv('rect', { x: p.x + o[0], y: p.y + o[1], width: 11 + (i % 2) * 5, height: 9, class: 'bld' }))); });
+    if (W3.on.serv) drawPlaces(svg, true, true);
+    if (W3.hit) { svg.append(sv('circle', { cx: W3.hit.x, cy: W3.hit.y, r: 11, class: 'gpin p2' })); }
+    if (W3.click) svg.append(sv('path', { d: 'M' + (W3.click.x - 7) + ' ' + (W3.click.y - 7) + 'l14 14m0 -14l-14 14', class: 'gguess' }));
+    svg.addEventListener('click', ev => { W3.click = svgPoint(svg, ev); W3.hit = null; reverse(); draw(); });
+    svgBox.innerHTML = ''; svgBox.append(svg);
+    info.innerHTML = '';
+    if (W3.click) { const c = px2ll(W3.click.x, W3.click.y), near = PLACES.filter(p => p.t !== 'carrefour').map(p => ({ p, d: Math.hypot(p.x - W3.click.x, p.y - W3.click.y) * 10 })).sort((a, b) => a.d - b.d)[0];
+      info.append(h('p', { class: 'pcard' }, h('b', null, 'Géocodage inverse : '), 'coordonnées ' + f5(c.lat) + ' °N ; ' + f5(c.lon) + ' °E → adresse la plus proche : ', h('b', null, near.p.a), ' (' + near.p.n + ', à ' + Math.round(near.d) + ' m).')); }
+    tbl.innerHTML = '';
+    if (W3.on.serv) { const rows = PLACES.filter(p => p.t !== 'carrefour').map(p => { const c = px2ll(p.x, p.y); return { nom: p.n, type: p.t, latitude: f5(c.lat), longitude: f5(c.lon) }; });
+      tbl.append(h('h3', null, 'La table de la couche « Services et lieux »'), h('p', { class: 'small' }, 'Chaque élément de la couche est un enregistrement : un point avec des coordonnées et des attributs.'), tableEl(rows, ['nom', 'type', 'latitude', 'longitude'])); }
+  }
+  function reverse() { /* géré dans draw */ }
+  const qi = h('input', { type: 'text', value: W3.q, placeholder: 'Ex. : 12 rue des Écoles', 'aria-label': 'Adresse à chercher', autocomplete: 'off' }), res = h('p', { class: 'small' });
+  const go = () => { W3.q = qi.value; const q = norm(qi.value.trim()); if (!q) { res.textContent = 'Entrez une adresse.'; return; }
+    const m = PLACES.filter(p => p.t !== 'carrefour' && (norm(p.a).includes(q) || norm(p.n).includes(q)));
+    if (!m.length) { res.textContent = 'Adresse introuvable. Essayez : « Mairie », « 12 rue des Écoles », « quai du Port ».'; W3.hit = null; draw(); return; }
+    W3.hit = m[0]; W3.click = null; const c = px2ll(m[0].x, m[0].y); res.textContent = 'Géocodage : « ' + m[0].a + ' » → latitude ' + f5(c.lat) + ' °N, longitude ' + f5(c.lon) + ' °E' + (m.length > 1 ? ' (' + m.length + ' résultats, le premier est affiché)' : '') + '.'; draw(); res.textContent = res.textContent; };
+  qi.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  root.append(chips, svgBox, h('p', { class: 'small' }, 'Cliquez sur la carte pour trouver l’adresse la plus proche (géocodage inverse).'), info,
+    h('h3', null, 'Trouver une adresse (géocodage)'), h('p', null, 'Le ', h('b', null, 'géocodage'), ' transforme une adresse en coordonnées. Tapez une adresse ou un lieu de Valmont.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'Adresse'), qi), h('button', { class: 'btn pri', type: 'button', onclick: go }, 'Chercher')), res, tbl);
+  draw();
+}
+WORKSHOPS.push({ id: 'g3', title: 'Cartes en couches', hint: 'Superposez les couches d’une carte, cherchez une adresse et trouvez l’adresse d’un point.', mount: mountW3, reset: () => { Object.assign(W3, { on: { eau: true, routes: true, bat: false, serv: true, alt: false }, q: '', hit: null, click: null }); } });
+
+/* ---------- Atelier 4 : itinéraires ---------- */
+const W4 = { from: 0, to: 4, crit: 'time', rush: false, noRing: false, step: 99 };
+function edgeCost(e) {
+  if (W4.crit === 'dist') return roadLen(e);
+  let t = roadLen(e) / SPEED[e[2]] * 60;
+  if (W4.rush && (e[0] === 10 || e[1] === 10)) t *= 3;
+  return t;
+}
+function dijkstra(from, to) {
+  const n = PLACES.length, dist = Array(n).fill(Infinity), prev = Array(n).fill(null), done = Array(n).fill(false), steps = [];
+  const edges = ROADS.filter(e => !(W4.noRing && e[2] === 'rocade'));
+  dist[from] = 0;
+  for (let it = 0; it < n; it++) {
+    let u = -1; for (let i = 0; i < n; i++) if (!done[i] && dist[i] < Infinity && (u < 0 || dist[i] < dist[u])) u = i;
+    if (u < 0) break; done[u] = true;
+    edges.forEach(e => { const o = e[0] === u ? e[1] : e[1] === u ? e[0] : -1; if (o < 0 || done[o]) return; const c = dist[u] + edgeCost(e); if (c < dist[o]) { dist[o] = c; prev[o] = u; } });
+    steps.push({ u, dist: dist.slice(), done: done.slice(), prev: prev.slice() });
+    if (u === to) break;
+  }
+  let path = null; if (dist[to] < Infinity) { path = [to]; let c = to; while (c !== from) { c = prev[c]; path.unshift(c); } }
+  return { path, total: dist[to], steps };
+}
+function mountW4(root) {
+  root.append(h('h2', null, 'Calculer un itinéraire'),
+    h('p', null, 'Une application d’itinéraire représente les routes par un ', h('b', null, 'graphe'), ' : les carrefours et lieux sont les sommets, les tronçons de route les arêtes, chacune avec un ', h('b', null, 'poids'), ' (distance ou durée). Chercher un itinéraire, c’est chercher le chemin de poids minimal.'));
+  const svgBox = h('div', { class: 'gwrap' }), info = h('div'), tab = h('div'), chips = h('div', { class: 'chips' });
+  const opt = (arr, v, fn, lab) => h('label', { class: 'fld' }, h('span', null, lab), h('select', { onchange: e => fn(+e.target.value) }, arr.map((p, i) => h('option', { value: i, selected: i === v }, p.n))));
+  function draw() {
+    const R = dijkstra(W4.from, W4.to), K = Math.min(W4.step, R.steps.length), S = R.steps.slice(0, K), last = S[S.length - 1];
+    const svg = sv('svg', { viewBox: '0 0 760 460', class: 'webg', role: 'img', 'aria-label': 'Carte du graphe routier de Valmont avec le meilleur itinéraire' });
+    baseMap(svg, {});
+    const onPath = new Set(); if (R.path && K >= R.steps.length) for (let i = 0; i + 1 < R.path.length; i++) onPath.add(Math.min(R.path[i], R.path[i + 1]) + '-' + Math.max(R.path[i], R.path[i + 1]));
+    ROADS.forEach(e => { const a = PLACES[e[0]], b = PLACES[e[1]], skip = W4.noRing && e[2] === 'rocade', key = Math.min(e[0], e[1]) + '-' + Math.max(e[0], e[1]), slow = W4.rush && W4.crit === 'time' && (e[0] === 10 || e[1] === 10);
+      svg.append(sv('line', { x1: a.x, y1: a.y, x2: b.x, y2: b.y, class: 'rd ' + e[2] + (onPath.has(key) ? ' route' : '') + (skip ? ' off' : '') + (slow ? ' slow' : '') }));
+      const w = edgeCost(e); svg.append(sv('text', { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 - 4, 'text-anchor': 'middle', class: 'ew' }, (W4.crit === 'dist' ? fmt(w) + ' km' : fmt(w) + ' min'))); });
+    PLACES.forEach((p, i) => { const vis = last && last.done[i], cur = last && last.u === i;
+      svg.append(sv('circle', { cx: p.x, cy: p.y, r: p.t === 'carrefour' ? 8 : 10, class: 'dn' + (vis ? ' vis' : '') + (cur ? ' cur' : '') + (i === W4.from ? ' from' : '') + (i === W4.to ? ' to' : '') }));
+      svg.append(sv('text', { x: p.x, y: p.y + 24, 'text-anchor': 'middle', class: 'gl' }, p.n)); });
+    svgBox.innerHTML = ''; svgBox.append(svg);
+    info.innerHTML = '';
+    if (!R.path) info.append(h('p', { class: 'warn' }, 'Aucun itinéraire : les deux lieux ne sont plus reliés avec ces contraintes.'));
+    else { const dKm = R.path.reduce((a, c, i) => i ? a + roadLen(ROADS.find(e => (e[0] === R.path[i - 1] && e[1] === c) || (e[1] === R.path[i - 1] && e[0] === c))) : a, 0);
+      info.append(h('div', { class: 'pcard' }, h('b', null, 'Meilleur itinéraire : '), R.path.map(i => PLACES[i].n).join(' → '), h('br'), (W4.crit === 'dist' ? 'Distance : ' + fmt(R.total) + ' km' : 'Durée : ' + fmt(R.total) + ' min (distance : ' + fmt(dKm) + ' km)'), '.')); }
+    chips.innerHTML = ''; [['time', 'Le plus rapide'], ['dist', 'Le plus court']].forEach(c => chips.append(h('button', { type: 'button', class: 'chip' + (W4.crit === c[0] ? ' on' : ''), 'aria-pressed': W4.crit === c[0] ? 'true' : 'false', onclick: () => { W4.crit = c[0]; W4.step = 99; draw(); } }, c[1])));
+    tab.innerHTML = '';
+    const rows = PLACES.map((p, i) => ({ lieu: p.n, d: last && last.dist[i] < Infinity ? fmt(last.dist[i]) : '∞', v: last && last.prev[i] != null ? PLACES[last.prev[i]].n : '-', st: last && last.done[i] ? 'fixé' : '' }));
+    tab.append(h('h3', null, 'L’algorithme de Dijkstra pas à pas'), h('p', { class: 'small' }, 'À chaque étape, on fixe le sommet non encore fixé le plus proche du départ, puis on met à jour les distances de ses voisins. Étape ' + K + ' sur ' + R.steps.length + (last ? ' : on fixe ' + PLACES[last.u].n + '.' : '.')),
+      h('div', { class: 'opts' }, h('button', { class: 'btn sm', type: 'button', onclick: () => { W4.step = Math.max(0, K - 1); draw(); } }, '← Étape précédente'), h('button', { class: 'btn sm pri', type: 'button', onclick: () => { W4.step = Math.min(R.steps.length, K + 1); draw(); } }, 'Étape suivante →'), h('button', { class: 'btn sm', type: 'button', onclick: () => { W4.step = 99; draw(); } }, 'Tout afficher')),
+      tableEl(rows, ['lieu', 'd', 'v', 'st'], { lieu: 'Lieu', d: W4.crit === 'dist' ? 'Distance depuis le départ (km)' : 'Durée depuis le départ (min)', v: 'Vient de', st: 'État' }));
+  }
+  const fromS = opt(PLACES, W4.from, v => { W4.from = v; W4.step = 99; draw(); }, 'Départ'), toS = opt(PLACES, W4.to, v => { W4.to = v; W4.step = 99; draw(); }, 'Arrivée');
+  const rush = h('input', { type: 'checkbox', checked: W4.rush, onchange: e => { W4.rush = e.target.checked; draw(); } }), ring = h('input', { type: 'checkbox', checked: W4.noRing, onchange: e => { W4.noRing = e.target.checked; W4.step = 99; draw(); } });
+  root.append(h('div', { class: 'opts' }, fromS, toS), h('div', { class: 'opts' }, chips, h('label', { class: 'fld chk' }, rush, 'Heure de pointe (routes autour du Carrefour Nord ×3)'), h('label', { class: 'fld chk' }, ring, 'Éviter la rocade')), svgBox, info, tab);
+  draw();
+}
+WORKSHOPS.push({ id: 'g4', title: 'Itinéraires', hint: 'Choisissez départ et arrivée, changez les critères et suivez l’algorithme de Dijkstra.', mount: mountW4, reset: () => { Object.assign(W4, { from: 0, to: 4, crit: 'time', rush: false, noRing: false, step: 99 }); } });
+
+/* ---------- Atelier 5 : mobilité et données de localisation ---------- */
+const PINGS = [['00:00', 'Résidence des Tilleuls (domicile)', 'dom', false], ['06:30', 'Résidence des Tilleuls (domicile)', 'dom', false], ['07:45', 'Bus de la ligne 2', 'trajet', true], ['08:10', 'Lycée Exemple', 'lycee', false], ['12:30', 'Marché couvert', 'commerce', true], ['16:45', 'Lycée Exemple', 'lycee', false], ['17:30', 'Stade municipal (mercredi, entraînement)', 'sport', false], ['19:00', 'Résidence des Tilleuls (domicile)', 'dom', false], ['22:30', 'Résidence des Tilleuls (domicile)', 'dom', false]];
+const DEDS = [['Où Sam habite', ['dom']], ['Dans quel établissement Sam étudie', ['lycee']], ['Son activité sportive du mercredi soir', ['sport']], ['Ses horaires de départ et d’arrivée', ['trajet', 'lycee']], ['Où Sam déjeune', ['commerce']]];
+const MODES = [['never', 'Jamais'], ['use', 'Seulement quand j’utilise l’application'], ['approx', 'En continu, position approximative'], ['always', 'En continu, position précise']];
+const W5 = { tab: 'trace', mode: 'always', n: 20 };
+const SAMPLES = (() => { let s = 5; const r = () => { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; return Array.from({ length: 200 }, () => { const q = r(); return q < 0.1 ? 4 + r() * 3 : q < 0.2 ? 12 + r() * 4 : 32 + (r() - 0.5) * 24; }); })();
+function mountW5(root) {
+  root.append(h('h2', null, 'Mobilité et données de localisation'));
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div');
+  const draw = () => { tabs.innerHTML = ''; [['trace', 'Traces de localisation'], ['trafic', 'Calculer le trafic']].forEach(t => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': W5.tab === t[0] ? 'true' : 'false', onclick: () => { W5.tab = t[0]; draw(); } }, t[1])));
+    body.innerHTML = ''; (W5.tab === 'trace' ? traceTab : traficTab)(body, draw); };
+  root.append(tabs, body); draw();
+}
+function traceTab(box, redraw) {
+  box.append(h('p', null, 'Sam est un personnage fictif. Son téléphone enregistre sa position pendant une journée. Choisissez quand l’application a le droit de lire la position de Sam et regardez ce qu’on peut en déduire.'));
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Autorisation de localisation' });
+  MODES.forEach(m => chips.append(h('button', { type: 'button', class: 'chip' + (W5.mode === m[0] ? ' on' : ''), 'aria-pressed': W5.mode === m[0] ? 'true' : 'false', onclick: () => { W5.mode = m[0]; redraw(); } }, m[1])));
+  const avail = PINGS.filter(p => W5.mode === 'always' || W5.mode === 'approx' ? true : W5.mode === 'use' ? p[3] : false);
+  const rows = PINGS.map(p => ({ heure: p[0], position: avail.includes(p) ? (W5.mode === 'approx' ? 'zone d’environ 1 km autour de ' + p[1].split(' (')[0] : p[1]) : 'non collectée', usage: p[3] ? 'application ouverte' : '' }));
+  box.append(chips, h('h3', null, 'Ce que l’application reçoit'), tableEl(rows, ['heure', 'position', 'usage'], { heure: 'Heure', position: 'Position enregistrée', usage: 'Contexte' }), h('h3', null, 'Ce qu’on peut en déduire'));
+  let full = 0, part = 0;
+  DEDS.forEach(d => { const has = d[1].some(c => avail.some(p => p[2] === c)); const st = !has ? 'safe' : W5.mode === 'approx' ? 'part' : 'exp'; if (st === 'exp') full++; if (st === 'part') part++;
+    box.append(h('div', { class: 'dd ' + (st === 'exp' ? 'exp' : st === 'part' ? 'prt' : 'safe') }, h('b', null, (st === 'exp' ? '⚠ Déductible : ' : st === 'part' ? '≈ Zone approximative seulement : ' : '✓ Protégé : ') + d[0]))); });
+  box.append(h('p', { class: 'score' }, full + ' information(s) précise(s) déductible(s), ' + part + ' approximative(s) sur ' + DEDS.length + '.'),
+    h('p', { class: 'small' }, 'Une étude de 2013 sur 1,5 million d’utilisateurs de téléphones portables a montré que quatre points de localisation, avec leur date, suffisaient à identifier 95 % des personnes parmi les autres : une trace de localisation est presque toujours unique.'));
+}
+function traficTab(box, redraw) {
+  box.append(h('p', null, 'Les applications de navigation estiment le trafic grâce aux ', h('b', null, 'téléphones des automobilistes'), ' : chacun envoie sa vitesse. Sur un tronçon de 1,2 km, la vitesse réelle des voitures est de 32 km/h, mais les téléphones mesurent aussi des cyclistes et des piétons. Combien de téléphones faut-il pour estimer le trafic ?'));
+  const rg = h('input', { type: 'range', min: 1, max: 200, step: 1, value: W5.n, 'aria-label': 'Nombre de téléphones' }), nv = h('b'), out = h('div');
+  const est = n => { const v = SAMPLES.slice(0, n), m = v.reduce((a, b) => a + b, 0) / n, s = v.slice().sort((a, b) => a - b), md = n % 2 ? s[n >> 1] : (s[n / 2 - 1] + s[n / 2]) / 2; return { m, md }; };
+  function upd() { W5.n = +rg.value; nv.textContent = W5.n + ' téléphone(s)'; const e = est(W5.n); out.innerHTML = '';
+    out.append(h('div', { class: 'gstats' }, [['Moyenne des vitesses', fmt(e.m) + ' km/h'], ['Médiane des vitesses', fmt(e.md) + ' km/h'], ['Écart de la moyenne avec 32 km/h', fmt(Math.abs(e.m - 32)) + ' km/h'], ['Écart de la médiane avec 32 km/h', fmt(Math.abs(e.md - 32)) + ' km/h'], ['Temps de parcours estimé (moyenne)', fmt(1.2 / e.m * 60) + ' min'], ['Temps de parcours réel', fmt(1.2 / 32 * 60) + ' min']].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, k[1])))));
+    const t = h('table', { class: 'dt' }, h('thead', null, h('tr', null, h('th', null, 'Téléphones'), h('th', null, 'Moyenne (km/h)'), h('th', null, 'Médiane (km/h)'))), h('tbody', null, [1, 5, 20, 50, 100, 200].map(n => { const q = est(n); return h('tr', null, h('td', { class: 'num' }, String(n)), h('td', { class: 'num' }, fmt(q.m)), h('td', { class: 'num' }, fmt(q.md))); })));
+    out.append(h('div', { class: 'dwrap' }, t)); }
+  rg.addEventListener('input', upd); upd();
+  box.append(h('label', { class: 'fld' }, h('span', null, 'Nombre de téléphones : ', nv), rg), out,
+    h('p', { class: 'small' }, 'Avec peu de téléphones, l’estimation est instable. Quand leur nombre augmente, elle s’approche de la vérité. La médiane résiste mieux aux piétons et aux cyclistes. Cette estimation collective est utile pour tous, mais elle repose sur la collecte de la position de chacun.'));
+}
+WORKSHOPS.push({ id: 'g5', title: 'Mobilité et vie privée', hint: 'Choisissez quand partager votre position, puis voyez comment les téléphones mesurent le trafic.', mount: mountW5, reset: () => { Object.assign(W5, { tab: 'trace', mode: 'always', n: 20 }); } });
+
+/*ACT-START*/
+const ACT = {
+  g1: {
+    title: 'Le GPS', level: 'Niveau 1 · Comprendre', time: '25 min', course: 'gps',
+    goal: 'Comprendre comment un récepteur GPS calcule sa position à partir de distances à des satellites (trilatération), et le rôle de l’horloge.',
+    steps: [
+      'Avec <b>1 balise</b>, cliquez sur le plan : combien de positions sont possibles ? Passez à <b>2 balises</b> : et maintenant ?',
+      'Avec <b>3 balises</b>, placez votre estimation au point commun des trois cercles. Regardez les écarts affichés, puis cliquez sur « Afficher la vraie position ».',
+      'Cliquez sur « Calculer la position » : le calcul retrouve-t-il la vraie position ?',
+      'Augmentez l’<b>erreur d’horloge</b> à 200 m : les cercles se coupent-ils toujours en un seul point ? Calculez la position <b>sans</b> corriger l’horloge, puis avec la case cochée.',
+      'Dans « Mesurer une distance avec le temps », réglez 67 ms : quelle distance au satellite ? Quelle erreur provoque 1 µs d’erreur d’horloge ?',
+      'Dans « Lire ce que le récepteur envoie », changez un chiffre de la trame : que dit la somme de contrôle ?'
+    ],
+    defi: { q: 'Un satellite GPS est à environ 20 000 km. Combien de temps met son signal radio pour arriver jusqu’à vous ? Pourquoi une horloge précise est-elle indispensable ?',
+      a: 'Environ 20 000 ÷ 300 000 ≈ 0,067 s, soit 67 ms. Comme la lumière parcourt environ 300 m en 1 microseconde, une horloge en avance de 1 µs fausse la distance de 300 m. Les satellites embarquent des horloges atomiques, et le récepteur corrige son propre décalage grâce à un satellite supplémentaire.' },
+    qcm: [
+      { q: 'Comment un récepteur GPS détermine-t-il sa position ?', o: ['Il mesure sa distance à plusieurs satellites dont il connaît la position', 'Il demande sa position à une antenne relais', 'Il lit une carte', 'Il capte la position d’un autre téléphone'], a: 0, w: 'C’est la trilatération : l’intersection des sphères (ou cercles) de distance.' },
+      { q: 'Dans le plan, une seule distance à une balise place l’utilisateur…', o: ['À un point précis', 'Quelque part sur un cercle autour de la balise', 'À l’intérieur de la balise', 'Nulle part'], a: 1, w: 'Tous les points à la même distance de la balise forment un cercle.' },
+      { q: 'Combien de satellites faut-il au minimum pour un calcul de position en 3D, horloge du récepteur comprise ?', o: ['1', '2', '3', '4'], a: 3, w: 'Quatre inconnues (x, y, z et l’erreur d’horloge) demandent quatre mesures.' },
+      { q: 'Le signal d’un satellite voyage à la vitesse de…', o: ['Le son (340 m/s)', 'La lumière (environ 300 000 km/s)', 'Un avion de ligne', 'Une voiture'], a: 1, w: 'C’est une onde radio : elle va à la vitesse de la lumière.' },
+      { q: 'Une erreur d’horloge de 1 microseconde donne une erreur de distance d’environ…', o: ['3 mm', '30 cm', '300 m', '300 km'], a: 2, w: '300 000 km/s × 0,000001 s = 0,3 km = 300 m.' },
+      { q: 'Que sont Galileo, GLONASS et BeiDou ?', o: ['Des applications de cartes', 'D’autres systèmes de positionnement par satellites (européen, russe et chinois)', 'Des marques de téléphone', 'Des protocoles Internet'], a: 1, w: 'Ce sont des GNSS, comme le GPS américain. Un téléphone peut en utiliser plusieurs.' },
+      { q: 'Pourquoi une trame GPS contient-elle une somme de contrôle ?', o: ['Pour la chiffrer', 'Pour détecter une erreur de transmission', 'Pour compter les satellites', 'Pour indiquer l’heure'], a: 1, w: 'Si un caractère est modifié, la somme calculée ne correspond plus à celle écrite.' }
+    ]
+  },
+  g2: {
+    title: 'Coordonnées et échelle', level: 'Niveau 1 · Repérer', time: '25 min', course: 'coordonnees',
+    goal: 'Savoir lire et écrire des coordonnées géographiques, calculer une distance à vol d’oiseau et utiliser l’échelle d’une carte.',
+    steps: [
+      'Cliquez sur la carte pour placer le point A. Notez sa latitude et sa longitude. Dans quel sens varie chacune quand on va vers le nord ? vers l’est ?',
+      'Cliquez pour placer B : comparez la distance calculée avec les coordonnées et la distance mesurée sur le plan.',
+      'Dans « Aller à des coordonnées », placez le point A en 45,0300 ; 5,0500. Où se trouve-t-il ?',
+      'Dans « L’échelle d’une carte », réglez 1/25 000 et 4 cm : quelle distance sur le terrain ? Puis 1/100 000.',
+      'Convertissez 45,1234° en degrés, minutes, secondes. Vérifiez : 1° vaut combien de minutes ?'
+    ],
+    defi: { q: 'Deux points de la carte ont presque la même latitude mais des longitudes qui diffèrent de 0,01°. Environ quelle distance les sépare ? Et pour 0,01° de latitude ?',
+      a: 'À cette latitude (45°), 0,01° de longitude font environ 790 m ; 0,01° de latitude font environ 1 110 m, soit 1,11 km. Un degré de latitude vaut partout environ 111 km, mais un degré de longitude rétrécit quand on s’éloigne de l’équateur (car les méridiens se rapprochent vers les pôles).' },
+    qcm: [
+      { q: 'La latitude mesure…', o: ['La position est-ouest', 'La position nord-sud, à partir de l’équateur', 'L’altitude', 'La distance à Paris'], a: 1, w: 'La latitude va de 0° (équateur) à 90° au nord ou au sud.' },
+      { q: 'Quel méridien sert de référence pour les longitudes ?', o: ['Celui de New York', 'Celui de Paris', 'Celui de Greenwich', 'Celui de Tokyo'], a: 2, w: 'Le méridien de Greenwich (0°) est la référence internationale.' },
+      { q: '1° équivaut à…', o: ['10′', '60′', '100′', '360′'], a: 1, w: '1° = 60 minutes, et 1′ = 60 secondes.' },
+      { q: 'Une carte à l’échelle 1/25 000 : 1 cm sur la carte représente…', o: ['25 m', '250 m', '2,5 km', '25 km'], a: 1, w: '25 000 cm = 250 m.' },
+      { q: 'Quelle carte montre le plus de détails sur un petit territoire ?', o: ['1/1 000 000', '1/100 000', '1/25 000', '1/5 000 000'], a: 2, w: 'Plus le dénominateur est petit, plus l’échelle est grande : plus de détails, moins de territoire.' },
+      { q: 'Une latitude de −30° signifie…', o: ['Un lieu au nord de l’équateur', 'Un lieu au sud de l’équateur', 'Un lieu à l’ouest de Greenwich', 'Une erreur'], a: 1, w: 'Un signe négatif correspond au sud (pour la latitude) ou à l’ouest (pour la longitude).' }
+    ]
+  },
+  g3: {
+    title: 'Cartes en couches', level: 'Niveau 2 · Analyser', time: '25 min', course: 'sig',
+    goal: 'Comprendre qu’une carte numérique est un empilement de couches de données, et le principe du géocodage.',
+    steps: [
+      'Désactivez toutes les couches puis activez-les une à une. Quelle couche donne quelle information ?',
+      'Activez « Relief (altitudes) » avec « Eau et nature » : que remarquez-vous sur les lignes de niveau ?',
+      'Activez « Services et lieux » : sous la carte, une table apparaît. Que contient chaque enregistrement ?',
+      'Dans « Trouver une adresse », cherchez « 12 rue des Écoles » : quelles coordonnées obtenez-vous ?',
+      'Cliquez à un endroit de la carte : quelle adresse la plus proche trouve-t-on (géocodage inverse) ?',
+      'Cherchez « rue du Marché » : et si l’adresse est mal écrite (« Rue du marche ») ?'
+    ],
+    defi: { q: 'Quelles couches faut-il superposer pour qu’une application dise à un piéton « le trottoir passe devant la Mairie et le Marché couvert, à 120 m de la Gare » ?',
+      a: 'Il faut au moins la couche des routes et trottoirs (pour le tracé), celle des lieux et services (Mairie, Marché, Gare, avec leurs coordonnées), et un calcul de distances à partir des coordonnées. Chaque couche est une table de données localisées : on les croise grâce à leurs coordonnées.' },
+    qcm: [
+      { q: 'Qu’est-ce qu’une couche dans un système d’information géographique ?', o: ['Une photo satellite', 'Un ensemble de données localisées d’un même type (routes, bâtiments…)', 'Un filtre de couleur', 'Un câble de réseau'], a: 1, w: 'On superpose les couches pour composer la carte.' },
+      { q: 'Que fait le géocodage ?', o: ['Il transforme une adresse en coordonnées', 'Il chiffre une carte', 'Il dessine des routes', 'Il compresse une image'], a: 0, w: 'Le géocodage associe des coordonnées à une adresse. Le géocodage inverse fait l’inverse.' },
+      { q: 'Que fait le géocodage inverse ?', o: ['Il retourne la carte', 'Il trouve l’adresse proche de coordonnées données', 'Il supprime un lieu', 'Il calcule l’échelle'], a: 1, w: 'À partir d’un point (latitude, longitude), on retrouve l’adresse la plus proche.' },
+      { q: 'OpenStreetMap est…', o: ['Une carte construite et mise à jour par des contributeurs, et dont les données sont libres', 'Une carte secrète de l’armée', 'Un logiciel payant', 'Un satellite'], a: 0, w: 'OpenStreetMap est collaboratif : des volontaires ajoutent et corrigent les données, réutilisables avec attribution.' },
+      { q: 'Dans la table des lieux, un enregistrement correspond à…', o: ['Une colonne', 'Un lieu avec ses attributs (nom, type, coordonnées)', 'Une couche entière', 'Une échelle'], a: 1, w: 'Chaque lieu est une ligne ; nom, type, latitude, longitude sont des descripteurs.' },
+      { q: 'Que représentent les lignes de niveau d’une carte de relief ?', o: ['Les routes', 'Des points de même altitude', 'Les frontières', 'Les cours d’eau'], a: 1, w: 'Chaque ligne relie des points de même altitude ; plus elles sont serrées, plus la pente est forte.' }
+    ]
+  },
+  g4: {
+    title: 'Itinéraires', level: 'Niveau 3 · Algorithmique', time: '30 min', course: 'itineraire',
+    goal: 'Comprendre qu’un itinéraire est un plus court chemin dans un graphe pondéré, et que le résultat dépend du critère et des conditions de circulation.',
+    steps: [
+      'Gardez Gare → Hôpital et choisissez « Le plus rapide ». Notez l’itinéraire et la durée.',
+      'Passez à « Le plus court » : l’itinéraire change-t-il ? Comparez la distance et la durée.',
+      'Revenez au plus rapide et cochez « Heure de pointe ». Que devient le trajet ?',
+      'Choisissez Université → Port de plaisance. Cochez « Éviter la rocade » : combien de minutes perdez-vous ?',
+      'Utilisez « Étape suivante » dans le tableau de Dijkstra. À chaque étape, quel sommet est fixé ? Comment évoluent les distances des voisins ?'
+    ],
+    defi: { q: 'Gare → Hôpital : comparez le trajet le plus rapide et le plus court (durée et distance). Que se passe-t-il à l’heure de pointe ?',
+      a: 'Le plus rapide passe par l’Université et le Carrefour Nord : 8,6 min pour 7,2 km. Le plus court passe par le Marché couvert et la Mairie : 5,85 km, mais 9,8 min, car il emprunte des rues plus lentes. À l’heure de pointe, les routes autour du Carrefour Nord sont ralenties ×3 : le meilleur trajet passe alors par la Médiathèque, le Parc et le Stade (11,7 min). Le meilleur itinéraire dépend du critère et du trafic.' },
+    qcm: [
+      { q: 'Comment représente-t-on un réseau routier pour calculer un itinéraire ?', o: ['Par un tableau de nombres sans lien', 'Par un graphe : carrefours = sommets, routes = arêtes avec un poids', 'Par une image', 'Par une liste de couleurs'], a: 1, w: 'Les arêtes portent une distance ou une durée : c’est un graphe pondéré.' },
+      { q: 'Que cherche l’algorithme de Dijkstra ?', o: ['Le chemin de poids total minimal entre deux sommets', 'Le chemin le plus joli', 'Le chemin avec le plus d’arêtes', 'Le sommet le plus connecté'], a: 0, w: 'Il calcule les plus courts chemins depuis un sommet de départ.' },
+      { q: 'À chaque étape, Dijkstra fixe…', o: ['Un sommet au hasard', 'Le sommet non fixé le plus proche du départ', 'Le dernier sommet visité', 'Le sommet le plus éloigné'], a: 1, w: 'Il choisit le sommet de plus petite distance provisoire, puis met à jour ses voisins.' },
+      { q: 'Le trajet le plus court en kilomètres est-il toujours le plus rapide ?', o: ['Oui, toujours', 'Non : les vitesses et le trafic comptent', 'Oui, sur autoroute seulement', 'Non, il est toujours plus long'], a: 1, w: 'Dans l’atelier : 5,85 km en 9,8 min contre 7,2 km en 8,6 min.' },
+      { q: 'Pourquoi un itinéraire peut-il changer à l’heure de pointe ?', o: ['Les routes changent de place', 'Les poids (durées) de certaines arêtes augmentent', 'La carte est mise à jour', 'Le GPS se trompe'], a: 1, w: 'Si une route ralentit, son poids augmente et un autre chemin devient meilleur.' },
+      { q: 'Comment une application connaît-elle le trafic en temps réel ?', o: ['Elle devine', 'Grâce aux vitesses envoyées par les téléphones des usagers et à des capteurs', 'Grâce à la météo', 'Grâce aux satellites de télévision'], a: 1, w: 'Les données de localisation et de vitesse des usagers sont agrégées.' },
+      { q: 'Éviter la rocade pour aller de l’Université au Port de plaisance…', o: ['Ne change rien', 'Allonge le trajet de 1,5 minute environ', 'Raccourcit toujours le trajet', 'Est impossible'], a: 1, w: '9,07 min avec la rocade, 10,62 min sans : environ 1,5 minute de plus.' }
+    ]
+  },
+  g5: {
+    title: 'Mobilité et vie privée', level: 'Niveau 3 · Protéger', time: '25 min', course: 'donnees',
+    goal: 'Mesurer ce que révèlent les données de localisation, et comprendre comment elles servent aussi à mesurer le trafic.',
+    steps: [
+      'Dans <b>Traces de localisation</b>, choisissez « En continu, position précise » : quelles informations sur Sam sont déductibles ?',
+      'Choisissez « Seulement quand j’utilise l’application » : que reste-t-il ? Pourquoi ?',
+      'Choisissez « En continu, position approximative » : que peut-on encore savoir ?',
+      'Choisissez « Jamais » : que devient l’application de navigation ? Que perd-on en échange de la protection ?',
+      'Passez à <b>Calculer le trafic</b> : avec 5 téléphones, puis 50, puis 200, comment évolue l’estimation de la vitesse ?',
+      'Comparez la moyenne et la médiane. Laquelle est la plus proche de 32 km/h avec 20 téléphones ?'
+    ],
+    defi: { q: 'Une application gratuite de météo demande l’accès à votre position « en continu ». Cette demande est-elle nécessaire ? Que feriez-vous ?',
+      a: 'Non : pour une météo locale, une position approximative ou « seulement quand j’utilise l’application » suffit largement. Une position précise en continu permet de déduire le domicile, l’école, les habitudes. On choisit « seulement pendant l’utilisation » ou une position approximative, voire on refuse. Le principe RGPD de minimisation s’applique : ne collecter que ce qui est nécessaire.' },
+    qcm: [
+      { q: 'Que peut révéler une trace de localisation prolongée ?', o: ['Rien de personnel', 'Domicile, lieu de travail ou d’études, habitudes, déplacements réguliers', 'Seulement la météo', 'Seulement l’heure'], a: 1, w: 'La nuit, on est généralement chez soi ; la journée, au travail ou à l’école.' },
+      { q: 'Combien de points de localisation datés suffisent à identifier 95 % des personnes (étude de 2013) ?', o: ['1', '4', '40', '4 000'], a: 1, w: 'Les trajectoires sont très uniques : quatre points suffisent le plus souvent.' },
+      { q: 'Quel réglage limite le plus la collecte pour une application de navigation ?', o: ['En continu, position précise', 'Seulement pendant l’utilisation', 'Toujours autorisée', 'En arrière-plan'], a: 1, w: 'La position n’est lue que lorsque l’application sert.' },
+      { q: 'Pourquoi plus de téléphones donnent-ils une meilleure estimation du trafic ?', o: ['Ils vont plus vite', 'Les erreurs individuelles se compensent dans la moyenne', 'Ils pèsent plus lourd', 'Les routes sont plus larges'], a: 1, w: 'Plus l’échantillon est grand, plus l’estimation s’approche de la valeur réelle.' },
+      { q: 'Pourquoi utiliser la médiane pour estimer la vitesse d’un tronçon ?', o: ['Elle est plus facile à calculer', 'Elle résiste aux valeurs extrêmes (piétons, cyclistes)', 'Elle donne toujours 32', 'Elle est interdite'], a: 1, w: 'Quelques vitesses très faibles tirent la moyenne vers le bas, pas la médiane.' },
+      { q: 'Que dit le principe de minimisation du RGPD ?', o: ['Collecter le plus de données possible', 'Ne collecter que les données nécessaires à la finalité', 'Garder les données à vie', 'Vendre les données'], a: 1, w: 'Une application n’a pas à connaître plus que ce qui lui est nécessaire.' },
+      { q: 'Quelle est la différence entre position précise et approximative ?', o: ['Aucune', 'La précise donne l’endroit exact (quelques mètres), l’approximative une zone d’environ 1 km', 'L’approximative est plus chère', 'La précise est interdite'], a: 1, w: 'Une zone plus large protège l’adresse exacte, tout en donnant une idée du quartier.' }
+    ]
+  }
+};
+/*ACT-END*/
+
+/*COURSE-START*/
+const COURSE = [];
+COURSE.push({ id: 'localisation', t: 'Se localiser, se repérer', h: `
+<p>Savoir où l’on est et comment aller ailleurs est un besoin ancien. Les technologies numériques l’ont transformé.</p>
+<h3>Quelques repères</h3>
+<table class="ctable"><thead><tr><th>Époque</th><th>Moyen</th></tr></thead><tbody>
+<tr><td>Antiquité à XVIIIe siècle</td><td>Étoiles, boussole, cartes dessinées à la main, sextant.</td></tr>
+<tr><td>Années 1960 à 1980</td><td>Premiers systèmes de navigation par satellites, d’abord militaires.</td></tr>
+<tr><td>1995</td><td>Le GPS américain devient pleinement opérationnel. Son usage civil est progressivement ouvert et de plus en plus précis.</td></tr>
+<tr><td>Années 2000</td><td>Cartes en ligne, navigateurs pour voitures, puis smartphones avec récepteur GPS.</td></tr>
+<tr><td>Depuis 2016</td><td>Galileo, le système européen, entre en service progressivement.</td></tr>
+</tbody></table>
+<h3>Usages d’aujourd’hui</h3>
+<ul>
+<li>Navigation et itinéraires (voiture, vélo, transports, marche).</li>
+<li>Services de proximité : trouver un commerce, un horaire, un covoiturage.</li>
+<li>Logistique, livraison, suivi de colis, transport.</li>
+<li>Agriculture de précision, secours, sciences (suivi d’animaux, séismes).</li>
+<li>Sport et santé : parcours, vitesse, allure.</li>
+<li>Synchronisation des horloges, car le GPS fournit aussi une heure très précise.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> La localisation par satellites, associée aux cartes numériques et aux smartphones, a donné naissance à de nombreux services. Ces services reposent sur des données de position.</div>` });
+
+COURSE.push({ id: 'gps', t: 'Le GPS : localisation par satellites', h: `
+<p>Le <b>GPS</b> (<i>Global Positioning System</i>) est un système américain de <b>positionnement par satellites</b>. Il appartient à la famille des <b>GNSS</b> (systèmes de navigation par satellites) : GPS (États-Unis), GLONASS (Russie), Galileo (Europe), BeiDou (Chine). Un téléphone peut en utiliser plusieurs.</p>
+<h3>Trois éléments</h3>
+<ul>
+<li>Les <b>satellites</b>, à environ 20 000 km d’altitude, qui émettent en continu leur position et l’heure exacte (grâce à des horloges atomiques).</li>
+<li>Le <b>segment de contrôle</b> au sol, qui surveille les satellites.</li>
+<li>Le <b>récepteur</b> (téléphone, voiture, montre), qui ne fait que recevoir : il n’envoie rien aux satellites.</li>
+</ul>
+<h3>Le principe : mesurer des distances</h3>
+<ol>
+<li>Chaque satellite envoie un message : « je suis ici et il est telle heure ».</li>
+<li>Le récepteur note l’heure d’arrivée. Le temps de trajet <i>t</i> donne la distance : <b>d = c × t</b>, avec <i>c</i> ≈ 300 000 km/s (vitesse de la lumière).</li>
+<li>Connaissant sa distance à un satellite, le récepteur sait qu’il se trouve sur une sphère autour de lui.</li>
+<li>L’intersection de plusieurs sphères donne la position : c’est la <b>trilatération</b>.</li>
+</ol>
+<p>Pour d = 20 000 km, le signal met environ 67 ms. La lumière parcourt 300 m en 1 microseconde : une erreur de 1 µs sur l’horloge donne une erreur de 300 m. Les horloges des satellites sont atomiques, ce qui est très précis, mais celle du récepteur ne l’est pas. On ajoute donc une inconnue : le décalage d’horloge du récepteur. Il y a quatre inconnues (latitude, longitude, altitude, décalage d’horloge) : il faut donc <b>au moins 4 satellites</b>.</p>
+<h3>Précision</h3>
+<ul>
+<li>Un smartphone est précis à quelques mètres en terrain dégagé.</li>
+<li>La précision diminue dans les rues étroites, en forêt et dans les bâtiments : les signaux sont masqués ou réfléchis.</li>
+<li>Des systèmes d’aide (réseaux mobiles, Wi-Fi, correction différentielle) améliorent la position, parfois jusqu’au centimètre pour les usages professionnels.</li>
+</ul>
+<h3>Les trames NMEA</h3>
+<p>Un récepteur communique souvent par phrases de texte (format NMEA), comme <code>$GPGGA,123519,4507.404,N,…*4B</code> : heure UTC, latitude, longitude, nombre de satellites, précision, altitude. Les deux derniers caractères sont une <b>somme de contrôle</b> qui permet de vérifier que la trame n’est pas altérée.</p>
+<div class="retain"><b>À retenir.</b> Un récepteur calcule sa position en mesurant sa distance à au moins 4 satellites (d = c × t). Il ne transmet rien aux satellites : c’est l’application qui peut ensuite envoyer sa position sur Internet.</div>` });
+
+COURSE.push({ id: 'coordonnees', t: 'Coordonnées géographiques', h: `
+<p>Pour désigner un point sur Terre, on utilise un système de repérage fondé sur deux angles.</p>
+<h3>Latitude et longitude</h3>
+<ul>
+<li>La <b>latitude</b> : angle nord-sud par rapport à l’<b>équateur</b>. De 0° à 90°, vers le nord (N) ou le sud (S). Les <b>parallèles</b> sont des cercles de même latitude.</li>
+<li>La <b>longitude</b> : angle est-ouest par rapport au <b>méridien de Greenwich</b>. De 0° à 180°, vers l’est (E) ou l’ouest (O). Les <b>méridiens</b> relient les pôles.</li>
+</ul>
+<p>On écrit en <b>degrés décimaux</b> (45,1234° N) ou en <b>degrés, minutes, secondes</b> (45° 7′ 24,2″ N). 1° = 60′ et 1′ = 60″. Le signe moins désigne le sud ou l’ouest.</p>
+<div class="widget" data-w="dms"></div>
+<h3>Distances</h3>
+<ul>
+<li>1° de latitude vaut environ <b>111 km</b>, partout sur Terre.</li>
+<li>1° de longitude vaut environ 111 km <b>à l’équateur</b>, mais de moins en moins vers les pôles (environ 79 km à 45° de latitude, 0 aux pôles), car les méridiens se rapprochent.</li>
+<li>La <b>distance à vol d’oiseau</b> entre deux points se calcule à partir des coordonnées (formule de la haversine, sur une sphère).</li>
+</ul>
+<h3>Altitude</h3>
+<p>La position complète comprend aussi l’<b>altitude</b>, mesurée par rapport au niveau de la mer. Elle est moins précise que la latitude et la longitude avec un GPS.</p>
+<div class="retain"><b>À retenir.</b> Latitude (nord-sud, 0° à 90°) et longitude (est-ouest, 0° à 180°) repèrent un point. 1° de latitude ≈ 111 km. 1° = 60′, 1′ = 60″.</div>` });
+
+COURSE.push({ id: 'cartes', t: 'Les cartes : échelle et représentation', h: `
+<p>Une carte représente un territoire <b>réduit</b> et <b>simplifié</b> sur un plan.</p>
+<h3>L’échelle</h3>
+<p>L’<b>échelle</b> est le rapport entre une longueur sur la carte et la longueur réelle. Une carte au <b>1/25 000</b> : 1 cm sur la carte = 25 000 cm = 250 m sur le terrain.</p>
+<ul>
+<li>Petit dénominateur (1/5 000) : <b>grande échelle</b>, peu de territoire, beaucoup de détails.</li>
+<li>Grand dénominateur (1/1 000 000) : <b>petite échelle</b>, grand territoire, peu de détails.</li>
+<li>Sur écran, l’échelle change quand on zoome : on affiche une barre d’échelle (« 500 m »).</li>
+</ul>
+<h3>Projeter la Terre à plat</h3>
+<p>La Terre est (presque) une sphère : la représenter sur un plan <b>déforme</b> forcément les surfaces, les distances ou les angles. Une <b>projection</b> est une méthode pour passer de la sphère au plan. Beaucoup de cartes en ligne utilisent une même projection (Web Mercator), qui conserve les angles et donc la forme locale des lieux, mais exagère les surfaces vers les pôles.</p>
+<h3>Deux façons de représenter l’espace</h3>
+<ul>
+<li><b>Image (raster)</b> : une grille de pixels, comme une photo aérienne ou satellite.</li>
+<li><b>Vecteur</b> : des objets géométriques (points, lignes, polygones) avec des attributs. Le dessin des routes se redessine à toute échelle et on peut interroger chaque objet.</li>
+</ul>
+<h3>Lire une carte</h3>
+<ul>
+<li>Légende : signification des couleurs et symboles.</li>
+<li>Orientation : le nord est en haut, sauf indication contraire.</li>
+<li>Lignes de niveau : elles relient des points de même altitude ; plus elles sont serrées, plus la pente est forte.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Échelle = rapport carte / terrain. Représenter une sphère sur un plan déforme toujours. Une carte numérique est vectorielle ou en images, et peut être interrogée.</div>` });
+
+COURSE.push({ id: 'sig', t: 'Cartes numériques et couches', h: `
+<p>Une carte numérique est construite avec un <b>système d’information géographique</b> (SIG) : un système qui stocke, traite et affiche des données <b>localisées</b>.</p>
+<h3>Des couches de données</h3>
+<p>Chaque <b>couche</b> regroupe des éléments du même type : routes, bâtiments, transports, cours d’eau, services, relief… On les <b>superpose</b> pour composer la carte, et chacune peut être affichée ou masquée. Chaque élément d’une couche a une <b>géométrie</b> (un point, une ligne, un polygone avec des coordonnées) et des <b>attributs</b> (nom, type, horaires…). La table d’une couche est donc une table de données comme celles de la page sur les données structurées.</p>
+<h3>Le géocodage</h3>
+<ul>
+<li><b>Géocodage</b> : transformer une adresse (« 12 rue des Écoles ») en coordonnées (latitude, longitude).</li>
+<li><b>Géocodage inverse</b> : retrouver l’adresse la plus proche de coordonnées données.</li>
+</ul>
+<p>Cela suppose une base d’adresses localisées, souvent des données ouvertes (en France, la Base adresse nationale).</p>
+<h3>Des cartes collaboratives</h3>
+<p><b>OpenStreetMap</b> (OSM) est une carte du monde créée et corrigée par des contributeurs. Les données sont libres : chacun peut les réutiliser, à condition de citer la source (licence ODbL). Beaucoup d’applications de cartes s’appuient sur OSM ou sur des données ouvertes d’institutions.</p>
+<h3>Des cartes mises à jour</h3>
+<ul>
+<li>Données des collectivités (travaux, voies cyclables).</li>
+<li>Images satellite et aériennes.</li>
+<li>Signalements des utilisateurs (fermeture, accident).</li>
+<li>Trajets des utilisateurs, qui permettent de détecter de nouvelles routes.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Une carte numérique = des couches de données localisées, chacune avec ses attributs. Le géocodage relie adresses et coordonnées. OpenStreetMap est une carte collaborative aux données libres.</div>` });
+
+COURSE.push({ id: 'itineraire', t: 'Calculer un itinéraire', h: `
+<p>Pour proposer un itinéraire, une application modélise le réseau routier par un <b>graphe pondéré</b>.</p>
+<ul>
+<li>Les <b>sommets</b> : carrefours, lieux.</li>
+<li>Les <b>arêtes</b> : tronçons de route entre deux sommets.</li>
+<li>Le <b>poids</b> d’une arête : sa longueur (km), ou mieux, sa <b>durée</b> estimée (longueur ÷ vitesse, plus le trafic).</li>
+</ul>
+<p>Chercher un itinéraire, c’est trouver, entre le départ et l’arrivée, le <b>chemin dont la somme des poids est minimale</b>.</p>
+<h3>L’algorithme de Dijkstra</h3>
+<p>Inventé en 1956 par le Néerlandais Edsger Dijkstra, il calcule les plus courts chemins depuis un sommet de départ.</p>
+<ol>
+<li>Distance de départ = 0 ; toutes les autres = ∞ (inconnue).</li>
+<li>Choisir, parmi les sommets non fixés, celui de distance la plus petite et le <b>fixer</b> (sa distance est définitive).</li>
+<li>Pour chaque voisin, regarder si passer par ce sommet donne un chemin plus court ; si oui, mettre à jour sa distance et noter d’où l’on vient.</li>
+<li>Répéter jusqu’à avoir fixé l’arrivée. On remonte ensuite les « vient de » pour reconstituer l’itinéraire.</li>
+</ol>
+<p>L’algorithme suppose que les poids sont positifs. Les applications utilisent des variantes plus rapides (comme A*) pour des cartes qui contiennent des millions de carrefours.</p>
+<h3>Plusieurs critères</h3>
+<ul>
+<li>Le plus court en distance n’est pas toujours le plus rapide.</li>
+<li>On peut ajouter des contraintes : éviter les péages, la rocade, les routes non cyclables ; préférer les transports en commun.</li>
+<li>Le poids dépend du <b>trafic</b> : l’itinéraire est recalculé en temps réel.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Réseau routier = graphe pondéré. Itinéraire = chemin de poids minimal, trouvé par Dijkstra ou une variante. Le meilleur trajet dépend du critère (distance, durée, contraintes) et du trafic.</div>` });
+
+COURSE.push({ id: 'trafic', t: 'Le trafic collecté par les usagers', h: `
+<p>Comment une application sait-elle qu’une route est embouteillée ?</p>
+<h3>Des capteurs et des usagers</h3>
+<ul>
+<li>Des <b>capteurs</b> installés par les gestionnaires de routes (boucles dans la chaussée, caméras).</li>
+<li>Les <b>téléphones des usagers</b> : chaque application de navigation envoie, de façon anonymisée ou non, sa position et sa vitesse. On parle de données <b>participatives</b>.</li>
+</ul>
+<h3>Du détail à l’ensemble</h3>
+<ol>
+<li>Chaque téléphone envoie des points (position, heure, vitesse).</li>
+<li>Le serveur rattache chaque point à un tronçon de route.</li>
+<li>Il agrège les vitesses par tronçon (moyenne ou médiane) sur les dernières minutes.</li>
+<li>Il compare à la vitesse normale pour détecter un ralentissement et recalcule les durées de parcours.</li>
+</ol>
+<p>Plus il y a d’usagers, plus l’estimation est fiable : les erreurs individuelles se compensent. La médiane résiste mieux que la moyenne aux vitesses atypiques (piétons, cyclistes, bus, arrêts).</p>
+<h3>Limites</h3>
+<ul>
+<li>Peu d’usagers sur une petite route la nuit : estimation peu fiable.</li>
+<li>Effet inverse : si beaucoup d’usagers sont dirigés vers la même route « libre », elle se congestionne à son tour.</li>
+<li>Les résultats dépendent de la qualité des données de localisation.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Le trafic est mesuré par des capteurs et par les positions et vitesses des usagers, agrégées par tronçon. Un grand nombre d’usagers rend l’estimation plus fiable, mais suppose de collecter leurs positions.</div>` });
+
+COURSE.push({ id: 'donnees', t: 'Localisation et vie privée', h: `
+<p>La position d’une personne est une <b>donnée personnelle</b>, et l’une des plus sensibles.</p>
+<h3>Ce que révèle une trace de localisation</h3>
+<ul>
+<li>Le <b>domicile</b> (où l’on est la nuit) et le <b>lieu de travail ou d’études</b> (où l’on est la journée).</li>
+<li>Les <b>habitudes</b> : horaires, sorties, activités régulières, lieux de culte, de soins, de loisirs.</li>
+<li>Les <b>relations</b> : avec qui on se trouve au même endroit.</li>
+</ul>
+<p>Une étude de 2013 sur 1,5 million d’utilisateurs de téléphones portables a montré que <b>quatre points de localisation datés</b> suffisent à identifier 95 % des personnes. Une trace « anonymisée » (sans nom) peut donc être ré-identifiée.</p>
+<h3>Qui collecte ?</h3>
+<ul>
+<li>Les applications de cartes et de navigation, mais aussi de météo, de réseaux sociaux, de jeux.</li>
+<li>L’opérateur mobile (par les antennes relais).</li>
+<li>Le système du téléphone, selon ses réglages.</li>
+<li>Les publications elles-mêmes : photos géolocalisées, « check-in », métadonnées.</li>
+</ul>
+<h3>Le cadre légal</h3>
+<p>Le <b>RGPD</b> s’applique : la collecte de la position doit avoir une <b>finalité précise</b>, le <b>consentement</b> clair de l’utilisateur, être limitée au <b>nécessaire</b> (minimisation) et ne pas durer plus que nécessaire. La <b>CNIL</b> contrôle son application.</p>
+<h3>Se protéger</h3>
+<ul>
+<li>Choisir « <b>seulement quand j’utilise l’application</b> » plutôt que « toujours ».</li>
+<li>Préférer une position <b>approximative</b> quand le service n’a pas besoin d’une adresse exacte.</li>
+<li>Désactiver la localisation des photos, et vérifier les autorisations régulièrement.</li>
+<li>Se demander : cette application a-t-elle vraiment besoin de ma position ?</li>
+</ul>
+<h3>À faire dans votre téléphone</h3>
+<p>Ouvrez les réglages de confidentialité, rubrique « Localisation » : vous voyez la liste des applications qui ont accès à votre position et le type d’accès accordé.</p>
+<div class="retain"><b>À retenir.</b> La localisation est une donnée personnelle très révélatrice : quelques points suffisent à identifier une personne. Le RGPD impose finalité, consentement et minimisation ; on choisit au mieux ses autorisations.</div>` });
+
+COURSE.push({ id: 'mobilites', t: 'Les mobilités et le numérique', h: `
+<p>Le numérique transforme la façon de se déplacer.</p>
+<h3>Nouveaux services</h3>
+<ul>
+<li><b>Information en temps réel</b> sur les transports en commun (horaires, retards).</li>
+<li><b>Mobilité partagée</b> : covoiturage, vélos et trottinettes en libre-service, autopartage.</li>
+<li><b>Billetterie et paiement</b> dématérialisés, parfois un seul compte pour plusieurs moyens de transport.</li>
+<li><b>Calcul d’itinéraires multimodaux</b> : combiner marche, vélo, bus et train.</li>
+<li><b>Véhicules de plus en plus connectés</b> : assistance à la conduite, véhicules autonomes en expérimentation.</li>
+</ul>
+<h3>Intérêts</h3>
+<ul>
+<li>Gain de temps, fluidité, accessibilité (personnes à mobilité réduite).</li>
+<li>Meilleure utilisation des véhicules et des infrastructures, possible baisse des émissions.</li>
+</ul>
+<h3>Questions à se poser</h3>
+<ul>
+<li><b>Vie privée</b> : tous ces services collectent des positions.</li>
+<li><b>Dépendance</b> : que faire sans réseau ni batterie ?</li>
+<li><b>Effets de bord</b> : une application qui détourne le trafic vers des petites rues peut gêner les riverains.</li>
+<li><b>Inégalités</b> : tout le monde n’a pas de smartphone ni de forfait.</li>
+<li><b>Environnement</b> : les services numériques consomment de l’énergie et des ressources (serveurs, satellites, appareils).</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Le numérique facilite et réorganise les déplacements, mais pose des questions de vie privée, de dépendance et d’impact. Il faut garder un regard critique.</div>` });
+
+COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
+<ul>
+<li>La ville de Valmont, ses lieux, ses adresses et les trajets de Sam sont <b>fictifs</b>. Les coordonnées sont inventées.</li>
+<li>La trilatération est en 2D avec des cercles ; le vrai GPS travaille en 3D avec des sphères, des horloges atomiques, des corrections d’effets atmosphériques et relativistes.</li>
+<li>La distance à vol d’oiseau suppose une Terre sphérique ; la Terre est un peu aplatie.</li>
+<li>Le graphe routier a 13 sommets. Dans une vraie application, il en a des centaines de millions, et l’algorithme est optimisé.</li>
+<li>Les vitesses sont constantes par type de route, et « l’heure de pointe » multiplie simplement les durées par 3 autour d’un carrefour.</li>
+<li>La simulation du trafic utilise 200 mesures fictives, avec un bruit fixe.</li>
+<li>Les déductions sur la trace de Sam sont des cas types : une vraie analyse est plus fine.</li>
+</ul>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>Altitude</dt><dd>Hauteur d’un point par rapport au niveau de la mer.</dd>
+<dt>Attribut</dt><dd>Information associée à un élément d’une couche (nom, type…).</dd>
+<dt>Couche</dt><dd>Ensemble de données localisées du même type dans un SIG.</dd>
+<dt>Dijkstra (algorithme de)</dt><dd>Algorithme de calcul du plus court chemin dans un graphe pondéré.</dd>
+<dt>Échelle</dt><dd>Rapport entre une longueur sur la carte et la longueur réelle.</dd>
+<dt>Géocodage</dt><dd>Transformation d’une adresse en coordonnées.</dd>
+<dt>GNSS</dt><dd>Système de positionnement par satellites (GPS, Galileo, GLONASS, BeiDou).</dd>
+<dt>GPS</dt><dd>Système de positionnement par satellites américain.</dd>
+<dt>Graphe pondéré</dt><dd>Graphe dont les arêtes portent un nombre (distance, durée).</dd>
+<dt>Latitude</dt><dd>Angle nord-sud par rapport à l’équateur.</dd>
+<dt>Longitude</dt><dd>Angle est-ouest par rapport au méridien de Greenwich.</dd>
+<dt>NMEA</dt><dd>Format de messages texte envoyés par un récepteur GPS.</dd>
+<dt>OpenStreetMap</dt><dd>Carte du monde collaborative aux données libres.</dd>
+<dt>Projection</dt><dd>Méthode pour représenter la sphère terrestre sur un plan.</dd>
+<dt>Raster</dt><dd>Image formée de pixels.</dd>
+<dt>RGPD</dt><dd>Règlement européen sur la protection des données personnelles.</dd>
+<dt>SIG</dt><dd>Système d’information géographique.</dd>
+<dt>Trilatération</dt><dd>Calcul d’une position à partir de distances à des points connus.</dd>
+<dt>Vecteur</dt><dd>Représentation par points, lignes et polygones avec attributs.</dd>
+</dl>` });
+/*COURSE-END*/
+
+/* ---------- interface ---------- */
+const UI = { cur: 'g1' };
+const AS = { key: 'g1', tab: 'steps', open: false, st: lsGet(KEYS.act, {}), arm: null };
+const CS = { open: false, id: 'web' };
+function actSave() { lsSet(KEYS.act, AS.st); }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function wsById(id) { return WORKSHOPS.find(w => w.id === id) || WORKSHOPS[0]; }
+
+function renderSeg() {
+  const seg = $('#wsSeg'); seg.innerHTML = '';
+  WORKSHOPS.forEach((w, i) => seg.append(h('button', { type: 'button', role: 'tab', 'aria-pressed': w.id === UI.cur ? 'true' : 'false', 'aria-selected': w.id === UI.cur ? 'true' : 'false', onclick: () => gotoWs(w.id) }, (i + 1) + '. ' + w.title)));
+}
+function mountWs() {
+  const w = wsById(UI.cur), root = $('#ws');
+  $('#hint').textContent = w.hint; root.innerHTML = '';
+  w.mount(root);
+  const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
+}
+function gotoWs(id) {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  UI.cur = id; AS.key = id; AS.tab = 'steps';
+  renderSeg(); mountWs(); renderAct();
+}
+
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
+  if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: s }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: a.defi.q }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: a.defi.a }))));
+    if (a.course) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(a.course) }, 'Voir le cours : ' + courseSection(a.course).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Votre travail sera effacé'; AS.arm = setTimeout(() => { b.textContent = 'Recommencer l’atelier'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; wsById(UI.cur).reset(); mountWs(); renderAct(); } }, 'Recommencer l’atelier')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open; renderAct();
+}
+$('#bAct').addEventListener('click', actToggle);
+
+/* ---------- cours ---------- */
+function widgetDms(root) {
+  const inp = h('input', { type: 'text', value: '45,1234', 'aria-label': 'Degrés décimaux', autocomplete: 'off', class: 'mono' }), out = h('p', { class: 'score' });
+  const upd = () => { const v = parseFloat(inp.value.replace(',', '.')); out.textContent = isNaN(v) ? 'Entrez un nombre.' : fmt(v) + ' ° = ' + decToDms(v, '', '-').replace(/ $/, '').replace(/ -$/, '').replace(/^/, v < 0 ? '- ' : ''); };
+  inp.addEventListener('input', upd); upd();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Degrés décimaux (positif = nord ou est)'), inp), out);
+}
+
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const go = id => { CS.id = id; renderCourse(); };
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => go(s.id) }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => go(e.target.value) }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+  art.querySelectorAll('[data-w]').forEach(w => { if (w.dataset.w === 'dms') widgetDms(w); });
+  art.append(h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => go(COURSE[idx - 1].id) }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => go(COURSE[idx + 1].id) }, COURSE[idx + 1].t + ' →') : h('span')));
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : notions de géolocalisation'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+  const sc = box.querySelector('.cwrap'); if (sc) sc.scrollTop = 0; box.scrollTop = 0;
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+
+/* ---------- aide ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre la localisation, la cartographie et la mobilité (SNT, seconde). La ville de Valmont, ses lieux et ses personnages sont fictifs.</p>' +
+    '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction.</li><li>Le bouton <b>Cours</b> détaille toutes les notions.</li></ul>' +
+    '<h3>Vos données</h3><p>Les réponses au QCM sont mémorisées dans ce navigateur uniquement.</p>' }));
+});
+
+/* ---------- démarrage ---------- */
+(function init() {
+    AS.open = !isSmall();
+  renderSeg(); mountWs(); renderAct(); renderCourse();
+})();
+
+</script>
+
+</body></html>

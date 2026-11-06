@@ -228,14 +228,34 @@ function renderWs(){
 
 /* ================= Panneau activité ================= */
 function score(){return QCM.filter((q,i)=>st.answers[i]===q.a).length;}
+/* Mise à jour légère sans reconstruire le panneau : le défilement est conservé. */
+function updateActMeta(){
+  const n=Object.keys(st.answers).length, s=score();
+  const sc=$('#actScore');if(sc)sc.textContent='Quiz : '+s+' / '+QCM.length;
+  const ct=$('#actCount');if(ct)ct.textContent=n+' réponse(s) sur '+QCM.length+(st.unlocked?' · quiz réussi 🎉':'');
+  const b=$('#actBar');if(b)b.style.width=Math.round(s/QCM.length*100)+'%';
+}
+/* Affiche/montre la remarque sous une question, sans re-render global. */
+function showWhy(i,fs,q){
+  if(st.unlocked)return;
+  let p=fs.querySelector('.why');
+  if(!p){p=h('p',{class:'why'});fs.append(p);}
+  p.textContent=q.w;
+}
+/* Re-render qui restaure la position de défilement du panneau. */
+function renderActKeepScroll(){
+  const b=$('#act .pbody'),y=b?b.scrollTop:0;
+  renderAct();
+  const nb=$('#act .pbody');if(nb)nb.scrollTop=y;
+}
 function renderAct(){
   const box=$('#act');box.innerHTML='';
   const close=h('button',{class:'btn sm',type:'button',onclick:()=>{box.hidden=true;}},'Fermer');
-  box.append(h('div',{class:'phead'},h('b',null,'Activité'),h('span',{class:'sub'},'Quiz : '+score()+' / '+QCM.length),close));
-  const bar=h('div',{class:'progbar'},h('i',{style:'width:'+Math.round(score()/QCM.length*100)+'%'}));
+  box.append(h('div',{class:'phead'},h('b',null,'Activité'),h('span',{class:'sub',id:'actScore'},'Quiz : '+score()+' / '+QCM.length),close));
+  const bar=h('div',{class:'progbar'},h('i',{id:'actBar',style:'width:'+Math.round(score()/QCM.length*100)+'%'}));
   const body=h('div',{class:'pbody'});
   const done=Object.keys(st.answers).length;
-  body.append(h('p',{class:'small'},done+' réponse(s) sur '+QCM.length+(st.unlocked?' · quiz réussi 🎉':'')));
+  body.append(h('p',{class:'small',id:'actCount'},done+' réponse(s) sur '+QCM.length+(st.unlocked?' · quiz réussi 🎉':'')));
   body.append(bar);
   QCM.forEach((q,i)=>{
     const sel=st.answers[i];
@@ -243,7 +263,7 @@ function renderAct(){
     q.o.forEach((o,j)=>{
       const good=st.unlocked&&j===q.a,bad=sel===j&&j!==q.a;
       const inp=h('input',{type:'radio',name:'q'+i,checked:sel===j,disabled:st.unlocked});
-      inp.addEventListener('change',()=>{st.answers[i]=j;save();renderAct();});
+      inp.addEventListener('change',()=>{st.answers[i]=j;save();updateActMeta();showWhy(i,fs,q);});
       fs.append(h('label',{class:'opt'+(good?' good':'')+(bad?' bad':'')},inp,h('span',null,o+(good?'  ✓':'')+(bad?'  ✗':''))));
     });
     if(st.unlocked||sel!=null)body.appendChild(fs),fs.append(h('p',{class:'why'},(sel==null&&!st.unlocked?'Sans réponse. ':'')+(st.unlocked&&sel===q.a?'Exact. ':st.unlocked?'Non. ':'')+q.w));
@@ -253,8 +273,8 @@ function renderAct(){
   if(!st.unlocked){
     row.append(h('button',{class:'btn pri',type:'button',onclick:()=>{
       if(Object.keys(st.answers).length<QCM.length){toast('Réponds d\'abord à toutes les questions !');return;}
-      if(score()===QCM.length){st.unlocked=true;save();renderAct();renderWs();$('#liveTag').hidden=false;toast('🏆 Arène débloquée !');}
-      else{renderAct();toast('Score : '+score()+' / '+QCM.length+'. Les erreurs sont marquées : corrige-les !');}
+      if(score()===QCM.length){st.unlocked=true;save();renderActKeepScroll();renderWs();$('#liveTag').hidden=false;toast('🏆 Arène débloquée !');}
+      else{renderActKeepScroll();toast('Score : '+score()+' / '+QCM.length+'. Les erreurs sont marquées : corrige-les !');}
     }},'✔ Valider mes réponses'));
   }
   row.append(h('button',{class:'btn',type:'button',onclick:()=>{st.answers={};st.unlocked=false;save();$('#liveTag').hidden=true;renderAct();renderWs();}},'Recommencer'));

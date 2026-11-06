@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Snake Arena : bataille de serpents en ligne — Activité SNT seconde</title>
+<meta name="description" content="Jeu en ligne Snake Arena : fais grandir ton serpent, coupe la route des autres et deviens le plus long ! Activité interactive SNT pour comprendre le jeu en réseau (P2P, WebRTC).">
+<link rel="canonical" href="https://siicpgeamansur.github.io/SNT/snake_arena.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Snake Arena — Jeu en ligne pour la SNT">
+<meta property="og:description" content="Affronte tes camarades dans l'arène aux serpents et découvre le fonctionnement d'un jeu en ligne.">
+<meta property="og:url" content="https://siicpgeamansur.github.io/SNT/snake_arena.html">
+<meta property="og:locale" content="fr_FR">
+<style>
+:root{color-scheme:dark;--bg:#070a14;--panel:#101728;--line:#1e2d4a;--cyan:#00f0ff;--green:#00ff88;--red:#ff3366;--gold:#ffcc00;--text:#eaf1ff;--muted:#8ca2cc}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at center,#121d33,#070a14 70%);color:var(--text);font:15px system-ui,Segoe UI,sans-serif}
+main{max-width:1150px;margin:auto;padding:20px}
+header{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:15px}
+h1{font-size:clamp(22px,3.5vw,32px);margin:0;letter-spacing:1px}h1 span{color:var(--green);text-shadow:0 0 10px rgba(0,255,136,.4)}
+.tag{color:var(--green);border:1px solid #1a4d36;background:#0d261b;border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600}
+.layout{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 20px 40px rgba(0,0,0,.5)}
+canvas{display:block;width:100%;aspect-ratio:16/9;background:#03050a;border-radius:12px;border:2px solid var(--line);box-shadow:inset 0 0 20px rgba(0,0,0,.8)}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+button,input{font:inherit;border-radius:10px;border:1px solid var(--line);padding:11px;background:#0a101f;color:var(--text)}
+button{cursor:pointer;font-weight:650;transition:all .2s}
+button:hover{border-color:var(--green);background:#13203c}
+button.primary{background:linear-gradient(135deg,#0d6b3a,#0f8a4a);border-color:#00ff88;box-shadow:0 4px 12px rgba(0,255,136,.25)}
+button:disabled{opacity:.4;cursor:not-allowed}
+input{width:100%;min-width:0;outline:none}input:focus{border-color:var(--green)}
+label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1;min-width:0}
+.small{font-size:12px;color:var(--muted);line-height:1.5}
+.status{padding:12px;border-radius:10px;background:#070b14;border:1px solid #1a2740;margin-top:12px;min-height:46px;font-size:13px}
+.good{color:var(--green);border-color:#1a4d36;background:#0a1a12}
+.bad{color:var(--red);border-color:#4d1a26;background:#1a0a0f}
+.players{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.player{border:1px solid var(--line);background:#0a101f;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:500}
+.kbd{display:inline-block;border:1px solid #324770;background:#131c31;border-radius:5px;padding:2px 6px;color:#fff;font-family:monospace;font-size:12px}
+.section{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.section h2{font-size:15px;margin:0 0 8px;color:var(--green)}
+.footer{margin-top:20px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}main{padding:10px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <h1>🐍 SNAKE <span>ARENA</span></h1>
+  <span class="tag">MODE SERPENTS SNT · 2 À 8 JOUEURS</span>
+</header>
+
+<div class="layout">
+  <section class="panel">
+    <canvas id="game" width="640" height="360" aria-label="Arène des serpents"></canvas>
+    <div class="controls">
+      <button id="start" class="primary">▶ Jouer / Reprendre</button>
+      <button id="stop">⏸ Pause</button>
+      <button id="reset">↻ Nouvelle partie</button>
+    </div>
+    <p class="small" style="margin-top:12px;">
+      Diriger : <span class="kbd">Z</span> <span class="kbd">Q</span> <span class="kbd">S</span> <span class="kbd">D</span> (ou flèches <span class="kbd">←</span> <span class="kbd">↑</span> <span class="kbd">↓</span> <span class="kbd">→</span>)
+      · Mange les 🍎 pour grandir · Ne te mords pas, ne cogne pas un mur, et coupe la route des autres !
+    </p>
+    <div class="status" id="gameStatus">Bienvenue dans l'arène ! En solo, fais le plus long serpent possible.</div>
+  </section>
+
+  <aside class="panel">
+    <h2 style="margin-top:0">🐍 Gestion de l'arène</h2>
+    <label for="nick">Ton Pseudo</label>
+    <input id="nick" maxlength="16" placeholder="Ex. Serpentino" value="Joueur">
+
+    <div class="row" style="margin-top:12px;">
+      <button id="create" class="primary">Créer une salle</button>
+      <button id="join">Rejoindre</button>
+    </div>
+
+    <label for="room" style="margin-top:12px;">Code de la Salle (généré par l'hôte)</label>
+    <input id="room" placeholder="Colle le code ici">
+
+    <div class="status" id="netStatus">Statut : Non connecté au réseau.</div>
+
+    <div class="section">
+      <h2>📏 Longueurs (<span id="count">1</span> serpent(s))</h2>
+      <div id="players" class="players"></div>
+      <p class="small" id="scoreLine" style="margin-top:10px;">Ton serpent : 3 segments · 0 🍎</p>
+    </div>
+  </aside>
+</div>
+
+<div class="footer">Snake Arena · Architecture PeerJS WebRTC P2P · Conçu pour SNT</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+(()=> {
+"use strict";
+const $=id=>document.getElementById(id), canvas=$("game"), ctx=canvas.getContext("2d");
+const W=canvas.width, H=canvas.height;
+
+/* ---- grille : 32 x 18 cases, bordures en dur, quelques piliers ---- */
+const GW=32, GH=18, TS=20, OX=(W-GW*TS)/2, OY=(H-GH*TS)/2;
+const PILLARS=[[7,4],[24,4],[7,13],[24,13],[15,8],[16,9],[15,9],[16,8]].map(([x,y])=>({x,y}));
+const isWall=(x,y)=>x<0||y<0||x>=GW||y>=GH||PILLARS.some(p=>p.x===x&&p.y===y);
+const inBody=(body,x,y,skipHead)=>body.some((s,i)=>(!skipHead||i>0)&&s.x===x&&s.y===y);
+
+const palette=["#00f0ff","#ff3366","#ffcc00","#b866ff","#ff8844","#66ccff","#00ff88","#ff66b8"];
+const colorOf=id=>{let n=0;for(const c of String(id))n=(n*36+(parseInt(c,36)||0))%997;return palette[n%palette.length];};
+const SPAWNS=[[2,2],[GW-3,2],[2,GH-3],[GW-3,GH-3],[2,GH/2|0],[GW-3,GH/2|0],[GW/2|0,2],[GW/2|0,GH-3]];
+const DIRS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+const opposite={up:"down",down:"up",left:"right",right:"left"};
+
+let me={body:null,dir:"right",pending:"right",apples:0,deadFlash:0};
+let foods=[], running=false, tickAcc=0, TICK=0.13; /* vitesse : une case toutes les 130 ms */
+let netMode=false, peer=null, host=false, lastSend=0;
+let connections=new Map(), remote=new Map();
+let best=3;
+
+function say(id,msg,cls=""){ $(id).innerHTML=msg; $(id).className="status "+cls; }
+function setGameMsg(msg){ say("gameStatus", msg); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+/* ---- nourriture : cases libres loin des serpents ---- */
+function allBodies(){
+  const cells=new Set();
+  const add=b=>{ if(b) for(const s of b) cells.add(s.x+","+s.y); };
+  add(me.body);
+  for(const p of remote.values()) add(p.body);
+  for(const f of foods) cells.add(f.x+","+f.y);
+  return cells;
+}
+function spawnFood(){
+  const occupied=allBodies();
+  for(let t=0;t<500;t++){
+    const x=1+Math.floor(Math.random()*(GW-2)), y=1+Math.floor(Math.random()*(GH-2));
+    if(!isWall(x,y)&&!occupied.has(x+","+y)){ foods.push({x,y}); return; }
+  }
+}
+function newFoods(n){ foods=[]; for(let i=0;i<n;i++) spawnFood(); }
+
+function snakeLen(){ return me.body?me.body.length:0; }
+
+/* ---- dessin ---- */
+function cell(x,y){ return [OX+x*TS, OY+y*TS]; }
+function draw(t){
+  ctx.fillStyle="#03050a"; ctx.fillRect(0,0,W,H);
+  /* grille */
+  ctx.strokeStyle="rgba(30,45,74,.3)"; ctx.lineWidth=1;
+  for(let x=0;x<=GW;x++){ctx.beginPath();ctx.moveTo(OX+x*TS,OY);ctx.lineTo(OX+x*TS,OY+GH*TS);ctx.stroke();}
+  for(let y=0;y<=GH;y++){ctx.beginPath();ctx.moveTo(OX,OY+y*TS);ctx.lineTo(OX+GW*TS,OY+y*TS);ctx.stroke();}
+  /* murs + piliers */
+  ctx.fillStyle="#1e2d4a";
+  ctx.fillRect(OX-4,OY-4,GW*TS+8,4);ctx.fillRect(OX-4,OY+GH*TS,GW*TS+8,4);
+  ctx.fillRect(OX-4,OY,4,GH*TS);ctx.fillRect(OX+GW*TS,OY,4,GH*TS);
+  for(const p of PILLARS){ const[px,py]=cell(p.x,p.y); ctx.fillStyle="#1e2d4a"; ctx.fillRect(px+1,py+1,TS-2,TS-2); ctx.fillStyle="rgba(0,240,255,.08)"; ctx.fillRect(px+1,py+1,TS-2,3); }
+  /* pommes */
+  for(const f of foods){
+    const[fx,fy]=cell(f.x,f.y), bob=Math.sin(t/300+f.x)*2;
+    ctx.font=(TS-2)+"px system-ui"; ctx.textAlign="center";
+    ctx.fillText("🍎",fx+TS/2,fy+TS-4+bob);
+    ctx.strokeStyle="rgba(255,51,102,.25)";ctx.beginPath();ctx.arc(fx+TS/2,fy+TS/2+bob,11,0,7);ctx.stroke();
+  }
+  /* serpents distants */
+  for(const [id,p] of remote){
+    if(!p.body)continue;
+    const col=colorOf(id);
+    drawSnake(p.body,col,p.body.length);
+    const[hx,hy]=cell(p.body[0].x,p.body[0].y);
+    ctx.fillStyle="#fff";ctx.font="bold 10px system-ui";ctx.textAlign="center";
+    ctx.fillText(String(p.name||"?").slice(0,10),hx+TS/2,hy-3);
+  }
+  /* mon serpent */
+  if(me.body){
+    drawSnake(me.body, host||!netMode?"#00ff88":"#00f0ff", snakeLen());
+    if(me.deadFlash>0){ me.deadFlash-=.05; ctx.fillStyle=`rgba(255,51,102,${me.deadFlash*.4})`; ctx.fillRect(0,0,W,H); }
+  }
+  /* HUD */
+  ctx.fillStyle="#eaf1ff";ctx.font="bold 15px system-ui";ctx.textAlign="left";
+  ctx.fillText("🍎 "+me.apples+" · 🐍 "+snakeLen(),14,26);
+  ctx.fillText(!netMode?("⭐ Record : "+best):(host?"🌐 HÔTE · "+(remote.size+1)+" serpents":"🌐 ARÈNE EN LIGNE"),14,48);
+}
+function drawSnake(body,col,len){
+  for(let i=body.length-1;i>=0;i--){
+    const[x,y]=cell(body[i].x,body[i].y);
+    const head=i===0, fade=1-i/(body.length+4);
+    ctx.fillStyle=head?col:col+Math.round(fade*200+55).toString(16).padStart(2,"0");
+    if(head){
+      ctx.shadowColor=col;ctx.shadowBlur=8;
+      ctx.fillRect(x+1,y+1,TS-2,TS-2);
+      ctx.shadowBlur=0;
+      /* yeux */
+      ctx.fillStyle="#03050a";
+      const d=DIRS[me.dir]||[1,0];
+      ctx.fillRect(x+TS/2-4+d[0]*3,y+TS/2-4+d[1]*3,3,3);
+      ctx.fillRect(x+TS/2+1+d[0]*3,y+TS/2+1+d[1]*3,3,3);
+    }else{
+      ctx.globalAlpha=.35+.6*fade;
+      ctx.fillRect(x+2,y+2,TS-4,TS-4);
+      ctx.globalAlpha=1;
+    }
+  }
+}
+
+/* ---- logique : un « tick » = un déplacement de case ---- */
+function tick(){
+  if(!me.body)return;
+  /* direction demandée (pas de demi-tour) */
+  if(me.pending!==opposite[me.dir]&&DIRS[me.pending])me.dir=me.pending;
+  const [dx,dy]=DIRS[me.dir];
+  const head={x:me.body[0].x+dx,y:me.body[0].y+dy};
+  /* collisions murs / soi */
+  if(isWall(head.x,head.y)||inBody(me.body,head.x,head.y,true)){ crash(); return; }
+  /* collisions serpents distants */
+  for(const p of remote.values()){
+    if(p.body&&inBody(p.body,head.x,head.y,false)){ crash(); return; }
+  }
+  me.body.unshift(head);
+  /* pomme ? */
+  const fi=foods.findIndex(f=>f.x===head.x&&f.y===head.y);
+  if(fi>=0){
+    foods.splice(fi,1); spawnFood();
+    me.apples++;
+    if(netMode&&host)broadcast({type:"foods",foods:[...foods]});
+    if(netMode&&!host)sendHost({type:"foodsAsk"});
+    $("scoreLine").textContent="Ton serpent : "+snakeLen()+" segments · "+me.apples+" 🍎";
+    updateRoster();
+  }else{
+    me.body.pop();
+  }
+}
+function crash(){
+  me.deadFlash=1;
+  setGameMsg("💥 Aïe ! Tu repars du départ. Longueur atteinte : "+snakeLen()+".");
+  respawn();
+  if(netMode&&host)broadcast({type:"sync",foods:[...foods]});
+  updateRoster();
+}
+function respawn(){
+  const sp=SPAWNS[(Math.random()*SPAWNS.length)|0];
+  me.body=[{x:sp[0],y:sp[1]},{x:sp[0]-1,y:sp[1]},{x:sp[0]-2,y:sp[1]}];
+  me.dir=me.pending="right";
+  me.apples=0;
+  $("scoreLine").textContent="Ton serpent : 3 segments · 0 🍎";
+}
+
+/* ---- réseau : même architecture que Mini LAN FPS ---- */
+function newPeer(){
+  return new Peer(undefined,{config:{iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:global.stun.twilio.com:3478'}
+  ]}});
+}
+function sendHost(msg){ if(host){onHostMessage(peer.id,msg);return;} const c=connections.values().next().value; if(c&&c.open)c.send(msg); }
+function broadcast(msg){ for(const c of connections.values()) if(c.open) c.send(msg); }
+
+function connectConn(conn){
+  conn.on("open",()=>{
+    connections.set(conn.peer,conn);
+    conn.send({type:"welcome",name:($("nick").value||"Joueur").slice(0,16),body:me.body,foods:[...foods]});
+    updateRoster();
+  });
+  conn.on("data",m=>onMessage(conn,m));
+  conn.on("close",()=>{connections.delete(conn.peer);remote.delete(conn.peer);updateRoster();});
+  conn.on("error",err=>say("netStatus","Erreur connexion : "+escapeHtml(err.message||err.type),"bad"));
+}
+function onHostMessage(from,msg){
+  if(!host)return;
+  const p=remote.get(from)||{};
+  if(msg.type==="welcome"||msg.type==="hello"){
+    p.name=String(msg.name||"Joueur").slice(0,16);
+    if(msg.body)p.body=msg.body;
+    remote.set(from,p);
+    updateRoster();
+    broadcast({type:"roster",players:[...remote.entries()].map(([id,q])=>({id,name:q.name}))});
+  }
+  if(msg.type==="state"){ p.body=msg.body; p.name=msg.name; }
+  if(msg.type==="foodsAsk"){
+    broadcast({type:"foods",foods:[...foods]});
+    const c=connections.get(from); if(c&&c.open)c.send({type:"foods",foods:[...foods]});
+  }
+}
+function onMessage(conn,msg){
+  if(host){onHostMessage(conn.peer,msg);return;}
+  if(msg.type==="welcome"){
+    if(msg.foods)foods=msg.foods;
+    if(msg.players){remote=new Map(msg.players.filter(q=>q.id!==peer.id).map(q=>[q.id,q]));}
+    updateRoster();
+  }
+  if(msg.type==="foods"){foods=msg.foods;}
+  if(msg.type==="roster"){remote=new Map(msg.players.filter(q=>q.id!==peer.id).map(q=>[q.id,q]));updateRoster();}
+  if(msg.type==="state"){
+    let p=remote.get(msg.id)||{name:msg.name};
+    p.body=msg.body; p.name=msg.name;
+    remote.set(msg.id,p);
+  }
+}
+
+function updateRoster(){
+  let list=[{name:($("nick").value||"Moi")+(host?" (hôte)":""),len:snakeLen(),a:me.apples}];
+  for(const [id,p] of remote) list.push({name:p.name||"?",len:p.body?p.body.length:3,a:p.apples||0});
+  list.sort((a,b)=>b.len-a.len);
+  $("count").textContent=list.length;
+  $("players").innerHTML=list.map(p=>`<span class="player">${escapeHtml(p.name)} · <b>🐍${p.len}</b>${p.a?" · 🍎"+p.a:""}</span>`).join("");
+}
+
+/* ---- boucle : déplacement par ticks, dessin à chaque frame ---- */
+function frame(t){
+  if(!frame.last)frame.last=t;
+  const dt=Math.min(.1,(t-frame.last)/1000);frame.last=t;
+  if(running){
+    tickAcc+=dt;
+    while(tickAcc>=TICK){ tickAcc-=TICK; tick(); }
+    if(netMode&&peer&&t-lastSend>110){
+      lastSend=t;
+      const st={type:"state",id:peer?peer.id:"host",name:($("nick").value||"Joueur").slice(0,16),body:me.body};
+      if(host)broadcast(st);else sendHost(st);
+    }
+    if(!netMode&&snakeLen()>best){best=snakeLen();}
+  }
+  draw(t);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+/* ---- clavier ---- */
+const KEYMAP={z:"up",w:"up",arrowup:"up",s:"down",arrowdown:"down",q:"left",a:"left",arrowleft:"left",d:"right",arrowright:"right"};
+window.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  const k=e.key.toLowerCase(), d=KEYMAP[k];
+  if(d){ e.preventDefault(); if(d!==opposite[me.dir]) me.pending=d; }
+});
+window.addEventListener("keyup",e=>{});
+
+/* ---- boutons ---- */
+$("start").onclick=()=>{ running=true; setGameMsg("🐍 La chasse aux pommes est ouverte !"); };
+$("stop").onclick=()=>{ running=false; setGameMsg("Partie en pause."); };
+$("reset").onclick=startRound;
+function startRound(){
+  respawn(); newFoods(4); running=true; tickAcc=0;
+  if(netMode&&host)broadcast({type:"foods",foods:[...foods]});
+  setGameMsg(netMode?"🐍 Nouvelle arène : sois le plus long !":"🐍 Objectif : battre ton record ("+best+" segments) !");
+  updateRoster();
+}
+
+$("create").onclick=()=>{
+  if(typeof Peer==="undefined"){say("netStatus","Mode réseau indisponible ici (aperçu hors ligne). En ligne sur GitHub Pages, ça fonctionne !","bad");return;}
+  if(peer)return;
+  say("netStatus","Création de l'arène...");
+  host=true;netMode=true;running=true;
+  peer=newPeer();
+  peer.on("open",id=>{
+    $("room").value=id;
+    say("netStatus","Arène créée ! Code à copier : <b style='color:var(--green)'>"+escapeHtml(id)+"</b>","good");
+    startRound();
+  });
+  peer.on("connection",connectConn);
+  peer.on("error",err=>say("netStatus","Erreur : "+escapeHtml(err.type||err.message),"bad"));
+};
+$("join").onclick=()=>{
+  if(typeof Peer==="undefined"){say("netStatus","Mode réseau indisponible ici (aperçu hors ligne).","bad");return;}
+  const id=$("room").value.trim();
+  if(!id){say("netStatus","Colle d'abord le code de la salle.","bad");return;}
+  if(peer)return;
+  host=false;
+  say("netStatus","Connexion à l'arène...");
+  peer=newPeer();
+  peer.on("open",()=>{
+    const c=peer.connect(id,{reliable:true});
+    connectConn(c);
+    c.on("open",()=>{
+      say("netStatus","Connecté à l'arène ! Bonne chance.","good");
+      netMode=true;running=true;
+      respawn();
+      updateRoster();
+    });
+    c.on("error",()=>say("netStatus","Impossible de rejoindre. Vérifie le code.","bad"));
+  });
+  peer.on("error",err=>say("netStatus","Erreur : "+escapeHtml(err.type||err.message),"bad"));
+};
+
+respawn();newFoods(4);updateRoster();draw(0);
+})();
+</script>
+</body>
+</html>

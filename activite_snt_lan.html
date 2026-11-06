@@ -284,7 +284,12 @@ function renderAct(){
   }
   row.append(h('button',{class:'btn',type:'button',onclick:()=>{st.answers={};st.unlocked=false;save();$('#liveTag').hidden=true;renderAct();renderWs();}},'Recommencer'));
   body.append(row);
-  if(st.unlocked)body.append(h('div',{class:'retain'},h('b',null,'Bravo ! '),h('a',{href:'mini_lan_fps.html'},'Mini LAN FPS'),' · ',h('a',{href:'treasure_rush.html'},'Treasure Rush')));
+if(st.unlocked)body.append(h('div',{class:'retain'},
+  h('b',null,'Bravo ! '),
+  h('a',{href:'mini_lan_fps.html'},'Mini LAN FPS'),' · ',
+  h('a',{href:'treasure_rush.html'},'Treasure Rush'),' · ',
+  h('a',{href:'snake_arena.html'},'Snake Arena')
+));
   box.append(body);
 }
 

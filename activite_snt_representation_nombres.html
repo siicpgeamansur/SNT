@@ -19,7 +19,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn.sm{padding:3px 8px;font-size:12px}
 :is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);max-width:100%;overflow-x:auto}
-.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
 .work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
@@ -143,7 +143,7 @@ fieldset.q legend{font-weight:600;padding:0 4px}
       <button class="btn" id="bHelp" type="button">Aide</button>
     </div>
   </div></header>
-  <div class="band"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <div class="band" id="modes"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
   <main class="inner work" id="work">
     <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
     <aside id="act" hidden aria-label="Activité"></aside>
@@ -587,7 +587,7 @@ const ACT = {
       { q: 'Le masque d’un /24 est :', o: ['255.0.0.0', '255.255.0.0', '255.255.255.0', '0.0.0.255'], a: 2, w: '24 bits à 1 : trois octets pleins.' },
       { q: '192.168.10.25 /24 : adresse réseau ?', o: ['192.168.10.25', '192.168.10.0', '192.168.0.0', '192.0.0.0'], a: 1, w: 'Le dernier octet (partie machine) est mis à 0 par le masque.' },
       { q: 'Le broadcast de 192.168.10.0 /24 est :', o: ['192.168.10.0', '192.168.10.1', '192.168.10.254', '192.168.10.255'], a: 3, w: 'Tous les bits machine à 1 : ...10.255.' },
-      { q: 'Combien d’hôtes utilisables dans un /24 ?', o: ['256', '255', '254', '24'], a: 2, w: '2⁸ − 2 = 254 : on retire l’adresse réseau et le broadcast.' },
+      { q: 'Combien d’hôtes utilisables dans un /24 ?', o: ['256', '255', '254', '24'], a: 2, w: '2⁸ − 2 = 254 : ou retire l’adresse réseau et le broadcast.' },
       { q: 'Un masque sert à :', o: ['chiffrer les communications', 'séparer la partie réseau de la partie machine dans une adresse IP', 'accélérer la connexion', 'compter les bits'], a: 1, w: 'Bits à 1 = réseau, bits à 0 = machines : c’est sa définition même.' },
       { q: 'Pour un /20, le nombre de bits disponibles pour les machines est :', o: ['20', '8', '12', '32'], a: 2, w: '32 − 20 = 12 bits machine → 2¹² − 2 = 4 094 machines.' }
     ]
@@ -610,7 +610,7 @@ const ACT = {
       { q: 'Décoder le Gray 0111 donne :', o: ['7', '6', '5', '3'], a: 2, w: 'De gauche à droite : chaque bit binaire est le XOR du bit Gray et du bit binaire précédent → 0000 0101 = 5.' },
       { q: 'Pourquoi le Gray est-il utilisé dans les codeurs rotatifs ?', o: ['Il est plus compact', 'Une lecture pendant une transition donne au pire une position voisine, jamais éloignée', 'Il est plus facile à mémoriser', 'Il évite les retenues'], a: 1, w: 'L’erreur transitoire est bornée à un pas : c’est exactement ce qu’on demande à un capteur de position.' },
       { q: 'En binaire pur, passer de 0111 à 1000 change :', o: ['1 bit', '2 bits', '3 bits', '4 bits'], a: 3, w: '0111 → 1000 : les 4 bits changent (c’est le pire cas, qui survient aux puissances de 2).' },
-      { q: 'Le passage binaire → Gray se calcule par :', o: ['g = n + 1', 'g = n XOR (n décalé d’un bit vers la droite)', 'g = NOT n', 'g = n × 2'], a: 1, w: 'Le bit de rang i de g vaut b_i XOR b_{i+1} : le décalage aligne chaque bit avec son voisin de gauche.' }
+      { q: 'Le passage binaire → Gray se calcule par :', o: ['g = n + 1', 'g = n XOR (n décalé d’un bit vers la droite)', 'g = NOT n', 'g = n × 2'], a: 1, w: 'Le bit de rang i du code Gray vaut b_i XOR b_{i+1} : le décalage aligne chaque bit avec son voisin de gauche.' }
     ]
   }
 };
@@ -818,7 +818,7 @@ function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; 
 function renderCourse() {
   const box = $('#course'), btn = $('#bCourse'), work = $('#work');
   btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
-  box.hidden = !CS.open; work.hidden = CS.open;
+  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
   if (!CS.open) { box.innerHTML = ''; return; }
   box.innerHTML = '';
   const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
@@ -837,7 +837,7 @@ function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
 $('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
 
 /* ---------- aide ---------- */
-function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function closeDlg() { $('#dlg').hidden = true; $('#dlg'].innerHTML = ''; }
 function openDlg(title, body) {
   const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
   d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));

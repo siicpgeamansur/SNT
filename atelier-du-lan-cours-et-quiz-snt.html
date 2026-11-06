@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Créer une LAN et jouer en ligne — Activité SNT seconde</title>
+<meta name="description" content="Comprendre le fonctionnement d'un réseau local (LAN), l'architecture client-serveur et le P2P, puis réussir le quiz pour débloquer l'arène de jeu en ligne. Activité SNT seconde.">
+<link rel="canonical" href="https://siicpgeamansur.github.io/SNT/activite_snt_lan.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Créer une LAN et jouer en ligne — Activité SNT seconde interactive">
+<meta property="og:description" content="Réseau local, latence, client-serveur, pair-à-pair : comprends comment on joue en réseau, puis débloque l'arène de combat en ligne.">
+<meta property="og:url" content="https://siicpgeamansur.github.io/SNT/activite_snt_lan.html">
+<meta property="og:locale" content="fr_FR">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;
+  --node-fill:#dfe7f0;--node-stroke:#33475b;--note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;
+  --ok:#1e7a2e;--warn:#9a5b00;--bad:#c0281f;
+  color-scheme:light;
+}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{min-height:100vh;display:flex;flex-direction:column}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+:is(button,input,select,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--run);font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.work{flex:1;display:flex;gap:10px;padding-block:10px;align-items:flex-start}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;overflow:auto}
+#ws{padding:16px 18px 30px;max-width:860px}
+#ws h2{font-size:24px;margin:0 0 8px}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.6}
+#ws ul,#ws ol{padding-left:22px}#ws li{margin-bottom:4px}
+#act{flex:none;width:clamp(300px,30vw,360px);border:1px solid var(--line);border-radius:10px;background:var(--panel);display:flex;flex-direction:column;max-height:calc(100vh - 90px);position:sticky;top:10px}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.pbody.fill{display:flex;flex-direction:column;gap:8px}
+.small{font-size:12px;color:var(--muted);margin:0 0 9px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px;white-space:normal;word-break:break-all}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px;font-size:14px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+.note{background:var(--note-bg);border:1px solid var(--note-line);color:var(--note-fg);border-radius:8px;padding:8px 12px;margin:10px 0;font-size:14px}
+.diagram{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;background:var(--panel2);border:1px dashed var(--node-stroke);border-radius:10px;padding:14px;margin:12px 0;font-size:13.5px}
+.node{border:2px solid var(--accent);border-radius:8px;padding:8px 12px;background:var(--node-fill);text-align:center}
+.node.host{border-color:var(--warn)}
+.node.you{border-color:var(--run)}
+.arrow{color:var(--muted);font-size:18px}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+pre.code{font:12.5px/1.5 var(--font-mono);margin:6px 0;white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:6px;padding:7px 9px;overflow-x:auto}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+.score{font-weight:600;font-size:15px;margin:4px 0 8px}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+details.defi-d{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+details.defi-d summary{cursor:pointer;font-weight:600;color:var(--accent-ink)}
+details.defi-d p{margin:6px 0;font-size:14px}
+/* porte du jeu */
+.locked{text-align:center;padding:26px;border:2px dashed var(--line);border-radius:10px;color:var(--muted);font-size:14.5px;background:var(--panel2)}
+.unlocked{text-align:center;padding:28px;border:2px solid var(--ok);border-radius:10px;background:rgba(46,139,58,.07)}
+.unlocked h3{color:var(--ok);font-size:20px;margin:0 0 8px}
+.unlocked p{font-size:14.5px;margin:6px 0}
+.gamebtn{display:inline-block;margin-top:12px;font-size:17px;font-weight:600;padding:14px 30px;border-radius:9px;background:var(--accent);color:var(--accent-fg);text-decoration:none;border:1px solid var(--accent)}
+.gamebtn:hover{filter:brightness(1.12)}
+.progbar{height:8px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:4px 0 10px}
+.progbar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--run));transition:width .4s}
+footer{border-top:1px solid var(--line);margin-top:20px;padding-top:10px;text-align:center;color:var(--muted);font-size:12.5px}
+@media (max-width:820px){
+  .work{flex-direction:column}
+  #act{position:static;width:auto;max-height:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="3" y="4" width="7" height="5" rx="1" fill="none" stroke="var(--fg)" stroke-width="1.6"/><rect x="16" y="4" width="7" height="5" rx="1" fill="none" stroke="var(--fg)" stroke-width="1.6"/><rect x="9.5" y="17" width="7" height="5" rx="1" fill="none" stroke="var(--accent)" stroke-width="1.6"/><path d="M6.5 9v4h13V9M13 13v4" stroke="var(--accent)" stroke-width="1.4" fill="none"/></svg><span>Atelier du réseau <small>SNT</small></span></div>
+    <div class="files">
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <span class="live" id="liveTag" hidden>Arène débloquée</span>
+    </div>
+  </div></header>
+  <main class="inner work">
+    <section id="stage">
+      <div id="hint">Lisez le cours, puis répondez au quiz dans le panneau « Activité ». Un score parfait débloque l'arène de combat en ligne.</div>
+      <div id="scroller"><div id="ws"></div></div>
+    </section>
+    <aside id="act" aria-label="Activité"></aside>
+  </main>
+</div>
+
+<script>
+'use strict';
+const $=(s,r)=>(r||document).querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function h(tag,attrs,...kids){const el=document.createElement(tag);if(attrs)for(const[k,v]of Object.entries(attrs)){if(v===false||v==null)continue;if(k==='class')el.className=v;else if(k==='html')el.innerHTML=v;else if(k.startsWith('on'))el.addEventListener(k.slice(2),v);else if(v===true)el.setAttribute(k,'');else el.setAttribute(k,v);}for(const k of kids.flat())if(k!=null&&k!==false)el.append(k.nodeType?k:document.createTextNode(k));return el;}
+
+/* ================= Cours ================= */
+const COURSE=[
+ {id:'lan',t:'Réseaux et LAN',h:`
+  <p>Un <b>réseau informatique</b> est un ensemble de machines reliées pour <b>échanger des informations</b>. Pour communiquer, chaque machine possède une <b>adresse IP</b> : sans adresse, personne ne peut vous envoyer de messages.</p>
+  <div class="note"><b>Adresse IP</b> : le « numéro de maison » d'une machine sur un réseau. Exemple : <code class="k">192.168.1.42</code>.</div>
+  <table class="ctable"><thead><tr><th>Réseau</th><th>Portée</th><th>Exemple</th></tr></thead><tbody>
+  <tr><td><b>PAN</b></td><td>Quelques mètres</td><td>Écouteurs Bluetooth reliés au téléphone</td></tr>
+  <tr><td><b>LAN</b></td><td>Un bâtiment</td><td>Le réseau du lycée, votre box Wi-Fi</td></tr>
+  <tr><td><b>WAN</b></td><td>Le monde entier</td><td>Internet</td></tr>
+  </tbody></table>
+  <h3>Le LAN : un réseau local</h3>
+  <p><b>LAN</b> signifie <i>Local Area Network</i> : un réseau <b>restreint à une petite zone géographique</b>. Dans le lycée, les ordinateurs passent par des <b>commutateurs</b> (switchs) et un <b>routeur</b> qui relie le LAN à Internet.</p>
+  <div class="diagram"><span class="node you">💻 PC élèves</span><span class="arrow">⇄</span><span class="node">🔀 Switch</span><span class="arrow">⇄</span><span class="node host">🌐 Routeur</span><span class="arrow">⇄</span><span class="node">🌍 Internet</span></div>
+  <p>Les <b>LAN parties</b> : historiquement, les joueurs branchaient leurs PC sur le même switch pour jouer ensemble. Avantages : <b>très faible latence</b>, et pas besoin d'Internet.</p>
+  <div class="note"><b>Latence (ping)</b> : temps d'aller-retour d'un message entre deux machines, en <b>millisecondes</b>. En LAN : 1 à 5 ms. Via Internet jusqu'à l'autre bout du monde : 300 ms ! Un ping élevé = jeu qui « lagge ».</div>
+  <div class="retain"><b>À retenir.</b> LAN = réseau limité à une zone petite, adresses IP pour identifier les machines, latence en ms : quasi nulle en LAN.</div>`},
+ {id:'archi',t:'Client-serveur et pair-à-pair',h:`
+  <p>Deux grandes architectures permettent de jouer à plusieurs :</p>
+  <h3>Architecture client-serveur</h3>
+  <p>Une machine centrale, le <b>serveur</b>, fait autorité : il connaît l'état du jeu, valide les actions et renvoie les résultats à chaque <b>client</b>. C'est le modèle de la plupart des jeux en ligne (Minecraft, Fortnite, CS2…).</p>
+  <div class="diagram"><span class="node">💻 Client A</span><span class="arrow">⇄</span><span class="node host">🏛️ SERVEUR</span><span class="arrow">⇄</span><span class="node">💻 Client B</span></div>
+  <p><b>+</b> Fiable, anti-triche (le serveur vérifie tout). <b>−</b> Coûteux, et si le serveur tombe, plus personne ne joue.</p>
+  <h3>Architecture pair-à-pair (P2P)</h3>
+  <p>Les machines discutent <b>directement entre elles</b>, sans serveur central. Dans notre jeu, <b>un joueur crée une salle</b> (il devient l'hôte) et partage un <b>code</b> ; les autres le rejoignent et les données circulent directement, via le standard Web <b>WebRTC</b>.</p>
+  <div class="diagram"><span class="node you">💻 Toi (hôte)</span><span class="arrow">⇄</span><span class="node">💻 Camarade</span></div>
+  <p><b>+</b> Gratuit, aucun serveur à louer. <b>−</b> L'hôte a un petit avantage (latence nulle), et s'il quitte, la partie s'arrête.</p>
+  <details class="defi-d"><summary>Où est le serveur alors, dans notre jeu ? 🤔</summary>
+  <p>Un mini-service appelé <b>serveur de signalisation</b> sert juste à mettre les joueurs en contact (c'est le rôle du code), puis il se retire : les échanges se font ensuite en direct, de pair à pair. C'est le principe de WebRTC, utilisé aussi par les visioconférences !</p></details>
+  <div class="retain"><b>À retenir.</b> Client-serveur : une machine fait autorité. P2P : échange direct. Notre arène : un hôte + des pairs, WebRTC.</div>`},
+ {id:'data',t:'Ce qui circule sur le réseau',h:`
+  <p>Quand tu avances d'un pas dans le jeu, ton ordinateur n'envoie pas une image (trop lourd !) mais un <b>petit message</b> :</p>
+  <pre class="code">{"type":"state","x":2.5,"y":2.5,"a":0.8}</pre>
+  <p>C'est du <b>JSON</b> : quelques dizaines d'octets seulement, envoyés environ 25 fois par seconde. Chaque joueur <b>reconstruit la scène localement</b>. Tous les jeux en ligne fonctionnent ainsi : on <b>envoie des états, pas des images</b>.</p>
+  <details class="defi-d"><summary>Et la sécurité ? 🔐</summary>
+  <p>WebRTC chiffre par défaut tous les échanges (DTLS) : personne ne peut espionner la partie sur le réseau. Mais rejoindre une salle inconnue, c'est accepter une connexion directe avec un inconnu : restez toujours entre camarades !</p></details>
+  <div class="retain"><b>À retenir.</b> Le réseau transporte de petits messages d'état (JSON), et chaque machine recalcule l'image localement.</div>`}
+];
+
+/* ================= Quiz ================= */
+const QCM=[
+ {q:'Que signifie le sigle LAN ?',o:['Large Access Number','Local Area Network','Long Antenna Network','Live Action Net'],a:1,w:'LAN = Local Area Network : un réseau limité à une petite zone (salle, bâtiment).'},
+ {q:'À quoi sert une adresse IP ?',o:['À chiffrer les messages','À identifier une machine sur un réseau','À accélérer la connexion','À nommer le joueur'],a:1,w:'L\'adresse IP identifie chaque machine, comme un numéro de maison permet de recevoir du courrier.'},
+ {q:'Dans une architecture client-serveur, qui fait autorité sur l\'état du jeu ?',o:['Le client le plus rapide','Tous les clients à égalité','Le serveur','Le routeur'],a:2,w:'Le serveur centralise et valide tout : c\'est lui qui décide de la « vérité » du jeu (anti-triche).'},
+ {q:'Comment appelle-t-on l\'architecture où les machines communiquent directement, sans serveur central ?',o:['Pair-à-pair (P2P)','Client-serveur','Cloud computing','LAN party'],a:0,w:'En pair-à-pair, chaque machine discute directement avec les autres : c\'est ce que fait notre arène.'},
+ {q:'Dans notre arène, à quoi sert le « code de salle » partagé par l\'hôte ?',o:['À chiffrer la partie','À mettre les joueurs en contact pour créer la connexion directe','À choisir le niveau','À payer le serveur'],a:1,w:'Le code sert de rendez-vous : retrouver l\'hôte, puis établir la connexion directe (P2P).'},
+ {q:'Qu\'est-ce que la latence (ping) ?',o:['La vitesse du processeur','Le temps d\'aller-retour d\'un message sur le réseau, en ms','Le nombre de joueurs','La qualité graphique'],a:1,w:'La latence se mesure en millisecondes : plus elle est basse, plus le jeu est réactif. En LAN, elle est quasi nulle !'},
+ {q:'Pourquoi un jeu en ligne n\'envoie-t-il pas des images à chaque frame ?',o:['Parce que les images sont interdites','Parce que c\'est trop lourd : on envoie de petits états et chacun recalcule la scène','Parce que le Wi-Fi ne le permet pas','Parce que les joueurs préfèrent'],a:1,w:'Un petit message JSON de quelques octets suffit : chaque machine reconstruit l\'image localement. Économe et rapide !'}
+];
+
+/* ================= État ================= */
+const KEYS='atelier-lan-quiz-v1';
+let st;try{st=JSON.parse(localStorage.getItem(KEYS))||{};}catch(e){st={};}
+st.answers=st.answers||{};st.unlocked=!!st.unlocked;st.course=st.course||null;
+function save(){try{localStorage.setItem(KEYS,JSON.stringify(st));}catch(e){}}
+
+/* ================= Cours ================= */
+function renderCourse(){
+  const open=!!st.course;
+  $('#bCourse').setAttribute('aria-pressed',open?'true':'false');
+  $('#bCourse').classList.toggle('pri',open);
+  const ws=$('#ws');
+  if(!open){renderWs();return;}
+  ws.innerHTML='';
+  const cur=COURSE.find(c=>c.id===st.course)||COURSE[0],idx=COURSE.indexOf(cur);
+  ws.append(h('p',{class:'small'},'Cours · section '+(idx+1)+' sur '+COURSE.length));
+  ws.append(h('h2',null,cur.t),h('div',{html:cur.h}));
+  ws.append(h('div',{class:'files'},
+    idx>0?h('button',{class:'btn',type:'button',onclick:()=>{st.course=COURSE[idx-1].id;save();renderCourse();}},'← '+COURSE[idx-1].t):h('span'),
+    idx<COURSE.length-1?h('button',{class:'btn pri',type:'button',onclick:()=>{st.course=COURSE[idx+1].id;save();renderCourse();}},COURSE[idx+1].t+' →'):h('span'),
+    h('button',{class:'btn',type:'button',onclick:()=>{st.course=null;save();renderCourse();}},'Retour à l\'atelier')));
+  const sc=$('#scroller');if(sc)sc.scrollTop=0;
+}
+$('#bCourse').addEventListener('click',()=>{st.course=st.course?null:COURSE[0].id;save();renderCourse();});
+
+/* ================= Atelier ================= */
+function renderWs(){
+  const ws=$('#ws');ws.innerHTML='';
+  ws.append(h('h2',null,'Créer une LAN et jouer en ligne'),
+    h('p',null,'Cette activité t\'apprend comment des ordinateurs se connectent pour jouer ensemble. À droite, un quiz vérifie que tu as tout compris : un score parfait débloque l\'',h('b',null,'arène de combat en ligne'),' ! 🎮'));
+  COURSE.forEach(c=>{
+    ws.append(h('h3',null,c.t),h('div',{html:c.h}),
+      h('p',null,h('button',{class:'btn sm',type:'button',onclick:()=>{st.course=c.id;save();renderCourse();}},'Lire le cours complet : '+c.t)));
+  });
+  /* porte */
+  const gate=h('div');
+  if(st.unlocked){
+    gate.append(h('div',{class:'unlocked'},
+      h('h3',null,'🏆 Arène débloquée !'),
+      h('p',null,'Tu as compris le fonctionnement d\'une LAN, du client-serveur et du P2P.'),
+      h('p',null,'Crée une salle, partage ton code à un camarade… et que le meilleur réseau gagne !'),
+      h('a',{class:'gamebtn',href:'mini_lan_fps.html'},'🎮 ENTRER DANS L\'ARÈNE'),
+      h('p',{class:'small'},'Astuce : ouvre le jeu dans un second onglet pour tester seul, puis joue à deux sur deux ordinateurs du lycée (même LAN 😉).')));
+  }else{
+    gate.append(h('div',{class:'locked'},'🔒 Réussis le quiz du panneau « Activité » (7 réponses correctes) pour débloquer l\'arène de combat en ligne !'));
+  }
+  ws.append(h('h3',null,'L\'arène de combat'),gate,
+    h('footer',null,'Activité SNT seconde · Réseau local, client-serveur et P2P · Suite directe : Mini LAN FPS'));
+}
+
+/* ================= Panneau activité ================= */
+function score(){return QCM.filter((q,i)=>st.answers[i]===q.a).length;}
+function renderAct(){
+  const box=$('#act');box.innerHTML='';
+  const close=h('button',{class:'btn sm',type:'button',onclick:()=>{box.hidden=true;}},'Fermer');
+  box.append(h('div',{class:'phead'},h('b',null,'Activité'),h('span',{class:'sub'},'Quiz : '+score()+' / '+QCM.length),close));
+  const bar=h('div',{class:'progbar'},h('i',{style:'width:'+Math.round(score()/QCM.length*100)+'%'}));
+  const body=h('div',{class:'pbody'});
+  const done=Object.keys(st.answers).length;
+  body.append(h('p',{class:'small'},done+' réponse(s) sur '+QCM.length+(st.unlocked?' · quiz réussi 🎉':'')));
+  body.append(bar);
+  QCM.forEach((q,i)=>{
+    const sel=st.answers[i];
+    const fs=h('fieldset',{class:'q'},h('legend',null,(i+1)+'. '+q.q));
+    q.o.forEach((o,j)=>{
+      const good=st.unlocked&&j===q.a,bad=sel===j&&j!==q.a;
+      const inp=h('input',{type:'radio',name:'q'+i,checked:sel===j,disabled:st.unlocked});
+      inp.addEventListener('change',()=>{st.answers[i]=j;save();renderAct();});
+      fs.append(h('label',{class:'opt'+(good?' good':'')+(bad?' bad':'')},inp,h('span',null,o+(good?'  ✓':'')+(bad?'  ✗':''))));
+    });
+    if(st.unlocked||sel!=null)body.appendChild(fs),fs.append(h('p',{class:'why'},(sel==null&&!st.unlocked?'Sans réponse. ':'')+(st.unlocked&&sel===q.a?'Exact. ':st.unlocked?'Non. ':'')+q.w));
+    body.append(fs);
+  });
+  const row=h('div',{class:'files'});
+  if(!st.unlocked){
+    row.append(h('button',{class:'btn pri',type:'button',onclick:()=>{
+      if(Object.keys(st.answers).length<QCM.length){toast('Réponds d\'abord à toutes les questions !');return;}
+      if(score()===QCM.length){st.unlocked=true;save();renderAct();renderWs();$('#liveTag').hidden=false;toast('🏆 Arène débloquée !');}
+      else{renderAct();toast('Score : '+score()+' / '+QCM.length+'. Les erreurs sont marquées : corrige-les !');}
+    }},'✔ Valider mes réponses'));
+  }
+  row.append(h('button',{class:'btn',type:'button',onclick:()=>{st.answers={};st.unlocked=false;save();$('#liveTag').hidden=true;renderAct();renderWs();}},'Recommencer'));
+  body.append(row);
+  if(st.unlocked)body.append(h('div',{class:'retain'},h('b',null,'Bravo ! '),h('a',{href:'mini_lan_fps.html'},'Entre dans l\'arène →')));
+  box.append(body);
+}
+
+/* ================= toast ================= */
+let toastT=null;
+function toast(msg){let t=$('#toast');if(!t){t=h('div',{id:'toast',hidden:true});t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw';document.body.append(t);}t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true;},3200);}
+
+/* ================= démarrage ================= */
+if(st.unlocked)$('#liveTag').hidden=false;
+renderCourse();renderAct();
+</script>
+</body>
+</html>

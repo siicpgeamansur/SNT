@@ -1,3 +1,8 @@
+Voici une page explicative de la représentation des nombres en seconde :
+
+[Représentation des nombres](https://siicpgeamansur.github.io/SNT/activite_snt_representation_nombres.html)
+
+
 Voici une page interactive pour découvrir internet en seconde :
 
 [Internet](https://siicpgeamansur.github.io/SNT/activite_snt_internet.html)

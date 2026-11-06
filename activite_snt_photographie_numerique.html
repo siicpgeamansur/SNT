@@ -1,0 +1,1115 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Atelier Photo numérique</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Mise en page : barre d'outils en haut, palette à gauche, zone de travail blanche, panneau de l'appareil à droite (feuille basse sur téléphone). */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;
+  --canvas:#ffffff;--grid:#ffffff;--cable:#000000;--node-fill:#dfe7f0;--node-stroke:#33475b;--screen:#8ec1e6;
+  --note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;--page-bg:#ffffff;--page-fg:#1d2733;
+  --term-bg:#121a22;--term-fg:#d5e0ea;
+  --ok:#1e7a2e;--warn:#9a5b00;--bad:#c0281f;
+  --c-arp:#c98a00;--c-icmp:#7b4fc2;--c-dns:#1478b8;--c-dhcp:#c2347f;--c-tcp:#6d8a14;--c-http:#0f8c68;--c-mail:#d1561b;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;letter-spacing:.01em}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn.del{color:var(--bad)}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.seg button[data-mode=sim][aria-pressed="true"]{background:var(--run)}
+#simctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#simctl label{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:13px}
+#simctl select{width:auto}
+.live{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--run);font-weight:500}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.live.paused{color:var(--warn)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#palette{flex:none;width:92px;display:flex;flex-direction:column;gap:6px;overflow-y:auto}
+.tool{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;font-weight:500;font-size:11.5px;min-width:74px;text-align:center}
+.tool svg{width:34px;height:34px;overflow:visible}
+.tool:hover{border-color:var(--accent)}
+.tool.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink)}
+.sep{height:1px;background:var(--line);flex:none;margin:2px 0}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:var(--canvas);display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#svg{display:block;width:1400px;height:900px;touch-action:none;user-select:none;-webkit-user-select:none}
+.node{cursor:pointer}
+.mode-design .node,.mode-doc .note{cursor:grab}
+.ic-body{fill:var(--node-fill);stroke:var(--node-stroke);stroke-width:2;stroke-linejoin:round}
+.ic-screen{fill:var(--screen);stroke:var(--node-stroke);stroke-width:1.2}
+.ic-acc{stroke:var(--accent);fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.ic-led{fill:var(--accent)}
+.nlabel{font:600 12.5px var(--font-ui);fill:var(--fg)}
+.nip{font:11px var(--font-mono);fill:var(--muted)}
+.selbox{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+.lk .selbox{stroke-dasharray:none;stroke-width:2.5}
+.cab{stroke:var(--cable);stroke-width:2.2;stroke-linecap:round}
+.cab.on{stroke:var(--accent);stroke-width:4}
+.hit{stroke:transparent;stroke-width:16;cursor:pointer}
+.note rect{fill:var(--note-bg);stroke:var(--note-line)}
+.note text{font:12.5px var(--font-ui);fill:var(--note-fg)}
+#panel{flex:none;width:360px;max-height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0}
+#panel.wide{width:clamp(380px,38vw,600px)}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.pbody.fill{display:flex;flex-direction:column;gap:8px}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.fld.chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);font-size:13px}
+.fld.chk input{width:auto}
+input[type=text],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.mono{font-family:var(--font-mono);font-size:12.5px}
+textarea{resize:vertical;min-height:70px}
+.bad{border-color:var(--bad)!important}
+.grp{border:1px solid var(--line);border-radius:8px;padding:10px 10px 2px;margin-bottom:10px}
+.grp>h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.line3{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.line2{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.small{font-size:12px;color:var(--muted);margin:0 0 9px}
+.term{display:flex;flex-direction:column;flex:1;min-height:240px;background:var(--term-bg);color:var(--term-fg);border-radius:8px;font:12.5px/1.5 var(--font-mono);overflow:hidden}
+.tout{flex:1;overflow:auto;padding:10px;white-space:pre-wrap;word-break:break-word}
+.tout .ok{color:#6fdc9a}.tout .err{color:#ff9a94}.tout .dim{color:#8da0b5}.tout .cmd{color:#fff}
+.tin{display:flex;gap:8px;align-items:center;padding:7px 10px;border-top:1px solid #2a3542}
+.tin:focus-within{outline:2px solid var(--accent);outline-offset:-2px}
+.tin input{flex:1;background:transparent;border:0;color:inherit;font:inherit;outline:none;padding:2px 0}
+.tin .prm{color:#6fdc9a;white-space:nowrap}
+.bar-url{display:flex;gap:6px}
+.bstat{font-size:12.5px;color:var(--muted)}
+.page{flex:1;min-height:180px;overflow:auto;background:var(--page-bg);color:var(--page-fg);border:1px solid var(--line);border-radius:6px;padding:14px 16px;font:15px/1.5 Georgia,'Times New Roman',serif}
+.page h1{font-size:24px;margin:.2em 0 .4em}.page h2{font-size:19px}.page a{color:#1558c0;text-decoration:underline;cursor:pointer}
+.exch{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0}
+.extop{display:flex;align-items:center;gap:8px;justify-content:space-between;flex:none}
+.tscroll{overflow:auto;border:1px solid var(--line);border-radius:8px;flex:1;min-height:110px}
+.tbl{border-collapse:collapse;width:100%;font-size:12px}
+.tbl th{position:sticky;top:0;background:var(--panel2);text-align:left;padding:5px 8px;font-weight:600;white-space:nowrap;border-bottom:1px solid var(--line)}
+.tbl td{padding:4px 8px;white-space:nowrap;border-bottom:1px solid var(--line);font-family:var(--font-mono)}
+.tbl td.info{white-space:normal;min-width:150px}
+.tbl tbody tr{cursor:pointer}
+.tbl tbody tr:hover{background:var(--panel2)}
+.tbl tbody tr.sel{background:var(--accent-soft)}
+.tbl tr.ign td{opacity:.55}
+tr[data-pk=arp] td:first-child{box-shadow:inset 4px 0 var(--c-arp)}tr[data-pk=icmp] td:first-child{box-shadow:inset 4px 0 var(--c-icmp)}
+tr[data-pk=dns] td:first-child{box-shadow:inset 4px 0 var(--c-dns)}tr[data-pk=dhcp] td:first-child{box-shadow:inset 4px 0 var(--c-dhcp)}
+tr[data-pk=tcp] td:first-child{box-shadow:inset 4px 0 var(--c-tcp)}tr[data-pk=http] td:first-child{box-shadow:inset 4px 0 var(--c-http)}
+.detail{overflow:auto;flex:none;max-height:46%}
+.layer{border:1px solid var(--line);border-radius:8px;margin-bottom:6px;overflow:hidden}
+.layer h4{margin:0;padding:4px 10px;font-size:12px;background:var(--panel2);display:flex;justify-content:space-between}
+.layer h4 span{color:var(--muted);font-weight:400}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:1px 12px;padding:6px 10px;font-size:12px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;font-family:var(--font-mono);white-space:pre-wrap;word-break:break-word}
+.layer.empty .kv{color:var(--muted)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;background:var(--panel2)}
+.mono-tbl{font:12px var(--font-mono);width:100%;border-collapse:collapse;margin-bottom:10px}
+.mono-tbl th{text-align:left;color:var(--muted);font-weight:500;padding:3px 6px;border-bottom:1px solid var(--line)}
+.mono-tbl td{padding:3px 6px;border-bottom:1px solid var(--line)}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.dlgbox h3{margin:14px 0 4px;font-size:14px}.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}.dlgbox code{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px;white-space:nowrap}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px;max-width:100%}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+.score{font-weight:600;font-size:15px;margin:4px 0 8px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px;text-wrap:balance}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.cbody table{display:block;overflow-x:auto;max-width:100%}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.ctable.narrow td,.ctable.narrow th{text-align:center;font-family:var(--font-mono);font-size:13px}
+.ctable td.on1{background:var(--accent);color:var(--accent-fg);font-weight:600}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+.bits{font:13px var(--font-mono);overflow-x:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:8px 0;background:var(--panel2)}
+.bits>div{display:flex;white-space:nowrap;align-items:baseline;line-height:1.8}
+.bits .lbl{width:96px;flex:none;color:var(--muted);font-family:var(--font-ui);font-size:12px}
+.bits .n{color:var(--accent-ink);font-weight:600}.bits .m{color:#8a949f}
+.bits .dec{margin-left:14px;color:var(--fg);font-family:var(--font-ui);font-size:12.5px}
+.encap{display:flex;flex-wrap:wrap;margin:8px 0 12px}
+.encap span{padding:7px 14px;font:13px var(--font-mono);border:1px solid var(--node-stroke);margin-left:-1px}
+.encap .e4{background:#f6dede}.encap .e3{background:#dfeaf7}.encap .e2{background:#e0f1dc}.encap .e1{background:#fff4c2}
+.widget{border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0 14px;background:var(--panel)}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}.bars>div{display:flex;align-items:center;gap:8px}
+.bars .bl{width:44px;flex:none;font-size:12.5px;color:var(--muted)}.bars .bar{display:inline-block;height:14px;background:var(--accent);border-radius:3px}.bars .bar.alt{background:var(--run)}.bars .bv{font:13px var(--font-mono)}
+input[type=range]{width:100%;padding:0}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}.gloss{grid-template-columns:1fr}.gloss dd{margin-bottom:6px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .work{flex-direction:column;gap:8px}
+  #palette{flex-direction:row;width:auto;overflow-x:auto;overflow-y:hidden;flex:none}
+  .sep{width:1px;height:auto;margin:0 2px}
+  .tool{min-width:70px}
+  #panel,#panel.wide{position:fixed;left:0;right:0;bottom:0;width:auto;height:62%;max-height:none;border-radius:14px 14px 0 0;z-index:30;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .line3{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:no-preference){.tool,.btn{transition:border-color .12s,background .12s}}
+/* ---- ateliers : commun, 1 et 2 ---- */
+#ws{padding:16px max(16px,env(safe-area-inset-left,0px)) 30px;max-width:980px}
+#ws h2{font-size:24px;margin:0 0 8px;text-wrap:balance}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.55}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.stack{margin:14px 0;display:flex;flex-direction:column;gap:6px}
+.stk-row{display:flex;gap:6px;flex-wrap:wrap}
+.stk{border:1px solid var(--node-stroke);border-radius:8px;padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.stk b{font-size:15px}.stk span{font-size:12.5px;color:var(--muted)}
+.stk.web{background:#dfeaf7;flex:2 1 260px}.stk.oth{background:var(--panel2);flex:1 1 170px}.stk.net{background:#e0f1dc}
+.tl{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;margin:6px 0}
+.ev{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);border-top:4px solid var(--muted);min-width:0}
+.ev.web{border-top-color:var(--accent)}.ev.net{border-top-color:var(--run)}
+.ev .yr{font:600 17px var(--font-mono)}.ev .et{margin-left:8px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ev p{margin:4px 0 0;font-size:13.5px}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px}
+.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.score{font-weight:600;font-size:15px;margin:6px 0}
+.urlseg{font:15px var(--font-mono);padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin:10px 0;overflow-x:auto;white-space:nowrap;background:var(--panel2)}
+.urlseg span{padding:2px 1px;border-bottom:3px solid transparent}
+.u-s{border-bottom-color:#c98a00!important}.u-h{border-bottom-color:#1478b8!important}.u-p{border-bottom-color:#7b4fc2!important}
+.u-c{border-bottom-color:#1e7a2e!important}.u-q{border-bottom-color:#c2347f!important}.u-a{border-bottom-color:#d1561b!important}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;border-bottom:3px solid transparent;background:var(--panel2);white-space:nowrap}
+.bar-url{display:flex;gap:6px;margin:8px 0}
+.wout{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.stepc{border:1px solid var(--line);border-left:5px solid var(--muted);border-radius:8px;padding:8px 10px;background:var(--panel)}
+.stepc.k-dns{border-left-color:var(--c-dns)}.stepc.k-tcp{border-left-color:var(--c-tcp)}.stepc.k-http{border-left-color:var(--c-http)}.stepc.k-tls{border-left-color:var(--c-icmp)}.stepc.k-nav{border-left-color:var(--accent)}
+.sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.stag{font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:0 8px}
+pre.code{font:12.5px/1.5 var(--font-mono);margin:6px 0 0;white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:6px;padding:7px 9px;overflow-x:auto}
+.pgbar{font-size:12.5px;color:var(--muted);margin-top:4px}
+.broken{display:inline-block;border:1px dashed var(--muted);padding:2px 6px;font:12px var(--font-mono);color:var(--muted)}
+.files{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+
+/* ---- réseaux sociaux ---- */
+.webg{display:block;width:100%;min-width:640px;height:auto}
+.ge{stroke:#aab3bf;stroke-width:1.6}.ge.path{stroke:var(--accent);stroke-width:4}.ge.off{stroke-dasharray:3 4;opacity:.3}
+.pcard{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin-top:8px;background:var(--panel)}
+.pcard p{margin:6px 0 2px}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px}.stat span{font-size:12px;color:var(--muted)}.stat b{font-size:15px}
+.opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0 10px}.opts .fld{margin:0}
+.rlog{margin:6px 0;padding:6px 8px 6px 22px;font:12.5px/1.6 var(--font-mono);max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}.rlog:empty{display:none}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.two2>div{min-width:0}
+.post{display:flex;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--panel)}
+.post .rk{font:600 18px var(--font-mono);color:var(--muted);width:24px;flex:none;text-align:center}.post .pb{flex:1;min-width:0}.post p{margin:3px 0 6px}
+.pa{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.pf{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.tag{font-size:11px;padding:1px 8px;border-radius:10px;background:var(--panel2);border:1px solid var(--line)}
+.ibar{display:grid;grid-template-columns:90px 1fr 24px;gap:8px;align-items:center;font-size:13px;margin:3px 0}
+.bar2{display:block;height:8px;border-radius:4px;background:var(--panel2);overflow:hidden}.bar2 i{display:block;height:100%;background:var(--accent)}.bar2.big{height:12px;margin:6px 0}
+.ad{margin-top:10px;border:1px dashed #8a949f;border-radius:6px;padding:8px 12px;background:#f6f6f0;font-size:14px}.ad .adl{display:block;font-size:11px;color:#5a6068;text-transform:uppercase;letter-spacing:.06em}
+.dd{border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin:5px 0;font-size:14px}.dd.exp{background:rgba(192,40,31,.1);border-color:var(--bad)}.dd.safe{background:rgba(30,122,46,.1);border-color:var(--ok)}
+.sorts{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.sortrow{display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+.sortrow .si{flex:1 1 260px;min-width:0;font-size:14px}.sortrow .sb{display:flex;gap:6px;flex-wrap:wrap}.sortrow .sf{flex:1 1 100%;font-size:13px}.sf.ok{color:var(--ok)}.sf.ko{color:var(--bad)}
+.btn.good{background:rgba(30,122,46,.18);border-color:var(--ok)}.btn.badc{background:rgba(192,40,31,.16);border-color:var(--bad)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.files{display:flex;gap:6px;flex-wrap:wrap}
+#ws .small{font-size:12.5px}
+.seg{max-width:100%;overflow-x:auto}.seg button{white-space:nowrap}
+#act code.k{white-space:normal;word-break:break-all}
+#act.sheet{position:fixed;left:0;right:0;bottom:0;max-height:72vh;z-index:20}
+.dwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:8px 0;max-height:360px}
+.dt{border-collapse:collapse;width:100%;font-size:13.5px}.dt th,.dt td{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.dt thead th{position:sticky;top:0;background:var(--panel2);font-weight:600;z-index:1}.dt td.num{text-align:right;font-variant-numeric:tabular-nums}
+.dt .hl{background:rgba(46,109,164,.12)}.dt tr.uq td{background:rgba(192,40,31,.12)}.dt .bcell{width:30%}
+.code-in{width:100%;font:13px/1.5 var(--font-mono);padding:8px 10px;border:1px solid var(--line);border-radius:8px;resize:vertical;box-sizing:border-box}
+.mono{font-family:var(--font-mono);font-size:13px}
+.warn{font-size:12.5px;color:var(--bad);margin:0 0 9px}
+.gl2{font:10.5px var(--font-ui);fill:#6b7684}
+.rd{stroke:#fff;stroke-width:5;stroke-linecap:round}.rd{filter:none}.rd.rue{stroke:#fff;stroke-width:4}.rd.avenue{stroke:#ffd98a;stroke-width:6}.rd.rocade{stroke:#f0a05a;stroke-width:8}
+.rd.route{stroke:var(--accent);stroke-width:8}.rd.off{opacity:.15}.rd.slow{stroke:#e46a5e}
+.pl{stroke:#1d2733;stroke-width:1.6;fill:#fff}.pl.transport{fill:#cfe3f7}.pl.éducation{fill:#ffe4a8}.pl.service{fill:#f5c6c0}.pl.commerce{fill:#d9eec9}.pl.santé{fill:#f7a8a2}.pl.loisirs{fill:#bfe5c3}.pl.culture{fill:#e3d3f2}.pl.carrefour{fill:#fff}
+.gcirc{fill:none;stroke-width:2}.gcirc.c0{stroke:#2e6da4}.gcirc.c1{stroke:#1e7a2e}.gcirc.c2{stroke:#c0281f}.gcirc.c3{stroke:#8a5cc0}
+.gbal{stroke:#1d2733;fill:#fff}.gtrue{fill:rgba(30,122,46,.25);stroke:var(--ok);stroke-width:2.5}.gguess{stroke:#111;stroke-width:3;fill:none}.gsol{fill:#fff;stroke:#8a5cc0;stroke-width:3}
+.gpin{stroke:#111;stroke-width:2}.gpin.p1{fill:#ffd24a}.gpin.p2{fill:#8ad0ff}.gseg{stroke:#111;stroke-width:2.5;stroke-dasharray:6 5}
+.bld{fill:#c9c2b6;stroke:#8a8478;stroke-width:.8}
+.ew{font:10.5px var(--font-ui);fill:#444;paint-order:stroke;stroke:#fff;stroke-width:3}
+.dn{fill:#fff;stroke:#4a5a6e;stroke-width:2}.dn.vis{fill:#cfe3f7}.dn.cur{fill:#fff0a8;stroke:#111;stroke-width:3}.dn.from{stroke:var(--ok);stroke-width:4}.dn.to{stroke:var(--bad);stroke-width:4}
+.dd.prt{background:rgba(224,160,40,.16);border-color:#d9a21b}
+.gwrap{border:1px solid var(--line);border-radius:10px;overflow-x:auto;background:#fff}
+.gl{font:12.5px var(--font-ui);fill:#1d2733;paint-order:stroke;stroke:#fff;stroke-width:3}
+canvas.pix{image-rendering:pixelated;border:1px solid var(--line);border-radius:4px;display:block;max-width:100%;height:auto!important;background:#fff}
+.pixbox{margin:8px 0}.pixbox.rel{position:relative;width:320px;max-width:100%}
+.selbox{position:absolute;width:20px;height:20px;border:2px solid #fff;outline:2px solid #111;pointer-events:none}
+.swatch{min-height:110px;border:1px solid var(--line);border-radius:10px}
+.chipc{display:inline-block;width:16px;height:16px;border:1px solid #111;border-radius:3px;margin-left:8px;vertical-align:middle}
+.histo{display:block;width:100%;max-width:320px;height:auto;margin-top:6px}.hb{fill:var(--accent)}
+.kern{display:grid;grid-template-columns:repeat(3,64px);gap:4px}.kern input{width:64px;padding:4px;box-sizing:border-box}
+.bgrid{display:grid;gap:1px;background:var(--line);padding:1px;width:max-content;max-width:100%;overflow-x:auto;margin:8px 0}
+.bc{width:16px;height:16px;border:0;background:#fff;padding:0;cursor:pointer}.bc.on{background:#1d2733}.bc:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.kern input,input[type=number]{background:#fff;color:#111;border:1px solid #8a94a3;border-radius:6px;font:inherit;font-size:15px;text-align:center}
+.kern input:focus,input[type=number]:focus{outline:2px solid var(--accent);outline-offset:1px}
+
+
+</style>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><path d="M3 8h5l1.5-2.5h7L18 8h5v13H3z" fill="none" stroke="var(--fg)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="13" cy="14" r="4" fill="none" stroke="var(--accent)" stroke-width="1.6"/></svg><span>Atelier Photo numérique <small>SNT</small></span></div>
+    <div class="files">
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band" id="modes"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <main class="inner work" id="work">
+    <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+/*CORE-START*/
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'atelier-photo-v1', code: 'atelier-photo-extra-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
+const cm = t => '<code class="k">' + t + '</code>';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ---------- images virtuelles (pour le HTML des élèves) ---------- */
+const dataSvg = s => 'data:image/svg+xml;utf8,' + encodeURIComponent(s);
+const IMGS = {
+  'logo.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'><rect width='120' height='120' rx='18' fill='#2e6da4'/><path d='M28 88V44l32-18 32 18v44z' fill='#fff'/><rect x='51' y='58' width='18' height='30' fill='#2e6da4'/><rect x='34' y='52' width='12' height='12' fill='#2e6da4'/><rect x='74' y='52' width='12' height='12' fill='#2e6da4'/></svg>"),
+  'planete.svg': dataSvg("<svg xmlns='http://www.w3.org/2000/svg' width='160' height='120' viewBox='0 0 160 120'><rect width='160' height='120' fill='#101c33'/><circle cx='80' cy='60' r='28' fill='#e0a458'/><ellipse cx='80' cy='60' rx='54' ry='11' fill='none' stroke='#f3d9a4' stroke-width='4' transform='rotate(-18 80 60)'/><circle cx='30' cy='24' r='2' fill='#fff'/><circle cx='132' cy='96' r='2' fill='#fff'/><circle cx='122' cy='22' r='1.5' fill='#fff'/></svg>")
+};
+
+/* ---------- assainisseur : le HTML d'un élève ne peut rien exécuter ---------- */
+const OKTAGS = new Set('a b i u em strong small mark code pre br hr p div span h1 h2 h3 h4 h5 h6 ul ol li dl dt dd table thead tbody tfoot tr td th caption img header footer nav main section article aside figure figcaption blockquote'.split(' '));
+const DROPTAGS = new Set(['script', 'style', 'iframe', 'object', 'embed', 'title', 'head', 'meta', 'link', 'noscript', 'template', 'svg', 'math', 'form', 'input', 'button', 'select', 'textarea', 'audio', 'video', 'canvas', 'base']);
+function safeDom(html, o) {
+  o = o || {};
+  const doc = new DOMParser().parseFromString('<!doctype html><body>' + html, 'text/html');
+  const css = [...doc.querySelectorAll('style')].map(s => s.textContent).join('\n');
+  const out = document.createElement('div');
+  (function walk(src, dst) {
+    for (const c of src.childNodes) {
+      if (c.nodeType === 3) { dst.append(c.textContent); continue; }
+      if (c.nodeType !== 1) continue;
+      const t = c.tagName.toLowerCase();
+      if (DROPTAGS.has(t)) continue;
+      if (!OKTAGS.has(t)) { walk(c, dst); continue; }
+      const e = document.createElement(t);
+      for (const a of c.attributes) {
+        const n = a.name.toLowerCase(), v = a.value;
+        if (['class', 'title', 'lang', 'colspan', 'rowspan', 'width', 'height', 'alt'].includes(n)) e.setAttribute(n, v);
+        else if (n === 'id' && !o.light) e.setAttribute('id', v);
+        else if (n === 'style' && !/url\s*\(|expression|@import/i.test(v)) e.setAttribute('style', v);
+      }
+      if (t === 'a') {
+        const href = c.getAttribute('href') || ''; e.setAttribute('href', '#'); e.dataset.href = href;
+        e.addEventListener('click', ev => { ev.preventDefault(); if (o.onLink) o.onLink(href); });
+      }
+      if (t === 'img') {
+        const src = (c.getAttribute('src') || '').trim();
+        if (IMGS[src]) { e.setAttribute('src', IMGS[src]); e.dataset.ok = '1'; }
+        else { const sp = document.createElement('span'); sp.className = 'broken'; sp.textContent = '[image introuvable : ' + (src || 'attribut src manquant') + (c.getAttribute('alt') ? ', texte alternatif : ' + c.getAttribute('alt') : '') + ']'; dst.append(sp); continue; }
+      }
+      walk(c, e); dst.append(e);
+    }
+  })(doc.body, out);
+  return { el: out, css, doc };
+}
+function scopeCss(css) {
+  return String(css).replace(/@import[^;]*;?/gi, '').replace(/url\s*\([^)]*\)/gi, 'none').replace(/(^|[\s,{}>+~])(html|body)(?=[\s,{.:#\[>+~]|$)/gi, '$1#body');
+}
+
+/* ---------- URL ---------- */
+function parseUrl(u) {
+  const m = /^([a-z][a-z0-9+.-]*):\/\/([^\/?#:]*)(?::(\d+))?([^?#]*)(\?[^#]*)?(#.*)?$/i.exec(String(u).trim());
+  if (!m) return null;
+  return { scheme: m[1].toLowerCase(), host: m[2].toLowerCase(), port: m[3] || '', path: m[4] || '/', query: m[5] || '', hash: m[6] || '' };
+}
+function domainSplit(host) { const p = host.split('.'); return p.length <= 2 ? { sub: '', dom: host } : { sub: p.slice(0, -2).join('.'), dom: p.slice(-2).join('.') }; }
+function widgetUrl(root, start) {
+  const inp = h('input', { type: 'text', class: 'mono', value: start || 'https://www.lycee-exemple.fr/snt/reseaux.html?page=2&lang=fr#masques', 'aria-label': 'Adresse à décoder', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false' });
+  const out = h('div');
+  const draw = () => {
+    out.innerHTML = ''; const u = parseUrl(inp.value);
+    inp.classList.toggle('bad', !!inp.value.trim() && !u);
+    if (!u) { out.append(h('p', { class: 'small' }, 'Saisissez une adresse complète, par exemple https://www.exemple.fr/page.html')); return; }
+    const d = domainSplit(u.host), dport = u.scheme === 'https' ? '443' : u.scheme === 'http' ? '80' : '';
+    const seg = [['u-s', u.scheme + '://'], ['u-h', u.host]];
+    if (u.port) seg.push(['u-p', ':' + u.port]);
+    seg.push(['u-c', u.path === '/' && !/\/$/.test(inp.value.split(/[?#]/)[0]) ? '' : u.path]);
+    if (u.query) seg.push(['u-q', u.query]); if (u.hash) seg.push(['u-a', u.hash]);
+    out.append(h('div', { class: 'urlseg', 'aria-label': 'Adresse découpée' }, seg.filter(s => s[1]).map(s => h('span', { class: s[0] }, s[1]))));
+    const q = u.query ? u.query.slice(1).split('&').map(x => x.split('=')).map(p => p[0] + ' = ' + (p[1] || '')).join(' ; ') : '';
+    out.append(h('table', { class: 'ctable' }, h('tbody', null,
+      h('tr', null, h('td', null, h('span', { class: 'u-s tag' }, 'Protocole')), h('td', null, u.scheme + (u.scheme === 'https' ? ' : HTTP chiffré (TLS)' : u.scheme === 'http' ? ' : HTTP non chiffré' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-h tag' }, 'Nom de domaine')), h('td', null, u.host + (d.sub ? ' : sous-domaine « ' + d.sub + ' », domaine principal « ' + d.dom + ' »' : ' : domaine principal « ' + d.dom + ' »'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-p tag' }, 'Port')), h('td', null, u.port ? u.port : (dport ? 'non précisé : ' + dport + ' par défaut' : 'non précisé'))),
+      h('tr', null, h('td', null, h('span', { class: 'u-c tag' }, 'Chemin')), h('td', null, u.path + (u.path === '/' ? ' : page d’accueil' : ''))),
+      h('tr', null, h('td', null, h('span', { class: 'u-q tag' }, 'Paramètres')), h('td', null, q || 'aucun')),
+      h('tr', null, h('td', null, h('span', { class: 'u-a tag' }, 'Ancre')), h('td', null, u.hash ? u.hash + ' : endroit précis de la page' : 'aucune')))));
+  };
+  inp.addEventListener('input', draw); draw();
+  root.append(h('label', { class: 'fld' }, h('span', null, 'Adresse (URL)'), inp), out);
+}
+/*CORE-END*/
+function sv(tag, attrs, ...kids) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in (attrs || {})) e.setAttribute(k, attrs[k]);
+  kids.forEach(c => e.append(c));
+  return e;
+}
+
+const WORKSHOPS = [];
+function tableEl(rows, cols, labels, hi) {
+  const t = h('table', { class: 'dt' }), tr = h('tr');
+  cols.forEach(c => tr.append(h('th', { scope: 'col', class: hi === c ? 'hl' : '' }, (labels && labels[c]) || c)));
+  t.append(h('thead', null, tr));
+  const tb = h('tbody'); rows.forEach(r => { const x = h('tr'); cols.forEach(c => x.append(h('td', { class: (typeof r[c] === 'number' ? 'num ' : '') + (hi === c ? 'hl' : '') }, String(r[c] == null ? '' : r[c])))); tb.append(x); }); t.append(tb);
+  return h('div', { class: 'dwrap' }, t);
+}
+const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
+function sortWidget(box, items, labels, store, redraw) {
+  const done = Object.keys(store).length; let ok = 0;
+  items.forEach((it, i) => { const a = store[i], right = a === it.a; if (a != null && right) ok++;
+    box.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, it.card ? it.card : it.t), h('span', { class: 'sb' }, labels.map((lab, j) => h('button', { type: 'button', class: 'btn sm' + (a === j ? (right ? ' good' : ' badc') : ''), disabled: a != null, onclick: () => { store[i] = j; redraw(); } }, lab))),
+      a != null ? h('span', { class: 'sf ' + (right ? 'ok' : 'ko') }, (right ? 'Exact. ' : 'Pas tout à fait : il fallait « ' + labels[it.a] + ' ». ') + it.w) : null)); });
+  box.append(h('p', { class: 'score' }, done ? 'Score : ' + ok + ' / ' + items.length + (done === items.length ? ' (terminé)' : '') : ''));
+}
+
+/* ---------- image de démonstration ---------- */
+function drawScene(ctx, S) {
+  const k = S / 100, R = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x * k, y * k, w * k, h * k); }, E = (x, y, rx, ry, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.ellipse(x * k, y * k, rx * k, ry * k, 0, 0, 6.2832); ctx.fill(); };
+  const g = ctx.createLinearGradient(0, 0, 0, 65 * k); g.addColorStop(0, '#3d8fe0'); g.addColorStop(1, '#d6ecfb'); ctx.fillStyle = g; ctx.fillRect(0, 0, S, S);
+  E(78, 20, 10, 10, '#ffd23f'); E(30, 82, 62, 30, '#6fbf73'); E(82, 94, 58, 26, '#3f9b4f');
+  R(66, 58, 4, 18, '#6b4423'); E(68, 52, 11, 11, '#2d7d32');
+  R(22, 52, 26, 22, '#d9534f'); ctx.fillStyle = '#7a3b2e'; ctx.beginPath(); ctx.moveTo(18 * k, 52 * k); ctx.lineTo(35 * k, 36 * k); ctx.lineTo(52 * k, 52 * k); ctx.fill();
+  R(32, 62, 6, 12, '#f3d9a4'); R(24, 57, 6, 6, '#bfe3ff'); R(41, 57, 5, 6, '#bfe3ff');
+}
+let BASE = null;
+function baseImage() { if (BASE) return BASE; const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); drawScene(x, 256); BASE = x.getImageData(0, 0, 256, 256); return BASE; }
+function downsample(img, n) {
+  const s = img.width / n, out = new ImageData(n, n);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) { let r = 0, g = 0, b = 0, c = 0; for (let j = Math.floor(y * s); j < Math.floor((y + 1) * s); j++) for (let i = Math.floor(x * s); i < Math.floor((x + 1) * s); i++) { const k = (j * img.width + i) * 4; r += img.data[k]; g += img.data[k + 1]; b += img.data[k + 2]; c++; } const o = (y * n + x) * 4; out.data[o] = r / c; out.data[o + 1] = g / c; out.data[o + 2] = b / c; out.data[o + 3] = 255; }
+  return out;
+}
+function cvs(img, size, cls) { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; c.getContext('2d').putImageData(img, 0, 0); c.className = 'pix ' + (cls || ''); c.style.width = size + 'px'; c.style.height = size + 'px'; c.setAttribute('role', 'img'); return c; }
+const hex2 = n => Math.round(n).toString(16).toUpperCase().padStart(2, '0');
+const lum = (r, g, b) => 0.299 * r + 0.587 * g + 0.114 * b;
+
+/* ---------- Atelier 1 : du réel au pixel ---------- */
+const NS1 = [4, 8, 16, 32, 64, 128];
+const W1 = { i: 3, w: 4000, h: 3000, cm1: 10, cm2: 15, ppp: 300 };
+function mountW1(root) {
+  root.append(h('h2', null, 'De la lumière aux pixels'),
+    h('p', null, 'Un appareil photo numérique ne garde pas la scène continue : son ', h('b', null, 'capteur'), ' la découpe en une grille de petits carrés, les ', h('b', null, 'pixels'), ', et mesure la lumière reçue par chacun. Le nombre de pixels est la ', h('b', null, 'définition'), ' de l’image.'));
+  const box = h('div', { class: 'pixbox' }), info = h('div', { class: 'gstats' });
+  const rg = h('input', { type: 'range', min: 0, max: 5, step: 1, value: W1.i, 'aria-label': 'Définition de l’image' }), rv = h('b');
+  function draw() { W1.i = +rg.value; const n = NS1[W1.i]; rv.textContent = n + ' × ' + n + ' pixels';
+    box.innerHTML = ''; box.append(cvs(downsample(baseImage(), n), 320));
+    info.innerHTML = ''; [['Nombre de pixels', (n * n).toLocaleString('fr-FR')], ['Mégapixels', fmt(n * n / 1e6)], ['Taille brute', (n * n * 3).toLocaleString('fr-FR') + ' octets']].forEach(k => info.append(h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, k[1])))); }
+  rg.addEventListener('input', draw);
+  root.append(h('h3', null, '1. Plus ou moins de pixels'), h('label', { class: 'fld' }, h('span', null, 'Définition : ', rv), rg), box, info,
+    h('p', { class: 'small' }, 'Avec peu de pixels, chaque carré représente une grande zone de la scène : on perd les détails (la fenêtre, la porte, le soleil). Chaque pixel stocke 3 valeurs (rouge, vert, bleu), de 1 octet chacune : la taille brute est donc de 3 octets par pixel.'));
+  /* calculateur */
+  const mi = (v, lab) => h('input', { type: 'number', min: 1, value: v, 'aria-label': lab });
+  const iw = mi(W1.w, 'Largeur en pixels'), ih = mi(W1.h, 'Hauteur en pixels'), out = h('p', { class: 'score' });
+  const calc = () => { W1.w = +iw.value; W1.h = +ih.value; const px = W1.w * W1.h; out.textContent = px ? W1.w + ' × ' + W1.h + ' = ' + px.toLocaleString('fr-FR') + ' pixels, soit ' + fmt(px / 1e6) + ' mégapixels. Taille brute : ' + fmt(px * 3 / 1e6) + ' Mo (3 octets par pixel).' : 'Entrez des nombres positifs.'; };
+  iw.addEventListener('input', calc); ih.addEventListener('input', calc); calc();
+  root.append(h('h3', null, '2. Mégapixels et taille brute'), h('p', null, 'Un « 12 mégapixels » a environ 12 millions de pixels. Calculez avec les dimensions de votre choix (4 000 × 3 000 pour un téléphone courant).'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'Largeur (pixels)'), iw), h('label', { class: 'fld' }, h('span', null, 'Hauteur (pixels)'), ih)), out);
+  /* impression */
+  const a = mi(W1.cm1, 'Largeur en cm'), b = mi(W1.cm2, 'Hauteur en cm'), c = mi(W1.ppp, 'Résolution en ppp'), o2 = h('p', { class: 'score' });
+  const calc2 = () => { W1.cm1 = +a.value; W1.cm2 = +b.value; W1.ppp = +c.value; const px = Math.round(W1.cm1 / 2.54 * W1.ppp), py = Math.round(W1.cm2 / 2.54 * W1.ppp); o2.textContent = px > 0 && py > 0 ? 'Il faut au moins ' + px.toLocaleString('fr-FR') + ' × ' + py.toLocaleString('fr-FR') + ' pixels, soit ' + fmt(px * py / 1e6) + ' mégapixels.' : 'Entrez des nombres positifs.'; };
+  [a, b, c].forEach(i => i.addEventListener('input', calc2)); calc2();
+  root.append(h('h3', null, '3. Quelle définition pour imprimer ?'), h('p', null, 'La ', h('b', null, 'résolution'), ' d’une impression se mesure en pixels par pouce (ppp ou dpi). 1 pouce = 2,54 cm. Pour une impression nette, on vise environ 300 ppp.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld' }, h('span', null, 'Largeur imprimée (cm)'), a), h('label', { class: 'fld' }, h('span', null, 'Hauteur imprimée (cm)'), b), h('label', { class: 'fld' }, h('span', null, 'Résolution (ppp)'), c)), o2,
+    h('p', { class: 'small' }, 'Une photo 10 × 15 cm à 300 ppp demande environ 2 mégapixels : une photo de téléphone en a bien plus. En revanche, une affiche de 1 mètre de large demande beaucoup plus de pixels.'));
+  draw();
+}
+WORKSHOPS.push({ id: 'p1', title: 'Du réel aux pixels', hint: 'Faites varier la définition, calculez mégapixels, taille brute et résolution d’impression.', mount: mountW1, reset: () => { Object.assign(W1, { i: 3, w: 4000, h: 3000, cm1: 10, cm2: 15, ppp: 300 }); } });
+
+/* ---------- Atelier 2 : les couleurs ---------- */
+const W2 = { r: 255, g: 128, b: 0, bits: 8, sel: null };
+function mountW2(root) {
+  root.append(h('h2', null, 'Les couleurs d’un pixel'),
+    h('p', null, 'Un écran fabrique toutes les couleurs en mélangeant de la lumière rouge, verte et bleue : c’est la ', h('b', null, 'synthèse additive'), ' (codage ', h('b', null, 'RVB'), ' ou RGB). Chaque composante est un nombre de 0 (éteint) à 255 (maximum), stocké sur 1 octet.'));
+  /* mixeur */
+  const sw = h('div', { class: 'swatch' }), code = h('p', { class: 'score' }), sl = {}, rows = h('div');
+  const upd = () => { sw.style.background = 'rgb(' + W2.r + ',' + W2.g + ',' + W2.b + ')'; code.textContent = 'Décimal : (' + W2.r + ', ' + W2.g + ', ' + W2.b + ') · Hexadécimal : #' + hex2(W2.r) + hex2(W2.g) + hex2(W2.b) + ' · Binaire : ' + [W2.r, W2.g, W2.b].map(v => v.toString(2).padStart(8, '0')).join(' '); ['r', 'g', 'b'].forEach(k => { sl[k].value = W2[k]; sl[k + 'v'].textContent = W2[k]; }); };
+  [['r', 'Rouge'], ['g', 'Vert'], ['b', 'Bleu']].forEach(c => { const v = h('b'), i = h('input', { type: 'range', min: 0, max: 255, step: 1, value: W2[c[0]], 'aria-label': c[1] }); sl[c[0]] = i; sl[c[0] + 'v'] = v; i.addEventListener('input', () => { W2[c[0]] = +i.value; upd(); }); rows.append(h('label', { class: 'fld' }, h('span', null, c[1] + ' : ', v), i)); });
+  const presets = [['Rouge', 255, 0, 0], ['Jaune', 255, 255, 0], ['Cyan', 0, 255, 255], ['Blanc', 255, 255, 255], ['Noir', 0, 0, 0], ['Gris', 128, 128, 128], ['Orange', 255, 128, 0]];
+  root.append(h('h3', null, '1. Mélanger rouge, vert et bleu'), h('div', { class: 'chips', role: 'group', 'aria-label': 'Couleurs prédéfinies' }, presets.map(p => h('button', { type: 'button', class: 'chip', onclick: () => { W2.r = p[1]; W2.g = p[2]; W2.b = p[3]; upd(); } }, p[0]))), h('div', { class: 'two2' }, rows, sw), code,
+    h('p', { class: 'small' }, 'Essayez : rouge + vert = jaune ; les trois au maximum = blanc ; les trois à zéro = noir ; trois valeurs égales = un gris. En hexadécimal, chaque composante s’écrit avec 2 chiffres (00 à FF).'));
+  /* inspecteur */
+  const img16 = downsample(baseImage(), 16), insp = h('div', { class: 'pixbox rel' }), det = h('p', { class: 'pcard' });
+  const drawI = () => { insp.innerHTML = ''; const c = cvs(img16, 320, 'grid'); insp.append(c);
+    if (W2.sel) insp.append(h('div', { class: 'selbox', style: 'left:' + (W2.sel.x * 20) + 'px;top:' + (W2.sel.y * 20) + 'px' }));
+    c.addEventListener('click', ev => { const r = c.getBoundingClientRect(), x = Math.min(15, Math.floor((ev.clientX - r.left) / r.width * 16)), y = Math.min(15, Math.floor((ev.clientY - r.top) / r.height * 16)); W2.sel = { x, y }; drawI(); });
+    det.innerHTML = '';
+    if (W2.sel) { const k = (W2.sel.y * 16 + W2.sel.x) * 4, r = img16.data[k], g = img16.data[k + 1], b = img16.data[k + 2], gr = Math.round(lum(r, g, b));
+      det.append(h('b', null, 'Pixel (' + W2.sel.x + ' ; ' + W2.sel.y + ') : '), 'R = ' + r + ', V = ' + g + ', B = ' + b + ' · #' + hex2(r) + hex2(g) + hex2(b) + ' · niveau de gris équivalent : ' + gr, h('span', { class: 'chipc', style: 'background:rgb(' + r + ',' + g + ',' + b + ')' })); }
+    else det.append('Cliquez sur un pixel de l’image 16 × 16 pour lire ses valeurs.'); };
+  root.append(h('h3', null, '2. Inspecter les pixels d’une image'), h('p', null, 'Cette image fait 16 × 16 pixels. Cliquez sur un pixel : chaque pixel est un triplet (R, V, B). Le ciel a un bleu fort, l’herbe un vert fort.'), insp, det);
+  /* profondeur */
+  const pb = h('div', { class: 'pixbox' }), pi = h('div', { class: 'gstats' }), bg = h('input', { type: 'range', min: 1, max: 8, step: 1, value: W2.bits, 'aria-label': 'Bits par composante' }), bv = h('b');
+  const drawB = () => { W2.bits = +bg.value; bv.textContent = W2.bits + ' bit' + (W2.bits > 1 ? 's' : '') + ' par composante';
+    const src = downsample(baseImage(), 64), o = new ImageData(64, 64), lv = 2 ** W2.bits, st = 255 / (lv - 1);
+    for (let i = 0; i < src.data.length; i++) o.data[i] = (i % 4 === 3) ? 255 : Math.round(Math.round(src.data[i] / 255 * (lv - 1)) * st);
+    pb.innerHTML = ''; pb.append(cvs(o, 256));
+    pi.innerHTML = ''; [['Niveaux par composante', lv], ['Couleurs possibles', (lv ** 3).toLocaleString('fr-FR')], ['Bits par pixel', W2.bits * 3]].forEach(k => pi.append(h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, String(k[1]))))); };
+  bg.addEventListener('input', drawB);
+  root.append(h('h3', null, '3. Profondeur de couleur'), h('p', null, 'Avec 8 bits par composante (24 bits par pixel), on dispose de 256 niveaux par composante, soit 256³ ≈ 16,7 millions de couleurs. Réduisez le nombre de bits pour voir apparaître des aplats.'),
+    h('label', { class: 'fld' }, h('span', null, 'Profondeur : ', bv), bg), pb, pi);
+  upd(); drawI(); drawB();
+}
+WORKSHOPS.push({ id: 'p2', title: 'Les couleurs', hint: 'Mélangez du rouge, du vert et du bleu, inspectez des pixels et réduisez la profondeur de couleur.', mount: mountW2, reset: () => { Object.assign(W2, { r: 255, g: 128, b: 0, bits: 8, sel: null }); } });
+
+/* ---------- Atelier 3 : traiter une image ---------- */
+const KERN = { id: [0, 0, 0, 0, 1, 0, 0, 0, 0, 1], blur: [1, 1, 1, 1, 1, 1, 1, 1, 1, 9], edge: [-1, -1, -1, -1, 8, -1, -1, -1, -1, 1], sharp: [0, -1, 0, -1, 5, -1, 0, -1, 0, 1], emboss: [-2, -1, 0, -1, 1, 1, 0, 1, 2, 1] };
+const FILT = [['orig', 'Original'], ['gray', 'Niveaux de gris'], ['neg', 'Négatif'], ['bright', 'Luminosité'], ['contrast', 'Contraste'], ['thresh', 'Seuillage'], ['blur', 'Flou'], ['edge', 'Contours'], ['sharp', 'Netteté'], ['custom', 'Matrice libre']];
+const W3 = { f: 'gray', bright: 60, contrast: 150, thresh: 128, k: KERN.blur.slice(), kgray: false };
+function convolve(img, k, gray) {
+  const w = img.width, h2 = img.height, o = new ImageData(w, h2), d = k[9] || 1;
+  const src = gray ? (() => { const g = new Uint8ClampedArray(img.data); for (let i = 0; i < g.length; i += 4) { const v = lum(g[i], g[i + 1], g[i + 2]); g[i] = g[i + 1] = g[i + 2] = v; } return g; })() : img.data;
+  for (let y = 0; y < h2; y++) for (let x = 0; x < w; x++) for (let c = 0; c < 3; c++) { let s = 0; for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++) { const xx = Math.min(w - 1, Math.max(0, x + i)), yy = Math.min(h2 - 1, Math.max(0, y + j)); s += src[(yy * w + xx) * 4 + c] * k[(j + 1) * 3 + i + 1]; } o.data[(y * w + x) * 4 + c] = s / d; o.data[(y * w + x) * 4 + 3] = 255; }
+  return o;
+}
+function applyFilter(img) {
+  const o = new ImageData(new Uint8ClampedArray(img.data), img.width, img.height), D = o.data;
+  const each = fn => { for (let i = 0; i < D.length; i += 4) { const r = fn(D[i], D[i + 1], D[i + 2]); D[i] = r[0]; D[i + 1] = r[1]; D[i + 2] = r[2]; } return o; };
+  switch (W3.f) {
+    case 'gray': return each((r, g, b) => { const v = lum(r, g, b); return [v, v, v]; });
+    case 'neg': return each((r, g, b) => [255 - r, 255 - g, 255 - b]);
+    case 'bright': return each((r, g, b) => [r + W3.bright, g + W3.bright, b + W3.bright]);
+    case 'contrast': return each((r, g, b) => { const c = W3.contrast / 100; return [(r - 128) * c + 128, (g - 128) * c + 128, (b - 128) * c + 128]; });
+    case 'thresh': return each((r, g, b) => { const v = lum(r, g, b) > W3.thresh ? 255 : 0; return [v, v, v]; });
+    case 'blur': return convolve(img, KERN.blur, false);
+    case 'edge': return convolve(img, KERN.edge, true);
+    case 'sharp': return convolve(img, KERN.sharp, false);
+    case 'custom': return convolve(img, W3.k, W3.kgray);
+    default: return o;
+  }
+}
+function histo(img) { const bins = Array(32).fill(0); for (let i = 0; i < img.data.length; i += 4) bins[Math.min(31, Math.floor(lum(img.data[i], img.data[i + 1], img.data[i + 2]) / 8))]++; return bins; }
+function histSvg(bins) {
+  const mx = Math.max(...bins), svg = sv('svg', { viewBox: '0 0 320 110', class: 'histo', role: 'img', 'aria-label': 'Histogramme des niveaux de luminosité' });
+  bins.forEach((v, i) => svg.append(sv('rect', { x: i * 10 + 1, y: 90 - v / mx * 85, width: 8, height: v / mx * 85, class: 'hb' })));
+  svg.append(sv('line', { x1: 0, y1: 90, x2: 320, y2: 90, stroke: '#555' })); svg.append(sv('text', { x: 0, y: 105, class: 'gl2' }, '0 (noir)')); svg.append(sv('text', { x: 320, y: 105, 'text-anchor': 'end', class: 'gl2' }, '255 (blanc)'));
+  return svg;
+}
+function mountW3(root) {
+  root.append(h('h2', null, 'Traiter une image'),
+    h('p', null, 'Traiter une image, c’est appliquer un calcul à chacun de ses pixels, ou à un pixel et ses voisins. L’image ci-dessous fait 64 × 64 pixels. Choisissez un traitement.'));
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Traitement' }), par = h('div'), view = h('div', { class: 'two2' }), kbox = h('div'), dd = h('p', { class: 'small' });
+  const src = downsample(baseImage(), 64);
+  const desc = { orig: 'Image d’origine, sans traitement.', gray: 'Chaque pixel prend le niveau de gris 0,299 R + 0,587 V + 0,114 B : l’œil est plus sensible au vert.', neg: 'Chaque composante v devient 255 − v.', bright: 'On ajoute une valeur à chaque composante (limitée entre 0 et 255).', contrast: 'On écarte les valeurs de 128 : (v − 128) × facteur + 128.', thresh: 'Un pixel devient blanc s’il est plus clair que le seuil, noir sinon : l’image n’a plus que 2 valeurs.', blur: 'Chaque pixel devient la moyenne de lui-même et de ses 8 voisins.', edge: 'Un pixel très différent de ses voisins reste clair ; les zones uniformes deviennent noires.', sharp: 'On renforce la différence entre un pixel et ses voisins.', custom: 'Choisissez un exemple ou modifiez les coefficients.' };
+  function draw() {
+    chips.innerHTML = ''; FILT.forEach(f => chips.append(h('button', { type: 'button', class: 'chip' + (W3.f === f[0] ? ' on' : ''), 'aria-pressed': W3.f === f[0] ? 'true' : 'false', onclick: () => { W3.f = f[0]; draw(); } }, f[1])));
+    par.innerHTML = ''; dd.textContent = desc[W3.f];
+    const sl = (k, lab, mi, ma, st) => { const v = h('b', null, String(W3[k])), i = h('input', { type: 'range', min: mi, max: ma, step: st, value: W3[k], 'aria-label': lab }); i.addEventListener('input', () => { W3[k] = +i.value; v.textContent = W3[k]; show(); }); return h('label', { class: 'fld' }, h('span', null, lab + ' : ', v), i); };
+    if (W3.f === 'bright') par.append(sl('bright', 'Ajout à chaque composante', -150, 150, 10));
+    if (W3.f === 'contrast') par.append(sl('contrast', 'Contraste (%)', 20, 300, 10));
+    if (W3.f === 'thresh') par.append(sl('thresh', 'Seuil de luminosité', 0, 255, 5));
+    kbox.innerHTML = '';
+    if (W3.f === 'custom') { const g = h('div', { class: 'kern' }); W3.k.slice(0, 9).forEach((v, i) => { const inp = h('input', { type: 'number', value: v, step: 1, 'aria-label': 'Coefficient ' + (i + 1) }); inp.addEventListener('input', () => { W3.k[i] = +inp.value; show(); }); g.append(inp); });
+      const dv = h('input', { type: 'number', value: W3.k[9], step: 1, 'aria-label': 'Diviseur' }); dv.addEventListener('input', () => { W3.k[9] = +dv.value || 1; show(); });
+      const gc = h('input', { type: 'checkbox', checked: W3.kgray, onchange: e => { W3.kgray = e.target.checked; show(); } });
+      kbox.append(h('p', { class: 'small' }, 'Pour chaque pixel, on multiplie le pixel et ses 8 voisins par ces coefficients, on additionne, puis on divise par le diviseur (c’est une convolution). Exemples :'),
+        h('div', { class: 'chips' }, [['Identité', 'id'], ['Flou', 'blur'], ['Contours', 'edge'], ['Netteté', 'sharp'], ['Relief', 'emboss']].map(p => h('button', { type: 'button', class: 'chip', onclick: () => { W3.k = KERN[p[1]].slice(); draw(); } }, p[0]))),
+        h('div', { class: 'opts' }, g, h('label', { class: 'fld' }, h('span', null, 'Diviseur'), dv), h('label', { class: 'fld chk' }, gc, 'Sur le niveau de gris')));
+    }
+    show();
+  }
+  function show() { const res = applyFilter(src); view.innerHTML = ''; view.append(h('div', null, h('h3', null, 'Avant'), cvs(src, 256), histSvg(histo(src))), h('div', null, h('h3', null, 'Après'), cvs(res, 256), histSvg(histo(res)))); }
+  root.append(chips, par, kbox, dd, view,
+    h('p', { class: 'small' }, 'L’histogramme montre combien de pixels ont chaque niveau de luminosité, du noir (à gauche) au blanc (à droite). Une image sombre a son histogramme à gauche, une image claire à droite, une image contrastée étalée sur toute la largeur.'));
+  draw();
+}
+WORKSHOPS.push({ id: 'p3', title: 'Traiter une image', hint: 'Appliquez des filtres pixel par pixel, observez l’histogramme et créez votre filtre 3 × 3.', mount: mountW3, reset: () => { Object.assign(W3, { f: 'gray', bright: 60, contrast: 150, thresh: 128, k: KERN.blur.slice(), kgray: false }); } });
+
+/* ---------- Atelier 4 : compression ---------- */
+const SMILEY = Array.from({ length: 16 }, (_, y) => Array.from({ length: 30 }, (_, x) => (y >= 3 && y <= 12 && x >= 3 && x <= 26 && !(y >= 6 && y <= 9 && x >= 9 && x <= 20)) ? 1 : 0));
+const QT = [16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55, 14, 13, 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109, 103, 77, 24, 35, 55, 64, 81, 104, 113, 92, 49, 64, 78, 87, 103, 121, 120, 101, 72, 92, 95, 98, 112, 100, 103, 99];
+const COS = Array.from({ length: 8 }, (_, u) => Array.from({ length: 8 }, (_, x) => Math.cos((2 * x + 1) * u * Math.PI / 16)));
+const CU = u => u === 0 ? Math.SQRT1_2 : 1;
+function jpegSim(img, q) {
+  const w = img.width, scale = q < 50 ? 5000 / q : 200 - 2 * q, Q = QT.map(t => Math.min(255, Math.max(1, Math.floor((t * scale + 50) / 100)))), out = new ImageData(w, img.height), cnt = new Map(); let total = 0, err = 0;
+  for (let c = 0; c < 3; c++) for (let by = 0; by < img.height; by += 8) for (let bx = 0; bx < w; bx += 8) {
+    const f = new Float64Array(64), qd = new Float64Array(64);
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) f[y * 8 + x] = img.data[((by + y) * w + bx + x) * 4 + c] - 128;
+    for (let v = 0; v < 8; v++) for (let u = 0; u < 8; u++) { let s = 0; for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) s += f[y * 8 + x] * COS[u][x] * COS[v][y]; const F = s * CU(u) * CU(v) / 4, qv = Math.round(F / Q[v * 8 + u]); qd[v * 8 + u] = qv * Q[v * 8 + u]; cnt.set(qv, (cnt.get(qv) || 0) + 1); total++; }
+    for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { let s = 0; for (let v = 0; v < 8; v++) for (let u = 0; u < 8; u++) s += CU(u) * CU(v) * qd[v * 8 + u] * COS[u][x] * COS[v][y]; const val = Math.max(0, Math.min(255, Math.round(s / 4 + 128))), k = ((by + y) * w + bx + x) * 4 + c; out.data[k] = val; err += Math.abs(val - img.data[k]); }
+  }
+  for (let i = 3; i < out.data.length; i += 4) out.data[i] = 255;
+  let bits = 0; cnt.forEach(n => { bits -= n * Math.log2(n / total); });
+  return { out, bits, mae: err / (w * img.height * 3) };
+}
+const W4 = { tab: 'rle', q: 50, bmp: SMILEY.map(r => r.slice()) };
+function mountW4(root) {
+  root.append(h('h2', null, 'Compresser une image'),
+    h('p', null, 'Une photo brute de 12 mégapixels pèse 36 Mo : trop pour la stocker ou l’envoyer. La ', h('b', null, 'compression'), ' réduit la taille d’un fichier. Elle peut se faire ', h('b', null, 'sans perte'), ' (on retrouve exactement l’image) ou ', h('b', null, 'avec perte'), ' (on accepte de perdre des détails peu visibles).'));
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div');
+  const draw = () => { tabs.innerHTML = ''; [['rle', 'Sans perte : le codage par plages'], ['jpeg', 'Avec perte : le JPEG']].forEach(t => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': W4.tab === t[0] ? 'true' : 'false', onclick: () => { W4.tab = t[0]; draw(); } }, t[1])));
+    body.innerHTML = ''; (W4.tab === 'rle' ? rleTab : jpegTab)(body, draw); };
+  root.append(tabs, body); draw();
+}
+function rleTab(box, redraw) {
+  const bmp = W4.bmp, hh = bmp.length, ww = bmp[0].length;
+  const grid = h('div', { class: 'bgrid', style: 'grid-template-columns:repeat(' + ww + ',16px)' });
+  bmp.forEach((r, y) => r.forEach((v, x) => grid.append(h('button', { type: 'button', class: 'bc' + (v ? ' on' : ''), 'aria-label': 'Pixel ' + x + ' ; ' + y + (v ? ' noir' : ' blanc'), 'aria-pressed': v ? 'true' : 'false', onclick: () => { bmp[y][x] = v ? 0 : 1; redraw(); } }))));
+  let runs = 0; const lines = bmp.map((r, y) => { const out = []; let cur = 0, n = 0; r.forEach(v => { if (v === cur) n++; else { out.push(n + (cur ? 'N' : 'B')); cur = v; n = 1; } }); out.push(n + (cur ? 'N' : 'B')); runs += out.length; return 'ligne ' + String(y + 1).padStart(2, ' ') + ' : ' + out.join(' '); });
+  const raw = ww * hh, rle = runs * 5;
+  box.append(h('p', null, 'Cette image en noir et blanc fait ' + ww + ' × ' + hh + ' pixels. Au lieu de mémoriser chaque pixel, on mémorise des ', h('b', null, 'plages'), ' : « 7 blancs, 8 noirs, 5 blancs ». C’est le codage par plages (RLE, ', h('i', null, 'run-length encoding'), '), utilisé dans certains formats. Cliquez sur les pixels pour modifier le dessin.'), grid,
+    h('pre', { class: 'code' }, lines.join('\n')),
+    h('div', { class: 'gstats' }, [['Sans compression', raw + ' bits (1 bit par pixel)'], ['Avec plages', runs + ' plages × 5 bits = ' + rle + ' bits'], ['Taux de compression', fmt(raw / rle) + ' : 1']].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, k[1])))),
+    h('p', { class: 'small' }, rle < raw ? 'Les grandes zones uniformes se compressent très bien.' : 'Ici le codage est plus long que l’image : quand il y a trop de changements (image « bruitée »), la méthode ne gagne rien, voire perd.'),
+    h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { for (let y = 0; y < hh; y++) for (let x = 0; x < ww; x++) bmp[y][x] = (x + y) % 2; redraw(); } }, 'Damier (pire cas)'), ' ', h('button', { class: 'btn sm', type: 'button', onclick: () => { for (let y = 0; y < hh; y++) for (let x = 0; x < ww; x++) bmp[y][x] = 0; redraw(); } }, 'Tout blanc'), ' ', h('button', { class: 'btn sm', type: 'button', onclick: () => { SMILEY.forEach((r, y) => r.forEach((v, x) => { bmp[y][x] = v; })); redraw(); } }, 'Rétablir le dessin')));
+}
+function jpegTab(box) {
+  const src = downsample(baseImage(), 64), view = h('div', { class: 'two2' }), info = h('div', { class: 'gstats' });
+  const rg = h('input', { type: 'range', min: 1, max: 100, step: 1, value: W4.q, 'aria-label': 'Qualité' }), rv = h('b');
+  const orig = cvs(src, 288);
+  function upd() { W4.q = +rg.value; rv.textContent = W4.q; const r = jpegSim(src, W4.q), raw = 64 * 64 * 3 * 8;
+    view.innerHTML = ''; view.append(h('div', null, h('h3', null, 'Original'), orig), h('div', null, h('h3', null, 'Après compression'), cvs(r.out, 288)));
+    info.innerHTML = ''; [['Taille brute', fmt(raw / 8 / 1024) + ' Ko'], ['Taille estimée compressée', fmt(r.bits / 8 / 1024) + ' Ko'], ['Taux de compression', fmt(raw / r.bits) + ' : 1'], ['Écart moyen par composante', fmt(r.mae) + ' / 255']].forEach(k => info.append(h('div', { class: 'stat' }, h('span', null, k[0]), h('b', null, k[1])))); }
+  rg.addEventListener('input', upd);
+  box.append(h('p', null, 'Le format ', h('b', null, 'JPEG'), ' découpe l’image en blocs de 8 × 8 pixels, transforme chaque bloc pour séparer les détails fins (peu visibles) des variations larges, puis arrondit les détails fins : c’est là qu’on perd de l’information. Plus la qualité est basse, plus on arrondit, plus le fichier est petit.'),
+    h('label', { class: 'fld' }, h('span', null, 'Qualité JPEG (1 à 100) : ', rv), rg), view, info,
+    h('p', { class: 'small' }, 'À basse qualité, on voit apparaître des carrés de 8 × 8 pixels et des halos autour des contours. La taille est une estimation (entropie des coefficients) ; un vrai fichier JPEG contient aussi un en-tête et d’autres optimisations.'));
+  upd();
+}
+WORKSHOPS.push({ id: 'p4', title: 'Compression', hint: 'Compressez sans perte avec des plages, puis avec perte avec un JPEG simplifié.', mount: mountW4, reset: () => { W4.tab = 'rle'; W4.q = 50; W4.bmp = SMILEY.map(r => r.slice()); } });
+
+/* ---------- Atelier 5 : métadonnées, authenticité, droits ---------- */
+const META5 = [['app', 'Appareil', 'Téléphone modèle X-12, numéro de série 4F7A-…', 'Relie plusieurs photos au même appareil, donc à la même personne.'], ['date', 'Date et heure', '14 mars 2025, 17 h 42', 'Révèle quand la personne était là : ses habitudes.'], ['gps', 'Position GPS', '45,1234 N ; 5,0400 E (devant le lycée)', 'Révèle où la photo a été prise : lieu d’études, domicile, loisirs.'], ['auteur', 'Auteur', 'M. Durand', 'Identifie directement la personne qui a pris la photo.'], ['soft', 'Logiciel', 'Retouchée avec l’application PhotoPlus', 'Indique que l’image a été modifiée après la prise de vue.'], ['reg', 'Réglages', 'f/1,8 ; 1/120 s ; ISO 100', 'Informations techniques sans danger pour la vie privée.']];
+const SORT_FAKE = [
+  { t: 'Photo du pont fermé, publiée par un journal local identifié, avec date, lieu, nom du photographe et deux autres photos du même endroit.', a: 0, w: 'Source identifiée, contexte précis, plusieurs images concordantes : plutôt fiable.' },
+  { t: 'Photo d’une rivière en crue, partagée avec « ce matin à Valmont ». Une recherche d’image inversée la retrouve dans un article de 2019 sur une autre ville.', a: 1, w: 'Photo authentique mais hors contexte : elle ne montre pas ce qu’on prétend.' },
+  { t: 'Portrait d’une « personne » : une main a six doigts, les boucles d’oreilles sont différentes, le texte à l’arrière-plan est déformé.', a: 2, w: 'Des détails incohérents (doigts, symétrie, texte) sont des indices d’une image générée par IA.' },
+  { t: 'Capture d’écran d’un message attribué à un élu : police et alignement différents du vrai réseau, aucun lien vers le message d’origine.', a: 2, w: 'Les captures sont faciles à fabriquer : on cherche le message original sur le compte officiel.' },
+  { t: 'Photo de coucher de soleil très saturée, avec la mention « filtre appliqué » dans la légende, publiée par son auteur.', a: 0, w: 'Une retouche esthétique assumée n’est pas une tromperie : l’auteur le dit.' },
+  { t: 'Photo virale d’un animal géant, sans auteur ni lieu, relayée par des comptes anonymes ; l’ombre ne va pas dans le même sens que celle du décor.', a: 2, w: 'Absence de source et ombres incohérentes : montage probable.' }];
+const SORT_LAW = [
+  { t: 'Publier sur le blog du lycée la photo d’un élève de seconde, reconnaissable, sans l’accord de ses parents.', a: 1, w: 'Le droit à l’image : un mineur est protégé, l’accord des parents est nécessaire pour publier.' },
+  { t: 'Publier une photo humiliante d’un camarade, même s’il a accepté de poser.', a: 2, w: 'Atteinte à la dignité et cyberharcèlement : c’est interdit, même avec accord pour la photo.' },
+  { t: 'Illustrer un exposé avec une photo trouvée sur un site, sans vérifier la licence ni citer l’auteur.', a: 1, w: 'L’auteur détient des droits : il faut sa permission ou une licence qui l’autorise, et citer la source.' },
+  { t: 'Illustrer un exposé avec une photo sous licence Creative Commons (CC BY) en citant l’auteur.', a: 0, w: 'La licence autorise la réutilisation à condition de citer l’auteur.' },
+  { t: 'Photographier un camarade à son insu au vestiaire et partager l’image.', a: 2, w: 'Atteinte grave à l’intimité, punie par la loi.' },
+  { t: 'Publier la photo d’une foule lors d’un concert, où personne n’est mis en avant.', a: 0, w: 'Une personne dans une foule n’est pas ciblée : en général, c’est toléré.' }];
+const W5 = { tab: 'meta', meta: { app: true, date: true, gps: true, auteur: true, soft: true, reg: true }, fake: {}, law: {} };
+function mountW5(root) {
+  root.append(h('h2', null, 'Métadonnées, authenticité et droits'));
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div');
+  const draw = () => { tabs.innerHTML = ''; [['meta', 'Métadonnées'], ['fake', 'Vraie ou truquée ?'], ['law', 'Droits']].forEach(t => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': W5.tab === t[0] ? 'true' : 'false', onclick: () => { W5.tab = t[0]; draw(); } }, t[1])));
+    body.innerHTML = ''; (W5.tab === 'meta' ? metaTab : W5.tab === 'fake' ? fakeTab : lawTab)(body, draw); };
+  root.append(tabs, body); draw();
+}
+function metaTab(box, redraw) {
+  box.append(h('p', null, 'Une photo numérique contient, à côté de l’image, des ', h('b', null, 'métadonnées'), ' (format EXIF) ajoutées automatiquement par l’appareil. Indiquez celles que vous supprimez avant de publier.'));
+  const list = h('div', { class: 'sorts' });
+  META5.forEach(m => list.append(h('div', { class: 'sortrow' }, h('span', { class: 'si' }, h('b', null, m[1] + ' : '), m[2]), h('span', { class: 'sb' },
+    h('button', { type: 'button', class: 'btn sm' + (W5.meta[m[0]] ? ' badc' : ''), 'aria-pressed': W5.meta[m[0]] ? 'true' : 'false', onclick: () => { W5.meta[m[0]] = true; redraw(); } }, 'Présente'),
+    h('button', { type: 'button', class: 'btn sm' + (!W5.meta[m[0]] ? ' good' : ''), 'aria-pressed': !W5.meta[m[0]] ? 'true' : 'false', onclick: () => { W5.meta[m[0]] = false; redraw(); } }, 'Supprimée')))));
+  const ded = META5.filter(m => W5.meta[m[0]]);
+  box.append(list, h('h3', null, 'Ce que révèle la photo publiée'), ded.length ? h('ul', null, ded.map(m => h('li', null, h('b', null, m[1] + ' : '), m[3]))) : h('p', { class: 'score' }, 'Plus aucune information annexe : seule l’image reste.'),
+    h('p', { class: 'small' }, 'Beaucoup de réseaux sociaux retirent les métadonnées à l’affichage, mais pas tous, et pas les messageries qui envoient le fichier original. Les données utiles à l’image (réglages) ne posent pas de problème : on supprime surtout position, date, appareil et auteur.'));
+}
+function fakeTab(box, redraw) {
+  box.append(h('p', null, 'Quelle confiance accorder à ces images ? Pour chacune, choisissez la réaction la plus juste.'), h('p', { class: 'small' }, 'Indices : source identifiable ? date et lieu ? recherche d’image inversée ? détails incohérents (mains, ombres, texte, reflets) ?'));
+  const b = h('div', { class: 'sorts' }); sortWidget(b, SORT_FAKE, ['Plutôt fiable', 'Hors contexte ou retouchée : à vérifier', 'Probablement générée ou truquée'], W5.fake, redraw);
+  box.append(b, h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W5.fake = {}; redraw(); } }, 'Recommencer')));
+  box.querySelector('.sorts') && null;
+}
+function lawTab(box, redraw) {
+  box.append(h('p', null, 'Prendre et publier des photos est encadré par la loi : le droit à l’image, le droit d’auteur, le respect de la vie privée. Dans chaque situation, que dit le droit ?'));
+  const b = h('div', { class: 'sorts' }); sortWidget(b, SORT_LAW, ['Autorisé', 'Accord nécessaire', 'Interdit'], W5.law, redraw);
+  box.append(b, h('p', null, h('button', { class: 'btn sm', type: 'button', onclick: () => { W5.law = {}; redraw(); } }, 'Recommencer')));
+}
+WORKSHOPS.push({ id: 'p5', title: 'Métadonnées et droits', hint: 'Supprimez des métadonnées, repérez les images douteuses et situez les règles de droit.', mount: mountW5, reset: () => { W5.tab = 'meta'; W5.meta = { app: true, date: true, gps: true, auteur: true, soft: true, reg: true }; W5.fake = {}; W5.law = {}; } });
+
+/*ACT-START*/
+const ACT = {
+  p1: {
+    title: 'Du réel aux pixels', level: 'Niveau 1 · Découvrir', time: '20 min', course: 'pixels',
+    goal: 'Comprendre qu’une photo numérique est une grille de pixels, et relier définition, mégapixels, taille brute et résolution d’impression.',
+    steps: [
+      'Réglez la définition sur <b>4 × 4</b> puis augmentez peu à peu jusqu’à <b>128 × 128</b>. À partir de quelle définition reconnaissez-vous la maison, le soleil et l’arbre ?',
+      'Relevez le nombre de pixels et la taille brute pour 16 × 16 puis 32 × 32. Quand on double la largeur et la hauteur, par combien le nombre de pixels est-il multiplié ?',
+      'Dans « Mégapixels et taille brute », calculez 4 000 × 3 000. Combien de mégapixels ? Quelle taille brute ?',
+      'Essayez 1 920 × 1 080 (écran Full HD). Combien de mégapixels ?',
+      'Dans « Quelle définition pour imprimer ? », calculez les pixels nécessaires pour une photo de 10 × 15 cm à 300 ppp, puis pour une affiche de 100 × 70 cm.',
+      'Comparez : une photo de téléphone de 12 mégapixels suffit-elle pour chacun des deux tirages ?'
+    ],
+    defi: { q: 'Quelle est la plus grande largeur d’impression, en cm, d’une photo de 4 000 × 3 000 pixels à 300 ppp ? Et pour la hauteur ?',
+      a: 'Largeur : 4 000 ÷ 300 ≈ 13,3 pouces, soit 13,3 × 2,54 ≈ 33,9 cm. Hauteur : 3 000 ÷ 300 = 10 pouces = 25,4 cm. On peut donc imprimer à environ 34 × 25 cm en gardant 300 ppp. Pour une affiche de 100 cm de large, il faudrait environ 11 800 pixels de large : la photo serait floue de près.' },
+    qcm: [
+      { q: 'Qu’est-ce qu’un pixel ?', o: ['Un type de fichier', 'Le plus petit élément d’une image numérique, avec une couleur', 'Un câble', 'Un filtre photo'], a: 1, w: 'Une image est une grille de pixels ; chacun mémorise une couleur.' },
+      { q: 'Une image de 4 000 × 3 000 pixels a combien de mégapixels ?', o: ['7', '12', '120', '1 200'], a: 1, w: '4 000 × 3 000 = 12 000 000 pixels = 12 mégapixels.' },
+      { q: 'Quand on double la largeur ET la hauteur d’une image, le nombre de pixels est multiplié par…', o: ['2', '3', '4', '8'], a: 2, w: '2 × 2 = 4. Dans l’atelier, 16 × 16 = 256 pixels devient 32 × 32 = 1 024 pixels.' },
+      { q: 'Combien d’octets faut-il pour un pixel codé en 24 bits (RVB, 8 bits par composante) ?', o: ['1', '3', '8', '24'], a: 1, w: '24 bits = 3 octets.' },
+      { q: 'La résolution d’impression s’exprime en…', o: ['Mégapixels', 'Pixels par pouce (ppp ou dpi)', 'Octets', 'Hertz'], a: 1, w: '300 ppp signifie 300 pixels sur 1 pouce (2,54 cm).' },
+      { q: 'Pourquoi une photo agrandie sur une grande affiche paraît-elle floue de près ?', o: ['Le papier est mauvais', 'Il n’y a pas assez de pixels pour la taille : chaque pixel est étalé et visible', 'Elle est en noir et blanc', 'Les couleurs changent'], a: 1, w: 'Quand les pixels sont agrandis, on distingue les carrés et on perd en finesse.' }
+    ]
+  },
+  p2: {
+    title: 'Les couleurs', level: 'Niveau 1 · Comprendre', time: '25 min', course: 'couleurs',
+    goal: 'Comprendre le codage RVB d’une couleur, lire les valeurs d’un pixel, et voir l’effet de la profondeur de couleur.',
+    steps: [
+      'Dans le mélangeur, obtenez du <b>jaune</b>, du <b>blanc</b>, du <b>noir</b>, puis un <b>gris</b>. Quelles valeurs de R, V, B avez-vous utilisées ?',
+      'Notez le code hexadécimal de l’orange (255, 128, 0). Comment s’écrit 128 en hexadécimal ?',
+      'Dans l’image 16 × 16, cliquez sur un pixel du ciel, de l’herbe et du toit. Quelle composante domine à chaque fois ?',
+      'Passez le curseur de profondeur de 8 bits à 1 bit. À quel moment les dégradés du ciel se transforment-ils en bandes ?',
+      'Relevez le nombre de couleurs possibles pour 8, 4, 2 et 1 bit par composante.'
+    ],
+    defi: { q: 'Avec 4 bits par composante, combien de couleurs peut-on représenter ? Et combien de bits par pixel ?',
+      a: '4 bits donnent 2⁴ = 16 niveaux par composante, soit 16 × 16 × 16 = 4 096 couleurs (2¹²). Il y a 3 × 4 = 12 bits par pixel, contre 24 bits pour 16,7 millions de couleurs en 8 bits par composante.' },
+    qcm: [
+      { q: 'Que signifie RVB ?', o: ['Rouge, Vert, Bleu', 'Rouge, Violet, Brun', 'Réseau Virtuel Binaire', 'Résolution, Vitesse, Bits'], a: 0, w: 'Un écran fabrique ses couleurs en mélangeant ces trois lumières.' },
+      { q: 'Quelle couleur obtient-on avec R = 255, V = 255, B = 0 ?', o: ['Blanc', 'Cyan', 'Jaune', 'Violet'], a: 2, w: 'Rouge + vert = jaune en synthèse additive.' },
+      { q: 'Quel triplet donne un gris moyen ?', o: ['(255, 0, 0)', '(128, 128, 128)', '(0, 0, 255)', '(255, 255, 0)'], a: 1, w: 'Les trois composantes égales donnent un gris : plus elles sont élevées, plus il est clair.' },
+      { q: 'Combien de couleurs différentes avec 8 bits par composante ?', o: ['256', '65 536', 'Environ 16,7 millions', 'Environ 16 milliards'], a: 2, w: '256 × 256 × 256 = 16 777 216.' },
+      { q: 'En hexadécimal, #FF0000 est…', o: ['Du bleu', 'Du vert', 'Du rouge', 'Du noir'], a: 2, w: 'FF = 255 pour le rouge, 00 pour le vert et le bleu.' },
+      { q: 'Si on réduit la profondeur de couleur, que se passe-t-il ?', o: ['L’image est plus nette', 'Il y a moins de couleurs et des bandes apparaissent dans les dégradés', 'Le nombre de pixels diminue', 'Rien'], a: 1, w: 'Avec moins de niveaux, les nuances sont arrondies : on voit des aplats.' },
+      { q: 'Combien de bits faut-il pour un pixel noir ou blanc seulement (2 couleurs) ?', o: ['1', '2', '8', '24'], a: 0, w: '1 bit suffit pour 2 valeurs : 0 ou 1.' }
+    ]
+  },
+  p3: {
+    title: 'Traiter une image', level: 'Niveau 2 · Manipuler', time: '30 min', course: 'traitement',
+    goal: 'Comprendre qu’un traitement d’image est un calcul sur les pixels, lire un histogramme, et découvrir la convolution (flou, contours, netteté).',
+    steps: [
+      'Appliquez « Niveaux de gris » puis « Négatif ». Que devient l’histogramme dans chaque cas ?',
+      'Avec « Luminosité », déplacez le curseur vers la droite puis vers la gauche : dans quel sens se déplace l’histogramme ?',
+      'Avec « Contraste », augmentez le facteur : l’histogramme s’étale ou se resserre ?',
+      'Avec « Seuillage », déplacez le seuil : combien de valeurs de gris reste-t-il dans l’image ?',
+      'Comparez « Flou », « Contours » et « Netteté ». Chacun regarde le pixel et ses voisins.',
+      'Dans « Matrice libre », choisissez « Flou », puis mettez le diviseur à 1 : que se passe-t-il ? Pourquoi ?'
+    ],
+    defi: { q: 'Quelle matrice 3 × 3 de convolution produit un flou ? Pourquoi divise-t-on le résultat par 9 ?',
+      a: 'Une matrice de neuf coefficients 1 : chaque pixel devient la somme de lui-même et de ses 8 voisins. En divisant par 9, on obtient la moyenne et on garde la même luminosité. Sans le diviseur, l’image serait environ 9 fois plus claire et presque entièrement blanche.' },
+    qcm: [
+      { q: 'Le niveau de gris d’un pixel se calcule à partir de…', o: ['La position du pixel', 'Ses composantes rouge, verte et bleue', 'Sa taille', 'Le nom du fichier'], a: 1, w: 'On pondère R, V, B (0,299 R + 0,587 V + 0,114 B).' },
+      { q: 'Le négatif d’une composante v est…', o: ['v + 255', '255 − v', 'v ÷ 2', '0'], a: 1, w: 'Le noir (0) devient blanc (255) et inversement.' },
+      { q: 'Un histogramme dont presque tous les pixels sont à gauche correspond à une image…', o: ['Très claire', 'Très sombre', 'Contrastée', 'En couleurs'], a: 1, w: 'À gauche : niveaux proches de 0 (noir).' },
+      { q: 'Le seuillage donne une image…', o: ['Avec deux valeurs seulement (noir et blanc)', 'Plus floue', 'Avec plus de couleurs', 'Inchangée'], a: 0, w: 'Chaque pixel devient noir ou blanc selon qu’il dépasse le seuil ou non.' },
+      { q: 'Que fait un filtre de flou 3 × 3 ?', o: ['Il remplace chaque pixel par la moyenne de lui-même et de ses voisins', 'Il supprime des pixels', 'Il augmente la taille', 'Il change le format'], a: 0, w: 'Les détails fins sont lissés.' },
+      { q: 'Un filtre de détection de contours laisse clair…', o: ['Les zones uniformes', 'Les pixels très différents de leurs voisins', 'Tous les pixels', 'Les pixels rouges'], a: 1, w: 'Aux contours, la valeur change brusquement ; ailleurs, le calcul donne presque 0.' },
+      { q: 'Pour calculer le pixel (x ; y) avec un noyau 3 × 3, on utilise…', o: ['Ce pixel seul', 'Ce pixel et ses 8 voisins', 'L’image entière', 'La ligne suivante'], a: 1, w: 'On parle de convolution : produit de chaque voisin par un coefficient, puis somme.' }
+    ]
+  },
+  p4: {
+    title: 'Compression', level: 'Niveau 2 · Analyser', time: '25 min', course: 'compression',
+    goal: 'Comprendre pourquoi on compresse les images, la différence entre compression sans perte et avec perte, et le compromis taille / qualité.',
+    steps: [
+      'Dans « Sans perte », observez le codage par plages. Combien de bits sans compression ? Avec les plages ?',
+      'Cliquez sur quelques pixels pour ajouter du « bruit ». Que devient le taux de compression ?',
+      'Cliquez sur « Damier (pire cas) » : le codage par plages est-il toujours avantageux ?',
+      'Dans « Avec perte », réglez la qualité JPEG à 90, 50, 30 puis 10 : relevez la taille estimée à chaque fois.',
+      'Observez l’image à qualité 10. Que remarquez-vous autour des contours et dans le ciel (blocs de 8 × 8) ?',
+      'Choisissez la qualité qui vous semble le meilleur compromis et justifiez.'
+    ],
+    defi: { q: 'Un téléphone enregistre une photo de 12 mégapixels dont la taille brute est de 36 Mo, en un fichier JPEG d’environ 3 Mo. Quel est le taux de compression ? À quelle qualité de l’atelier cela ressemble-t-il le plus ?',
+      a: '36 ÷ 3 = 12 : le fichier est environ 12 fois plus petit. Dans l’atelier, une qualité de 30 donne un taux d’environ 9 pour 1, une qualité de 10 environ 16 pour 1 : la photo de téléphone se situe entre les deux, avec des pertes qu’on remarque peu sur un petit écran. Plus de compression, c’est plus de perte de détails.' },
+    qcm: [
+      { q: 'Quel est l’intérêt de compresser une image ?', o: ['La rendre plus colorée', 'Réduire la taille du fichier (stockage, envoi)', 'Augmenter le nombre de pixels', 'La chiffrer'], a: 1, w: 'Les fichiers plus petits se stockent et se transmettent plus vite.' },
+      { q: 'Dans une compression sans perte…', o: ['On retrouve exactement l’image d’origine', 'On perd des détails', 'On supprime des pixels', 'La qualité baisse'], a: 0, w: 'Les données sont réorganisées, pas supprimées.' },
+      { q: 'Le codage par plages (RLE) fonctionne bien sur…', o: ['Des images avec de grandes zones uniformes', 'Des photos très détaillées', 'Un damier de pixels alternés', 'Du bruit aléatoire'], a: 0, w: 'Plus il y a de longues plages de la même valeur, plus le gain est grand.' },
+      { q: 'Quel format utilise une compression avec perte ?', o: ['JPEG', 'PNG', 'BMP', 'RAW'], a: 0, w: 'Le JPEG arrondit les détails fins ; le PNG compresse sans perte.' },
+      { q: 'Quand on baisse la qualité JPEG…', o: ['Le fichier est plus petit mais l’image perd en détails', 'Le fichier est plus gros', 'L’image devient plus nette', 'Il n’y a aucun effet'], a: 0, w: 'On accepte une dégradation pour gagner en taille.' },
+      { q: 'À forte compression JPEG, on voit apparaître…', o: ['Des blocs de 8 × 8 pixels et des défauts autour des contours', 'Des couleurs plus vives', 'Un meilleur contraste', 'Plus de pixels'], a: 0, w: 'Chaque bloc est traité séparément : les arrondis deviennent visibles.' },
+      { q: 'Un fichier RAW est…', o: ['Un fichier très compressé', 'Les données brutes du capteur, peu ou pas compressées', 'Un format de page web', 'Un filtre'], a: 1, w: 'Les fichiers RAW gardent toute l’information du capteur pour la retouche, mais sont volumineux.' }
+    ]
+  },
+  p5: {
+    title: 'Métadonnées et droits', level: 'Niveau 3 · Protéger', time: '25 min', course: 'droit',
+    goal: 'Repérer ce que révèlent les métadonnées d’une photo, évaluer la fiabilité d’une image et connaître les règles du droit à l’image et du droit d’auteur.',
+    steps: [
+      'Dans <b>Métadonnées</b>, supprimez une à une les informations. Lesquelles sont dangereuses pour la vie privée ? Lesquelles sont sans risque ?',
+      'Dans <b>Vraie ou truquée ?</b>, classez chaque image. Notez les indices utilisés : source, date, détails incohérents.',
+      'Dans <b>Droits</b>, répondez pour chaque situation : autorisé, accord nécessaire ou interdit.',
+      'Relisez les explications des réponses fausses : quelles règles vous manquent ?'
+    ],
+    defi: { q: 'Une photo spectaculaire circule : « tempête ce matin dans notre ville ». Listez au moins quatre vérifications avant de la partager.',
+      a: '1. Qui l’a publiée ? Source identifiée ou compte anonyme ? 2. Date et lieu : sont-ils indiqués, cohérents avec la photo ? 3. Recherche d’image inversée : existe-t-elle déjà ailleurs, plus ancienne ? 4. Détails de l’image : ombres, reflets, mains, texte ; signes de montage ou d’IA. 5. Autres sources fiables ou témoins qui montrent la même scène. 6. Métadonnées, si on dispose du fichier d’origine. En cas de doute, on ne partage pas.' },
+    qcm: [
+      { q: 'Quelle métadonnée d’une photo est la plus risquée pour la vie privée ?', o: ['Les réglages (ouverture, vitesse)', 'La position GPS', 'La taille du fichier', 'Le format'], a: 1, w: 'La position révèle où la photo a été prise : domicile, établissement, habitudes.' },
+      { q: 'Que révèle la date et l’heure d’une photo publiée ?', o: ['Rien', 'Les habitudes et l’emploi du temps de la personne', 'Son âge', 'Sa taille'], a: 1, w: 'En croisant plusieurs photos, on déduit des horaires et des lieux réguliers.' },
+      { q: 'Quel indice permet de soupçonner une image générée par IA ?', o: ['Elle est très nette', 'Des mains aux doigts en trop ou un texte déformé', 'Elle est en couleurs', 'Elle est grande'], a: 1, w: 'Détails incohérents (doigts, symétrie, texte, reflets).' },
+      { q: 'Que permet une recherche d’image inversée ?', o: ['De rendre l’image plus nette', 'De retrouver l’origine et les autres usages d’une image', 'De la supprimer d’Internet', 'De la colorier'], a: 1, w: 'On peut vérifier si la photo est plus ancienne ou vient d’un autre contexte.' },
+      { q: 'Peut-on publier la photo d’une personne reconnaissable sans son accord ?', o: ['Oui, toujours', 'En principe non : le droit à l’image impose son accord (celui des parents pour un mineur)', 'Oui si elle est de dos', 'Oui si on est ami'], a: 1, w: 'Toute personne a un droit sur son image.' },
+      { q: 'Que signifie la licence Creative Commons « CC BY » ?', o: ['La photo est secrète', 'On peut réutiliser l’œuvre à condition de citer son auteur', 'La photo est payante', 'La photo est interdite'], a: 1, w: 'BY = attribution : mentionner l’auteur.' },
+      { q: 'Une photo trouvée sur un site est-elle libre de droits par défaut ?', o: ['Oui', 'Non : l’auteur a des droits, sauf licence libre ou accord', 'Oui si elle est sur Internet', 'Seulement pour les images floues'], a: 1, w: 'Une œuvre est protégée dès sa création ; il faut une autorisation ou une licence qui la permet.' }
+    ]
+  }
+};
+/*ACT-END*/
+
+/*COURSE-START*/
+const COURSE = [];
+COURSE.push({ id: 'photo', t: 'De l’argentique au numérique', h: `
+<p>Une photographie fixe la lumière d’une scène. Pendant longtemps, la lumière imprimait un support chimique ; aujourd’hui, elle est transformée en nombres.</p>
+<table class="ctable"><thead><tr><th>Date</th><th>Événement</th></tr></thead><tbody>
+<tr><td>1826</td><td>Nicéphore Niépce réalise la plus ancienne photographie conservée.</td></tr>
+<tr><td>1839</td><td>Le daguerréotype est présenté au public.</td></tr>
+<tr><td>1888</td><td>Kodak met la photographie à la portée du grand public.</td></tr>
+<tr><td>1975</td><td>Steven Sasson (Kodak) construit le premier appareil photo numérique.</td></tr>
+<tr><td>1992</td><td>Le format JPEG est normalisé.</td></tr>
+<tr><td>Années 2000</td><td>Les téléphones intègrent un appareil photo ; les photos sont partagées en ligne.</td></tr>
+</tbody></table>
+<div class="retain"><b>À retenir.</b> Une photo numérique est un fichier de nombres : on peut la copier sans perte, la traiter par calcul, la compresser et l’envoyer sur Internet.</div>` });
+
+COURSE.push({ id: 'capteur', t: 'Du capteur au fichier', h: `
+<p>La lumière traverse l’objectif et tombe sur un <b>capteur</b> (CCD ou CMOS) formé de millions de cellules sensibles à la lumière. Chaque cellule mesure une quantité de lumière et la convertit en tension, puis en nombre.</p>
+<ul>
+<li>Chaque cellule ne « voit » qu’une couleur grâce à un filtre rouge, vert ou bleu (<b>filtre de Bayer</b>, avec deux fois plus de vert).</li>
+<li>Le processeur de l’appareil reconstitue la couleur complète de chaque pixel à partir des voisins (<i>dématriçage</i>).</li>
+<li>L’image est ensuite traitée (balance des blancs, netteté), compressée, puis enregistrée avec ses métadonnées.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Capteur → conversion en nombres → traitement → compression → fichier.</div>` });
+
+COURSE.push({ id: 'pixels', t: 'Pixels, définition, résolution', h: `
+<p>Une image numérique est une grille de <b>pixels</b>. Sa <b>définition</b> est le nombre de pixels : largeur × hauteur.</p>
+<ul>
+<li>1 mégapixel = 1 million de pixels. 4 000 × 3 000 = 12 Mpx.</li>
+<li>Taille brute = nombre de pixels × octets par pixel (3 octets en 24 bits). 12 Mpx × 3 = 36 Mo.</li>
+<li>La <b>résolution d’impression</b> se mesure en pixels par pouce (ppp ou dpi). 1 pouce = 2,54 cm. Pour un tirage de qualité, on vise environ 300 ppp.</li>
+<li>Pixels nécessaires = (cm ÷ 2,54) × ppp. Pour 10 cm à 300 ppp : 1 181 pixels.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Plus il y a de pixels, plus l’image est détaillée et plus le fichier est lourd. Un écran n’a pas besoin de beaucoup de pixels ; une grande impression en demande davantage.</div>
+<p><b>Attention :</b> « mégapixels » mesure la définition, pas la qualité. La qualité dépend aussi de l’objectif, de la taille du capteur et de l’éclairage.</p>` });
+
+COURSE.push({ id: 'couleurs', t: 'Coder les couleurs', h: `
+<p>Un écran fabrique les couleurs en mélangeant de la lumière rouge, verte et bleue : c’est la <b>synthèse additive</b>.</p>
+<table class="ctable"><thead><tr><th>Couleur</th><th>(R, V, B)</th><th>Hexadécimal</th></tr></thead><tbody>
+<tr><td>Rouge</td><td>(255, 0, 0)</td><td>#FF0000</td></tr>
+<tr><td>Jaune</td><td>(255, 255, 0)</td><td>#FFFF00</td></tr>
+<tr><td>Blanc</td><td>(255, 255, 255)</td><td>#FFFFFF</td></tr>
+<tr><td>Noir</td><td>(0, 0, 0)</td><td>#000000</td></tr>
+<tr><td>Orange</td><td>(255, 128, 0)</td><td>#FF8000</td></tr>
+</tbody></table>
+<ul>
+<li>Chaque composante est codée sur 8 bits : 256 valeurs, de 0 à 255. L’hexadécimal l’écrit avec 2 chiffres (0 à 9 puis A à F).</li>
+<li>Avec 3 × 8 = 24 bits, on obtient 256³ = 16 777 216 couleurs.</li>
+<li>Avec b bits par composante, on a 2^(3b) couleurs.</li>
+<li>Un gris a ses trois composantes égales.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Pixel = triplet (R, V, B). Moins de bits par composante = moins de couleurs, des bandes dans les dégradés, mais un fichier plus léger.</div>` });
+
+COURSE.push({ id: 'traitement', t: 'Traiter une image', h: `
+<p>Retoucher une image, c’est calculer de nouvelles valeurs de pixels.</p>
+<h3>Traitements pixel par pixel</h3>
+<ul>
+<li><b>Niveaux de gris</b> : 0,299 R + 0,587 V + 0,114 B (l’œil est plus sensible au vert).</li>
+<li><b>Négatif</b> : 255 − valeur.</li>
+<li><b>Luminosité, contraste</b> : on ajoute une valeur ou on multiplie autour du gris moyen.</li>
+<li><b>Seuillage</b> : noir si la valeur est sous le seuil, blanc sinon.</li>
+</ul>
+<h3>L’histogramme</h3>
+<p>Il compte combien de pixels ont chaque niveau de gris. Tassé à gauche : image sombre. À droite : image claire. Étroit : image peu contrastée.</p>
+<h3>La convolution</h3>
+<p>Pour chaque pixel, on multiplie lui et ses 8 voisins par les coefficients d’une matrice 3 × 3, on additionne, puis on divise (souvent par la somme des coefficients).</p>
+<ul>
+<li><b>Flou</b> : neuf coefficients 1, divisés par 9 (moyenne).</li>
+<li><b>Contours</b> : les zones uniformes donnent 0, les changements brusques ressortent.</li>
+<li><b>Netteté</b> : renforce le pixel central par rapport à ses voisins.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Un filtre est un calcul sur les nombres de l’image. L’histogramme résume la répartition des luminosités.</div>` });
+
+COURSE.push({ id: 'compression', t: 'Compresser une image', h: `
+<p>Une photo brute de 12 Mpx pèse 36 Mo : on la compresse pour la stocker et l’envoyer.</p>
+<h3>Sans perte</h3>
+<p>On peut retrouver exactement l’image d’origine. Exemple : le <b>codage par plages</b> (RLE), qui note « 12 pixels blancs, 3 noirs… » au lieu de chaque pixel. Efficace sur les aplats, inefficace sur le bruit. Formats : PNG, GIF.</p>
+<h3>Avec perte</h3>
+<p>On supprime des détails peu visibles. Le <b>JPEG</b> découpe l’image en blocs de 8 × 8, convertit chaque bloc en fréquences (transformée en cosinus discrète), arrondit les fréquences fines (quantification) puis code le résultat. Plus la qualité est basse, plus on arrondit : fichier petit, mais blocs visibles et contours dégradés.</p>
+<table class="ctable"><thead><tr><th>Format</th><th>Compression</th><th>Usage</th></tr></thead><tbody>
+<tr><td>JPEG</td><td>avec perte</td><td>Photos</td></tr>
+<tr><td>PNG</td><td>sans perte</td><td>Schémas, logos, captures</td></tr>
+<tr><td>RAW</td><td>aucune ou peu</td><td>Données du capteur pour retouche</td></tr>
+</tbody></table>
+<div class="retain"><b>À retenir.</b> Sans perte : on retrouve l’original. Avec perte : fichier plus petit mais détails définitivement perdus. Il faut choisir un compromis taille / qualité.</div>` });
+
+COURSE.push({ id: 'metadonnees', t: 'Les métadonnées', h: `
+<p>Un fichier photo contient aussi des <b>métadonnées</b> (EXIF) : des informations sur l’image.</p>
+<ul>
+<li>Modèle d’appareil ou de téléphone.</li>
+<li>Date et heure de la prise de vue.</li>
+<li><b>Position GPS</b> si la localisation est activée.</li>
+<li>Réglages (ouverture, temps de pose, sensibilité).</li>
+<li>Logiciel de retouche, auteur.</li>
+</ul>
+<p>Ces informations sont utiles pour classer ses photos, mais elles peuvent révéler un domicile, un lieu d’études ou des habitudes. Beaucoup de réseaux sociaux les retirent à la publication, mais pas tous, ni les envois directs.</p>
+<div class="retain"><b>À retenir.</b> Avant de partager une photo, on peut désactiver la localisation de l’appareil photo ou supprimer les métadonnées.</div>` });
+
+COURSE.push({ id: 'retouche', t: 'Retouche, IA et fiabilité', h: `
+<p>Retoucher une photo est ancien et souvent légitime (luminosité, recadrage). Le problème commence quand l’image trompe.</p>
+<ul>
+<li><b>Photo retouchée ou montée</b> : éléments ajoutés, retirés ou déplacés.</li>
+<li><b>Image hors contexte</b> : une vraie photo présentée avec une fausse date ou un faux lieu.</li>
+<li><b>Image générée par IA</b> : créée sans appareil photo ; hameçonnage de ressemblance : l’<i>hypertrucage</i> (<i>deepfake</i>) imite un visage ou une voix.</li>
+</ul>
+<h3>Vérifier</h3>
+<ul>
+<li>Qui publie ? La source est-elle identifiable et fiable ?</li>
+<li>Date, lieu, contexte : cohérents ?</li>
+<li>Recherche d’image inversée pour retrouver l’origine.</li>
+<li>Détails étranges : mains, texte, reflets, ombres.</li>
+<li>Comparer avec d’autres sources.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Une image n’est pas une preuve. On vérifie la source et le contexte avant de croire ou de partager.</div>` });
+
+COURSE.push({ id: 'droit', t: 'Droit à l’image et droit d’auteur', h: `
+<h3>Droit à l’image</h3>
+<p>Toute personne a un droit sur son image. Publier une photo où elle est reconnaissable nécessite en principe son <b>accord</b> ; pour un mineur, celui de ses représentants légaux. Il existe des exceptions (foule, lieu public sans personne mise en avant, actualité), mais elles sont limitées.</p>
+<h3>Droit d’auteur</h3>
+<p>Une photo originale est protégée dès sa création : son auteur décide de sa reproduction et de sa diffusion. Trouver une image sur Internet ne la rend pas libre.</p>
+<h3>Licences libres</h3>
+<p>Les licences <b>Creative Commons</b> autorisent certains usages sous conditions : citer l’auteur (BY), pas d’usage commercial (NC), pas de modification (ND), partage à l’identique (SA).</p>
+<h3>Données personnelles</h3>
+<p>Un visage est une donnée personnelle. Le RGPD protège aussi les personnes face aux traitements automatisés (reconnaissance faciale).</p>
+<div class="retain"><b>À retenir.</b> Pour publier une image : accord des personnes reconnaissables, respect de l’auteur et de la licence. En cas de doute, on demande.</div>` });
+
+COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
+<ul>
+<li>La scène de l’atelier est un <b>dessin généré par programme</b>, pas une vraie photo.</li>
+<li>Les images sont petites (256 × 256 au maximum) pour que les calculs soient instantanés.</li>
+<li>La taille JPEG est <b>estimée</b> par un calcul d’entropie ; un vrai encodeur JPEG fait mieux (codage de Huffman, sous-échantillonnage des couleurs).</li>
+<li>La compression JPEG simulée travaille sur la luminosité d’une image de 64 × 64 pixels.</li>
+<li>Le codage par plages est un exemple pédagogique ; PNG utilise d’autres méthodes (filtres, DEFLATE).</li>
+<li>Les cas « vraie ou truquée » et « droits » sont des cas types ; la réalité juridique dépend de chaque situation.</li>
+<li>Les métadonnées sont fictives.</li>
+</ul>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>Capteur</dt><dd>Composant qui transforme la lumière en signal électrique (CCD, CMOS).</dd>
+<dt>Compression</dt><dd>Réduction de la taille d’un fichier, avec ou sans perte.</dd>
+<dt>Convolution</dt><dd>Calcul d’un pixel à partir de ses voisins pondérés par une matrice.</dd>
+<dt>Creative Commons</dt><dd>Licences libres définissant les conditions de réutilisation d’une œuvre.</dd>
+<dt>Définition</dt><dd>Nombre de pixels d’une image (largeur × hauteur).</dd>
+<dt>Droit d’auteur</dt><dd>Droit de l’auteur sur son œuvre.</dd>
+<dt>Droit à l’image</dt><dd>Droit d’une personne de contrôler l’usage de son image.</dd>
+<dt>EXIF</dt><dd>Métadonnées enregistrées dans une photo.</dd>
+<dt>Hexadécimal</dt><dd>Numération en base 16 (0 à 9, A à F).</dd>
+<dt>Histogramme</dt><dd>Répartition des pixels selon leur luminosité.</dd>
+<dt>Hypertrucage</dt><dd>Contenu falsifié par IA imitant une personne (deepfake).</dd>
+<dt>JPEG</dt><dd>Format de compression avec perte, adapté aux photos.</dd>
+<dt>Mégapixel</dt><dd>Un million de pixels.</dd>
+<dt>Métadonnées</dt><dd>Données sur une donnée (date, lieu, appareil…).</dd>
+<dt>Pixel</dt><dd>Plus petit élément d’une image numérique.</dd>
+<dt>ppp (dpi)</dt><dd>Pixels par pouce : résolution d’impression.</dd>
+<dt>Profondeur de couleur</dt><dd>Nombre de bits pour coder la couleur d’un pixel.</dd>
+<dt>RAW</dt><dd>Fichier brut contenant les données du capteur.</dd>
+<dt>RLE</dt><dd>Codage par plages : on note la longueur des suites de valeurs identiques.</dd>
+<dt>RVB</dt><dd>Rouge, vert, bleu : codage des couleurs à l’écran.</dd>
+<dt>Seuillage</dt><dd>Transformation en noir et blanc selon un seuil.</dd>
+</dl>` });
+/*COURSE-END*/
+
+/* ---------- interface ---------- */
+const UI = { cur: 'p1' };
+const AS = { key: 'p1', tab: 'steps', open: false, st: lsGet(KEYS.act, {}), arm: null };
+const CS = { open: false, id: 'web' };
+function actSave() { lsSet(KEYS.act, AS.st); }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function wsById(id) { return WORKSHOPS.find(w => w.id === id) || WORKSHOPS[0]; }
+
+function renderSeg() {
+  const seg = $('#wsSeg'); seg.innerHTML = '';
+  WORKSHOPS.forEach((w, i) => seg.append(h('button', { type: 'button', role: 'tab', 'aria-pressed': w.id === UI.cur ? 'true' : 'false', 'aria-selected': w.id === UI.cur ? 'true' : 'false', onclick: () => gotoWs(w.id) }, (i + 1) + '. ' + w.title)));
+}
+function mountWs() {
+  const w = wsById(UI.cur), root = $('#ws');
+  $('#hint').textContent = w.hint; root.innerHTML = '';
+  w.mount(root);
+  const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
+}
+function gotoWs(id) {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  UI.cur = id; AS.key = id; AS.tab = 'steps';
+  renderSeg(); mountWs(); renderAct();
+}
+
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
+  if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: s }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: a.defi.q }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: a.defi.a }))));
+    if (a.course) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(a.course) }, 'Voir le cours : ' + courseSection(a.course).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Votre travail sera effacé'; AS.arm = setTimeout(() => { b.textContent = 'Recommencer l’atelier'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; wsById(UI.cur).reset(); mountWs(); renderAct(); } }, 'Recommencer l’atelier')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open; renderAct();
+}
+$('#bAct').addEventListener('click', actToggle);
+
+/* ---------- cours ---------- */
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open; $('#modes').hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const go = id => { CS.id = id; renderCourse(); };
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => go(s.id) }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => go(e.target.value) }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+    art.append(h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => go(COURSE[idx - 1].id) }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => go(COURSE[idx + 1].id) }, COURSE[idx + 1].t + ' →') : h('span')));
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : la photographie numérique'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+  const sc = box.querySelector('.cwrap'); if (sc) sc.scrollTop = 0; box.scrollTop = 0;
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+
+/* ---------- aide ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre la photographie numérique (SNT, seconde) : pixels, couleurs, traitement, compression, métadonnées et droits. La scène des ateliers est un dessin généré par programme.</p>' +
+    '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction.</li><li>Le bouton <b>Cours</b> détaille toutes les notions.</li></ul>' +
+    '<h3>Vos données</h3><p>Les réponses au QCM sont mémorisées dans ce navigateur uniquement.</p>' }));
+});
+
+/* ---------- démarrage ---------- */
+(function init() {
+    AS.open = !isSmall();
+  renderSeg(); mountWs(); renderAct(); renderCourse();
+})();
+
+</script>
+
+</body></html>

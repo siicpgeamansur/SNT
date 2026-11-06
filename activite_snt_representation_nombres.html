@@ -117,6 +117,7 @@ fieldset.q legend{font-weight:600;padding:0 4px}
 .cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
 #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
 #dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+#dlg[hidden] { display: none !important; }
 .dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
 .dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
 .dlgbox header b{font-size:16px}
@@ -186,7 +187,7 @@ function bitRow(v, bits, o) {
   for (let i = bits - 1; i >= 0; i--) {
     const b = (v >>> i) & 1;
     const cell = h('span', { class: 'bit' + (b ? ' on' : '') + (o.small ? ' sm' : '') + (o.xs ? ' xs' : '') + (o.cls ? ' ' + o.cls(i, b) : ''), 'aria-label': 'bit ' + i + ' = ' + b }, String(b));
-    if (o.onFlip) { cell.tagName; cell.style.cursor = 'pointer'; cell.addEventListener('click', () => o.onFlip(i)); }
+    if (o.onFlip) { cell.style.cursor = 'pointer'; cell.addEventListener('click', () => o.onFlip(i)); }
     row.append(cell);
     if (o.grp4 && i > 0 && i % 4 === 0) row.append(h('span', { class: 'bsep' }));
   }
@@ -214,7 +215,6 @@ const W1 = { v: 205, n: 205, hex: 'CD' };
 function mountW1(root) {
   root.append(h('h2', null, 'Décimal, binaire, hexadécimal'),
     h('p', null, 'Nous écrivons les nombres en ', h('b', null, 'base 10'), ' : dix chiffres, et chaque position vaut dix fois plus que celle de droite (205 = 2×100 + 0×10 + 5×1). Les ordinateurs utilisent la ', h('b', null, 'base 2'), ' (le binaire : deux chiffres, 0 et 1, chaque position vaut deux fois plus). Pour les humains, on regroupe les bits par paquets de 4 : la ', h('b', null, 'base 16'), ' (hexadécimal).'));
-  /* 1. octet interactif */
   const rowBox = h('div'), pw = h('p', { class: 'formula' }), sw = h('div', { class: 'gstats' });
   function drawOctet() {
     rowBox.innerHTML = ''; rowBox.append(bitRow(W1.v, 8, { onFlip: i => { W1.v = (W1.v ^ (1 << i)) & 255; drawOctet(); } }));
@@ -227,7 +227,6 @@ function mountW1(root) {
     powerRow(8), rowBox, pw, sw,
     h('p', { class: 'small' }, 'Pourquoi le binaire ? Le composant de base d’un processeur, le transistor, est un interrupteur électronique : soit passant, soit bloqué. Deux états stables, faciles à distinguer même avec du bruit électrique — donc deux chiffres, 0 et 1.'));
   drawOctet();
-  /* 2. méthode des divisions */
   const din = h('input', { type: 'number', min: 0, max: 255, value: W1.n, 'aria-label': 'Nombre à convertir' }), dsteps = h('div');
   function drawDiv() {
     W1.n = Math.max(0, Math.min(255, Math.round(+din.value || 0)));
@@ -243,7 +242,6 @@ function mountW1(root) {
     h('p', null, 'Pour convertir un nombre en binaire, on le divise par 2 et on note le reste (0 ou 1), puis on recommence avec le quotient, jusqu’à 0. ', h('b', null, 'Pourquoi ?'), ' Diviser par 2 donne le reste de la division par 2, c’est-à-dire le chiffre des unités en base 2 ; le quotient contient tous les autres chiffres, qu’on extrait de la même façon.'),
     h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:180px' }, h('span', null, 'Nombre (0 à 255)'), din)), dsteps);
   drawDiv();
-  /* 3. hexadécimal */
   const hexd = [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9'], [10, 'A'], [11, 'B'], [12, 'C'], [13, 'D'], [14, 'E'], [15, 'F']];
   const tbl = h('table', { class: 'ctable narrow' }, h('thead', null, h('tr', null, h('th', null, 'Décimal'), hexd.map(d => h('th', null, String(d[0]))))), h('tbody',
     h('tr', null, h('th', null, 'Binaire'), hexd.map(d => h('td', null, toBin(d[0], 4)))),
@@ -378,7 +376,6 @@ function mountW3(root) {
   }
   root.append(chips, h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'A (0-255)'), ia), h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'B (0-255)'), ib)), out);
   draw();
-  /* XOR chiffrement */
   const msg = h('input', { type: 'text', value: 'SNT', maxlength: 12, 'aria-label': 'Message à chiffrer' }), key = numIn(200, 'Clé (0-255)', () => draw2());
   const enc = h('pre', { class: 'code' }), dec = h('pre', { class: 'code' }), cin = h('input', { type: 'text', class: 'mono', placeholder: 'codes reçus, séparés par des espaces', 'aria-label': 'Codes reçus' });
   function encBytes(t, k) { return Array.from(t).map(c => (c.charCodeAt(0) & 255) ^ k); }
@@ -386,7 +383,7 @@ function mountW3(root) {
     const k = Math.max(0, Math.min(255, +key.value || 0));
     const codes = encBytes(msg.value, k);
     enc.textContent = codes.map(c => toHex(c)).join(' ');
-    const parts = cin.value.trim().split(/\s+/).filter(x => /^[0-9a-fA-F]{2}$/);
+    const parts = cin.value.trim().split(/\s+/).filter(x => /^[0-9a-fA-F]{2}$/.test(x));
     const back = parts.map(x => String.fromCharCode(parseInt(x, 16) ^ k));
     dec.textContent = parts.length ? back.join('') + (back.every(c => (c >= ' ' && c <= '~')) ? '' : '  (caractères non affichables : vérifiez la clé)') : '—';
   }
@@ -456,7 +453,6 @@ function graySteps(g8) {
 function mountW5(root) {
   root.append(h('h2', null, 'Le code Gray : un seul bit qui change'),
     h('p', null, 'En binaire pur, passer d’un nombre au suivant peut changer ', h('b', null, 'plusieurs bits'), ' à la fois (0111 → 1000 : les 4 bits changent). Le ', h('b', null, 'code Gray'), ' est un autre codage des nombres où ', h('b', null, 'un seul bit change entre deux codes consécutifs'), '. Il est utilisé par les codeurs de position (axes de machines, volants, capteurs rotatifs).'));
-  /* 1. compteur */
   const rn = h('input', { type: 'range', min: 0, max: 15, step: 1, value: W5.n, 'aria-label': 'Nombre' }), cbin = h('div'), cgr = h('div'), ctxt = h('p', { class: 'score' }), cauto = h('button', { class: 'btn', type: 'button' }, 'Lecture automatique');
   function drawCount() {
     const gPrev = (W5.prev ^ (W5.prev >> 1)) & 15, gCur = (W5.n ^ (W5.n >> 1)) & 15;
@@ -479,7 +475,6 @@ function mountW5(root) {
     h('p', { class: 'mono', style: 'margin:8px 0 2px' }, 'Binaire'), cbin,
     h('p', { class: 'mono', style: 'margin:8px 0 2px' }, 'Code Gray'), cgr, ctxt);
   drawCount();
-  /* 2. convertisseur binaire -> gray */
   const iv = h('input', { type: 'number', min: 0, max: 255, value: W5.v, 'aria-label': 'Nombre à coder' }), o2 = h('div');
   function drawBG() {
     W5.v = Math.max(0, Math.min(255, Math.round(+iv.value || 0)));
@@ -492,7 +487,6 @@ function mountW5(root) {
   root.append(h('h3', null, '2. Convertir le binaire en Gray'),
     h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'Nombre (0-255)'), iv)), o2);
   drawBG();
-  /* 3. gray -> binaire */
   const gi = h('input', { type: 'text', class: 'mono', value: W5.gin, maxlength: 8, placeholder: 'ex. 01110100', 'aria-label': 'Code Gray à décoder', autocomplete: 'off', spellcheck: 'false' }), o3 = h('div');
   function drawGB() {
     o3.innerHTML = '';
@@ -655,7 +649,7 @@ COURSE.push({ id: 'addition', t: 'L’addition binaire et la retenue', h: `
 <tr><td>1 + 1 + 1 (retenue entrante)</td><td>=</td><td>11₂ → on écrit 1, on retient 1</td></tr></tbody></table>
 <p>La <b>retenue sortante</b> d'une colonne devient la <b>retenue entrante</b> de la colonne suivante. Exemple : 1011 0011 + 0110 1010 = 1 0001 1101 (en 9 bits).</p>
 <h3>Le dépassement (overflow)</h3>
-<p>Sur un octet, seules 256 valeurs existent (0 à 255). Si la somme dépasse 255, la retenue finale est <b>perdue</b> : le résultat affiché est la somme <b>modulo 256</b>. Exemple : 200 + 100 = 300, affiché 44 car 300 − 256 = 44. Ce n'est pas une erreur du processeur : c'est une convention arithmétique, à connaître quand les résultats intermédiaires sont grands.</p>
+<p>Sur un octet, seules 256 valeurs existent (0 à 255). Si la somme dépasse 255, la retenue finale est <b>perdue</b> : le résultat affiché est la somme <b>modulo 256</b>. Exemple : 200 + 100 = 300, affiché 44 car 300 − 256 = 44. Ce n'est pas une erreur du processeur : c'est une convention arithmétique, à connaître lorsque les résultats intermédiaires sont grands.</p>
 <div class="retain"><b>À retenir.</b> 1 + 1 = 10₂ (écrire 0, retenir 1). Sur n bits, le calcul se fait modulo 2ⁿ : la retenue sortante est perdue.</div>` });
 
 COURSE.push({ id: 'soustraction', t: 'La soustraction : complément à 2', h: `

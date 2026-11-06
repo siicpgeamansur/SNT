@@ -1,0 +1,1018 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Atelier Découverte de Python — SNT</title>
+<style>
+:root{color-scheme:light;--font-ui:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;--font-mono:ui-monospace,Consolas,Menlo,monospace;
+--bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+--fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;--warn:#9a5b00;--bad:#c0281f;--ok:#1e7a2e;
+--pyc:#3572a5;--kw:#c98a00;--strc:#1e7a2e}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+[hidden]{display:none!important}
+input.bad,select.bad,textarea.bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);max-width:100%;overflow-x:auto}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#ws{padding:16px max(16px,env(safe-area-inset-left,0px)) 30px;max-width:980px}
+#ws h2{font-size:24px;margin:0 0 8px}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.55}
+.mono{font-family:var(--font-mono);font-size:13px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0}
+.opts .fld{margin:0}
+input[type=range]{width:100%;padding:0}
+.small{font-size:12.5px;color:var(--muted);margin:0 0 9px}
+.score{font-weight:600;font-size:15px;margin:6px 0}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px}
+.stat span{font-size:12px;color:var(--muted)}.stat b{font-size:15px}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+pre.code{font:12.5px/1.55 var(--font-mono);margin:6px 0;white-space:pre-wrap;word-break:break-word;background:#f6f8fa;border:1px solid var(--line);border-radius:6px;padding:9px 11px;overflow-x:auto}
+pre.code .k{color:var(--kw);font-weight:600}
+pre.code .s{color:var(--strc)}
+pre.code .f{color:var(--pyc);font-weight:600}
+pre.code .c{color:#8a94a3;font-style:italic}
+.dwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:8px 0;max-height:360px}
+.dt{border-collapse:collapse;width:100%;font-size:13px}
+.dt th,.dt td{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.dt thead th{position:sticky;top:0;background:var(--panel2);font-weight:600;z-index:1}
+.dt .hl{background:rgba(46,109,164,.12)}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.two2>div{min-width:0}
+.cell{display:inline-flex;flex-direction:column;align-items:center;gap:1px;margin:2px 1px}
+.cell b{width:30px;height:34px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font:600 15px var(--font-mono);display:inline-flex;align-items:center;justify-content:center}
+.cell.on{outline:2px solid var(--run);outline-offset:1px}
+.cell span{font:10px var(--font-mono);color:var(--muted)}
+.cell span.neg{color:var(--warn)}
+.termin{background:#111820;color:#e6edf3;border-radius:8px;padding:10px 12px;font:13px/1.6 var(--font-mono);margin:8px 0;white-space:pre-wrap;min-height:20px}
+.termin .in{color:#7ee787}
+.termin .out{color:#e6edf3}
+.termin .err{color:#ff9b93}
+.pill{display:inline-block;border-radius:12px;padding:2px 10px;font-size:12.5px;font-weight:600;background:var(--panel2);border:1px solid var(--line)}
+.pill.ok{background:rgba(30,122,46,.12);color:var(--ok);border-color:var(--ok)}
+.pill.no{background:rgba(192,40,31,.1);color:var(--bad);border-color:var(--bad)}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}
+.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}
+.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line)}
+.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}
+  .work{flex-direction:column;gap:8px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+}
+</style><base target="_blank">
+</head><body>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="5" width="6" height="16" fill="var(--accent)"/><rect x="10" y="9" width="6" height="12" fill="var(--run)"/><rect x="18" y="13" width="6" height="8" fill="var(--warn)"/></svg><span>Atelier Découverte de Python <small>SNT</small></span></div>
+    <div class="files" style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <main class="inner work" id="work">
+    <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'atelier-python-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+
+/* ---------- outils ---------- */
+/* coloration simple : k=mot-clé, s=chaîne, f=nom de fonction, c=commentaire */
+function py(code) {
+  let out = '';
+  let i = 0;
+  while (i < code.length) {
+    if (code[i] === '#' || (code[i] === '/' && code[i + 1] === '/')) { const j = code.indexOf('\n', i); const end = j === -1 ? code.length : j; out += '<span class="c">' + esc(code.slice(i, end)) + '</span>'; i = end; continue; }
+    if (code[i] === '"' || code[i] === "'") { const q = code[i]; let j = i + 1; while (j < code.length && code[j] !== q) j++; out += '<span class="s">' + esc(code.slice(i, j + 1)) + '</span>'; i = j + 1; continue; }
+    const m = /^[A-Za-z_][A-Za-z_0-9]*/.exec(code.slice(i));
+    if (m) {
+      const w = m[0];
+      const KW = ['def','return','if','elif','else','for','while','in','and','or','not','import','from','True','False','None','break','continue','print','input','range','len','int','float','str','list','type','append','sort','sorted','sum','max','min','abs','round'];
+      const j = i + w.length;
+      if (KW.includes(w)) out += '<span class="' + (['print','input','range','len','int','float','str','list','type','append','sort','sorted','sum','max','min','abs','round'].includes(w) ? 'f' : 'k') + '">' + w + '</span>';
+      else out += w;
+      i = j; continue;
+    }
+    if (/[0-9]/.test(code[i])) { const m2 = /^[0-9][0-9.]*/.exec(code.slice(i)); out += m2[0]; i += m2[0].length; continue; }
+    out += esc(code[i]); i++;
+  }
+  return out;
+}
+function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function codeBlock(code) { return h('pre', { class: 'code', html: py(code) }); }
+function repr(v) { return typeof v === 'string' ? '"' + v + '"' : String(v); }
+function fmt(n) { return (Math.round(n * 100) / 100).toString().replace('.', ','); }
+function tableEl(rows, cols, labels, hi) {
+  const t = h('table', { class: 'dt' }), tr = h('tr');
+  cols.forEach(c => tr.append(h('th', { scope: 'col', class: hi === c ? 'hl' : '' }, (labels && labels[c]) || c)));
+  t.append(h('thead', null, tr));
+  const tb = h('tbody');
+  rows.forEach(r => { const x = h('tr'); cols.forEach(c => x.append(h('td', { class: hi === c ? 'hl' : '' }, String(r[c] == null ? '' : r[c])))); tb.append(x); });
+  t.append(tb);
+  return h('div', { class: 'dwrap' }, t);
+}
+/* détection de type façon Python (aperçu pédagogique) */
+function pyType(s) {
+  const t = s.trim();
+  if (t === 'True' || t === 'False') return 'bool';
+  if (/^-?\d+$/.test(t)) return 'int';
+  if (/^-?\d*\.\d+$/.test(t) || /^-?\d+\.[0-9]*(e-?\d+)?$/i.test(t)) return 'float';
+  if (/^-?\d+\.\d*$/.test(t)) return 'float';
+  if (/^".*"$/s.test(t) || /^'.*'$/s.test(t)) return 'str';
+  return null;
+}
+function pyVal(s) { const t = s.trim(); if (t === 'True') return true; if (t === 'False') return false; if (pyType(t) === 'int') return parseInt(t, 10); if (pyType(t) === 'float') return parseFloat(t); return t.replace(/^["']|["']$/g, ''); }
+
+const WORKSHOPS = [];
+
+/* ---------- Atelier 1 : variables, types, affichage ---------- */
+const W1 = { v: '42', n: 'Camille', a: 15 };
+function mountW1(root) {
+  root.append(h('h2', null, 'Variables, types et affichage'),
+    h('p', null, 'Un programme manipule des ', h('b', null, 'valeurs'), ' : des nombres, du texte, des vrais/faux… Une ', h('b', null, 'variable'), ' est une étiquette qu’on donne à une valeur pour la retrouver et la réutiliser : ', codeInline('age = 15'), ' crée la variable ', codeInline('age'), ' contenant l’entier 15.'));
+  /* 1. détecteur de type */
+  const vin = h('input', { type: 'text', class: 'mono', value: W1.v, maxlength: 24, 'aria-label': 'Valeur littérale', autocomplete: 'off', spellcheck: 'false' });
+  const vout = h('div');
+  function drawType() {
+    const s = vin.value.trim(); W1.v = s;
+    const t = pyType(s);
+    vout.innerHTML = '';
+    if (!s) { vout.append(h('p', { class: 'small' }, 'Saisissez une valeur dans la zone ci-dessus.')); return; }
+    if (t === null) {
+      vin.classList.add('bad');
+      vout.append(h('p', { class: 'small' }, 'Ce n’est pas une valeur littérale simple. En Python, du texte se met entre guillemets : ', h('code', { class: 'k' }, '"SNT"'), '. Sans guillemets, l’interpréteur chercherait une variable (ou une erreur NameError).'));
+    } else {
+      vin.classList.remove('bad');
+      vout.append(h('div', { class: 'gstats' }, [
+        ['Valeur', repr(pyVal(s))], ['type() renvoie', t], ['Catégorie', t === 'int' || t === 'float' ? 'nombre (calculs possibles)' : t === 'bool' ? 'booléen (vrai/faux)' : 'texte (concaténation possible)']
+      ].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', { class: 'mono' }, k[1])))));
+      if (t === 'str') vout.append(h('p', { class: 'small' }, 'Avec des guillemets : c’est du texte (type ', h('code', { class: 'k' }, 'str'), '), même s’il ressemble à un nombre. "', s.replace(/^["']|["']$/g, ''), '" + "1" collerait deux textes au lieu d’additionner.'));
+      if (t === 'int' || t === 'float') vout.append(h('p', { class: 'small' }, 'Sans guillemets : c’est un nombre (', h('code', { class: 'k' }, t), '), utilisable dans un calcul.'));
+    }
+  }
+  vin.addEventListener('input', drawType);
+  root.append(h('h3', null, '1. Quelle valeur, quel type ?'),
+    h('p', null, 'Saisissez ci-dessous des valeurs variées : ', h('code', { class: 'k' }, '42'), ', ', h('code', { class: 'k' }, '3.14'), ', ', h('code', { class: 'k' }, '"SNT"'), ', ', h('code', { class: 'k' }, 'True'), ', ', h('code', { class: 'k' }, '"42"'), '… L’interpréteur Python ne devine pas : c’est l’', h('b', null, 'écriture'), ' qui décide du type.'),
+    h('label', { class: 'fld', style: 'max-width:220px' }, h('span', null, 'Valeur littérale'), vin), vout);
+  drawType();
+  /* 2. print et f-string */
+  const nin = h('input', { type: 'text', value: W1.n, maxlength: 14, 'aria-label': 'Prénom' });
+  const ain = h('input', { type: 'number', min: 0, max: 120, value: W1.a, 'aria-label': 'Âge' });
+  const pout = h('div');
+  function drawPrint() {
+    W1.n = nin.value; W1.a = Math.max(0, Math.min(120, Math.round(+ain.value || 0)));
+    pout.innerHTML = '';
+    pout.append(codeBlock('prenom = "' + (W1.n || '…') + '"\nage = ' + W1.a + '\nprint(f"Bonjour {prenom}, tu as {age} ans.")'));
+    pout.append(h('div', { class: 'termin', html: '<span class="out">' + esc('Bonjour ' + (W1.n || '…') + ', tu as ' + W1.a + ' ans.') + '</span>' }));
+    pout.append(h('p', { class: 'small' }, h('b', null, 'Pourquoi les f-strings ? '), 'Le ', h('code', { class: 'k' }, 'f'), ' devant les guillemets active les accolades : ', h('code', { class: 'k' }, '{prenom}'), ' est remplacé par la ', h('b', null, 'valeur'), ' de la variable. Sans cela, ', h('code', { class: 'k' }, 'print("Bonjour prenom")'), ' afficherait littéralement « Bonjour prenom ».'));
+  }
+  nin.addEventListener('input', drawPrint); ain.addEventListener('input', drawPrint);
+  root.append(h('h3', null, '2. Afficher : print et les f-strings'),
+    h('div', { class: 'opts' },
+      h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'Prénom'), nin),
+      h('label', { class: 'fld', style: 'width:110px' }, h('span', null, 'Âge'), ain)), pout);
+  drawPrint();
+  /* 3. conversions */
+  const cin = h('input', { type: 'text', class: 'mono', value: '3', maxlength: 12, 'aria-label': 'Chaîne à convertir', autocomplete: 'off', spellcheck: 'false' });
+  const cout = h('div');
+  function drawConv() {
+    const s = cin.value.trim();
+    cout.innerHTML = '';
+    const rows = [];
+    const n = /^-?\d+([.,]\d+)?$/.test(s);
+    rows.push({ op: '"3" + "4"', res: '"34"', exp: 'deux textes collés (concaténation)' });
+    rows.push({ op: '3 + 4', res: '7', exp: 'addition de nombres' });
+    rows.push({ op: n ? 'int("' + s + '") + 1' : 'int("3") + 1', res: n ? String((parseInt(s.replace(',', '.'), 10)) + 1) : '4', exp: 'la fonction int() convertit le texte en nombre entier' });
+    rows.push({ op: 'str(3) + "4"', res: '"34"', exp: 'str() convertit un nombre en texte, puis on colle' });
+    cout.append(tableEl(rows, ['op', 'res', 'exp'], { op: 'Expression', res: 'Résultat', exp: 'Pourquoi' }, 'res'));
+    cout.append(h('p', { class: 'small' }, h('b', null, 'À retenir : '), h('code', { class: 'k' }, 'input()'), ' renvoie ', h('b', null, 'toujours du texte'), '. Pour faire un calcul avec ce que l’utilisateur tape, il faut convertir : ', h('code', { class: 'k' }, 'age = int(input("Ton âge ? "))'), '.'));
+  }
+  cin.addEventListener('input', drawConv);
+  root.append(h('h3', null, '3. Convertir : int(), float(), str()'),
+    h('p', null, 'Changer de type s’appelle une ', h('b', null, 'conversion'), ' (un « cast »). C’est indispensable dès qu’on mélange du texte et des nombres.'),
+    h('label', { class: 'fld', style: 'max-width:160px' }, h('span', null, 'Nombre à essayer (ex. 3 ou 2,5)'), cin), cout);
+  drawConv();
+}
+function codeInline(s) { return h('code', { class: 'k', html: py(s) }); }
+WORKSHOPS.push({ id: 'p1', title: 'Variables et types', hint: 'Créez des variables, distinguez int, float, str et bool, affichez avec print et les f-strings, convertissez avec int et str.', mount: mountW1, reset: () => { Object.assign(W1, { v: '42', n: 'Camille', a: 15 }); } });
+
+/* ---------- Atelier 2 : conditions ---------- */
+const W2 = { age: 15, a: 7, b: 12 };
+function mountW2(root) {
+  root.append(h('h2', null, 'Les conditions : if, elif, else'),
+    h('p', null, 'Un programme doit souvent ', h('b', null, 'choisir'), ' : si l’utilisateur est mineur, afficher ceci ; sinon, afficher cela. Python teste une ', h('b', null, 'condition'), ' (une expression vraie ou fausse) et exécute le bloc correspondant. L’', h('b', null, 'indentation'), ' (4 espaces) délimite ce bloc : elle fait partie de la syntaxe.'));
+  /* 1. simulateur de tarif */
+  const sl = h('input', { type: 'range', min: 0, max: 99, step: 1, value: W2.age, 'aria-label': 'Âge' });
+  const sv = h('b');
+  const sim = h('div');
+  function branch(age) {
+    if (age < 4) return ['gratuit', 'age < 4', 'tarif = "gratuit"'];
+    if (age < 18) return ['réduit', 'age < 18', 'tarif = "réduit"'];
+    if (age < 65) return ['plein', 'age < 65', 'tarif = "plein"'];
+    return ['séniors', 'else', 'tarif = "séniors"'];
+  }
+  function drawSim() {
+    W2.age = +sl.value; sv.textContent = W2.age + ' ans';
+    const [t, cond, act] = branch(W2.age);
+    sim.innerHTML = '';
+    const lines = ['if age < 4:', '    tarif = "gratuit"', 'elif age < 18:', '    tarif = "réduit"', 'elif age < 65:', '    tarif = "plein"', 'else:', '    tarif = "séniors"'];
+    const pre = h('pre', { class: 'code' });
+    lines.forEach(l => {
+      const isBranch = l.startsWith('if') || l.startsWith('elif') || l.startsWith('else');
+      const condMatch = isBranch && ((l.replace('elif ', '').replace('if ', '').replace(':', '')) === cond || (l.startsWith('else') && cond === 'else'));
+      const isAct = !isBranch && l.trim() === act;
+      const d = h('div');
+      if (condMatch) d.style.background = 'rgba(46,109,164,.18)';
+      if (isAct) d.style.background = 'rgba(46,139,58,.15)';
+      d.innerHTML = py(l + (condMatch || isAct ? '   ← exécuté' : ''));
+      pre.append(d);
+    });
+    sim.append(pre);
+    sim.append(h('div', { class: 'termin', html: '<span class="out">' + esc('Tarif retenu : ' + t) + '</span>' }));
+    sim.append(h('p', { class: 'small' }, 'La condition est évaluée ', h('b', null, 'de haut en bas'), ' : la première vraie gagne, les suivantes ne sont même pas regardées. Ici la branche exécutée est surlignée en bleu, son bloc en vert. Faites glisser l’âge : la ligne active change.'));
+  }
+  sl.addEventListener('input', drawSim);
+  root.append(h('h3', null, '1. Quelle branche s’exécute ?'),
+    h('p', null, 'Le cinéma applique un tarif selon l’âge. Faites glisser le curseur et observez quelle ligne s’exécute.'),
+    h('label', { class: 'fld', style: 'max-width:260px' }, h('span', null, 'Âge : ', sv), sl), sim);
+  drawSim();
+  /* 2. comparaisons et logique */
+  const ia = h('input', { type: 'number', value: W2.a, 'aria-label': 'a' }), ib = h('input', { type: 'number', value: W2.b, 'aria-label': 'b' });
+  const out2 = h('div');
+  function drawCmp() {
+    W2.a = Math.round(+ia.value || 0); W2.b = Math.round(+ib.value || 0);
+    const rows = [
+      { e: 'a == b', r: W2.a === W2.b }, { e: 'a != b', r: W2.a !== W2.b }, { e: 'a < b', r: W2.a < W2.b }, { e: 'a >= b', r: W2.a >= W2.b },
+      { e: 'a < 10 and b < 10', r: W2.a < 10 && W2.b < 10 }, { e: 'a < 10 or b < 10', r: W2.a < 10 || W2.b < 10 }, { e: 'not (a < b)', r: !(W2.a < W2.b) }
+    ].map(r => ({ e: r.e, c: r.e.replace(/(^|[^a-z])a(?![a-z])/g, '$1' + W2.a).replace(/(^|[^a-z])b(?![a-z])/g, '$1' + W2.b), r: r.r }));
+    out2.innerHTML = '';
+    out2.append(tableEl(rows, ['e', 'c', 'r'], { e: 'Expression (avec a = ' + W2.a + ', b = ' + W2.b + ')', c: 'Évaluée avec vos valeurs', r: 'Valeur' }, 'r'));
+    out2.append(h('p', { class: 'small' }, 'Chaque comparaison produit un ', h('b', null, 'booléen'), ' : ', h('code', { class: 'k' }, 'True'), ' ou ', h('code', { class: 'k' }, 'False'), ' — et c’est exactement ce qu’un ', h('code', { class: 'k' }, 'if'), ' examine. ', h('b', null, 'Attention : '), h('code', { class: 'k' }, '='), ' affecte (stocke une valeur), ', h('code', { class: 'k' }, '=='), ' compare. Écrire ', h('code', { class: 'k' }, 'if a = 5:'), ' est une erreur de syntaxe.'));
+  }
+  ia.addEventListener('input', drawCmp); ib.addEventListener('input', drawCmp);
+  root.append(h('h3', null, '2. Comparer et combiner'),
+    h('div', { class: 'opts' },
+      h('label', { class: 'fld', style: 'width:110px' }, h('span', null, 'a'), ia),
+      h('label', { class: 'fld', style: 'width:110px' }, h('span', null, 'b'), ib)), out2);
+  drawCmp();
+  /* 3. pièges classiques */
+  root.append(h('h3', null, '3. Les pièges classiques'),
+    h('div', { class: 'two2' },
+      h('div', null, h('p', { class: 'score' }, '❌ À ne jamais faire'), codeBlock('age = input("Âge ? ")\nif age >= 18:        # ❌ Comparaison impossible\n    print("Majeur")'), h('p', { class: 'small' }, h('code', { class: 'k' }, 'input()'), ' renvoie du texte : ', h('code', { class: 'k' }, '"15" >= 18'), ' provoque une ', h('code', { class: 'k' }, 'TypeError'), ' en Python 3. Il faut convertir d’abord.')),
+      h('div', null, h('p', { class: 'score' }, '✅ La bonne écriture'), codeBlock('age = int(input("Âge ? "))\nif age >= 18:\n    print("Majeur")\nelse:\n    print("Mineur")'), h('p', { class: 'small' }, 'On convertit ', h('b', null, 'une fois pour toutes'), ' à l’entrée, puis tous les calculs et comparaisons fonctionnent normalement.'))));
+}
+WORKSHOPS.push({ id: 'p2', title: 'Les conditions', hint: 'Testez des conditions if/elif/else, explorez les comparaisons et les booléens, évitez les pièges de = et d’input.', mount: mountW2, reset: () => { Object.assign(W2, { age: 15, a: 7, b: 12 }); } });
+
+/* ---------- Atelier 3 : boucles ---------- */
+const W3 = { start: 1, stop: 6, step: 1, n: 5, sq: 7 };
+function mountW3(root) {
+  root.append(h('h2', null, 'Les boucles : répéter sans se répéter'),
+    h('p', null, 'Faire 500 fois la même chose à la main est impossible : on fait une ', h('b', null, 'boucle'), '. Python en propose deux : ', h('code', { class: 'k' }, 'for'), ' quand on connaît le nombre de tours (ou qu’on parcourt une collection), ', h('code', { class: 'k' }, 'while'), ' quand on répète ', h('b', null, 'jusqu’à ce qu’une condition change'), '.'));
+  /* 1. range */
+  const rs = h('input', { type: 'number', value: W3.start, 'aria-label': 'début' }), re = h('input', { type: 'number', value: W3.stop, 'aria-label': 'fin' }), rp = h('input', { type: 'number', value: W3.step, min: 1, max: 5, 'aria-label': 'pas' });
+  const out = h('div');
+  function drawRange() {
+    W3.start = Math.round(+rs.value || 0); W3.stop = Math.round(+re.value || 0); W3.step = Math.max(1, Math.min(5, Math.round(+rp.value || 1)));
+    const vals = []; for (let i = W3.start; i < W3.stop; i += W3.step) { vals.push(i); if (vals.length > 40) break; }
+    out.innerHTML = '';
+    out.append(codeBlock('for i in range(' + W3.start + ', ' + W3.stop + ', ' + W3.step + '):\n    print(i)'));
+    out.append(h('div', { class: 'termin', html: '<span class="out">' + esc(vals.length ? vals.join(' ') : '(aucune valeur : la fin n’est jamais atteinte)') + '</span>' }));
+    const sum = vals.reduce((a, b) => a + b, 0);
+    out.append(h('p', null, 'Somme cumulée avec un ', h('b', null, 'accumulateur'), ' : ', codeBlock('total = 0\nfor i in range(' + W3.start + ', ' + W3.stop + ', ' + W3.step + '):\n    total = total + i\nprint(total)'), h('div', { class: 'termin', html: '<span class="out">' + sum + '</span>' })));
+    out.append(h('p', { class: 'small' }, h('b', null, 'Pourquoi la fin est-elle exclue ? '), 'Ça marche très bien avec les indices : ', h('code', { class: 'k' }, 'range(len(ma_liste))'), ' parcourt tous les indices sans jamais dépasser. Compter de ' + W3.start + ' à ' + W3.stop + ' inclus demanderait ', h('code', { class: 'k' }, 'range(' + W3.start + ', ' + (W3.stop + 1) + ')'), '.'));
+  }
+  [rs, re, rp].forEach(i => i.addEventListener('input', drawRange));
+  root.append(h('h3', null, '1. La boucle for et range()'),
+    h('p', null, h('code', { class: 'k' }, 'range(début, fin, pas)'), ' énumère les entiers de début à fin−1. Modifiez les trois valeurs :'),
+    h('div', { class: 'opts' },
+      h('label', { class: 'fld', style: 'width:110px' }, h('span', null, 'Début'), rs),
+      h('label', { class: 'fld', style: 'width:110px' }, h('span', null, 'Fin (exclue)'), re),
+      h('label', { class: 'fld', style: 'width:90px' }, h('span', null, 'Pas'), rp)), out);
+  drawRange();
+  /* 2. while */
+  const wn = h('input', { type: 'number', min: 0, max: 20, value: W3.n, 'aria-label': 'n' });
+  const wout = h('div');
+  function drawWhile() {
+    W3.n = Math.max(0, Math.min(20, Math.round(+wn.value || 0)));
+    const rows = []; let v = W3.n; let t = 0;
+    while (v > 0) { t++; rows.push({ t, c: 'v > 0 → ' + v + ' > 0 → True', b: 'v = ' + v + ' // 2  (division entière)', nv: v = Math.floor(v / 2) }); if (t > 25) break; }
+    wout.innerHTML = '';
+    wout.append(codeBlock('v = ' + W3.n + '\nétapes = 0\nwhile v > 0:\n    étapes = étapes + 1\n    v = v // 2\nprint(étapes)'));
+    wout.append(tableEl(rows, ['t', 'c', 'b', 'nv'], { t: 'Tour', c: 'Condition v > 0 ?', b: 'Corps de la boucle', nv: 'Nouveau v' }, 'c'));
+    wout.append(h('div', { class: 'termin', html: '<span class="out">' + (rows.length ? rows.length + ' tours pour arriver à 0' : '0 : la boucle ne s’exécute pas (v vaut déjà 0)') + '</span>' }));
+    wout.append(h('p', { class: 'small' }, h('b', null, 'La condition est testée avant chaque tour'), '. Si elle est fausse dès le départ, la boucle ne s’exécute jamais ; si elle ne devient jamais fausse, on obtient une ', h('b', null, 'boucle infinie'), ' (pensez à Ctrl+C). C’est le nombre de chiffres binaires de ' + W3.n + ' qui est ainsi compté : chaque tour supprime le dernier bit.'));
+  }
+  wn.addEventListener('input', drawWhile);
+  root.append(h('h3', null, '2. La boucle while : combien de divisions par 2 ?'),
+    h('p', null, 'On divise un nombre par 2 (division entière ', h('code', { class: 'k' }, '//'), ') jusqu’à atteindre 0. Chaque tour compte un bit.'),
+    h('label', { class: 'fld', style: 'width:110px' }, h('span', null, 'Nombre de départ'), wn), wout);
+  drawWhile();
+  /* 3. table de multiplication */
+  const ms = h('input', { type: 'range', min: 2, max: 12, step: 1, value: W3.sq, 'aria-label': 'Table' });
+  const mout = h('div');
+  function drawMul() {
+    W3.sq = +ms.value;
+    const lines = [];
+    for (let i = 1; i <= 10; i++) lines.push('print(f"{W3.sq} × {i} = {W3.sq * i}")');
+    mout.innerHTML = '';
+    mout.append(codeBlock('table = ' + W3.sq + '\nfor i in range(1, 11):\n    print(f"{table} × {i} = {table * i}")'));
+    const term = [];
+    for (let i = 1; i <= 10; i++) term.push(W3.sq + ' × ' + i + ' = ' + W3.sq * i);
+    mout.append(h('div', { class: 'termin', html: '<span class="out">' + esc(term.join('\n')) + '</span>' }));
+    mout.append(h('p', { class: 'small' }, 'Même logique pour la moyenne d’une liste de notes, le comptage de mots d’une page web ou la répétition d’un échange de messages : un ', h('b', null, 'traitement répété'), ' à l’intérieur d’une boucle, avec un accumulateur (somme, compteur, liste) qui mémorise les résultats au fur et à mesure.'));
+  }
+  ms.addEventListener('input', drawMul);
+  root.append(h('h3', null, '3. Application : la table de multiplication'),
+    h('label', { class: 'fld', style: 'max-width:260px' }, h('span', null, 'Table de : ', h('b', null, String(W3.sq))), ms), mout);
+  drawMul();
+}
+WORKSHOPS.push({ id: 'p3', title: 'Les boucles', hint: 'Explorez for et range, suivez une boucle while tour par tour, et utilisez un accumulateur.', mount: mountW3, reset: () => { Object.assign(W3, { start: 1, stop: 6, step: 1, n: 5, sq: 7 }); } });
+
+/* ---------- Atelier 4 : les fonctions ---------- */
+const W4 = { l: 5, L: 8, vals: '12, 7, 25, 3' };
+function mountW4(root) {
+  root.append(h('h2', null, 'Les fonctions : réutiliser et structurer'),
+    h('p', null, 'Une ', h('b', null, 'fonction'), ' est un bloc de code auquel on donne un nom, avec des ', h('b', null, 'paramètres'), ' (les entrées) et éventuellement une valeur ', h('b', null, 'retournée'), ' avec ', h('code', { class: 'k' }, 'return'), '. On l’appelle autant de fois qu’on veut : c’est la boîte à outils du programmeur, et la clé pour ne pas copier-coller du code.'));
+  /* 1. définition et appel */
+  const il = h('input', { type: 'number', min: 0, max: 50, value: W4.l, 'aria-label': 'largeur' });
+  const iL = h('input', { type: 'number', min: 0, max: 50, value: W4.L, 'aria-label': 'longueur' });
+  const out = h('div');
+  function drawFn() {
+    W4.l = Math.max(0, Math.min(50, Math.round(+il.value || 0))); W4.L = Math.max(0, Math.min(50, Math.round(+iL.value || 0)));
+    const p = 2 * (W4.l + W4.L), s = W4.l * W4.L;
+    out.innerHTML = '';
+    out.append(codeBlock('def infos_rectangle(largeur, longueur):\n    perimetre = 2 * (largeur + longueur)\n    surface = largeur * longueur\n    return perimetre, surface\n\np, s = infos_rectangle(' + W4.l + ', ' + W4.L + ')\nprint(f"Périmètre : {p}, surface : {s}")'));
+    out.append(h('div', { class: 'termin', html: '<span class="out">' + esc('Périmètre : ' + p + ', surface : ' + s) + '</span>' }));
+    out.append(h('div', { class: 'gstats' }, [['Paramètres reçus', W4.l + ' et ' + W4.L], ['Valeurs retournées', p + ' et ' + s], ['Appels possibles', 'autant qu’on veut, avec d’autres valeurs']].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', { class: 'mono' }, k[1])))));
+    out.append(h('p', { class: 'small' }, h('b', null, 'Le trajet d’une donnée : '), 'les valeurs ' + W4.l + ' et ' + W4.L + ' entrent par les paramètres, le bloc calcule, ', h('code', { class: 'k' }, 'return'), ' renvoie les résultats à l’endroit de l’appel, où on les range dans ', h('code', { class: 'k' }, 'p'), ' et ', h('code', { class: 'k' }, 's'), '. Une fonction sans ', h('code', { class: 'k' }, 'return'), ' renvoie ', h('code', { class: 'k' }, 'None'), ' (l’absence de valeur).'));
+  }
+  il.addEventListener('input', drawFn); iL.addEventListener('input', drawFn);
+  root.append(h('h3', null, '1. Définir, appeler, retourner'),
+    h('div', { class: 'opts' },
+      h('label', { class: 'fld', style: 'width:120px' }, h('span', null, 'Largeur'), il),
+      h('label', { class: 'fld', style: 'width:120px' }, h('span', null, 'Longueur'), iL)), out);
+  drawFn();
+  /* 2. portée des variables */
+  const pout = h('div');
+  pout.append(h('p', null, h('b', null, 'Local ou global ? '), 'Une variable créée ', h('b', null, 'dans'), ' une fonction n’existe que dans cette fonction : c’est une variable ', h('b', null, 'locale'), '.'));
+  pout.append(codeBlock('note = 15            # variable globale\n\ndef bonus(n):\n    points = 5        # variable locale : n’existe que dans bonus()\n    return n + points\n\nprint(bonus(note))    # affiche 20\nprint(points)         # ❌ NameError : points n’existe pas ici'));
+  pout.append(h('p', { class: 'small' }, 'La fonction lit les globales (ici ', h('code', { class: 'k' }, 'note'), '… enfin, ', h('code', { class: 'k' }, 'n'), ' en a reçu une copie via l’appel), mais ses propres variables meurent avec elle. C’est voulu : chaque fonction est une ', h('b', null, 'boîte étanche'), ', ce qui évite qu’un bloc de code écrase les variables d’un autre.'));
+  pout.append(h('p', { class: 'score' }, 'Règle d’or : une fonction communique par ses paramètres (entrée) et son return (sortie), pas en modifiant des variables de l’extérieur.'));
+  root.append(h('h3', null, '2. La portée : variables locales et globales'), pout);
+  /* 3. fonctions intégrées */
+  const vin = h('input', { type: 'text', class: 'mono', value: W4.vals, maxlength: 60, 'aria-label': 'Liste de nombres', autocomplete: 'off', spellcheck: 'false' });
+  const vout = h('div');
+  function drawBuiltins() {
+    W4.vals = vin.value;
+    const nums = W4.vals.split(/[,;\s]+/).map(x => parseFloat(x.replace(',', '.'))).filter(x => !isNaN(x)).slice(0, 12);
+    vout.innerHTML = '';
+    if (!nums.length) { vout.append(h('p', { class: 'small' }, 'Saisissez des nombres séparés par des virgules ou espaces.')); return; }
+    const somme = nums.reduce((a, b) => a + b, 0);
+    const rows = [
+      { f: 'len(notes)', r: String(nums.length), u: 'nombre d’éléments' },
+      { f: 'sum(notes)', r: fmt(somme), u: 'somme de tous les éléments' },
+      { f: 'max(notes)', r: String(Math.max(...nums)), u: 'plus grande valeur' },
+      { f: 'min(notes)', r: String(Math.min(...nums)), u: 'plus petite valeur' },
+      { f: 'round(sum(notes) / len(notes), 2)', r: fmt(somme / nums.length), u: 'moyenne, arrondie à 2 chiffres' },
+      { f: 'sorted(notes)', r: nums.slice().sort((a, b) => a - b).join(' '), u: 'copie triée (sans toucher l’originale)' }
+    ];
+    vout.append(codeBlock('notes = [' + nums.join(', ') + ']'));
+    vout.append(tableEl(rows, ['f', 'r', 'u'], { f: 'Expression', r: 'Résultat', u: 'Ce que ça fait' }, 'r'));
+    vout.append(h('p', { class: 'small' }, 'Ces fonctions sont ', h('b', null, 'fournies par Python'), ' : inutile de réécrire un maximum ou un tri. La moyenne n’existe pas toute seule : on la compose avec ', h('code', { class: 'k' }, 'sum'), ' et ', h('code', { class: 'k' }, 'len'), ' — c’est l’esprit de la programmation, assembler des briques.'));
+  }
+  vin.addEventListener('input', drawBuiltins);
+  root.append(h('h3', null, '3. Les fonctions déjà fournies : len, sum, max, sorted…'),
+    h('label', { class: 'fld', style: 'max-width:320px' }, h('span', null, 'Nombres (ex. 12, 7, 25, 3)'), vin), vout);
+  drawBuiltins();
+}
+WORKSHOPS.push({ id: 'p4', title: 'Les fonctions', hint: 'Définissez et appelez des fonctions, suivez paramètres et return, distinguez variables locales et globales.', mount: mountW4, reset: () => { Object.assign(W4, { l: 5, L: 8, vals: '12, 7, 25, 3' }); } });
+
+/* ---------- Atelier 5 : listes et chaînes ---------- */
+const W5 = { w: 'PYTHON', a: 2, st: 0, sp: 6, step: 1, hist: null };
+function mountW5(root) {
+  root.append(h('h2', null, 'Listes et chaînes : ranger et découper'),
+    h('p', null, 'Une ', h('b', null, 'liste'), ' (', h('code', { class: 'k' }, '['), ' … ', h('code', { class: 'k' }, ']'), ') range plusieurs valeurs dans un ordre précis ; une ', h('b', null, 'chaîne'), ' est du texte, qui se manipule presque pareil. Dans les deux cas, chaque élément a un ', h('b', null, 'indice'), ' : on compte à partir de ', h('b', null, '0'), '.'));
+  /* 1. indices */
+  const win = h('input', { type: 'text', class: 'mono', value: W5.w, maxlength: 12, 'aria-label': 'Mot', autocomplete: 'off', spellcheck: 'false' });
+  const wout = h('div');
+  function drawIdx() {
+    W5.w = win.value.toUpperCase(); win.value = W5.w;
+    const chars = Array.from(W5.w);
+    wout.innerHTML = '';
+    if (!chars.length) { wout.append(h('p', { class: 'small' }, 'Saisissez un mot (sans espace).')); return; }
+    const grid = h('div', { style: 'display:flex;flex-wrap:wrap' });
+    chars.forEach((c, i) => {
+      grid.append(h('span', { class: 'cell', title: 'indice ' + i },
+        h('b', { style: 'font-family:var(--font-mono)' }, c),
+        h('span', null, String(i)),
+        h('span', { class: 'neg' }, i - chars.length ? String(i - chars.length) : '0')));
+    });
+    wout.append(grid);
+    wout.append(codeBlock('mot = "' + W5.w + '"\nlen(mot)            # ' + chars.length + '\nmot[0]              # premier caractère : "' + chars[0] + '"\nmot[' + (chars.length - 1) + ']              # dernier : "' + chars[chars.length - 1] + '"\nmot[-1]             # aussi le dernier : les indices négatifs partent de la fin'));
+    wout.append(h('p', { class: 'small' }, 'Le premier caractère est à l’indice ', h('b', null, '0'), ', pas 1 : le dernier est donc à l’indice ', chars.length - 1, ', et ', h('code', { class: 'k' }, 'mot[' + chars.length + ']'), ' déclencherait un ', h('code', { class: 'k' }, 'IndexError'), '. Les indices négatifs comptent depuis la fin : ', h('code', { class: 'k' }, 'mot[-1]'), ' est le dernier caractère.'));
+  }
+  win.addEventListener('input', drawIdx);
+  root.append(h('h3', null, '1. Les indices : on compte à partir de 0'),
+    h('label', { class: 'fld', style: 'max-width:180px' }, h('span', null, 'Un mot'), win), wout);
+  drawIdx();
+  /* 2. tranches */
+  const sin = h('input', { type: 'number', min: -12, max: 12, value: W5.st, 'aria-label': 'début' });
+  const ein = h('input', { type: 'number', min: -12, max: 12, value: W5.sp, 'aria-label': 'fin' });
+  const pin = h('input', { type: 'number', min: 1, max: 4, value: W5.step, 'aria-label': 'pas' });
+  const sout = h('div');
+  function drawSlice() {
+    W5.st = Math.round(+sin.value || 0); W5.sp = Math.round(+ein.value || 0); W5.step = Math.max(1, Math.min(4, Math.round(+pin.value || 1)));
+    const chars = Array.from(W5.w || 'PYTHON');
+    const n = chars.length;
+    const norm = i => i < 0 ? Math.max(0, n + i) : Math.min(i, n);
+    const st = norm(W5.st), sp = norm(W5.sp);
+    const sel = new Set(); for (let i = st; i < sp; i += W5.step) sel.add(i);
+    const res = chars.filter((c, i) => sel.has(i)).join('');
+    sout.innerHTML = '';
+    const grid = h('div', { style: 'display:flex;flex-wrap:wrap' });
+    chars.forEach((c, i) => {
+      const cell = h('span', { class: 'cell' + (sel.has(i) ? ' on' : '') },
+        h('b', { style: 'font-family:var(--font-mono)' }, c), h('span', null, String(i)));
+      grid.append(cell);
+    });
+    sout.append(grid);
+    sout.append(codeBlock('mot[' + W5.st + ':' + W5.sp + ':' + W5.step + ']   # de l’indice ' + W5.st + ' (inclus) à ' + W5.sp + ' (exclu), un caractère sur ' + W5.step + ''));
+    sout.append(h('div', { class: 'termin', html: '<span class="out">' + esc('"' + res + '"') + '</span>' }));
+    sout.append(h('p', { class: 'small' }, 'Comme ', h('code', { class: 'k' }, 'range'), ', la tranche ', h('b', null, 'exclut la fin'), ' et accepte un pas. Raccourcis utiles : ', h('code', { class: 'k' }, 'mot[:3]'), ' = les 3 premiers, ', h('code', { class: 'k' }, 'mot[-3:]'), ' = les 3 derniers, ', h('code', { class: 'k' }, 'mot[::2]'), ' = un caractère sur deux. En SNT, les tranches servent à découper une date, une URL, un code…'));
+  }
+  [sin, ein, pin].forEach(i => i.addEventListener('input', drawSlice));
+  root.append(h('h3', null, '2. Les tranches (slices)'),
+    h('div', { class: 'opts' },
+      h('label', { class: 'fld', style: 'width:100px' }, h('span', null, 'Début'), sin),
+      h('label', { class: 'fld', style: 'width:100px' }, h('span', null, 'Fin'), ein),
+      h('label', { class: 'fld', style: 'width:90px' }, h('span', null, 'Pas'), pin)), sout);
+  drawSlice();
+  /* 3. méthodes de listes */
+  const demo = h('div');
+  const ops = [
+    { lab: 'notes.append(18)', run: s => { s.push(18); return 'append ajoute un élément à la fin'; } },
+    { lab: 'notes.sort()', run: s => { s.sort((a, b) => a - b); return 'sort trie la liste en place (elle est modifiée)'; } },
+    { lab: 'notes.remove(12)', run: s => { const i = s.indexOf(12); if (i >= 0) s.splice(i, 1); return 'remove supprime la première occurrence de la valeur'; } },
+    { lab: 'notes.pop()', run: s => { s.pop(); return 'pop retire et renvoie le dernier élément'; } },
+    { lab: 'notes.reverse()', run: s => { s.reverse(); return 'reverse retourne la liste'; } }
+  ];
+  let state = null, done = [];
+  function initDemo() { state = [12, 7, 25, 3]; done = []; drawDemo(); }
+  function drawDemo() {
+    demo.innerHTML = '';
+    demo.append(codeBlock('notes = [' + state.join(', ') + ']'));
+    const last = done[done.length - 1];
+    if (last) demo.append(h('p', { class: 'small' }, 'Dernière opération : ', h('code', { class: 'k' }, last.lab), ' → ', last.msg));
+    const row = h('div', { style: 'display:flex;gap:6px;flex-wrap:wrap;margin:6px 0' });
+    ops.forEach(o => { row.append(h('button', { class: 'btn sm', type: 'button', onclick: () => { const msg = o.run(state); done.push({ lab: o.lab, msg }); drawDemo(); } }, o.lab)); });
+    row.append(h('button', { class: 'btn sm', type: 'button', onclick: initDemo }, '↺ Réinitialiser'));
+    demo.append(row);
+    demo.append(h('p', { class: 'small' }, 'Les méthodes ', h('b', null, 'modifient la liste elle-même'), ' (« en place »), alors que ', h('code', { class: 'k' }, 'sorted(notes)'), ' renvoie une ', h('b', null, 'nouvelle'), ' liste triée sans toucher l’originale. Mélanger les deux est une source classique de bugs.'));
+  }
+  initDemo();
+  root.append(h('h3', null, '3. Les méthodes de liste, pas à pas'), demo);
+  /* 4. parcours */
+  const vout = h('div');
+  const vword = W5.w || 'PYTHON';
+  function drawVow() {
+    const w = vword.toLowerCase();
+    const rows = []; let count = 0;
+    Array.from(w).forEach((c, i) => { const voy = 'aeiouy'.includes(c); if (voy) count++; rows.push({ i: String(i), c: '"' + c + '"', voy: voy ? 'True → count = ' + count : 'False' }); });
+    vout.innerHTML = '';
+    vout.append(codeBlock('mot = "' + vword + '"\ncount = 0\nfor lettre in mot:\n    if lettre in "aeiouy":\n        count = count + 1\nprint(count)'));
+    vout.append(tableEl(rows, ['i', 'c', 'voy'], { i: 'Tour', c: 'lettre', voy: 'Voyelle ?' }, 'voy'));
+    vout.append(h('div', { class: 'termin', html: '<span class="out">' + count + ' voyelle(s)</span>' }));
+  }
+  drawVow();
+  root.append(h('h3', null, '4. Parcourir : for lettre in mot'), vout);
+}
+WORKSHOPS.push({ id: 'p5', title: 'Listes et chaînes', hint: 'Explorez les indices, les tranches, les méthodes de liste et le parcours caractère par caractère.', mount: mountW5, reset: () => { Object.assign(W5, { w: 'PYTHON', st: 0, sp: 6, step: 1 }); } });
+
+/* ---------- Activités ---------- */
+const ACT = {
+  p1: {
+    title: 'Variables et types', level: 'Niveau 1 · Découvrir', time: '25 min', course: 'variables',
+    goal: 'Créer des variables, distinguer les types int, float, str et bool, afficher avec print et les f-strings, convertir avec int, float et str.',
+    steps: [
+      'Dans « Quelle valeur, quel type ? », testez successivement 42, "42", 3.14, True et "SNT". Notez à chaque fois le type renvoyé et pourquoi.',
+      'Vérifiez la règle : un nombre peut-il s’écrire avec des guillemets ? Que devient alors son type ?',
+      'Dans « Afficher », modifiez le prénom et l’âge, puis observez le code et sa sortie. Repérez où les accolades sont remplacées.',
+      'Essayez de remplacer mentalement le f par rien : qu’afficherait print("Bonjour {prenom}") ? Vérifiez votre intuition à l’écrit.',
+      'Dans « Convertir », calculez "12" + "8" puis int("12") + int("8") : notez les deux résultats et expliquez la différence.',
+      'Justifiez à l’écrit : pourquoi input() renvoie-t-il toujours du texte, et comment obtenir un nombre exploitable ?'
+    ],
+    defi: { q: 'Un programme demande deux nombres à l’utilisateur avec input() et veut afficher leur somme. Écrivez les deux lignes nécessaires, puis expliquez ce qui se passerait sans conversion.', a: 'Sans conversion, "12" + "8" colle les deux textes et affiche "128" (concaténation) au lieu de 20. Il faut écrire : a = int(input("Premier nombre ? ")) puis b = int(input("Second ? ")) et print(a + b). input() renvoie toujours une chaîne (type str) : tant qu’on ne convertit pas, Python croit manipuler du texte et l’opérateur + colle au lieu d’additionner.' },
+    qcm: [
+      { q: 'Quelle est la valeur et le type de x après x = 3.0 ?', o: ['3, type int', '3.0, type float', '3.0, type int', '"3.0", type str'], a: 1, w: 'Le point décimal fait de 3.0 un flottant (float), même si la partie décimale est nulle.' },
+      { q: 'Que vaut "chat" + "on" ?', o: ['Erreur', '"chat on"', '"chaton"', '7'], a: 2, w: 'L’opérateur + entre deux chaînes les colle (concaténation).' },
+      { q: 'Qu’affiche print(f"2 + 2 = {2 + 2}") ?', o: ['2 + 2 = {2 + 2}', '2 + 2 = 4', '4', 'Erreur'], a: 1, w: 'Les accolades d’une f-string sont évaluées : l’expression est calculée puis insérée.' },
+      { q: 'Quel est le type renvoyé par input() ?', o: ['int', 'float', 'str', 'cela dépend de ce que tape l’utilisateur'], a: 2, w: 'Toujours str : input() lit du texte brut, sans interpréter.' },
+      { q: 'Que vaut int("7") + 2 ?', o: ['"72"', '9', '7', 'Erreur'], a: 1, w: 'int() convertit le texte en nombre, puis l’addition se fait normalement : 7 + 2 = 9.' },
+      { q: 'Parmi ces noms de variables, lequel est interdit en Python ?', o: ['ma_variable', 'note2', '2note', '_total'], a: 2, w: 'Un nom ne peut pas commencer par un chiffre (2note est une erreur de syntaxe).' },
+      { q: 'Que signifie type(True) ?', o: ['str', 'int', 'bool', 'None'], a: 2, w: 'True et False sont les deux valeurs du type booléen.' }
+    ]
+  },
+  p2: {
+    title: 'Les conditions', level: 'Niveau 1 · Manipuler', time: '25 min', course: 'conditions',
+    goal: 'Écrire des tests if/elif/else, comprendre l’indentation et l’ordre d’évaluation, combiner les conditions avec and, or et not.',
+    steps: [
+      'Dans « Quelle branche s’exécute ? », placez l’âge sur 3, 10, 30 puis 70 : identifiez à chaque fois la branche exécutée et pourquoi les suivantes sont ignorées.',
+      'Vérifiez le cas limite : à quel âge exact passe-t-on de « réduit » à « plein » ? Que dit la condition age < 18 pour 18 ?',
+      'Dans « Comparer et combiner », choisissez a = 5 et b = 5 : que valent a == b, a != b et a < b ?',
+      'Testez and et or avec a = 15, b = 3 : la condition a < 10 and b < 10 est-elle vraie ? Et a < 10 or b < 10 ? Justifiez.',
+      'Écrivez sur papier un if/else qui affiche « accès autorisé » si l’âge est supérieur ou égal à 16, « refusé » sinon.',
+      'Repérez les deux pièges du cours : if a = 5 (au lieu de ==) et la comparaison d’un input() non converti.'
+    ],
+    defi: { q: 'Un site refuse les inscriptions des moins de 13 ans et propose un tarif « ados » de 13 à 17 ans inclus, « adultes » ensuite. Écrivez le if/elif/else correspondant, puis donnez un âge qui teste chaque branche.', a: 'if age < 13:\n    print("Inscription refusée")\nelif age <= 17:\n    print("Tarif ados")\nelse:\n    print("Tarif adulte"). Âges de test : 10 (refusée), 15 (ados), 20 (adulte). L’ordre compte : en testant d’abord age < 13, le elif sait que l’âge est déjà >= 13 ; age <= 17 couvre donc 13 à 17.' },
+    qcm: [
+      { q: 'Que délimite le bloc d’un if en Python ?', o: ['Des accolades { }', 'Des parenthèses', 'L’indentation (4 espaces)', 'Le mot-clé end'], a: 2, w: 'Python utilise l’indentation elle-même comme syntaxe : un bloc mal indenté est une erreur (IndentationError).' },
+      { q: 'Quel symbole teste l’égalité ?', o: ['=', '==', '===', 'equal'], a: 1, w: '= affecte une valeur ; == compare deux valeurs.' },
+      { q: 'Que vaut 7 < 3 ?', o: ['True', 'False', '7', 'Erreur'], a: 1, w: 'Une comparaison produit un booléen : ici False.' },
+      { q: 'not (a >= 18) est vrai quand :', o: ['a est majeur', 'a est mineur', 'a vaut 18', 'toujours'], a: 1, w: 'not inverse : la négation de « au moins 18 » est « moins de 18 ».' },
+      { q: 'Quelle branche exécute-t-on pour age = 18 avec if age < 18: … elif age <= 25: … else: … ?', o: ['La première (if)', 'La deuxième (elif)', 'La troisième (else)', 'Aucune'], a: 1, w: '18 < 18 est faux, mais 18 <= 25 est vrai : le elif s’exécute.' },
+      { q: 'if reponse = "oui": provoque :', o: ['Rien, c’est correct', 'Une erreur de syntaxe (= n’est pas une comparaison)', 'Une boucle infinie', 'Un affichage différent'], a: 1, w: 'Un test exige == ; en Python l’affectation n’est pas une expression de test valide ici.' },
+      { q: 'Quel opérateur signifie « ou » ?', o: ['and', 'or', 'not', 'nor'], a: 1, w: 'and = et (les deux vraies), or = ou (au moins une vraie), not = non.' }
+    ]
+  },
+  p3: {
+    title: 'Les boucles', level: 'Niveau 2 · Manipuler', time: '25 min', course: 'boucles',
+    goal: 'Utiliser for avec range, suivre une boucle while tour par tour et employer un accumulateur (somme, compteur).',
+    steps: [
+      'Dans la boucle for, réglez range(1, 6, 1) : listez les valeurs affichées. Pourquoi 6 n’apparaît-il pas ?',
+      'Passez le pas à 2, puis essayez range(10, 0, -1)… que remarquez-vous avec un pas négatif ?',
+      'Observez l’accumulateur : que vaut total après range(1, 6) ? Vérifiez à la main : 1+2+3+4+5.',
+      'Dans la boucle while, choisissez v = 20 : combien de divisions par 2 avant d’atteindre 0 ? Et pour v = 100 ?',
+      'Testez v = 0 : pourquoi la boucle while ne s’exécute-t-elle pas du tout ?',
+      'Justifiez à l’écrit : qu’est-ce qui distingue une boucle infinie, et comment l’éviter dans un while ?'
+    ],
+    defi: { q: 'Écrivez un programme qui affiche la somme des nombres de 1 à 100, puis un second qui affiche seulement les multiples de 7 entre 1 et 100. Donnez les deux résultats.', a: 'Somme : total = 0 ; for i in range(1, 101): total = total + i → 5050. Multiples de 7 : for i in range(7, 101, 7): print(i) → 7, 14, …, 98 (le pas 7 évite même le test if i % 7 == 0).' },
+    qcm: [
+      { q: 'Quelles valeurs énumère range(2, 8) ?', o: ['2 à 8 inclus', '2 à 7 inclus', '3 à 8', '1 à 8'], a: 1, w: 'La borne de fin est exclue : 2, 3, 4, 5, 6, 7.' },
+      { q: 'Combien de tours fait for i in range(10) ?', o: ['9', '10', '11', '0'], a: 1, w: 'De 0 à 9 inclus : 10 valeurs. On compte de 0.' },
+      { q: 'Quelle boucle choisir pour répéter un traitement sur chaque élément d’une liste ?', o: ['for', 'while', 'if', 'def'], a: 0, w: 'for parcourt directement les éléments d’une collection.' },
+      { q: 'Dans total = total + i, la variable total est :', o: ['un compteur', 'un accumulateur', 'une constante', 'un paramètre'], a: 1, w: 'Elle accumule le résultat au fil des tours ; on l’initialise à 0 avant la boucle.' },
+      { q: 'Que fait l’instruction break ?', o: ['Elle relance la boucle', 'Elle quitte immédiatement la boucle', 'Elle saute au tour suivant', 'Elle arrête le programme'], a: 1, w: 'break sort de la boucle ; continue, lui, passe directement au tour suivant.' },
+      { q: 'while v > 0: avec v = 0 au départ :', o: ['s’exécute une fois', 'ne s’exécute jamais', 's’exécute à l’infini', 'affiche une erreur'], a: 1, w: 'La condition est testée avant le premier tour : fausse → aucun tour.' },
+      { q: 'Quelles valeurs énumère range(0, 10, 3) ?', o: ['0, 3, 6, 9', '0, 3, 6, 9, 12', '3, 6, 9', '0, 4, 8'], a: 0, w: 'On part de 0 et on avance de 3 en 3 en restant sous 10 : 0, 3, 6, 9.' }
+    ]
+  },
+  p4: {
+    title: 'Les fonctions', level: 'Niveau 2 · Construire', time: '25 min', course: 'fonctions',
+    goal: 'Définir une fonction avec def, passer des paramètres, retourner un résultat avec return et comprendre la portée des variables.',
+    steps: [
+      'Dans « Définir, appeler, retourner », choisissez largeur = 3 et longueur = 5 : retrouvez le périmètre (16) et la surface (15) à la main.',
+      'Suivez le trajet des valeurs : où entrent 3 et 5 ? Sous quels noms ? Que renvoie return, et où atterrit ce résultat ?',
+      'Appelez mentalement la même fonction avec 10 et 4 : pourquoi ne faut-il pas réécrire le code du calcul ?',
+      'Dans « La portée », expliquez pourquoi print(points) après l’appel provoque une NameError.',
+      'Dans « Fonctions fournies », saisissez cinq notes et vérifiez à la main la moyenne affichée par round(sum(notes) / len(notes), 2).',
+      'Justifiez : pourquoi est-il préférable qu’une fonction communique par paramètres et return plutôt qu’en modifiant une variable globale ?'
+    ],
+    defi: { q: 'Écrivez une fonction moyenne(liste) qui renvoie la moyenne d’une liste de nombres, ou 0 si la liste est vide. Testez-la mentalement avec [12, 8, 16] puis avec [].', a: 'def moyenne(liste):\n    if len(liste) == 0:\n        return 0\n    return sum(liste) / len(liste). Avec [12, 8, 16] : 36 / 3 = 12. Avec [] : le if protège de la division par zéro, sinon len vaudrait 0 et ZeroDivisionError. La fonction ne fait qu’afficher : elle return, c’est l’appelant qui décide quoi faire du résultat.' },
+    qcm: [
+      { q: 'Quel mot-clé crée une fonction ?', o: ['function', 'def', 'define', 'fun'], a: 1, w: 'def nom(parametres): définit la fonction ; son corps est le bloc indenté.' },
+      { q: 'Une fonction sans return renvoie :', o: ['0', '""', 'None', 'une erreur'], a: 2, w: 'Sans return explicite, Python renvoie None, l’absence de valeur.' },
+      { q: 'Les variables créées dans une fonction sont :', o: ['globales', 'locales à cette fonction', 'des constantes', 'partagées avec le programme'], a: 1, w: 'Elles naissent et disparaissent avec l’appel : c’est la portée locale.' },
+      { q: 'Que fait return ?', o: ['Affiche une valeur', 'Renvoie une valeur à l’appelant et quitte la fonction', 'Répète la fonction', 'Convertit un type'], a: 1, w: 'return termine la fonction et transmet le résultat ; print, lui, ne fait qu’afficher.' },
+      { q: 'len("bonjour") vaut :', o: ['6', '7', '8', 'erreur'], a: 1, w: 'Sept caractères : b-o-n-j-o-u-r. Les indices vont de 0 à 6.' },
+      { q: 'Quelle expression donne la moyenne d’une liste notes ?', o: ['notes / len(notes)', 'sum(notes) / len(notes)', 'avg(notes)', 'mean(notes) sans import'], a: 1, w: 'Pas de fonction moyenne intégrée : on la compose avec sum et len.' },
+      { q: 'sorted(notes) et notes.sort() diffèrent car :', o: ['aucune différence', 'sorted renvoie une nouvelle liste triée, sort trie en place', 'sorted trie à l’envers', 'sort renvoie la liste triée'], a: 1, w: 'sorted laisse l’originale intacte ; notes.sort() modifie la liste elle-même.' }
+    ]
+  },
+  p5: {
+    title: 'Listes et chaînes', level: 'Niveau 3 · Appliquer', time: '30 min', course: 'listes',
+    goal: 'Manipuler les indices (à partir de 0), les tranches, les méthodes de liste et le parcours d’une chaîne caractère par caractère.',
+    steps: [
+      'Saisissez le mot PYTHON : quel est l’indice du Y ? Et celui du dernier caractère ? Que vaut mot[-1] ?',
+      'Que se passerait-il avec mot[6] sur "PYTHON" ? Vérifiez votre réponse avec la règle des indices.',
+      'Dans les tranches, réglez [0:3] : qu’obtient-on ? Et [3:] ? Et [::2] ? Notez les trois résultats.',
+      'Essayez [-3:] sur PYTHON, puis [-6:-3] : les indices négatifs partent de quelle extrémité ?',
+      'Dans les méthodes, exécutez append(18) puis sort() : décrivez la liste après chaque opération. sorted() aurait-il changé la liste d’origine ?',
+      'Dans le parcours, comptez les voyelles de votre prénom : tracez le tableau des tours à la main pour les 4 premières lettres.'
+    ],
+    defi: { q: 'On reçoit une date au format AAAAMMJJ, par exemple "20261106". Écrivez comment extraire l’année, le mois et le jour avec des tranches, puis reconstituez-la en JJ/MM/AAAA.', a: 'annee = date[0:4] (ou date[:4]) → "2026" ; mois = date[4:6] → "11" ; jour = date[6:] → "06". Reconstitution : print(f"{jour}/{mois}/{annee}"). Les tranches découpent la chaîne sans la modifier : chaque position a son rôle, ici 4-2-2. C’est exactement ce que font les programmes qui lisent des données structurées (thématique « données structurées »).' },
+    qcm: [
+      { q: 'Pour mot = "PYTHON", que vaut mot[1] ?', o: ['"P"', '"Y"', '"T"', 'Erreur'], a: 1, w: 'Les indices commencent à 0 : mot[0] est "P", mot[1] est "Y".' },
+      { q: 'Que vaut mot[-1] sur "PYTHON" ?', o: ['"P"', '"N"', 'Erreur', '""'], a: 1, w: 'L’indice -1 désigne toujours le dernier caractère.' },
+      { q: 'Que vaut "PYTHON"[1:4] ?', o: ['"PYT"', '"YTH"', '"YTHO"', '"THO"'], a: 1, w: 'De l’indice 1 (Y) inclus à 4 (O) exclu : Y, T, H.' },
+      { q: 'Que fait notes.append(18) ?', o: ['Insère 18 au début', 'Ajoute 18 à la fin', 'Remplace tout par 18', 'Trie la liste'], a: 1, w: 'append ajoute son argument comme dernier élément.' },
+      { q: 'Quelle est la longueur de la liste [3, 7, 9, 12] ?', o: ['3', '4', '12', '31'], a: 1, w: 'len compte les éléments : quatre. Le dernier indice est donc 3.' },
+      { q: 'for lettre in "chat": exécute combien de tours ?', o: ['1', '3', '4', '5'], a: 2, w: 'Un tour par caractère : c, h, a, t.' },
+      { q: 'Que renvoie "12" + "8" ?', o: ['20', '"128"', 'Erreur', '128'], a: 1, w: 'Deux chaînes : + concatène. Pour additionner, il faut int("12") + int("8").' }
+    ]
+  }
+};
+
+/* ---------- Cours ---------- */
+const COURSE = [];
+COURSE.push({ id: 'pourquoi', t: 'Pourquoi Python en SNT ?', h: `
+<p>Python est le langage que vous utiliserez toute l’année en SNT, sur les <b>sept thématiques</b> du programme : Internet, le Web, les réseaux sociaux, les données structurées et leur traitement, la localisation et la cartographie, la photographie numérique, et la cybersécurité. Pourquoi ce choix ?</p>
+<ul>
+<li><b>Il se lit presque comme de l’anglais</b> : peu de symboles, pas d’accolades, l’indentation structure le texte.</li>
+<li><b>Il est partout</b> : sciences, data, web, enseignement. Ce que vous apprenez ici sert bien au-delà du lycée.</li>
+<li><b>Il est interprété</b> : on exécute immédiatement, sans compilation, ce qui permet d’expérimenter ligne par ligne.</li>
+</ul>
+<h3>La méthode de l’année</h3>
+<p>Chaque thématique mobilisera les mêmes briques : des <b>variables</b> pour ranger les données, des <b>conditions</b> pour décider, des <b>boucles</b> pour répéter, des <b>fonctions</b> pour réutiliser, des <b>listes</b> pour ranger plusieurs valeurs. Exemple : compter les mots d’une page web (Web), trier un fichier de données (données structurées), tester un mot de passe (cybersécurité) — toujours les mêmes fondations.</p>
+<h3>Écrire et exécuter</h3>
+<p>On écrit le programme dans un <b>éditeur</b> (Thonny, IDLE, Basthon…) et on l’exécute : l’<b>interpréteur</b> lit chaque ligne de haut en bas et exécute. La <b>console</b> affiche les résultats de <code class="k">print</code> et lit les saisies de <code class="k">input</code>. Un programme se termine par la dernière ligne — ou plus tôt en cas d’erreur, avec un message à lire attentivement.</p>
+<div class="retain"><b>À retenir.</b> Python exécute de haut en bas, une instruction par ligne. L’indentation (4 espaces) délimite les blocs : elle fait partie du langage.</div>` });
+
+COURSE.push({ id: 'variables', t: 'Variables, types et affichage', h: `
+<p>Une <b>variable</b> est un nom donné à une valeur : <code class="k">age = 15</code> range 15 dans age. Le symbole <b>=</b> est une <b>affectation</b> (on stocke), pas une égalité mathématique : <code class="k">total = total + 1</code> est parfaitement correct — cela signifie « nouveau total = ancien total + 1 ».</p>
+<h3>Les types de base</h3>
+<table class="ctable"><thead><tr><th>Type</th><th>Nom Python</th><th>Exemples</th><th>Sert à…</th></tr></thead><tbody>
+<tr><td>Entier</td><td><code class="k">int</code></td><td>15, 0, -3</td><td>compter, indexer</td></tr>
+<tr><td>Flottant</td><td><code class="k">float</code></td><td>3.14, -0.5, 2.0</td><td>mesurer, calculer des moyennes</td></tr>
+<tr><td>Chaîne</td><td><code class="k">str</code></td><td>"SNT", "42", ""</td><td>du texte, entre guillemets</td></tr>
+<tr><td>Booléen</td><td><code class="k">bool</code></td><td>True, False</td><td>résultat d’un test, décision</td></tr>
+</tbody></table>
+<p>La fonction <code class="k">type(x)</code> révèle le type. C’est <b>l’écriture qui décide</b> : "42" (avec guillemets) est du texte, 42 est un nombre. Les conversions se font avec <code class="k">int()</code>, <code class="k">float()</code>, <code class="k">str()</code>.</p>
+<h3>Afficher et saisir</h3>
+<p><code class="k">print(...)</code> affiche ; <code class="k">input(...)</code> pose une question et renvoie <b>toujours une chaîne</b>. Les <b>f-strings</b> insèrent des valeurs dans un texte :</p>
+<pre class="code">nom = input("Ton prénom ? ")
+age = int(input("Ton âge ? "))
+print(f"Bonjour {nom}, dans un an tu auras {age + 1} ans.")</pre>
+<div class="retain"><b>À retenir.</b> input() renvoie du texte : on convertit avec int() ou float() avant tout calcul. En f-string, les accolades sont remplacées par la valeur (ou le résultat) de l’expression.</div>` });
+
+COURSE.push({ id: 'conditions', t: 'Les conditions', h: `
+<p>Un test <code class="k">if</code> exécute un bloc seulement si la condition est vraie :</p>
+<pre class="code">if age >= 18:
+    print("Majeur")
+elif age >= 13:
+    print("Ado")
+else:
+    print("Enfant")</pre>
+<p>La condition est évaluée <b>de haut en bas</b> : la première vraie gagne, les autres ne sont pas regardées. Le <b>deux-points</b> termine la ligne de test, et le <b>bloc</b> est le texte indenté de 4 espaces.</p>
+<h3>Opérateurs de comparaison et de logique</h3>
+<table class="ctable narrow"><thead><tr><th>Symbole</th><th>Sens</th><th>Exemple vrai</th></tr></thead><tbody>
+<tr><td>==</td><td>égal à</td><td>5 == 5</td></tr>
+<tr><td>!=</td><td>différent de</td><td>5 != 3</td></tr>
+<tr><td>&lt;</td><td>plus petit</td><td>3 &lt; 5</td></tr>
+<tr><td>&gt;=</td><td>plus grand ou égal</td><td>5 &gt;= 5</td></tr>
+<tr><td>and</td><td>et (les deux vraies)</td><td>3 &lt; 5 and 2 &gt; 1</td></tr>
+<tr><td>or</td><td>ou (au moins une vraie)</td><td>3 &gt; 5 or 2 &gt; 1</td></tr>
+<tr><td>not</td><td>non (inverse)</td><td>not (3 &gt; 5)</td></tr>
+</tbody></table>
+<p>Chaque comparaison produit un <b>booléen</b> (True ou False) : c’est exactement ce qu’un if examine. Attention au piège classique : <b>= affecte, == compare</b>.</p>
+<div class="retain"><b>À retenir.</b> if / elif / else, deux-points puis bloc indenté. Les conditions se testent dans l’ordre ; and exige tout, or suffit à l’un, not inverse.</div>` });
+
+COURSE.push({ id: 'boucles', t: 'Les boucles', h: `
+<p>Deux façons de répéter : <b>for</b> quand on connaît les éléments à parcourir, <b>while</b> quand on répète jusqu’à ce qu’une condition change.</p>
+<h3>for et range()</h3>
+<pre class="code">for i in range(5):          # 0, 1, 2, 3, 4
+    print(i)
+for mot in ["le", "web"]:   # parcourt une liste
+    print(mot)</pre>
+<p><code class="k">range(début, fin, pas)</code> énumère les entiers de début (inclus) à fin (<b>exclue</b>), de pas en pas. Pour parcourir tous les indices d’une liste : <code class="k">range(len(ma_liste))</code>.</p>
+<h3>while</h3>
+<pre class="code">v = 100
+while v > 0:
+    v = v // 2</pre>
+<p>La condition est testée <b>avant chaque tour</b>. Si elle est fausse dès le départ : aucun tour. Si elle ne devient jamais fausse : <b>boucle infinie</b> (on l’arrête avec Ctrl+C) — d’où l’importance de faire évoluer la condition dans le bloc.</p>
+<h3>L’accumulateur</h3>
+<p>Le schéma le plus fréquent de l’année : une variable initialisée <b>avant</b> la boucle, enrichie <b>dedans</b>.</p>
+<pre class="code">total = 0
+for note in [12, 8, 16]:
+    total = total + note     # ou total += note
+print(total / 3)             # moyenne</pre>
+<div class="retain"><b>À retenir.</b> for = je parcours une collection ou un nombre de tours connu ; while = je répète tant que. La fin d’un range est exclue. Un accumulateur s’initialise avant la boucle.</div>` });
+
+COURSE.push({ id: 'fonctions', t: 'Les fonctions', h: `
+<p>Une <b>fonction</b> est un bloc nommé, appelable autant de fois qu’on veut. Elle reçoit des <b>paramètres</b> et renvoie un résultat avec <code class="k">return</code>.</p>
+<pre class="code">def prix_ttc(prix_ht):
+    return prix_ht * 1.20
+
+print(prix_ttc(10))     # 12.0
+total = prix_ttc(25)    # on range le résultat dans une variable</pre>
+<h3>Pourquoi des fonctions ?</h3>
+<ul><li><b>Réutiliser</b> : écrire une fois, appeler mille fois.</li>
+<li><b>Structurer</b> : un programme devient une suite de briques lisibles.</li>
+<li><b>Tester séparément</b> : si la fonction est correcte, tout ce qui l’appelle en profite.</li></ul>
+<h3>La portée des variables</h3>
+<p>Une variable créée <b>dans</b> une fonction est <b>locale</b> : elle disparaît à la fin de l’appel. Une variable créée au niveau du programme est <b>globale</b> : les fonctions peuvent la lire, mais la bonne pratique est de passer par les paramètres et le return :</p>
+<pre class="code">def double(x):
+    resultat = 2 * x    # locale : n’existe que dans double()
+    return resultat
+
+print(resultat)          # NameError !</pre>
+<p><b>print ou return ?</b> <code class="k">print</code> affiche à l’écran (pour l’humain) ; <code class="k">return</code> renvoie une valeur (pour le programme), qu’on peut ranger, retransmettre, calculer. Une fonction qui affiche sans renvoyer ne peut pas être réutilisée dans un calcul.</p>
+<div class="retain"><b>À retenir.</b> def nom(paramètres): … return valeur. Les variables internes sont locales. Une fonction communique par ses entrées (paramètres) et sa sortie (return).</div>` });
+
+COURSE.push({ id: 'listes', t: 'Listes et chaînes de caractères', h: `
+<p>Une <b>liste</b> range plusieurs valeurs dans l’ordre : <code class="k">notes = [12, 8, 16]</code>. Une <b>chaîne</b> est du texte : elle se parcourt et se découpe pareil. Dans les deux cas, les positions s’appellent des <b>indices</b> et commencent à <b>0</b>.</p>
+<pre class="code">notes = [12, 8, 16]
+len(notes)      # 3 : nombre d’éléments
+notes[0]        # 12 : premier élément
+notes[-1]       # 16 : dernier</pre>
+<h3>Les tranches (slices)</h3>
+<p><code class="k">mot[a:b]</code> va de l’indice a (inclus) à b (exclu) ; <code class="k">mot[a:b:pas]</code> prend un élément sur pas.</p>
+<table class="ctable narrow"><tbody>
+<tr><td>mot[:3]</td><td>les 3 premiers caractères</td></tr>
+<tr><td>mot[-3:]</td><td>les 3 derniers</td></tr>
+<tr><td>mot[::2]</td><td>un caractère sur deux</td></tr>
+<tr><td>date[4:6]</td><td>les caractères 4 et 5 (ex. le mois de "20261106")</td></tr>
+</tbody></table>
+<h3>Les méthodes de liste</h3>
+<pre class="code">notes.append(14)   # ajoute à la fin
+notes.sort()       # trie en place (modifie la liste)
+notes.remove(8)    # supprime la première occurrence de 8
+notes.pop()         # retire et renvoie le dernier</pre>
+<p><code class="k">sorted(notes)</code>, au contraire, renvoie une <b>nouvelle</b> liste triée sans toucher l’originale.</p>
+<h3>Parcourir</h3>
+<pre class="code">for note in notes:        # parcours par valeurs
+    print(note)
+for i in range(len(notes)):   # parcours par indices
+    print(i, notes[i])</pre>
+<div class="retain"><b>À retenir.</b> Les indices commencent à 0 ; -1 désigne la fin. Les tranches excluent la borne de fin. append ajoute, sort trie en place, sorted renvoie une copie triée.</div>` });
+
+COURSE.push({ id: 'erreurs', t: 'Lire un message d’erreur', h: `
+<p>Une erreur n’est pas un échec : c’est <b>un diagnostic</b>. Python dit presque toujours ce qui ne va pas et où. Dernière ligne d’abord : c’est elle qui nomme le problème.</p>
+<table class="ctable"><thead><tr><th>Message</th><th>Ce qu’il veut dire</th><th>Correction type</th></tr></thead><tbody>
+<tr><td><code class="k">SyntaxError</code></td><td>La ligne est mal écrite (deux-points, guillemet, parenthèse manquants)</td><td>Relire la ligne indiquée, vérifier : " et ()</td></tr>
+<tr><td><code class="k">IndentationError</code></td><td>Le bloc n’est pas aligné</td><td>4 espaces partout, cohérentes</td></tr>
+<tr><td><code class="k">NameError: name 'x' is not defined</code></td><td>La variable n’existe pas (faute de frappe, ou locale à une fonction)</td><td>Vérifier le nom exact et l’endroit où elle a été créée</td></tr>
+<tr><td><code class="k">TypeError</code></td><td>Opération entre types incompatibles ("3" + 5)</td><td>Convertir avec int(), float() ou str()</td></tr>
+<tr><td><code class="k">IndexError</code></td><td>Indice hors de la liste</td><td>Se souvenir qu’on compte à partir de 0</td></tr>
+<tr><td><code class="k">ZeroDivisionError</code></td><td>Division par 0</td><td>Protéger avec if len(liste) > 0:</td></tr>
+</tbody></table>
+<h3>La méthode anti-bug</h3>
+<ol><li><b>Lire le message</b> et le numéro de ligne (souvent la ligne indiquée, parfois la précédente).</li>
+<li><b>Isoler</b> : tester la seule partie qui pose problème.</li>
+<li><b>Afficher</b> : ajouter des print() pour voir ce que contiennent vraiment les variables.</li>
+<li><b>Commenter</b> son code au fur et à mesure : un # suivi d’une explication aide plus tard (et le jour d’un contrôle).</li></ol>
+<div class="retain"><b>À retenir.</b> On lit un message d’erreur de bas en haut : le type d’erreur puis la ligne. Print-debugger, isoler, convertir aux bons endroits : 90 % des bugs se règlent ainsi.</div>` });
+
+COURSE.push({ id: 'thematiques', t: 'Python au service des 7 thématiques', h: `
+<p>Voici comment les bases de cette page reviennent dans chaque thématique de l’année. Toutes reposent sur les mêmes briques : variables, conditions, boucles, fonctions, listes.</p>
+<table class="ctable"><thead><tr><th>Thématique</th><th>Ce qu’on programmera</th><th>Briques mobilisées</th></tr></thead><tbody>
+<tr><td><b>Internet</b></td><td>Simuler le routage de paquets, le trajet d’un message</td><td>listes d’étapes, boucles, conditions</td></tr>
+<tr><td><b>Le Web</b></td><td>Compter les mots ou les liens d’une page HTML</td><td>chaînes, tranches, boucles, dictionnaire de compteurs</td></tr>
+<tr><td><b>Réseaux sociaux</b></td><td>Modéliser un graphe d’amis, suggérer des contacts</td><td>listes de listes, fonctions, parcours</td></tr>
+<tr><td><b>Données structurées</b></td><td>Lire un fichier CSV, filtrer, trier, calculer des moyennes</td><td>listes, accumulateurs, fonctions, sorted</td></tr>
+<tr><td><b>Localisation, cartographie</b></td><td>Traiter des coordonnées GPS, calculer des distances</td><td>float, fonctions, tranches de chaînes (formats de date)</td></tr>
+<tr><td><b>Photographie numérique</b></td><td>Modifier les pixels d’une image (luminosité, filtres)</td><td>boucles imbriquées, listes de listes, conditions</td></tr>
+<tr><td><b>Cybersécurité</b></td><td>Tester la robustesse d’un mot de passe, un chiffrement simple</td><td>conditions, chaînes, boucles sur les caractères</td></tr>
+</tbody></table>
+<h3>Le fil conducteur</h3>
+<p>Un programme se construit toujours pareil : <b>entrer</b> les données (input, fichier), <b>traiter</b> (conditions, boucles, fonctions), <b>sortir</b> un résultat (print, graphique). Maîriser ces cinq ateliers, c’est être prêt pour les sept thématiques.</p>
+<div class="retain"><b>À retenir.</b> Peu importe la thématique : le squelette reste « données → traitement → résultat ». Les fondations de cette page servent toute l’année.</div>` });
+
+COURSE.push({ id: 'outils', t: 'Où écrire du Python ?', h: `
+<h3>Au lycée</h3>
+<ul>
+<li><b>Thonny</b> : éditeur simple, pensé pour débuter (installé sur les postes du lycée, gratuit à la maison).</li>
+<li><b>Basthon / Capytale</b> : dans le navigateur, rien à installer, idéal en classe et à la maison.</li>
+<li><b>La console</b> de l’éditeur : pour tester une ligne isolée avant de l’écrire dans le programme.</li>
+</ul>
+<h3>Bonnes habitudes dès maintenant</h3>
+<ul>
+<li><b>Nommer clairement</b> : note, total, mot_secret — pas de a, b, x partout. Un nom doit dire ce que contient la variable.</li>
+<li><b>Commenter</b> avec # pour expliquer une étape délicate (pas chaque ligne évidente).</li>
+<li><b>Tester petit</b> : 3 lignes qui marchent valent mieux que 30 lignes jamais exécutées.</li>
+<li><b>Sauvegarder</b> son fichier .py avec un nom explicite : tp2_web_compteur.py.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> On n’apprend pas la programmation en regardant : on teste, on se trompe, on lit le message d’erreur, on corrige. C’est le métier qui rentre.</div>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>Interpréteur</dt><dd>Programme qui lit et exécute le code Python ligne par ligne.</dd>
+<dt>Console</dt><dd>Fenêtre d’entrée/sortie du programme : ce que print affiche, ce que input lit.</dd>
+<dt>Variable</dt><dd>Nom donné à une valeur pour la réutiliser (age = 15).</dd>
+<dt>Affectation</dt><dd>Action de ranger une valeur dans une variable avec =.</dd>
+<dt>Type (int, float, str, bool)</dt><dd>Nature d’une valeur : entier, décimal, texte, vrai/faux.</dd>
+<dt>Conversion (cast)</dt><dd>Changement de type : int("42") transforme le texte en nombre.</dd>
+<dt>f-string</dt><dd>Chaîne précédée de f, où les accolades insèrent des valeurs.</dd>
+<dt>Condition (if / elif / else)</dt><dd>Test qui choisit le bloc à exécuter selon une valeur booléenne.</dd>
+<dt>Booléen</dt><dd>Valeur True ou False, résultat d’une comparaison.</dd>
+<dt>Indentation</dt><dd>Décalage de 4 espaces qui délimite un bloc en Python.</dd>
+<dt>Boucle (for / while)</dt><dd>Répétition d’un bloc : parcours connu, ou tant qu’une condition est vraie.</dd>
+<dt>Accumulateur</dt><dd>Variable qui se remplit au fil des tours d’une boucle (somme, compteur).</dd>
+<dt>Fonction (def / return)</dt><dd>Bloc nommé, réutilisable, avec paramètres en entrée et une valeur renvoyée.</dd>
+<dt>Paramètre</dt><dd>Nom donné à l’entrée d’une fonction ; il reçoit la valeur de l’appel.</dd>
+<dt>Portée</dt><dd>Zone où une variable existe : locale (dans la fonction) ou globale (tout le programme).</dd>
+<dt>Liste</dt><dd>Collection ordonnée de valeurs : notes = [12, 8, 16].</dd>
+<dt>Indice</dt><dd>Position d’un élément, comptée à partir de 0.</dd>
+<dt>Tranche (slice)</dt><dd>Sous-portion d’une liste ou chaîne : mot[0:4], mot[::2].</dd>
+<dt>Méthode</dt><dd>Fonction attachée à une valeur : notes.append(14), mot.upper().</dd>
+<dt>NameError / TypeError / IndexError</dt><dd>Erreurs courantes : variable inconnue, types incompatibles, indice hors limites.</dd>
+</dl>` });
+
+/* ---------- interface ---------- */
+const UI = { cur: 'p1' };
+const AS = { key: 'p1', tab: 'steps', open: false, st: lsGet(KEYS.act, {}), arm: null };
+const CS = { open: false, id: 'pourquoi' };
+function actSave() { lsSet(KEYS.act, AS.st); }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function wsById(id) { return WORKSHOPS.find(w => w.id === id) || WORKSHOPS[0]; }
+function nl(s) { return String(s).replace(/\n/g, '<br>'); }
+
+function renderSeg() {
+  const seg = $('#wsSeg'); seg.innerHTML = '';
+  WORKSHOPS.forEach((w, i) => seg.append(h('button', { type: 'button', role: 'tab', 'aria-pressed': w.id === UI.cur ? 'true' : 'false', onclick: () => gotoWs(w.id) }, (i + 1) + '. ' + w.title)));
+}
+function mountWs() {
+  const w = wsById(UI.cur), root = $('#ws');
+  $('#hint').textContent = w.hint; root.innerHTML = '';
+  w.mount(root);
+  const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
+}
+function gotoWs(id) {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  UI.cur = id; AS.key = id; AS.tab = 'steps';
+  renderSeg(); mountWs(); renderAct();
+}
+
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
+  if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: nl(s) }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: nl(a.defi.q) }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: nl(a.defi.a) }))));
+    if (a.course) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(a.course) }, 'Voir le cours : ' + courseSection(a.course).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Votre travail sera effacé'; AS.arm = setTimeout(() => { b.textContent = 'Recommencer l’atelier'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; wsById(UI.cur).reset(); mountWs(); renderAct(); } }, 'Recommencer l’atelier')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files', style: 'display:flex;gap:6px;flex-wrap:wrap' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open; renderAct();
+}
+$('#bAct').addEventListener('click', actToggle);
+
+/* ---------- cours ---------- */
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const go = id => { CS.id = id; renderCourse(); };
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => go(s.id) }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => go(e.target.value) }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+  art.append(h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => go(COURSE[idx - 1].id) }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => go(COURSE[idx + 1].id) }, COURSE[idx + 1].t + ' →') : h('span')));
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : les bases de Python'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+
+/* ---------- aide ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour poser les bases de Python avant d’aborder les 7 thématiques de l’année en SNT : variables et types, conditions, boucles, fonctions, listes et chaînes.</p>' +
+    '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction et explications.</li><li>Le bouton <b>Cours</b> détaille toutes les notions, chaque point étant justifié, jusqu’au lien avec les 7 thématiques.</li><li>Les zones interactives (curseurs, champs) réagissent en direct : essayez !</li></ul>' +
+    '<h3>Vos données</h3><p>Les réponses au QCM sont mémorisées dans ce navigateur uniquement.</p>' }));
+});
+
+/* ---------- démarrage ---------- */
+(function init() {
+  AS.open = !isSmall();
+  renderSeg(); mountWs(); renderAct(); renderCourse();
+})();
+</script>
+</body></html>

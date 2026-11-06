@@ -1,0 +1,865 @@
+<!doctype html><html lang="fr"><head><meta charset="utf8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Atelier Représentation des nombres — SNT</title>
+<style>
+:root{color-scheme:light;--font-ui:'Segoe UI',system-ui,-apple-system,Arial,sans-serif;--font-mono:ui-monospace,Consolas,Menlo,monospace;
+--bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--field:#ffffff;--line:#b9bfc7;
+--fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;--run:#2e8b3a;--warn:#9a5b00;--bad:#c0281f;--ok:#1e7a2e;
+--netc:#2e6da4;--hostc:#c98a00}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#app{height:100%;display:flex;flex-direction:column;min-height:0}
+.band{background:var(--bar);border-bottom:1px solid var(--line);flex:none}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.btn{font-weight:500;font-size:13px;padding:6px 11px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+:is(button,input,select,textarea,summary):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel);max-width:100%;overflow-x:auto}
+.seg button{border:0;background:transparent;padding:7px 14px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.work{flex:1;min-height:0;display:flex;gap:10px;padding-block:10px}
+#stage{flex:1;min-width:0;position:relative;border:1px solid var(--line);border-radius:10px;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+#hint{flex:none;padding:6px 12px;font-size:12.5px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+#scroller{flex:1;min-height:0;overflow:auto}
+#ws{padding:16px max(16px,env(safe-area-inset-left,0px)) 30px;max-width:980px}
+#ws h2{font-size:24px;margin:0 0 8px}
+#ws h3{font-size:16.5px;margin:24px 0 6px}
+#ws p,#ws li{font-size:14.5px;line-height:1.55}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:4px 11px;font-size:13px;cursor:pointer}
+.chip:hover{border-color:var(--accent)}.chip.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.mono{font-family:var(--font-mono);font-size:13px}
+code.k{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:12.5px}
+input[type=text],input[type=number],textarea,select{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;padding:5px 8px;color:var(--fg)}
+.fld{display:flex;flex-direction:column;gap:3px;margin-bottom:9px;font-size:12.5px;color:var(--muted)}
+.opts{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:flex-end;margin:6px 0}
+.opts .fld{margin:0}
+input[type=range]{width:100%;padding:0}
+.small{font-size:12.5px;color:var(--muted);margin:0 0 9px}
+.score{font-weight:600;font-size:15px;margin:6px 0}
+.gstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:10px 0}
+.stat{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:var(--panel);display:flex;flex-direction:column;gap:2px}
+.stat span{font-size:12px;color:var(--muted)}.stat b{font-size:15px}
+.formula{background:var(--panel2);border-left:3px solid var(--accent);padding:8px 12px;margin:8px 0;font-size:15px}
+.retain{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:9px 12px;margin:16px 0 6px;font-size:14px}
+pre.code{font:12.5px/1.5 var(--font-mono);margin:6px 0;white-space:pre-wrap;word-break:break-word;background:var(--panel2);border-radius:6px;padding:7px 9px;overflow-x:auto}
+.dwrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:8px 0;max-height:360px}
+.dt{border-collapse:collapse;width:100%;font-size:13px}
+.dt th,.dt td{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.dt thead th{position:sticky;top:0;background:var(--panel2);font-weight:600;z-index:1}
+.dt .hl{background:rgba(46,109,164,.12)}
+.ctable{border-collapse:collapse;font-size:13.5px;margin:8px 0 12px}
+.ctable th,.ctable td{border:1px solid var(--line);padding:5px 9px;text-align:left;vertical-align:top}
+.ctable th{background:var(--panel2);font-weight:600}
+.ctable.narrow td,.ctable.narrow th{text-align:center;font-family:var(--font-mono);font-size:13px}
+.two2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.two2>div{min-width:0}
+/* ---- bits ---- */
+.bitrow{display:flex;align-items:center;margin:8px 0;flex-wrap:wrap}
+.bit{width:34px;height:44px;border:1px solid var(--line);border-radius:6px;background:var(--panel);font:600 16px var(--font-mono);cursor:default;display:inline-flex;align-items:center;justify-content:center;margin-right:4px}
+button.bit{cursor:pointer}
+.bit.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.bit.on.gr{background:var(--run);border-color:var(--run)}
+.bit.chg{box-shadow:0 0 0 3px var(--warn);border-color:var(--warn)}
+.bit.sm{width:24px;height:30px;font-size:12px;margin-right:3px}
+.bit.xs{width:15px;height:20px;font-size:9px;border-radius:3px;margin-right:1px}
+.bsep{width:10px;flex:none}
+.pwlbl{display:flex;font:10.5px var(--font-mono);color:var(--muted);margin:0 0 4px}
+.pwlbl span{width:38px;text-align:center;flex:none}
+.pwlbl span.sep{width:10px}
+.pwlbl span.w15{width:16px}
+.bit.net{background:var(--accent-soft);border-color:var(--netc);color:var(--accent-ink);font-weight:700}
+.bit.host{background:#fdf1d7;border-color:var(--hostc);color:#7a5200;font-weight:700}
+.bit.m1{background:var(--netc);border-color:var(--netc);color:#fff}
+.bit.m0{background:#eee;color:#999}
+#act{flex:none;width:clamp(280px,24vw,340px);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;background:var(--panel);min-height:0;max-height:100%}
+#act .pbody{font-size:13.5px}
+.phead{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid var(--line);flex:none}
+.phead b{font-size:15px}
+.phead .sub{color:var(--muted);font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tabs{display:flex;gap:2px;padding:6px 8px 0;border-bottom:1px solid var(--line);overflow-x:auto;flex:none}
+.tabs button{border:0;border-bottom:2px solid transparent;background:transparent;padding:6px 10px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+.pbody{overflow:auto;padding:12px;flex:1;min-height:0}
+.goal{background:var(--accent-soft);color:var(--accent-ink);border-radius:8px;padding:8px 10px;margin:0 0 10px}
+.steps{margin:0 0 10px;padding-left:20px}.steps li{margin-bottom:9px}
+.defi{border:1px dashed var(--accent);border-radius:8px;padding:8px 10px;margin:0 0 12px}
+.defi p{margin:6px 0}
+.defi summary{cursor:pointer;font-weight:500;color:var(--accent-ink)}
+fieldset.q{border:1px solid var(--line);border-radius:8px;padding:8px 10px 6px;margin:0 0 10px;min-width:0}
+fieldset.q legend{font-weight:600;padding:0 4px}
+.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 6px;border-radius:6px;cursor:pointer}
+.opt input{margin-top:3px;width:auto;flex:none}
+.opt.good{background:rgba(30,122,46,.15)}.opt.bad{background:rgba(192,40,31,.15)}
+.why{font-size:12.5px;color:var(--muted);margin:6px 4px 2px}
+#course{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--bg)}
+.ctop,.cwrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ctop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-block:8px;border-bottom:1px solid var(--line);background:var(--bar)}
+.cwrap{flex:1;min-height:0;display:flex;gap:28px;padding-block:14px}
+.ctoc{flex:none;width:250px;overflow:auto;display:flex;flex-direction:column;gap:1px}
+.ctoc button{display:block;width:100%;text-align:left;padding:6px 10px;border:0;border-left:3px solid transparent;background:transparent;cursor:pointer;font-size:13.5px}
+.ctoc button:hover{background:var(--panel2)}
+.ctoc button.on{border-left-color:var(--accent);background:var(--accent-soft);color:var(--accent-ink);font-weight:600}
+.ctoc-sel{display:none;margin:8px max(16px,env(safe-area-inset-left,0px)) 0;width:auto}
+.cbody{flex:1;min-width:0;overflow:auto;max-width:860px;padding-right:6px}
+.ckick{color:var(--muted);font-size:12.5px;margin:0}
+.cbody h2{font-size:26px;margin:2px 0 12px}
+.cbody h3{font-size:16.5px;margin:22px 0 6px}
+.cbody p,.cbody li{font-size:14.5px;line-height:1.6}
+.cbody ul,.cbody ol{padding-left:22px}.cbody li{margin-bottom:4px}
+.gloss{display:grid;grid-template-columns:max-content 1fr;gap:5px 18px;font-size:14px}
+.gloss dt{font-weight:600}.gloss dd{margin:0}
+.cpn{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:24px 0 32px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;max-width:90vw}
+#dlg{position:fixed;inset:0;background:rgba(10,16,22,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.dlgbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:min(640px,100%);max-height:88%;display:flex;flex-direction:column}
+.dlgbox header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dlgbox header b{font-size:16px}
+.dlgbox .dbody{padding:14px 16px;overflow:auto}
+.dlgbox footer{display:flex;gap:8px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line)}
+.dlgbox p,.dlgbox li{margin:4px 0;font-size:13.5px}
+.verdict{border-radius:8px;padding:9px 12px;margin-top:10px;font-size:14px}
+.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
+@media (max-width:820px){
+  .ctoc{display:none}.ctoc-sel{display:block}.cwrap{padding-top:8px}.cbody{padding-right:0}
+  .work{flex-direction:column;gap:8px}
+  #act{position:fixed;left:0;right:0;bottom:0;width:auto;height:70%;max-height:none;border-radius:14px 14px 0 0;z-index:35;box-shadow:0 -8px 30px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .phead,.pbody,.tabs{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+}
+</style><base target="_blank">
+</head><body>
+<div id="app">
+  <header class="band"><div class="inner row">
+    <div class="brand"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="2" y="5" width="6" height="16" fill="var(--accent)"/><rect x="10" y="9" width="6" height="12" fill="var(--run)"/><rect x="18" y="13" width="6" height="8" fill="var(--warn)"/></svg><span>Atelier Représentation des nombres <small>SNT</small></span></div>
+    <div class="files" style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn" id="bAct" type="button" aria-pressed="false">Activité</button>
+      <button class="btn" id="bCourse" type="button" aria-pressed="false">Cours</button>
+      <button class="btn" id="bHelp" type="button">Aide</button>
+    </div>
+  </div></header>
+  <div class="band"><div class="inner row"><div class="seg" id="wsSeg" role="tablist" aria-label="Ateliers"></div></div></div>
+  <main class="inner work" id="work">
+    <section id="stage"><div id="hint"></div><div id="scroller"><div id="ws"></div></div></section>
+    <aside id="act" hidden aria-label="Activité"></aside>
+  </main>
+  <section id="course" hidden aria-label="Cours"></section>
+</div>
+<div id="dlg" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'atelier-nombres-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } }
+
+/* ---------- outils ---------- */
+const toBin = (v, bits) => (v >>> 0).toString(2).padStart(bits || 8, '0');
+const toHex = v => (v >>> 0).toString(16).toUpperCase().padStart(2, '0');
+const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
+
+function bitRow(v, bits, o) {
+  o = o || {};
+  const row = h('div', { class: 'bitrow' });
+  for (let i = bits - 1; i >= 0; i--) {
+    const b = (v >>> i) & 1;
+    const cell = h('span', { class: 'bit' + (b ? ' on' : '') + (o.small ? ' sm' : '') + (o.xs ? ' xs' : '') + (o.cls ? ' ' + o.cls(i, b) : ''), 'aria-label': 'bit ' + i + ' = ' + b }, String(b));
+    if (o.onFlip) { cell.tagName; cell.style.cursor = 'pointer'; cell.addEventListener('click', () => o.onFlip(i)); }
+    row.append(cell);
+    if (o.grp4 && i > 0 && i % 4 === 0) row.append(h('span', { class: 'bsep' }));
+  }
+  return row;
+}
+function powerRow(bits, small) {
+  const r = h('div', { class: 'pwlbl' });
+  for (let i = bits - 1; i >= 0; i--) { r.append(h('span', { class: small ? 'w15' : '' }, String(1 << i))); if (!small && i > 0 && i % 4 === 0) r.append(h('span', { class: 'sep' })); }
+  return r;
+}
+function tableEl(rows, cols, labels, hi) {
+  const t = h('table', { class: 'dt' }), tr = h('tr');
+  cols.forEach(c => tr.append(h('th', { scope: 'col', class: hi === c ? 'hl' : '' }, (labels && labels[c]) || c)));
+  t.append(h('thead', null, tr));
+  const tb = h('tbody');
+  rows.forEach(r => { const x = h('tr'); cols.forEach(c => x.append(h('td', { class: hi === c ? 'hl' : '' }, String(r[c] == null ? '' : r[c])))); tb.append(x); });
+  t.append(tb);
+  return h('div', { class: 'dwrap' }, t);
+}
+
+const WORKSHOPS = [];
+
+/* ---------- Atelier 1 : les bases ---------- */
+const W1 = { v: 205, n: 205, hex: 'CD' };
+function mountW1(root) {
+  root.append(h('h2', null, 'Décimal, binaire, hexadécimal'),
+    h('p', null, 'Nous écrivons les nombres en ', h('b', null, 'base 10'), ' : dix chiffres, et chaque position vaut dix fois plus que celle de droite (205 = 2×100 + 0×10 + 5×1). Les ordinateurs utilisent la ', h('b', null, 'base 2'), ' (le binaire : deux chiffres, 0 et 1, chaque position vaut deux fois plus). Pour les humains, on regroupe les bits par paquets de 4 : la ', h('b', null, 'base 16'), ' (hexadécimal).'));
+  /* 1. octet interactif */
+  const rowBox = h('div'), pw = h('p', { class: 'formula' }), sw = h('div', { class: 'gstats' });
+  function drawOctet() {
+    rowBox.innerHTML = ''; rowBox.append(bitRow(W1.v, 8, { onFlip: i => { W1.v = (W1.v ^ (1 << i)) & 255; drawOctet(); } }));
+    const terms = []; for (let i = 7; i >= 0; i--) if ((W1.v >>> i) & 1) terms.push('2^' + i + ' = ' + (1 << i));
+    pw.textContent = (terms.length ? terms.join(' + ') + ' = ' : '') + W1.v + ' en décimal · ' + toBin(W1.v) + ' en binaire · 0x' + toHex(W1.v) + ' en hexadécimal.';
+    sw.innerHTML = ''; [['Binaire', toBin(W1.v)], ['Décimal', String(W1.v)], ['Hexadécimal', '0x' + toHex(W1.v)]].forEach(k => sw.append(h('div', { class: 'stat' }, h('span', null, k[0]), h('b', { class: 'mono' }, k[1]))));
+  }
+  root.append(h('h3', null, '1. Un octet à construire'),
+    h('p', null, 'Cliquez sur les bits pour allumer (1) ou éteindre (0). La valeur d’un bit dépend de sa position : de droite à gauche, les poids valent 1, 2, 4, 8, 16, 32, 64, 128.'),
+    powerRow(8), rowBox, pw, sw,
+    h('p', { class: 'small' }, 'Pourquoi le binaire ? Le composant de base d’un processeur, le transistor, est un interrupteur électronique : soit passant, soit bloqué. Deux états stables, faciles à distinguer même avec du bruit électrique — donc deux chiffres, 0 et 1.'));
+  drawOctet();
+  /* 2. méthode des divisions */
+  const din = h('input', { type: 'number', min: 0, max: 255, value: W1.n, 'aria-label': 'Nombre à convertir' }), dsteps = h('div');
+  function drawDiv() {
+    W1.n = Math.max(0, Math.min(255, Math.round(+din.value || 0)));
+    const list = []; let m = W1.n;
+    if (m === 0) list.push('0 ÷ 2 = 0, reste 0');
+    while (m > 0) { const q = Math.floor(m / 2), r = m % 2; list.push(m + ' ÷ 2 = ' + q + ', reste ' + r); m = q; }
+    dsteps.innerHTML = '';
+    dsteps.append(h('pre', { class: 'code' }, list.join('\n')));
+    dsteps.append(h('p', { class: 'small' }, 'On lit les restes de bas en haut : ' + W1.n + ' = ' + toBin(W1.n) + '₂.'));
+  }
+  din.addEventListener('input', drawDiv);
+  root.append(h('h3', null, '2. Convertir : la méthode des divisions'),
+    h('p', null, 'Pour convertir un nombre en binaire, on le divise par 2 et on note le reste (0 ou 1), puis on recommence avec le quotient, jusqu’à 0. ', h('b', null, 'Pourquoi ?'), ' Diviser par 2 donne le reste de la division par 2, c’est-à-dire le chiffre des unités en base 2 ; le quotient contient tous les autres chiffres, qu’on extrait de la même façon.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:180px' }, h('span', null, 'Nombre (0 à 255)'), din)), dsteps);
+  drawDiv();
+  /* 3. hexadécimal */
+  const hexd = [[0, '0'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5'], [6, '6'], [7, '7'], [8, '8'], [9, '9'], [10, 'A'], [11, 'B'], [12, 'C'], [13, 'D'], [14, 'E'], [15, 'F']];
+  const tbl = h('table', { class: 'ctable narrow' }, h('thead', null, h('tr', null, h('th', null, 'Décimal'), hexd.map(d => h('th', null, String(d[0]))))), h('tbody',
+    h('tr', null, h('th', null, 'Binaire'), hexd.map(d => h('td', null, toBin(d[0], 4)))),
+    h('tr', null, h('th', null, 'Hexadécimal'), hexd.map(d => h('td', null, h('b', null, d[1]))))));
+  const hx = h('input', { type: 'text', class: 'mono', value: W1.hex, maxlength: 2, 'aria-label': 'Valeur hexadécimale', autocomplete: 'off', spellcheck: 'false' }), hout = h('p', { class: 'score' }), hrow = h('div');
+  function drawHex() {
+    const ok = /^[0-9a-fA-F]{1,2}$/.test(hx.value.trim());
+    hx.classList.toggle('bad', !ok);
+    hrow.innerHTML = '';
+    if (!ok) { hout.textContent = 'Entrez 1 ou 2 chiffres hexadécimaux (0-9, A-F).'; return; }
+    const v = parseInt(hx.value.trim(), 16) & 255;
+    W1.hex = hx.value.trim().toUpperCase();
+    hrow.append(bitRow(v, 8, { grp4: true }));
+    hout.textContent = '0x' + W1.hex + ' = ' + toBin(v) + '₂ = ' + v + '. Le chiffre de gauche code les 4 bits de poids fort, celui de droite les 4 bits de poids faible : F = 1111, donc 0xF0 = 1111 0000 = 240.';
+  }
+  hx.addEventListener('input', drawHex);
+  root.append(h('h3', null, '3. L’hexadécimal : des paquets de 4 bits'),
+    h('p', null, h('b', null, 'Pourquoi 16 ? '), '16 = 2⁴ : un chiffre hexadécimal représente ', h('b', null, 'exactement 4 bits'), ' (un « quartet »). Un octet = 8 bits = exactement 2 chiffres hexadécimaux. C’est compact et sans ambiguïté : c’est pourquoi la mémoire, les adresses et les codes d’erreur s’affichent en hexadécimal. Le préfixe 0x signifie « hexadécimal ».'),
+    tbl, h('label', { class: 'fld', style: 'max-width:160px' }, h('span', null, 'Hexadécimal (ex. CD, F0, 2A)'), hx), hrow, hout);
+  drawHex();
+}
+WORKSHOPS.push({ id: 'n1', title: 'Les bases', hint: 'Construisez un octet bit par bit, convertissez par divisions successives et liez binaire et hexadécimal.', mount: mountW1, reset: () => { Object.assign(W1, { v: 205, n: 205, hex: 'CD' }); } });
+
+/* ---------- Atelier 2 : additions et soustractions ---------- */
+const W2 = { a: 89, b: 37, tab: 'add', qa: 0, qb: 0, qans: '', qfeed: '', qw: 0 };
+function addSteps(a, b) {
+  const rows = []; let r = 0;
+  for (let i = 0; i < 8; i++) { const ai = (a >>> i) & 1, bi = (b >>> i) & 1, t = ai + bi + r; rows.push({ i: '2^' + i + ' (bit ' + i + ')', a: ai, b: bi, rin: r, tot: t, bit: t & 1, rout: t >> 1 }); r = t >> 1; }
+  return { rows, carry: r, res: (a + b) & 255 };
+}
+function mountW2(root) {
+  root.append(h('h2', null, 'Additionner et soustraire en binaire'),
+    h('p', null, 'Les processeurs ne connaissent que l’addition binaire. Une addition se fait colonne par colonne, comme en base 10, mais les règles changent : 1 + 1 = 2, et 2 s’écrit ', h('b', null, '10'), ' en binaire — on écrit 0 et on retient 1.'));
+  const tabs = h('div', { class: 'tabs', role: 'tablist' }), body = h('div');
+  const draw = () => {
+    tabs.innerHTML = ''; [['add', 'L’addition et la retenue'], ['sub', 'La soustraction : complément à 2'], ['quiz', 'À vous de jouer']].forEach(t => tabs.append(h('button', { type: 'button', role: 'tab', 'aria-selected': W2.tab === t[0] ? 'true' : 'false', onclick: () => { W2.tab = t[0]; draw(); } }, t[1])));
+    body.innerHTML = ''; (W2.tab === 'add' ? addTab : W2.tab === 'sub' ? subTab : quizTab)(body);
+  };
+  root.append(tabs, body); draw();
+}
+function numIn(v, lab, cb) { const i = h('input', { type: 'number', min: 0, max: 255, value: v, 'aria-label': lab }); i.addEventListener('input', () => cb(Math.max(0, Math.min(255, Math.round(+i.value || 0))))); return i; }
+function addTab(box) {
+  const ia = numIn(W2.a, 'Nombre A', v => { W2.a = v; draw(); }), ib = numIn(W2.b, 'Nombre B', v => { W2.b = v; draw(); }), out = h('div');
+  function draw() {
+    const { rows, carry, res } = addSteps(W2.a, W2.b);
+    out.innerHTML = '';
+    out.append(h('div', { class: 'gstats' }, [['A : ' + toBin(W2.a), W2.a + ''], ['B : ' + toBin(W2.b), W2.b + ''], ['Résultat (8 bits)', toBin(res) + ' = ' + res], ['Retenue finale', String(carry)]].map(k => h('div', { class: 'stat' }, h('span', { class: 'mono' }, k[0]), h('b', { class: 'mono' }, k[1])))));
+    out.append(tableEl(rows, ['i', 'a', 'b', 'rin', 'tot', 'bit', 'rout'], { i: 'Colonne', a: 'A', b: 'B', rin: 'Retenue entrante', tot: 'Somme A+B+retenue', bit: 'Bit écrit', rout: 'Retenue sortante' }, 'tot'));
+    out.append(h('p', { class: 'small' }, carry ? 'Dépassement ! ' + W2.a + ' + ' + W2.b + ' = ' + (W2.a + W2.b) + ', mais un octet ne peut stocker que 256 valeurs (0 à 255) : la retenue finale est perdue et le résultat affiché est ' + (W2.a + W2.b) + ' − 256 = ' + res + '. On dit que le calcul se fait « modulo 256 ».' : 'Pas de dépassement : ' + W2.a + ' + ' + W2.b + ' = ' + res + ', la somme tient sur un octet.'));
+    out.append(h('p', null, h('b', null, 'Vérification décimale : '), W2.a + ' + ' + W2.b + ' = ' + (W2.a + W2.b) + (carry ? ' = 256 + ' + res + ' (la retenue sortante vaut 256, elle est perdue).' : '.')));
+  }
+  box.append(h('p', null, h('b', null, 'Les règles : '), '0 + 0 = 0 · 0 + 1 = 1 · 1 + 0 = 1 · 1 + 1 = 10₂ (on écrit 0, retient 1) · 1 + 1 + 1 (retenue entrante) = 11₂ (on écrit 1, retient 1). La retenue sortante d’une colonne devient la retenue entrante de la colonne suivante.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'A (0-255)'), ia), h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'B (0-255)'), ib)), out);
+  draw();
+}
+function subTab(box) {
+  const ia = numIn(W2.a, 'Nombre A', v => { W2.a = v; draw(); }), ib = numIn(W2.b, 'Nombre B', v => { W2.b = v; draw(); }), out = h('div');
+  function draw() {
+    const nb = (~W2.b) & 255, cp2 = (nb + 1) & 255, tot = W2.a + cp2, co = tot > 255 ? 1 : 0, res = tot & 255;
+    const neg = !co, val = neg ? res - 256 : res;
+    out.innerHTML = '';
+    out.append(h('div', { class: 'gstats' }, [['B', W2.b + ' = ' + toBin(W2.b)], ['Inverser (NOT) : ~B', nb + ' = ' + toBin(nb)], ['Ajouter 1 : ~B + 1', cp2 + ' = ' + toBin(cp2)], ['A + (~B + 1) : total', tot + (co ? ' (9 bits, retenue 1)' : ' (retenue 0)')]].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', { class: 'mono' }, k[1])))));
+    out.append(h('p', { class: 'score' }, co ? 'Retenue finale = 1 → résultat positif : ' + W2.a + ' − ' + W2.b + ' = ' + val + '.' : 'Retenue finale = 0 → résultat négatif : ' + W2.a + ' − ' + W2.b + ' = ' + val + ' (affiché ' + res + ' sur l’octet, car ' + res + ' − 256 = ' + val + ').'));
+    out.append(h('p', { class: 'small' }, h('b', null, 'Pourquoi ça marche ? '), 'Sur un octet, on calcule « modulo 256 » : ajouter 256 ne change pas le résultat. Donc A − B = A + (256 − B). Et 256 − B s’obtient exactement en inversant chaque bit de B (on obtient 255 − B) puis en ajoutant 1. L’ordinateur n’a besoin que d’un additionneur : pas de circuit spécial pour soustraire, et le signe tombe tout seul grâce à la retenue.'));
+    if (W2.b === 0) out.append(h('p', { class: 'small' }, 'Cas particulier : 0 s’inverse en 255, +1 redonne 0 (=256 modulo 256) : −0 s’écrit 0, il n’y a pas de « moins zéro » en complément à 2.'));
+  }
+  box.append(h('p', null, 'En base 10, soustraire « à la main » demande des emprunts (0 − 1 : on emprunte 10 à la colonne voisine). En binaire, on emprunte ', h('b', null, '2'), ' à la place de 10. Les processeurs font plus simple : ils transforment la soustraction en addition grâce au ', h('b', null, 'complément à 2'), '.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'A (0-255)'), ia), h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'B (0-255)'), ib)), out);
+  draw();
+}
+function quizTab(box) {
+  const gen = h('button', { class: 'btn', type: 'button' }), qa = h('p', { class: 'score mono' }), qin = h('input', { type: 'text', class: 'mono', placeholder: 'ex. 01101100', maxlength: 8, 'aria-label': 'Votre réponse en binaire', autocomplete: 'off', spellcheck: 'false' }), chk = h('button', { class: 'btn pri', type: 'button' }, 'Vérifier'), feed = h('div');
+  function newQ() { W2.qa = Math.floor(Math.random() * 256); W2.qb = Math.floor(Math.random() * 256); W2.qans = ''; W2.qfeed = ''; draw(); }
+  function draw() {
+    qa.textContent = toBin(W2.qa) + ' + ' + toBin(W2.qb) + '  (soit ' + W2.qa + ' + ' + W2.qb + ')';
+    gen.textContent = 'Nouveau calcul'; qin.value = W2.qans; feed.innerHTML = '';
+    if (W2.qfeed) feed.append(h('p', { class: 'verdict ' + (W2.qok ? 'yes' : 'no'), html: W2.qfeed }));
+  }
+  gen.addEventListener('click', newQ);
+  chk.addEventListener('click', () => {
+    W2.qans = qin.value.trim();
+    if (!/^[01]{1,8}$/.test(W2.qans)) { toast('Réponse attendue : 1 à 8 bits (0 et 1).'); return; }
+    const { res, carry } = addSteps(W2.qa, W2.qb), given = parseInt(W2.qans, 2);
+    W2.qok = given === res;
+    W2.qfeed = W2.qok ? ('Exact. ' + W2.qa + ' + ' + W2.qb + ' = ' + (W2.qa + W2.qb) + ', soit ' + toBin(res) + ' sur l’octet' + (carry ? ' (retenue perdue : dépassement, modulo 256).' : '.')) : ('Pas encore. La réponse est ' + toBin(res) + ' = ' + res + ' : ' + W2.qa + ' + ' + W2.qb + ' = ' + (W2.qa + W2.qb) + (carry ? ' = 256 + ' + res + '.' : '.'));
+    draw();
+  });
+  if (W2.qa === 0 && W2.qb === 0 && !W2.qfeed) { W2.qa = 89; W2.qb = 37; }
+  box.append(h('p', null, 'Calculez la somme ', h('b', null, 'sur un octet'), ' (8 bits), en binaire. Pensez aux retenues !'),
+    h('div', { class: 'opts' }, gen), qa,
+    h('label', { class: 'fld', style: 'max-width:220px' }, h('span', null, 'Votre réponse (binaire)'), qin), chk, feed);
+  draw();
+}
+WORKSHOPS.push({ id: 'n2', title: 'Additions et soustractions', hint: 'Additionnez colonne par colonne avec retenues, comprenez le dépassement, soustrayez par le complément à 2.', mount: mountW2, reset: () => { Object.assign(W2, { a: 89, b: 37, tab: 'add', qans: '', qfeed: '' }); } });
+
+/* ---------- Atelier 3 : opérations logiques ---------- */
+const OPS = { AND: (a, b) => a & b, OR: (a, b) => a | b, XOR: (a, b) => a ^ b };
+const OPW = {
+  AND: 'Le résultat vaut 1 seulement si les DEUX bits d’entrée valent 1. Usage : garder certains bits et en effacer d’autres — c’est le principe des masques (atelier 4).',
+  OR: 'Le résultat vaut 1 dès qu’AU MOINS UN bit d’entrée vaut 1. Usage : « allumer » des bits (mettre des options à 1) sans toucher aux autres.',
+  XOR: 'Le résultat vaut 1 si les bits d’entrée sont DIFFÉRENTS. Usage : comparer deux nombres (les bits qui diffèrent ressortent), détecter une erreur, ou chiffrer : appliqué deux fois avec la même clé, le XOR annule son propre effet.',
+  NOT: 'Chaque bit est inversé (0 devient 1, 1 devient 0). Usage : obtenir le complément d’un nombre — c’est la première étape du complément à 2.'
+};
+const W3 = { op: 'AND', a: 179, b: 106 };
+function truthTable(op) {
+  const rows = [];
+  const cases = op === 'NOT' ? [[0], [1]] : [[0, 0], [0, 1], [1, 0], [1, 1]];
+  cases.forEach(c => {
+    const r = op === 'NOT' ? { a: c[0], out: c[0] ? 0 : 1 } : { a: c[0], b: c[1], out: OPS[op](c[0], c[1]) };
+    rows.push(r);
+  });
+  const cols = op === 'NOT' ? ['a', 'out'] : ['a', 'b', 'out'];
+  return tableEl(rows, cols, { a: op === 'NOT' ? 'A' : 'A', b: 'B', out: op + ' = résultat' }, 'out');
+}
+function mountW3(root) {
+  root.append(h('h2', null, 'Les opérations logiques bit à bit'),
+    h('p', null, 'AND, OR, XOR et NOT s’appliquent ', h('b', null, 'bit par bit'), ' : pour chaque position, on calcule le résultat d’après la table de vérité. Ces opérations portent aussi les noms français : ET, OU, OU exclusif, NON.'));
+  const chips = h('div', { class: 'chips', role: 'group', 'aria-label': 'Opération' });
+  const ia = numIn(W3.a, 'Octet A', v => { W3.a = v; draw(); }), ib = numIn(W3.b, 'Octet B', v => { W3.b = v; draw(); }), out = h('div');
+  function draw() {
+    chips.innerHTML = ''; ['AND', 'OR', 'XOR', 'NOT'].forEach(o => chips.append(h('button', { type: 'button', class: 'chip' + (W3.op === o ? ' on' : ''), 'aria-pressed': W3.op === o ? 'true' : 'false', onclick: () => { W3.op = o; draw(); } }, o)));
+    ib.disabled = W3.op === 'NOT'; ib.parentElement.style.opacity = W3.op === 'NOT' ? '.45' : '1';
+    const res = W3.op === 'NOT' ? (~W3.a) & 255 : OPS[W3.op](W3.a, W3.b);
+    out.innerHTML = '';
+    out.append(h('div', { class: 'two2' },
+      h('div', null, h('h3', null, 'Table de vérité : ' + W3.op), truthTable(W3.op), h('p', { class: 'small' }, OPW[W3.op])),
+      h('div', null, h('h3', null, 'Application octet par octet'),
+        h('p', { class: 'mono', style: 'margin:2px 0' }, 'A = ' + toBin(W3.a)), h('div', null, bitRow(W3.a, 8, { small: true })),
+        h('p', { class: 'mono', style: 'margin:6px 0 2px' }, W3.op === 'NOT' ? '(NOT appliqué à A seul)' : 'B = ' + toBin(W3.b)), W3.op === 'NOT' ? h('p', { class: 'small' }, '—') : h('div', null, bitRow(W3.b, 8, { small: true })),
+        h('p', { class: 'mono', style: 'margin:8px 0 2px' }, W3.op + ' = ' + toBin(res)), h('div', null, bitRow(res, 8, { small: true })),
+        h('p', { class: 'score' }, W3.a + (W3.op === 'NOT' ? ' inversé = ' : ' ' + W3.op + ' ' + W3.b + ' = ') + res + '  (0x' + toHex(res) + ')'))));
+  }
+  root.append(chips, h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'A (0-255)'), ia), h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'B (0-255)'), ib)), out);
+  draw();
+  /* XOR chiffrement */
+  const msg = h('input', { type: 'text', value: 'SNT', maxlength: 12, 'aria-label': 'Message à chiffrer' }), key = numIn(200, 'Clé (0-255)', () => draw2());
+  const enc = h('pre', { class: 'code' }), dec = h('pre', { class: 'code' }), cin = h('input', { type: 'text', class: 'mono', placeholder: 'codes reçus, séparés par des espaces', 'aria-label': 'Codes reçus' });
+  function encBytes(t, k) { return Array.from(t).map(c => (c.charCodeAt(0) & 255) ^ k); }
+  function draw2() {
+    const k = Math.max(0, Math.min(255, +key.value || 0));
+    const codes = encBytes(msg.value, k);
+    enc.textContent = codes.map(c => toHex(c)).join(' ');
+    const parts = cin.value.trim().split(/\s+/).filter(x => /^[0-9a-fA-F]{2}$/);
+    const back = parts.map(x => String.fromCharCode(parseInt(x, 16) ^ k));
+    dec.textContent = parts.length ? back.join('') + (back.every(c => (c >= ' ' && c <= '~')) ? '' : '  (caractères non affichables : vérifiez la clé)') : '—';
+  }
+  msg.addEventListener('input', draw2); cin.addEventListener('input', draw2);
+  root.append(h('h3', null, 'Le XOR : chiffrer et déchiffrer avec la même opération'),
+    h('p', null, 'Chaque caractère est remplacé par son code (ex. « S » = 83 = 0x53) combiné par XOR avec une clé. Le récepteur applique le XOR avec la même clé pour retrouver le message : ', h('b', null, '(M XOR clé) XOR clé = M'), '. C’est le principe du ', h('i', null, 'chiffre de Vernam'), ' simplifié.'),
+    h('div', { class: 'two2' },
+      h('div', null, h('label', { class: 'fld' }, h('span', null, 'Message à chiffrer'), msg), h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'Clé (0-255)'), key), h('p', { class: 'small', style: 'margin:2px 0' }, 'Message chiffré (hexadécimal) :'), enc),
+      h('div', null, h('label', { class: 'fld' }, h('span', null, 'Codes reçus (à déchiffrer)'), cin), h('p', { class: 'small', style: 'margin:2px 0' }, 'Message déchiffré :'), dec)),
+    h('p', { class: 'small' }, 'Justification : sur chaque bit, x XOR 0 = x (inchangé) et x XOR 1 = 1 − x (inversé) ; appliqué deux fois avec la même clé, chaque bit revient à sa valeur d’origine. Exemple avec la clé 200 = 1100 1000 : le bit 7 et le bit 3 de chaque caractère sont inversés, puis ré-inversés.'));
+  draw2();
+}
+WORKSHOPS.push({ id: 'n3', title: 'Opérations logiques', hint: 'Appliquez AND, OR, XOR et NOT bit par bit, et chiffrez un message avec le XOR.', mount: mountW3, reset: () => { Object.assign(W3, { op: 'AND', a: 179, b: 106 }); } });
+
+/* ---------- Atelier 4 : les masques ---------- */
+const W4 = { ip: [192, 168, 10, 25], p: 24 };
+function dotted(n) { return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.'); }
+function mountW4(root) {
+  root.append(h('h2', null, 'Les masques : extraire des bits avec le ET'),
+    h('p', null, 'Un ', h('b', null, 'masque'), ' est un nombre binaire qui « filtre » les bits d’un autre : combiné par AND, il ', h('b', null, 'garde'), ' les bits où il vaut 1 et ', h('b', null, 'efface'), ' ceux où il vaut 0. Application type en SNT : découper une adresse IPv4 en ', h('b', null, 'partie réseau'), ' et ', h('b', null, 'partie machine'), '.'));
+  const ips = W4.ip.map((v, i) => numIn(v, 'Octet ' + (i + 1), val => { W4.ip[i] = val; draw(); }));
+  const pr = h('input', { type: 'range', min: 8, max: 30, step: 1, value: W4.p, 'aria-label': 'Préfixe' }), prv = h('b'), out = h('div');
+  pr.addEventListener('input', () => { W4.p = +pr.value; draw(); });
+  function bits32(n, maskInt) {
+    const row = h('div', { class: 'bitrow' });
+    for (let i = 31; i >= 0; i--) {
+      const b = (n >>> i) & 1;
+      row.append(h('span', { class: 'bit xs ' + ((maskInt >>> i) & 1 ? 'net' : 'host') }, String(b)));
+      if (i > 0 && i % 8 === 0) row.append(h('span', { class: 'bsep', style: 'width:6px' }));
+    }
+    return row;
+  }
+  function draw() {
+    prv.textContent = '/' + W4.p;
+    const ipInt = ((W4.ip[0] << 24) | (W4.ip[1] << 16) | (W4.ip[2] << 8) | W4.ip[3]) >>> 0;
+    const maskInt = W4.p === 0 ? 0 : ((0xFFFFFFFF << (32 - W4.p)) >>> 0);
+    const net = (ipInt & maskInt) >>> 0, inv = (~maskInt) >>> 0, bc = (ipInt | inv) >>> 0;
+    const hosts = Math.pow(2, 32 - W4.p) - 2;
+    out.innerHTML = '';
+    out.append(h('p', { class: 'small' }, 'Masque : les bits bleus = partie réseau (à 1 dans le masque), les bits orange = partie machine (à 0).'));
+    out.append(h('p', { class: 'mono', style: 'margin:6px 0 0' }, 'Adresse IP  ' + dotted(ipInt) + ' /' + W4.p), bits32(ipInt, maskInt));
+    out.append(h('p', { class: 'mono', style: 'margin:6px 0 0' }, 'Masque      ' + dotted(maskInt)), bits32(maskInt, 0xFFFFFFFF));
+    out.append(h('p', { class: 'mono', style: 'margin:6px 0 0' }, 'Réseau (ET) ' + dotted(net)), bits32(net, maskInt));
+    out.append(h('p', { class: 'mono', style: 'margin:6px 0 0' }, 'Broadcast   ' + dotted(bc)), bits32(bc, 0));
+    out.append(h('div', { class: 'gstats' }, [['Adresse réseau', dotted(net)], ['Broadcast', dotted(bc)], ['Machines possibles', String(hosts)], ['Masque (décimal pointé)', dotted(maskInt)]].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', { class: 'mono' }, k[1])))));
+    out.append(h('p', { class: 'small' }, h('b', null, 'Justification du ET : '), 'pour un bit quelconque x : x AND 1 = x (le bit de l’IP est conservé) et x AND 0 = 0 (le bit est forcé à 0). Le masque ne laisse donc passer que les bits de la partie réseau : c’est exactement ce qu’on veut pour identifier le réseau. Le broadcast s’obtient par OR avec l’inverse du masque : tous les bits machine passent à 1. On retire 2 adresses (le réseau lui-même et le broadcast) : ' + hosts + ' = 2^' + (32 - W4.p) + ' − 2.'));
+  }
+  root.append(h('div', { class: 'opts' },
+    h('label', { class: 'fld', style: 'width:110px' }, h('span', null, 'Adresse IP'), h('div', { style: 'display:flex;gap:4px' }, ips)),
+    h('label', { class: 'fld', style: 'width:220px' }, h('span', null, 'Préfixe : ', prv), pr)), out);
+  draw();
+}
+WORKSHOPS.push({ id: 'n4', title: 'Les masques', hint: 'Découpez une adresse IPv4 avec un masque : ET logique, broadcast et nombre de machines.', mount: mountW4, reset: () => { Object.assign(W4, { ip: [192, 168, 10, 25], p: 24 }); } });
+
+/* ---------- Atelier 5 : le code Gray ---------- */
+const W5 = { n: 5, prev: 4, auto: null, v: 205, gin: '' };
+function graySteps(g8) {
+  const rows = []; let b = 0, bval = 0;
+  for (let i = 7; i >= 0; i--) {
+    const gi = (g8 >>> i) & 1;
+    if (i === 7) { b = gi; rows.push({ s: 'b7 = g7 = ' + gi, v: null }); }
+    else { const prev = b; b = prev ^ gi; rows.push({ s: 'b' + i + ' = b' + (i + 1) + ' XOR g' + i + ' = ' + prev + ' XOR ' + gi + ' = ' + b, v: b }); }
+    bval = (bval << 1) | b;
+  }
+  return { b: bval, rows };
+}
+function mountW5(root) {
+  root.append(h('h2', null, 'Le code Gray : un seul bit qui change'),
+    h('p', null, 'En binaire pur, passer d’un nombre au suivant peut changer ', h('b', null, 'plusieurs bits'), ' à la fois (0111 → 1000 : les 4 bits changent). Le ', h('b', null, 'code Gray'), ' est un autre codage des nombres où ', h('b', null, 'un seul bit change entre deux codes consécutifs'), '. Il est utilisé par les codeurs de position (axes de machines, volants, capteurs rotatifs).'));
+  /* 1. compteur */
+  const rn = h('input', { type: 'range', min: 0, max: 15, step: 1, value: W5.n, 'aria-label': 'Nombre' }), cbin = h('div'), cgr = h('div'), ctxt = h('p', { class: 'score' }), cauto = h('button', { class: 'btn', type: 'button' }, 'Lecture automatique');
+  function drawCount() {
+    const gPrev = (W5.prev ^ (W5.prev >> 1)) & 15, gCur = (W5.n ^ (W5.n >> 1)) & 15;
+    const diffB = [], diffG = [];
+    for (let i = 0; i < 4; i++) { if (((W5.n ^ W5.prev) >>> i) & 1) diffB.push(i); if (((gCur ^ gPrev) >>> i) & 1) diffG.push(i); }
+    cbin.innerHTML = ''; cbin.append(bitRow(W5.n, 4, { small: true, cls: i => diffB.includes(i) ? 'chg' : '' }));
+    cgr.innerHTML = ''; cgr.append(bitRow(gCur, 4, { small: true, cls: (i, b) => diffG.includes(i) ? 'chg on gr' : (b ? 'on gr' : '') }));
+    const L = arr => arr.map(i => 'bit ' + i).join(', ') || 'aucun';
+    ctxt.textContent = 'Nombre ' + W5.n + ' : binaire ' + toBin(W5.n, 4) + ' (' + diffB.length + ' bit(s) changent : ' + L(diffB) + ') · Gray ' + toBin(gCur, 4) + ' (' + diffG.length + ' bit change : ' + L(diffG) + ')';
+  }
+  rn.addEventListener('input', () => { W5.prev = W5.n; W5.n = +rn.value; drawCount(); });
+  cauto.addEventListener('click', () => {
+    if (W5.auto) { clearInterval(W5.auto); W5.auto = null; cauto.textContent = 'Lecture automatique'; return; }
+    cauto.textContent = 'Arrêter';
+    W5.auto = setInterval(() => { W5.prev = W5.n; W5.n = (W5.n + 1) % 16; rn.value = W5.n; drawCount(); }, 700);
+  });
+  root.append(h('h3', null, '1. Binaire contre Gray'),
+    h('p', null, 'Faites défiler les nombres (ou lancez la lecture automatique). Les cases entourées sont celles qui viennent de changer. ', h('b', null, 'Pourquoi est-ce important ? '), 'Un capteur qui lit la position pendant qu’elle change peut voir un mélange des anciens et nouveaux bits. En binaire, 0111 → 1000 peut donner 0000 ou 1111 : une position ', h('i', null, 'très éloignée'), ' de la réalité. En Gray, une seule valeur parasite possible, toujours ', h('i', null, 'voisine'), ' : l’erreur est au pire d’un pas.'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:240px' }, h('span', null, 'Nombre (0 à 15)'), rn), cauto),
+    h('p', { class: 'mono', style: 'margin:8px 0 2px' }, 'Binaire'), cbin,
+    h('p', { class: 'mono', style: 'margin:8px 0 2px' }, 'Code Gray'), cgr, ctxt);
+  drawCount();
+  /* 2. convertisseur binaire -> gray */
+  const iv = h('input', { type: 'number', min: 0, max: 255, value: W5.v, 'aria-label': 'Nombre à coder' }), o2 = h('div');
+  function drawBG() {
+    W5.v = Math.max(0, Math.min(255, Math.round(+iv.value || 0)));
+    const s1 = W5.v >> 1, g = (W5.v ^ s1) & 255;
+    o2.innerHTML = '';
+    o2.append(h('div', { class: 'gstats' }, [['n', toBin(W5.v)], ['n décalé d’un bit (n >> 1)', toBin(s1)], ['Gray = n XOR (n >> 1)', toBin(g) + ' = ' + g]].map(k => h('div', { class: 'stat' }, h('span', null, k[0]), h('b', { class: 'mono' }, k[1])))));
+    o2.append(h('p', { class: 'small' }, h('b', null, 'Justification : '), 'le bit de rang i du code Gray vaut b_i XOR b_{i+1} (le bit binaire courant comparé à son voisin de gauche) ; décaler n d’un bit vers la droite aligne précisément chaque bit avec son voisin de gauche, d’où la formule g = n XOR (n >> 1).'));
+  }
+  iv.addEventListener('input', drawBG);
+  root.append(h('h3', null, '2. Convertir le binaire en Gray'),
+    h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:150px' }, h('span', null, 'Nombre (0-255)'), iv)), o2);
+  drawBG();
+  /* 3. gray -> binaire */
+  const gi = h('input', { type: 'text', class: 'mono', value: W5.gin, maxlength: 8, placeholder: 'ex. 01110100', 'aria-label': 'Code Gray à décoder', autocomplete: 'off', spellcheck: 'false' }), o3 = h('div');
+  function drawGB() {
+    o3.innerHTML = '';
+    if (!/^[01]{1,8}$/.test(gi.value.trim())) { o3.append(h('p', { class: 'small' }, 'Entrez 1 à 8 bits (0 et 1).')); return; }
+    const g8 = parseInt(gi.value.trim(), 2);
+    const { b, rows } = graySteps(g8);
+    o3.append(h('pre', { class: 'code' }, 'Code Gray reçu : ' + toBin(g8) + '\n' + rows.map(r => r.s).join('\n') + '\n→ binaire : ' + toBin(b) + ' = ' + b));
+    o3.append(h('p', { class: 'small' }, h('b', null, 'Justification : '), 'le bit de poids fort est identique (b7 = g7) ; ensuite, chaque bit binaire se déduit du précédent : b_i = b_{i+1} XOR g_i. Comme g_i = b_i XOR b_{i+1} par construction, ce XOR « annule » la construction et fait réapparaître b_i.'));
+  }
+  gi.addEventListener('input', drawGB);
+  root.append(h('h3', null, '3. Décoder un code Gray'),
+    h('label', { class: 'fld', style: 'max-width:200px' }, h('span', null, 'Code Gray (binaire)'), gi), o3);
+  drawGB();
+}
+WORKSHOPS.push({ id: 'n5', title: 'Le code Gray', hint: 'Comparez binaire et Gray bit par bit, puis convertissez dans les deux sens.', mount: mountW5, reset: () => { if (W5.auto) clearInterval(W5.auto); Object.assign(W5, { n: 5, prev: 4, auto: null, v: 205, gin: '' }); } });
+
+/* ---------- Activités ---------- */
+const ACT = {
+  n1: {
+    title: 'Les bases', level: 'Niveau 1 · Découvrir', time: '20 min', course: 'pourquoi',
+    goal: 'Comprendre la numération positionnelle en bases 10, 2 et 16, et convertir un octet entre ces trois écritures.',
+    steps: [
+      'Dans « Un octet à construire », éteignez tous les bits, puis allumez seulement les bits de poids 128 et 1. Quel nombre obtenez-vous ? Écrivez la somme des puissances.',
+      'Construisez 205, puis 240. Notez l’écriture hexadécimale de chacun.',
+      'Dans « Méthode des divisions », choisissez 37 : relevez les divisions successives et lisez les restes de bas en haut.',
+      'Vérifiez avec l’octet : 37 s’écrit bien 0010 0101.',
+      'Dans le tableau hexadécimal : combien de bits faut-il pour un chiffre hexadécimal ? Quelle est la valeur de F en décimal ?',
+      'Justifiez à l’écrit : pourquoi un chiffre hexadécimal correspond-il exactement à 4 bits ?'
+    ],
+    defi: { q: 'Sans calculatrice : combien vaut 1111 1111₂ ? Et 0xFF ? Expliquez pourquoi ces deux réponses sont égales.', a: '1111 1111₂ = 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1 = 255. Et 0xFF : F = 15 = 1111₂, donc 0xFF = 1111 1111₂ = 255. Ce sont deux écritures différentes d’une même quantité : un octet tout à 1 vaut toujours 255, quelle que soit la base choisie pour l’afficher.' },
+    qcm: [
+      { q: 'En base 10, le nombre 205 signifie :', o: ['2 + 0 + 5', '2×100 + 0×10 + 5×1', '205 paquets de 10', '2×10 + 5'], a: 1, w: 'Chaque chiffre est multiplié par une puissance de 10 selon sa position : c’est la numération positionnelle.' },
+      { q: 'Combien vaut 1011 0110₂ ?', o: ['96', '172', '182', '215'], a: 2, w: '128 + 32 + 16 + 4 + 2 = 182.' },
+      { q: 'Pourquoi les ordinateurs calculent-ils en binaire ?', o: ['C’est plus rapide à écrire', 'Les circuits électriques n’ont que deux états stables (passant / bloqué)', 'Le binaire utilise moins de mémoire', 'Parce que 2 est un nombre premier'], a: 1, w: 'Un transistor est un interrupteur : 0 ou 1, deux états faciles à distinguer même avec du bruit électrique.' },
+      { q: 'Combien de bits représente un chiffre hexadécimal ?', o: ['2', '4', '8', '16'], a: 1, w: '16 = 2⁴, donc exactement 4 bits.' },
+      { q: '0xF0 vaut :', o: ['150', '240', '255', '16'], a: 1, w: 'F = 15 → 15×16 + 0 = 240 = 1111 0000₂.' },
+      { q: 'Un octet (8 bits) peut représenter :', o: ['8 nombres', '255 nombres', '256 nombres', '1 024 nombres'], a: 2, w: 'De 0 à 255 : 256 valeurs différentes.' },
+      { q: 'Le binaire 0000 0000 et l’hexadécimal 0x00 valent tous les deux :', o: ['1', '255', '8', '0'], a: 3, w: 'Tous les bits éteints = zéro, quelle que soit la base d’écriture.' }
+    ]
+  },
+  n2: {
+    title: 'Additions et soustractions', level: 'Niveau 2 · Manipuler', time: '30 min', course: 'addition',
+    goal: 'Additionner en binaire avec la retenue, comprendre le dépassement (overflow) et soustraire par le complément à 2.',
+    steps: [
+      'Choisissez A = 89 et B = 37. Observez la table colonne par colonne : à quelle étape apparaît la première retenue ?',
+      'Relevez la retenue finale et vérifiez le résultat en décimal.',
+      'Passez à A = 200, B = 100 : que vaut la retenue finale ? Quel résultat est affiché ? Calculez 300 − 256.',
+      'En soustraction, choisissez A = 50, B = 80 : notez ~B, ~B + 1 et la retenue de l’addition finale. Le résultat est-il positif ou négatif ?',
+      'Vérifiez : le résultat affiché (226) moins 256 donne bien −30.',
+      'Dans « À vous de jouer », générez des calculs jusqu’à trois réussites d’affilée.'
+    ],
+    defi: { q: 'Calculez 1011 0011₂ + 0110 1010₂ sur un octet. Le résultat affiché est-il « correct » ? Justifiez avec les décimaux.', a: '1011 0011₂ = 179 et 0110 1010₂ = 106. Somme : 285. Or un octet ne stocke que 0 à 255 : 285 − 256 = 29 = 0001 1101₂, qui est le résultat affiché — la retenue finale 1 est perdue. Le calcul est exact « modulo 256 » : c’est le phénomène de dépassement (overflow), à surveiller quand les résultats intermédiaires sont grands.' },
+    qcm: [
+      { q: 'En binaire, 1 + 1 donne :', o: ['0', '1', '10 (on écrit 0, retient 1)', '11'], a: 2, w: 'Comme en base 10 quand on dépasse 9 : 1 + 1 = 2 = 10₂, on écrit 0 et on retient 1.' },
+      { q: '1 + 1 + 1 (avec une retenue entrante de 1) donne :', o: ['1, retient 0', '0, retient 1', '1, retient 1', '11, sans retenue'], a: 2, w: '1 + 1 + 1 = 3 = 11₂ : on écrit 1 et on retient 1.' },
+      { q: '200 + 100 donne un résultat affiché de 44. Pourquoi ?', o: ['Le calcul est faux', 'Il y a dépassement : 300 − 256 = 44, la retenue sortante est perdue', 'Le processeur arrondit', '44 est la moyenne'], a: 1, w: 'Un octet ne garde que les 8 derniers bits : le calcul se fait modulo 256.' },
+      { q: 'Le complément à 2 de 37 sur un octet est :', o: ['218', '219', '220', '37'], a: 1, w: 'Inverser : 255 − 37 = 218, puis +1 : 219 = 256 − 37. C’est l’écriture de −37.' },
+      { q: '50 − 80 donne 226 sur un octet. Que signifie 226 ?', o: ['Une erreur de calcul', '−30 écrit sur un octet (226 = 256 − 30)', '+226', '80 − 50'], a: 1, w: 'Quand la retenue finale vaut 0, le résultat est négatif et vaut somme − 256.' },
+      { q: 'Pourquoi le complément à 2 plutôt que des emprunts « à la main » ?', o: ['Un seul circuit (l’additionneur) suffit, le signe tombe de la retenue', 'Il utilise moins de bits', 'Il évite toute retenue', 'Il est plus précis'], a: 0, w: 'A − B = A + (256 − B) : le processeur n’a besoin que d’additionneurs.' },
+      { q: 'Le résultat de A − B (sur un octet) est négatif quand :', o: ['la retenue finale vaut 1', 'la retenue finale vaut 0', 'A > B', 'B = 0'], a: 1, w: 'A + (256 − B) dépasse 256 (retenue 1) exactement quand A ≥ B ; sinon le résultat vaut somme − 256, qui est négatif.' }
+    ]
+  },
+  n3: {
+    title: 'Opérations logiques', level: 'Niveau 2 · Comprendre', time: '25 min', course: 'logique',
+    goal: 'Appliquer les opérations logiques bit à bit (AND, OR, XOR, NOT) et comprendre à quoi elles servent concrètement.',
+    steps: [
+      'Choisissez AND avec A = 179 et B = 106. Comparez ligne par ligne le tableau de droite avec la table de vérité.',
+      'Recommencez avec OR puis XOR : quels bits du résultat valent 1, et pourquoi ?',
+      'Vérifiez en décimal : 179 AND 106 = 34 = 0010 0010₂ (seuls les bits à 1 dans A ET dans B survivent).',
+      'Avec NOT, comparez A et son inverse bit par bit.',
+      'Dans « XOR : chiffrer et déchiffrer », chiffrez « SNT » avec la clé 200, notez le résultat, puis déchiffrez-le.',
+      'Justifiez à l’écrit : pourquoi le XOR permet-il de déchiffrer avec la même opération ?'
+    ],
+    defi: { q: 'Alice envoie à Bob le message 42 chiffré par XOR avec la clé 60 (résultat : 18). Ève intercepte 18 et connaît la clé. Que peut-elle faire ? Et pourquoi ce chiffrement est-il pourtant fragile ?', a: 'Ève calcule 18 XOR 60 = 42 : elle retrouve le message, car (M XOR clé) XOR clé = M. Ce chiffrement est fragile parce qu’une clé d’un seul octet, réutilisée pour tout le message, laisse des régularités statistiques qui trahissent le texte ; et quiconque connaît la clé déchiffre tout. Les vrais systèmes utilisent des clés longues et jamais réutilisées.' },
+    qcm: [
+      { q: 'Avec AND, le bit du résultat vaut 1…', o: ['si au moins une entrée vaut 1', 'si les deux entrées valent 1', 'si les entrées sont différentes', 'jamais'], a: 1, w: 'ET logique : 1 seulement quand A ET B valent 1.' },
+      { q: '1100 AND 1010 = ?', o: ['1110', '1000', '1010', '0100'], a: 1, w: 'Bit 3 : 1 ET 1 = 1 ; ailleurs au moins un 0 : 1000₂ = 8.' },
+      { q: 'XOR donne 1 quand :', o: ['les deux entrées valent 0', 'les deux entrées valent 1', 'les entrées sont différentes', 'toujours'], a: 2, w: 'OU exclusif : il détecte les différences.' },
+      { q: 'A XOR B XOR B = ?', o: ['0', 'B', 'A', '255'], a: 2, w: 'Le XOR est son propre inverse : appliqué deux fois avec la même valeur, il annule son effet. C’est pourquoi il chiffre ET déchiffre.' },
+      { q: 'L’opération NOT sur un octet :', o: ['remet tout à 0', 'inverse chaque bit (0 ↔ 1)', 'ajoute 1', 'multiplie par 2'], a: 1, w: 'Chaque bit est inversé : 1010 devient 0101.' },
+      { q: 'Pour forcer un bit à 1 quel que soit son état, on utilise :', o: ['AND avec 1', 'OR avec 1', 'XOR avec 1', 'NOT'], a: 1, w: 'x OR 1 = 1 toujours ; AND garde la valeur, XOR l’inverse selon l’état.' }
+    ]
+  },
+  n4: {
+    title: 'Les masques', level: 'Niveau 3 · Appliquer', time: '25 min', course: 'masques',
+    goal: 'Utiliser un masque de sous-réseau : extraire l’adresse réseau par un ET logique, calculer broadcast et nombre de machines.',
+    steps: [
+      'Gardez 192.168.10.25 /24. Observez le masque en binaire : combien de bits à 1 ? Quels bits de l’IP sont bleus (réseau) ?',
+      'Vérifiez : adresse réseau = IP ET masque. La dernière ligne binaire du résultat est-elle cohérente ?',
+      'Passez à /25 : que change-t-il dans le masque, dans l’adresse réseau et dans le nombre de machines ?',
+      'Essayez 172.16.5.9 /20 : notez le masque, l’adresse réseau, le broadcast et le nombre de machines.',
+      'Justifiez : dessinez la table du ET pour un bit x et expliquez pourquoi IP AND masque isole la partie réseau.',
+      'Que peuvent échanger directement deux machines dont les adresses réseau sont identiques ? Et si elles diffèrent ?'
+    ],
+    defi: { q: 'Un lycée a le réseau 10.4.96.0 /20. Combien de machines peut-il accueillir au maximum ? Donnez le masque et l’adresse de broadcast.', a: '/20 → masque 255.255.240.0 (20 bits à 1, soit 1111 1111 . 1111 1111 . 1111 0000 . 0000 0000). Il reste 12 bits pour les machines : 2¹² − 2 = 4 094 adresses utilisables. Broadcast : les 12 bits machine à 1 → 10.4.111.255 (troisième octet : 96 + 15 = 111).' },
+    qcm: [
+      { q: 'L’adresse réseau s’obtient par :', o: ['IP OR masque', 'IP AND masque', 'IP XOR masque', 'IP + masque'], a: 1, w: 'Le ET ne garde que les bits où le masque vaut 1 : exactement la partie réseau.' },
+      { q: 'Le masque d’un /24 est :', o: ['255.0.0.0', '255.255.0.0', '255.255.255.0', '0.0.0.255'], a: 2, w: '24 bits à 1 : trois octets pleins.' },
+      { q: '192.168.10.25 /24 : adresse réseau ?', o: ['192.168.10.25', '192.168.10.0', '192.168.0.0', '192.0.0.0'], a: 1, w: 'Le dernier octet (partie machine) est mis à 0 par le masque.' },
+      { q: 'Le broadcast de 192.168.10.0 /24 est :', o: ['192.168.10.0', '192.168.10.1', '192.168.10.254', '192.168.10.255'], a: 3, w: 'Tous les bits machine à 1 : ...10.255.' },
+      { q: 'Combien d’hôtes utilisables dans un /24 ?', o: ['256', '255', '254', '24'], a: 2, w: '2⁸ − 2 = 254 : on retire l’adresse réseau et le broadcast.' },
+      { q: 'Un masque sert à :', o: ['chiffrer les communications', 'séparer la partie réseau de la partie machine dans une adresse IP', 'accélérer la connexion', 'compter les bits'], a: 1, w: 'Bits à 1 = réseau, bits à 0 = machines : c’est sa définition même.' },
+      { q: 'Pour un /20, le nombre de bits disponibles pour les machines est :', o: ['20', '8', '12', '32'], a: 2, w: '32 − 20 = 12 bits machine → 2¹² − 2 = 4 094 machines.' }
+    ]
+  },
+  n5: {
+    title: 'Le code Gray', level: 'Niveau 3 · Analyser', time: '20 min', course: 'gray',
+    goal: 'Comprendre la propriété du code Gray (un seul bit change à la fois) et effectuer les conversions binaire ↔ Gray.',
+    steps: [
+      'Faites défiler le compteur : combien de bits changent entre 7 (0111) et 8 (1000) en binaire ? Entre 3 (0011) et 4 (0100) ?',
+      'Faites de même avec le code Gray : combien de bits changent à chaque étape ?',
+      'Lancez la lecture automatique et observez les cases entourées : c’est le bit qui vient de changer.',
+      'Vérifiez au convertisseur : Gray(5) = 5 XOR 2 = 7, et décoder 0111 redonne 5.',
+      'Listez les codes Gray de 0 à 7 : 000, 001, 011, 010, … et vérifiez la propriété sur chaque passage.',
+      'Justifiez : pourquoi un codeur rotatif utilise-t-il le Gray plutôt que le binaire ?'
+    ],
+    defi: { q: 'Un codeur rotatif à 3 bits lit la position d’un axe. En binaire, entre 3 (011) et 4 (100), plusieurs bits changent : pendant la rotation, le capteur peut lire 000 ou 111 un instant. Que devient ce risque avec le code Gray ?', a: 'En Gray, 3 = 010 et 4 = 110 : un seul bit change. Pendant la transition, le capteur lit soit 010, soit 110 — une position voisine, jamais une position éloignée comme 000 (= 0) ou 111 (= 7). L’erreur transitoire est donc bornée à un pas : imperceptible ou facile à corriger. En binaire, lire 111 au lieu de 4 serait une erreur de 3 pas sur 8 : c’est pourquoi les codeurs de position utilisent le code Gray.' },
+    qcm: [
+      { q: 'La propriété essentielle du code Gray :', o: ['il utilise moins de bits que le binaire', 'un seul bit change entre deux codes consécutifs', 'il se calcule plus vite', 'il est chiffré'], a: 1, w: 'C’est sa définition et sa raison d’être.' },
+      { q: 'Le code Gray de 5 (0101) est :', o: ['0101', '0110', '0111', '1010'], a: 2, w: 'g = n XOR (n >> 1) = 0101 XOR 0010 = 0111 (7).' },
+      { q: 'Décoder le Gray 0111 donne :', o: ['7', '6', '5', '3'], a: 2, w: 'De gauche à droite : chaque bit binaire est le XOR du bit Gray et du bit binaire précédent → 0000 0101 = 5.' },
+      { q: 'Pourquoi le Gray est-il utilisé dans les codeurs rotatifs ?', o: ['Il est plus compact', 'Une lecture pendant une transition donne au pire une position voisine, jamais éloignée', 'Il est plus facile à mémoriser', 'Il évite les retenues'], a: 1, w: 'L’erreur transitoire est bornée à un pas : c’est exactement ce qu’on demande à un capteur de position.' },
+      { q: 'En binaire pur, passer de 0111 à 1000 change :', o: ['1 bit', '2 bits', '3 bits', '4 bits'], a: 3, w: '0111 → 1000 : les 4 bits changent (c’est le pire cas, qui survient aux puissances de 2).' },
+      { q: 'Le passage binaire → Gray se calcule par :', o: ['g = n + 1', 'g = n XOR (n décalé d’un bit vers la droite)', 'g = NOT n', 'g = n × 2'], a: 1, w: 'Le bit de rang i de g vaut b_i XOR b_{i+1} : le décalage aligne chaque bit avec son voisin de gauche.' }
+    ]
+  }
+};
+
+/* ---------- Cours ---------- */
+const COURSE = [];
+COURSE.push({ id: 'pourquoi', t: 'Pourquoi le binaire ?', h: `
+<p>Nous comptons en <b>base 10</b> : dix chiffres, et chaque position vaut dix fois plus que la précédente. Cette écriture « positionnelle » se généralise à n'importe quelle base.</p>
+<p>À l'intérieur d'un processeur, l'information est portée par des tensions électriques. Or un composant de base, le <b>transistor</b>, se comporte comme un interrupteur : soit il laisse passer le courant, soit il le bloque. Deux états stables — donc deux chiffres, 0 et 1. Le binaire n'est pas un choix de commodité : c'est la seule écriture directement réalisable en électronique, et deux états sont faciles à distinguer même quand le signal est bruité.</p>
+<h3>La numération positionnelle en base 2</h3>
+<p>Chaque position vaut une puissance de 2. Comme en base 10, on « dépile » chiffre par chiffre :</p>
+<div class="formula">(1100 1101)₂ = 1×128 + 1×64 + 0×32 + 0×16 + 1×8 + 1×4 + 0×2 + 1×1 = 205</div>
+<table class="ctable narrow"><thead><tr><th>2⁷</th><th>2⁶</th><th>2⁵</th><th>2⁴</th><th>2³</th><th>2²</th><th>2¹</th><th>2⁰</th></tr></thead><tbody>
+<tr><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr>
+<tr><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr></tbody></table>
+<h3>Convertir : divisions successives</h3>
+<p>Diviser par 2 donne comme reste le chiffre des unités en base 2 ; recommencer avec le quotient donne le chiffre suivant, et ainsi de suite. On lit les restes <b>de bas en haut</b>.</p>
+<div class="retain"><b>À retenir.</b> Un <b>bit</b> = un chiffre binaire ; un <b>octet</b> = 8 bits = 256 valeurs (0 à 255). En base 2, chaque position vaut 2 fois la précédente.</div>` });
+
+COURSE.push({ id: 'hex', t: 'L’hexadécimal', h: `
+<p>L'hexadécimal compte en <b>base 16</b> : les chiffres 0 à 9 puis les lettres A (10), B (11), C (12), D (13), E (14), F (15). Le préfixe <code>0x</code> signale cette base.</p>
+<h3>Pourquoi 16 ?</h3>
+<p>16 = 2⁴ : un chiffre hexadécimal représente <b>exactement 4 bits</b>, et un octet (8 bits) se code avec <b>exactement 2 chiffres hexadécimaux</b>. L'écriture est donc 4 fois plus courte que le binaire, sans information perdue ni ambiguïté. C'est pourquoi la mémoire, les adresses réseau, les couleurs (#FF8000) et les codes d'erreur s'affichent en hexadécimal.</p>
+<table class="ctable narrow"><thead><tr><th>Hex</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td></tr></thead><tbody>
+<tr><th>Binaire</th><td>0000</td><td>0001</td><td>0010</td><td>0011</td><td>0100</td><td>0101</td><td>0110</td><td>0111</td><td>1000</td><td>1001</td><td>1010</td><td>1011</td><td>1100</td><td>1101</td><td>1110</td><td>1111</td></tr></tbody></table>
+<h3>Exemples</h3>
+<ul><li>0xFF = 1111 1111₂ = 255 (un octet tout à 1).</li><li>0xA5 = 1010 0101₂ = 165.</li><li>0x10 = 16, 0x100 = 256 : les « ronds » hexadécimaux sont les puissances de 16.</li></ul>
+<div class="retain"><b>À retenir.</b> 1 chiffre hexadécimal = 4 bits ; 1 octet = 2 chiffres hexadécimaux. On convertit un octet en lisant ses deux quartets indépendamment.</div>` });
+
+COURSE.push({ id: 'addition', t: 'L’addition binaire et la retenue', h: `
+<p>L'addition se pose colonne par colonne, de droite à gauche, comme en base 10 — avec des règles adaptées :</p>
+<table class="ctable narrow"><tbody>
+<tr><td>0 + 0</td><td>=</td><td>0</td></tr>
+<tr><td>0 + 1 = 1 + 0</td><td>=</td><td>1</td></tr>
+<tr><td>1 + 1</td><td>=</td><td>10₂ → on écrit 0, on retient 1</td></tr>
+<tr><td>1 + 1 + 1 (retenue entrante)</td><td>=</td><td>11₂ → on écrit 1, on retient 1</td></tr></tbody></table>
+<p>La <b>retenue sortante</b> d'une colonne devient la <b>retenue entrante</b> de la colonne suivante. Exemple : 1011 0011 + 0110 1010 = 1 0001 1101 (en 9 bits).</p>
+<h3>Le dépassement (overflow)</h3>
+<p>Sur un octet, seules 256 valeurs existent (0 à 255). Si la somme dépasse 255, la retenue finale est <b>perdue</b> : le résultat affiché est la somme <b>modulo 256</b>. Exemple : 200 + 100 = 300, affiché 44 car 300 − 256 = 44. Ce n'est pas une erreur du processeur : c'est une convention arithmétique, à connaître quand les résultats intermédiaires sont grands.</p>
+<div class="retain"><b>À retenir.</b> 1 + 1 = 10₂ (écrire 0, retenir 1). Sur n bits, le calcul se fait modulo 2ⁿ : la retenue sortante est perdue.</div>` });
+
+COURSE.push({ id: 'soustraction', t: 'La soustraction : complément à 2', h: `
+<p>Poser une soustraction « à la main » demande des emprunts : en base 10 on emprunte 10, en binaire on emprunte <b>2</b> (0 − 1 : on emprunte, 2 − 1 = 1, et la colonne voisine diminue). Les processeurs font plus simple : ils <b>transforment la soustraction en addition</b>.</p>
+<h3>L'astuce du modulo</h3>
+<p>Sur un octet, ajouter 256 ne change pas le résultat (le calcul est fait modulo 256). Donc :</p>
+<div class="formula">A − B = A + (256 − B)  et  256 − B = (255 − B) + 1 = NOT(B) + 1</div>
+<p>Le nombre 256 − B s'appelle le <b>complément à 2</b> de B : on l'obtient en inversant chaque bit de B (NOT) puis en ajoutant 1. C'est l'écriture de −B sur un octet.</p>
+<h3>Exemple : 50 − 80</h3>
+<ul><li>NOT(80) = 175 ; 175 + 1 = 176 (écriture de −80).</li><li>50 + 176 = 226, sans retenue sortante → résultat <b>négatif</b> : 226 − 256 = <b>−30</b>.</li></ul>
+<p>Si la retenue finale vaut 1, le résultat est positif (c'est la somme) ; s'il n'y a pas de retenue, il est négatif (somme − 256). Le signe « tombe » de la retenue, sans aucun bit de signe spécial.</p>
+<div class="retain"><b>À retenir.</b> Soustraire = ajouter le complément à 2 : inverser les bits puis ajouter 1. Un seul circuit (l'additionneur) suffit, et le signe se lit sur la retenue finale.</div>` });
+
+COURSE.push({ id: 'logique', t: 'Les opérations logiques', h: `
+<p>AND (ET), OR (OU), XOR (OU exclusif) et NOT (NON) s'appliquent <b>bit par bit</b>. Pour chaque position, on applique la table de vérité :</p>
+<table class="ctable narrow"><thead><tr><th>A</th><th>B</th><th>AND</th><th>OR</th><th>XOR</th></tr></thead><tbody>
+<tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+<tr><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr></tbody></table>
+<p>NOT n'a qu'une entrée : 0 devient 1 et 1 devient 0.</p>
+<h3>À quoi ça sert ?</h3>
+<ul><li><b>AND</b> = garder : x AND 1 = x, x AND 0 = 0 → extraire des champs de bits (masques, adresses réseau).</li>
+<li><b>OR</b> = allumer : x OR 1 = 1 → mettre des options à 1 sans toucher aux autres.</li>
+<li><b>XOR</b> = comparer : 1 signale une différence. Et (M XOR clé) XOR clé = M : il chiffre <i>et</i> déchiffre avec la même opération.</li>
+<li><b>NOT</b> = inverser : première étape du complément à 2.</li></ul>
+<div class="retain"><b>À retenir.</b> AND garde (avec 1) ou efface (avec 0), OR force à 1, XOR détecte les différences et est réversible, NOT inverse tout.</div>` });
+
+COURSE.push({ id: 'masques', t: 'Les masques et les adresses IP', h: `
+<p>Un <b>masque</b> est un nombre dont les bits à 1 délimitent la zone qu'on veut conserver. Combiné par AND, il filtre les bits : c'est l'outil qui permet de découper une adresse IPv4.</p>
+<h3>Exemple : 192.168.10.25 /24</h3>
+<p>Le « /24 » dit que les 24 premiers bits sont la <b>partie réseau</b>, les 8 derniers la <b>partie machine</b>. Le masque vaut donc 255.255.255.0 = 24 bits à 1 suivis de 8 bits à 0.</p>
+<pre class="code">IP      11000000.10101000.00001010.00011001  (192.168.10.25)
+Masque  11111111.11111111.11111111.00000000  (255.255.255.0)
+        ------------------------ ---------
+        partie réseau           partie machine
+ET      11000000.10101000.00001010.00000000  → réseau : 192.168.10.0</pre>
+<p>Le <b>broadcast</b> (message à toutes les machines du réseau) met tous les bits machine à 1 : IP OR (NOT masque) = 192.168.10.255. Le nombre de machines utilisables est 2^(bits machine) − 2 (on retire l'adresse réseau et le broadcast) : ici 2⁸ − 2 = 254.</p>
+<h3>Pourquoi le ET ?</h3>
+<p>Pour un bit x : x AND 1 = x (conservé) et x AND 0 = 0 (effacé). Les bits à 1 du masque laissent donc passer la partie réseau et annulent la partie machine : c'est exactement le découpage voulu.</p>
+<div class="retain"><b>À retenir.</b> Masque : bits à 1 = réseau, bits à 0 = machines. Réseau = IP AND masque ; broadcast = IP OR (NOT masque) ; hôtes = 2^(bits machine) − 2.</div>` });
+
+COURSE.push({ id: 'gray', t: 'Le code Gray', h: `
+<p>En binaire pur, plusieurs bits peuvent changer d'un coup : 0111 → 1000 fait basculer <b>les 4 bits</b> (pire cas aux puissances de 2). Le <b>code Gray</b> est un autre codage où <b>un seul bit change entre deux codes consécutifs</b>.</p>
+<table class="ctable narrow"><thead><tr><th>Nombre</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr></thead><tbody>
+<tr><th>Binaire</th><td>000</td><td>001</td><td>010</td><td>011</td><td>100</td><td>101</td><td>110</td><td>111</td></tr>
+<tr><th>Gray</th><td>000</td><td>001</td><td>011</td><td>010</td><td>110</td><td>111</td><td>101</td><td>100</td></tr></tbody></table>
+<h3>Pourquoi l'utilise-t-on ?</h3>
+<p>Un capteur qui lit une position <b>pendant</b> qu'elle change peut voir un mélange d'anciens et de nouveaux bits. En binaire, 0111 → 1000 peut donner 0000 ou 1111 : une valeur très éloignée de la réalité. En Gray, une seule valeur parasite est possible, toujours <b>voisine</b> : l'erreur transitoire est bornée à un pas. D'où son usage dans les codeurs rotatifs (axes de machines, volants, capteurs de position).</p>
+<h3>Les conversions</h3>
+<ul><li><b>Binaire → Gray</b> : g = n XOR (n décalé d'un bit vers la droite), car le bit de rang i de g vaut b_i XOR b_{i+1}.</li><li><b>Gray → binaire</b> : le bit de poids fort est identique (b₇ = g₇), puis b_i = b_{i+1} XOR g_i, de gauche à droite.</li></ul>
+<div class="retain"><b>À retenir.</b> Le code Gray change d'un seul bit à la fois : c'est un codage pensé pour les capteurs et la transmission fiable.</div>` });
+
+COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
+<ul>
+<li>Tous les calculs se font sur <b>un octet</b> (8 bits), alors que les processeurs manipulent des nombres de 32 ou 64 bits. Les principes (retenue, dépassement, complément à 2) sont identiques, avec 2ⁿ au lieu de 256.</li>
+<li>Le <b>dépassement</b> existe vraiment, mais les langages et processeurs offrent des moyens de le détecter ; ici, la retenue est simplement perdue.</li>
+<li>Seule l'<b>IPv4</b> est présentée ; l'IPv6 utilise 128 bits et une écriture hexadécimale.</li>
+<li>Le « chiffrement » par XOR de l'atelier 3 est un <b>modèle pédagogique</b> (chiffre de Vernam simplifié à une clé d'un octet) : il ne doit jamais être utilisé pour protéger de vraies données.</li>
+<li>Les codes Gray sont montrés sur 4 bits (compteur) et 8 bits (convertisseur) ; en pratique, les codeurs utilisent 10 à 20 bits.</li>
+<li>Dans un octet signé (complément à 2), les valeurs vont de −128 à 127 ; cette page affiche plutôt le résultat « non signé » puis le déduit.</li>
+</ul>` });
+
+COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
+<dl class="gloss">
+<dt>Base (d'une numération)</dt><dd>Nombre de chiffres distincts (10 décimal, 2 binaire, 16 hexadécimal).</dd>
+<dt>Bit</dt><dd>Chiffre binaire (0 ou 1), contraction de « binary digit ».</dd>
+<dt>Octet</dt><dd>Groupe de 8 bits, 256 valeurs possibles (0 à 255).</dd>
+<dt>Quartet</dt><dd>Groupe de 4 bits = un chiffre hexadécimal.</dd>
+<dt>Hexadécimal</dt><dd>Base 16, chiffres 0-9 et A-F ; préfixe 0x.</dd>
+<dt>Retenue (carry)</dt><dd>Bit rapporté à la colonne suivante quand la somme dépasse la base.</dd>
+<dt>Dépassement (overflow)</dt><dd>Perte de la retenue finale sur un nombre de bits fixé : calcul modulo 2ⁿ.</dd>
+<dt>Complément à 2</dt><dd>Écriture de −B : inverser les bits (NOT) puis ajouter 1.</dd>
+<dt>AND / ET</dt><dd>Résultat 1 seulement si les deux bits valent 1 ; « garde » des bits.</dd>
+<dt>OR / OU</dt><dd>Résultat 1 si au moins un bit vaut 1 ; « allume » des bits.</dd>
+<dt>XOR / OU exclusif</dt><dd>Résultat 1 si les bits sont différents ; compare, chiffre (réversible).</dd>
+<dt>NOT / NON</dt><dd>Inverse chaque bit.</dd>
+<dt>Masque</dt><dd>Nombre qui filtre des bits par AND : 1 = à garder, 0 = à effacer.</dd>
+<dt>Adresse réseau</dt><dd>Partie réseau d'une IP (bits machine à 0).</dd>
+<dt>Broadcast</dt><dd>Adresse de diffusion à toutes les machines du réseau (bits machine à 1).</dd>
+<dt>Code Gray</dt><dd>Codage où un seul bit change entre deux codes consécutifs.</dd>
+<dt>Décalage (shift)</dt><dd>Déplacement des bits vers la gauche ou la droite (n &gt;&gt; 1).</dd>
+</dl>` });
+
+/* ---------- interface ---------- */
+const UI = { cur: 'n1' };
+const AS = { key: 'n1', tab: 'steps', open: false, st: lsGet(KEYS.act, {}), arm: null };
+const CS = { open: false, id: 'pourquoi' };
+function actSave() { lsSet(KEYS.act, AS.st); }
+function actState() { return AS.st[AS.key] || (AS.st[AS.key] = { a: {}, checked: false, shown: false }); }
+function actScore(a) { const s = actState(); return a.qcm.filter((q, i) => s.a[i] === q.a).length; }
+function wsById(id) { return WORKSHOPS.find(w => w.id === id) || WORKSHOPS[0]; }
+
+function renderSeg() {
+  const seg = $('#wsSeg'); seg.innerHTML = '';
+  WORKSHOPS.forEach((w, i) => seg.append(h('button', { type: 'button', role: 'tab', 'aria-pressed': w.id === UI.cur ? 'true' : 'false', onclick: () => gotoWs(w.id) }, (i + 1) + '. ' + w.title)));
+}
+function mountWs() {
+  const w = wsById(UI.cur), root = $('#ws');
+  $('#hint').textContent = w.hint; root.innerHTML = '';
+  w.mount(root);
+  const sc = $('#scroller'); if (sc) sc.scrollTop = 0;
+}
+function gotoWs(id) {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  UI.cur = id; AS.key = id; AS.tab = 'steps';
+  renderSeg(); mountWs(); renderAct();
+}
+
+function renderAct() {
+  const box = $('#act'), btn = $('#bAct');
+  btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
+  box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
+  if (!AS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const a = ACT[AS.key];
+  const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
+  box.append(h('div', { class: 'phead' }, h('b', null, 'Activité'), h('span', { class: 'sub' }, a.title), close));
+  const nq = a.qcm.length;
+  box.append(h('div', { class: 'tabs', role: 'tablist' },
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'steps' ? 'true' : 'false', onclick: () => { AS.tab = 'steps'; renderAct(); } }, 'Consignes'),
+    h('button', { type: 'button', role: 'tab', 'aria-selected': AS.tab === 'qcm' ? 'true' : 'false', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Questions (' + nq + ')')));
+  const body = h('div', { class: 'pbody' });
+  if (AS.tab === 'steps') {
+    body.append(h('p', { class: 'small' }, a.level + ' · environ ' + a.time), h('div', { class: 'goal' }, h('b', null, 'Objectif. '), a.goal));
+    body.append(h('ol', { class: 'steps' }, a.steps.map(s => h('li', { html: s }))));
+    body.append(h('div', { class: 'defi' }, h('b', null, 'Défi'), h('p', { html: a.defi.q }), h('details', null, h('summary', null, 'Voir la réponse'), h('p', { html: a.defi.a }))));
+    if (a.course) body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: () => openCourse(a.course) }, 'Voir le cours : ' + courseSection(a.course).t)));
+    body.append(h('p', null, h('button', { class: 'btn', type: 'button', onclick: ev => {
+      const b = ev.currentTarget;
+      if (!AS.arm) { b.textContent = 'Confirmer ? Votre travail sera effacé'; AS.arm = setTimeout(() => { b.textContent = 'Recommencer l’atelier'; AS.arm = null; }, 3500); return; }
+      clearTimeout(AS.arm); AS.arm = null; wsById(UI.cur).reset(); mountWs(); renderAct(); } }, 'Recommencer l’atelier')));
+    body.append(h('p', null, h('button', { class: 'btn pri', type: 'button', onclick: () => { AS.tab = 'qcm'; renderAct(); } }, 'Passer aux questions')));
+  } else {
+    const s = actState(), show = s.checked || s.shown;
+    a.qcm.forEach((q, i) => {
+      const fs = h('fieldset', { class: 'q' }, h('legend', null, (i + 1) + '. ' + q.q));
+      q.o.forEach((o, j) => {
+        const good = show && j === q.a, bad = s.checked && !s.shown && s.a[i] === j && j !== q.a;
+        const inp = h('input', { type: 'radio', name: 'q' + i, checked: show && s.shown ? j === q.a : s.a[i] === j, disabled: show });
+        inp.addEventListener('change', () => { s.a[i] = j; actSave(); renderAct(); });
+        fs.append(h('label', { class: 'opt' + (good ? ' good' : '') + (bad ? ' bad' : '') }, inp, h('span', null, o + (good ? '  ✓' : '') + (bad ? '  ✗' : ''))));
+      });
+      if (show) { const miss = s.a[i] == null && !s.shown; fs.append(h('p', { class: 'why' }, (miss ? 'Sans réponse. ' : '') + q.w)); }
+      body.append(fs);
+    });
+    const done = Object.keys(s.a).length;
+    body.append(h('p', { class: 'small' }, s.shown ? 'Réponses affichées.' : s.checked ? '' : done + ' réponse(s) sur ' + nq + '.'));
+    if (s.checked && !s.shown) body.append(h('p', { class: 'score' }, 'Score : ' + actScore(a) + ' / ' + nq));
+    const row = h('div', { class: 'files', style: 'display:flex;gap:6px;flex-wrap:wrap' });
+    if (!show) row.append(h('button', { class: 'btn pri', type: 'button', onclick: () => { s.checked = true; actSave(); renderAct(); } }, 'Corriger'));
+    row.append(h('button', { class: 'btn', type: 'button', onclick: () => { s.shown = true; actSave(); renderAct(); } }, 'Afficher les réponses'));
+    if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
+    body.append(row);
+  }
+  box.append(body);
+}
+function actToggle() {
+  if (CS.open) { CS.open = false; renderCourse(); }
+  AS.open = !AS.open; renderAct();
+}
+$('#bAct').addEventListener('click', actToggle);
+
+/* ---------- cours ---------- */
+function courseSection(id) { return COURSE.find(s => s.id === id) || COURSE[0]; }
+function renderCourse() {
+  const box = $('#course'), btn = $('#bCourse'), work = $('#work');
+  btn.setAttribute('aria-pressed', CS.open ? 'true' : 'false'); btn.classList.toggle('pri', CS.open);
+  box.hidden = !CS.open; work.hidden = CS.open;
+  if (!CS.open) { box.innerHTML = ''; return; }
+  box.innerHTML = '';
+  const cur = courseSection(CS.id), idx = COURSE.indexOf(cur);
+  const go = id => { CS.id = id; renderCourse(); };
+  const nav = h('nav', { class: 'ctoc', 'aria-label': 'Sommaire du cours' }, COURSE.map((s, i) => h('button', { type: 'button', class: s.id === cur.id ? 'on' : '', 'aria-current': s.id === cur.id ? 'true' : 'false', onclick: () => go(s.id) }, (i + 1) + '. ' + s.t)));
+  const sel = h('select', { class: 'ctoc-sel', 'aria-label': 'Choisir une section', onchange: e => go(e.target.value) }, COURSE.map((s, i) => h('option', { value: s.id, selected: s.id === cur.id }, (i + 1) + '. ' + s.t)));
+  const art = h('article', { class: 'cbody' });
+  art.append(h('p', { class: 'ckick' }, 'Cours · section ' + (idx + 1) + ' sur ' + COURSE.length), h('h2', null, cur.t), h('div', { html: cur.h }));
+  art.append(h('div', { class: 'cpn' },
+    idx > 0 ? h('button', { class: 'btn', type: 'button', onclick: () => go(COURSE[idx - 1].id) }, '← ' + COURSE[idx - 1].t) : h('span'),
+    idx < COURSE.length - 1 ? h('button', { class: 'btn pri', type: 'button', onclick: () => go(COURSE[idx + 1].id) }, COURSE[idx + 1].t + ' →') : h('span')));
+  const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : la représentation des nombres'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
+  box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
+}
+function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
+$('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
+
+/* ---------- aide ---------- */
+function closeDlg() { $('#dlg').hidden = true; $('#dlg').innerHTML = ''; }
+function openDlg(title, body) {
+  const d = $('#dlg'); d.innerHTML = ''; d.hidden = false;
+  d.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-label': title }, h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: closeDlg }, 'Fermer')), h('div', { class: 'dbody' }, body)));
+  d.onclick = ev => { if (ev.target === d) closeDlg(); };
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
+$('#bHelp').addEventListener('click', () => {
+  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre comment les nombres sont représentés et calculés en informatique (SNT, seconde) : les bases décimale, binaire et hexadécimale, les additions et soustractions binaires (retenue, dépassement, complément à 2), les opérations logiques, les masques de sous-réseau et le code Gray.</p>' +
+    '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction et explications.</li><li>Le bouton <b>Cours</b> détaille toutes les notions, chaque point étant justifié.</li></ul>' +
+    '<h3>Vos données</h3><p>Les réponses au QCM sont mémorisées dans ce navigateur uniquement.</p>' }));
+});
+
+/* ---------- démarrage ---------- */
+(function init() {
+  AS.open = !isSmall();
+  renderSeg(); mountWs(); renderAct(); renderCourse();
+})();
+</script>
+</body></html>

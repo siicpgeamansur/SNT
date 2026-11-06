@@ -219,9 +219,10 @@ function renderWs(){
       h('h3',null,'🏆 Arène débloquée !'),
       h('p',null,'Tu as compris le fonctionnement d\'une LAN, du client-serveur et du P2P.'),
       h('p',null,'Choisis ton arène, crée une salle, partage ton code à un camarade… et que le meilleur réseau gagne !'),
-      h('div',{class:'gamerow'},
-        h('a',{class:'gamebtn',href:'mini_lan_fps.html'},'🎯 Mini LAN FPS'),
-        h('a',{class:'gamebtn gold',href:'treasure_rush.html'},'💰 Treasure Rush')),
+    h('div',{class:'gamerow'},
+      h('a',{class:'gamebtn',href:'mini_lan_fps.html'},'🎯 Mini LAN FPS'),
+      h('a',{class:'gamebtn gold',href:'treasure_rush.html'},'💰 Treasure Rush'),
+      h('a',{class:'gamebtn',href:'snake_arena.html'},'🐍 Snake Arena')),
       h('p',{class:'small'},'Astuce : ouvre un jeu dans un second onglet pour tester seul, puis joue à deux sur deux ordinateurs du lycée (même LAN).')));
   }else{
     gate.append(h('div',{class:'locked'},'🔒 Réussis le quiz du panneau « Activité » (7 réponses correctes) pour débloquer l\'arène de combat en ligne !'));

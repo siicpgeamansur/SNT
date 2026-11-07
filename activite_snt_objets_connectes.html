@@ -1110,6 +1110,8 @@ function renderAct() {
   btn.setAttribute('aria-pressed', AS.open ? 'true' : 'false'); btn.classList.toggle('pri', AS.open);
   box.hidden = !AS.open; box.classList.toggle('sheet', AS.open && isSmall());
   if (!AS.open) { box.innerHTML = ''; return; }
+  const oldB = box.querySelector('.pbody'), tag = AS.key + '|' + AS.tab, keep = oldB && box.dataset.k === tag ? oldB.scrollTop : 0;
+box.dataset.k = tag;
   box.innerHTML = '';
   const a = ACT[AS.key];
   const close = h('button', { class: 'btn sm', type: 'button', onclick: () => { AS.open = false; renderAct(); } }, 'Fermer');
@@ -1151,7 +1153,7 @@ function renderAct() {
     if (show) row.append(h('button', { class: 'btn', type: 'button', onclick: () => { AS.st[AS.key] = { a: {}, checked: false, shown: false }; actSave(); renderAct(); } }, 'Recommencer'));
     body.append(row);
   }
-  box.append(body);
+box.append(body); body.scrollTop = keep;
 }
 function actToggle() {
   if (CS.open) { CS.open = false; renderCourse(); }

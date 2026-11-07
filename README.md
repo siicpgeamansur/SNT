@@ -1,6 +1,6 @@
 # 🖥️ SNT en seconde — Activités interactives
 
-> **Sciences Numériques et Technologie** : un ensemble d'activités interactives en ligne pour découvrir, manipuler et comprendre les grandes notions du programme de seconde.
+> **Sciences Numériques et Technologie** : un ensemble d'activités interactives en ligne pour découvrir, manipuler et comprendre les grandes notions du programme de seconde, puis s'entraîner et se tester.
 
 ![Statut](https://img.shields.io/badge/statut-en%20ligne-brightgreen) ![Niveau](https://img.shields.io/badge/niveau-seconde-blue) ![Langue](https://img.shields.io/badge/langue-Fran%C3%A7ais-red) ![Licence](https://img.shields.io/badge/usage-p%C3%A9dagogique-orange)
 
@@ -13,7 +13,7 @@
 | Activité | Description |
 |---|---|
 | 🐍 [Python](https://siicpgeamansur.github.io/SNT/activite_snt_python.html) | Les notions de Python utiles toute l'année |
-| 🔢 [Représentation des nombres](https://siicpgeamansur.github.io/SNT/activite_snt_representation_nombres.html) | Comment un ordinateur représente les nombres (binaire, hexadécimal…) |
+| 🔢 [Représentation des nombres](https://siicpgeamansur.github.io/SNT/activite_snt_representation_nombres.html) | Comment un ordinateur représente les nombres (binaire, hexadécimal, code Gray…) |
 
 ### 🌐 Le Web et Internet
 
@@ -37,11 +37,17 @@
 | 📸 [Photographie numérique](https://siicpgeamansur.github.io/SNT/activite_snt_photographie_numerique.html) | Comprendre le fonctionnement de la photographie numérique |
 | 📡 [IoT / Objets connectés](https://siicpgeamansur.github.io/SNT/activite_snt_objets_connectes.html) | Comprendre le fonctionnement des objets connectés |
 
+### 📝 Entraînement et évaluation
+
+| Activité | Description |
+|---|---|
+| ✅ [Entraînement et interro SNT en Python](https://siicpgeamansur.github.io/SNT/entrainement_snt_interro_ds.html) | 108 questions Python qui illustrent les notions de chaque thème, sur 3 niveaux (★, ★★, ★★★). **Mode entraînement** avec corrigés et explications détaillées, **mode examen** chronométré avec correction finale et note sur 20, et **bilan** de progression |
+
 ### 🎮 Bonus
 
 | Activité | Description |
 |---|---|
- | 🎓 [Créer une LAN et jouer en ligne](https://siicpgeamansur.github.io/SNT/activite_snt_lan.html) | Comprendre le fonctionnement d'un réseau local, du client-serveur et du P2P, puis réussir le quiz pour débloquer l'arène |
+| 🎓 [Créer une LAN et jouer en ligne](https://siicpgeamansur.github.io/SNT/activite_snt_lan.html) | Comprendre le fonctionnement d'un réseau local, du client-serveur et du P2P, puis réussir le quiz pour débloquer l'arène |
 
 ---
 
@@ -55,7 +61,7 @@
 - [x] Informatique embarquée et objets connectés
 - [x] La photographie numérique
 
-*(Python et la représentation des nombres sont transversaux à tous les thèmes.)*
+*(Python et la représentation des nombres sont transversaux à tous les thèmes. Ils ont aussi leurs propres parties dans l'entraînement et l'interro.)*
 
 ---
 
@@ -64,6 +70,8 @@
 🔗 Toutes les activités sont hébergées via **GitHub Pages** : [siicpgeamansur.github.io/SNT](https://siicpgeamansur.github.io/SNT/)
 
 📱 Compatible ordinateur, tablette et smartphone — aucune installation nécessaire.
+
+💾 La progression (bilan, historique des examens) est enregistrée uniquement dans le navigateur de l'élève ; rien n'est envoyé sur Internet.
 
 ---
 

@@ -48,6 +48,7 @@
 | Activité | Description |
 |---|---|
 | 🎓 [Créer une LAN et jouer en ligne](https://siicpgeamansur.github.io/SNT/activite_snt_lan.html) | Comprendre le fonctionnement d'un réseau local, du client-serveur et du P2P, puis réussir le quiz pour débloquer l'arène |
+| 🕵️ [Escape game : Opération Cyclope](https://siicpgeamansur.github.io/SNT/escape_game_snt.html) | Pirate un ordinateur espion à travers 8 salles, une par thème du programme (nombres, Internet, Web, réseaux sociaux, données, localisation, photographie, objets connectés), puis démasque la taupe. Dossiers sur des événements réels en France (Ariane 501, TV5Monde, OVH…) |
 
 ---
 

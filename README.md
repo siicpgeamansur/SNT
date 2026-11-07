@@ -12,7 +12,7 @@
 
 | Activité | Description |
 |---|---|
-| 🐍 [Python](https://siicpgeamansur.github.io/SNT/activite_snt_python.html) [Python v2](https://siicpgeamansur.github.io/SNT/activite_snt_python2.html) | Les notions de Python utiles toute l'année |
+| 🐍 [Python](https://siicpgeamansur.github.io/SNT/activite_snt_python.html) | Les notions de Python utiles toute l'année |
 | 🔢 [Représentation des nombres](https://siicpgeamansur.github.io/SNT/activite_snt_representation_nombres.html) | Comment un ordinateur représente les nombres (binaire, hexadécimal…) |
 
 ### 🌐 Le Web et Internet

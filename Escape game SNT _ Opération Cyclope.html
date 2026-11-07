@@ -1,0 +1,535 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Escape game SNT : Opération Cyclope</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Escape game de SNT (seconde) : incarnez un agent des services secrets informatiques et piratez un ordinateur espion. Huit salles, une par thème du programme (Internet, Web, réseaux sociaux, données, localisation, photographie, objets connectés, Python), inspirées d'événements réels en France.">
+<meta name="keywords" content="SNT, sciences numériques et technologie, seconde, escape game, jeu sérieux, cybersécurité, Python, binaire, hexadécimal, Internet, Web, réseaux sociaux, données, géolocalisation, photographie numérique, objets connectés, stéganographie">
+<meta name="robots" content="index, follow">
+<meta name="author" content="Enseignant de SNT">
+<meta http-equiv="content-language" content="fr">
+<meta name="theme-color" content="#2e6da4">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="SNT en seconde">
+<meta property="og:title" content="Escape game SNT : Opération Cyclope">
+<meta property="og:description" content="Devenez agent des services secrets informatiques : huit salles, huit thèmes de SNT, une taupe à démasquer. Scénario fictif, dossiers historiques réels.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Escape game SNT : Opération Cyclope">
+<meta name="twitter:description" content="Un escape game pour réviser tous les thèmes de SNT en piratant un ordinateur espion.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Escape game SNT : Opération Cyclope","description":"Escape game en huit salles illustrant les thèmes de SNT en classe de seconde, avec des dossiers sur des événements réels en France (Ariane 501, TV5Monde, OVH, SAFARI et la CNIL, Cyclades).","inLanguage":"fr","educationalLevel":"Seconde","learningResourceType":["Jeu sérieux","Escape game","Exercice"],"teaches":["Représentation des nombres","Internet","Web","Réseaux sociaux","Données structurées","Géolocalisation","Photographie numérique","Informatique embarquée"],"isAccessibleForFree":true}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{
+  --font-ui:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#ffffff;--bar:#eeeeee;--panel:#ffffff;--panel2:#f1f3f6;--line:#b9bfc7;
+  --fg:#111111;--muted:#5a6068;--accent:#2e6da4;--accent-fg:#ffffff;--accent-soft:#dcebf8;--accent-ink:#1b4a76;
+  --ok:#1e7a2e;--ok-soft:#e3f3e6;--bad:#c0281f;--bad-soft:#fbe6e4;--warn:#9a5b00;
+  --note-bg:#fff4c2;--note-line:#d9bf5c;--note-fg:#4a3d05;
+  --term-bg:#121a22;--term-fg:#d5e0ea;--term-g:#6fdc8c;--term-a:#f5c46b;
+  color-scheme:light;
+}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 var(--font-ui)}
+button,input,select,textarea{font:inherit;color:inherit}
+.inner{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1180px;margin:0 auto}
+.band{background:var(--bar);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bar);z-index:10}
+.row{display:flex;align-items:center;gap:8px 14px;flex-wrap:wrap;padding-block:7px}
+.brand{display:flex;align-items:baseline;gap:8px;font-weight:600;font-size:16px;letter-spacing:.01em}
+.brand small{font-weight:400;color:var(--muted);font-size:13px}
+.sp{flex:1}
+.pill{font-family:var(--font-mono);font-size:12px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.btn{font-weight:500;font-size:13px;padding:6px 12px;border:1px solid var(--line);background:var(--panel);border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.sm{padding:3px 9px;font-size:12px}
+.btn.bad{color:var(--bad)}
+.btn[disabled]{opacity:.5;cursor:default}
+:is(button,input,select,textarea,summary,a):focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+main{padding-block:16px 40px}
+h1{font-size:26px;margin:0 0 6px;letter-spacing:.01em}
+h2{font-size:20px;margin:0}
+h3{font-size:15px;margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--font-mono)}
+/* couloir */
+.hall{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px}
+.door{flex:none;display:flex;flex-direction:column;gap:2px;min-width:104px;text-align:left;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer}
+.door b{font-size:12px;font-family:var(--font-mono);color:var(--muted);font-weight:500}
+.door span{font-size:13px;font-weight:500}
+.door.cur{border-color:var(--accent);background:var(--accent-soft)}
+.door.ok{border-color:var(--ok)}
+.door.ok b{color:var(--ok)}
+.door.lock{opacity:.55;cursor:not-allowed;background:var(--panel2)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+/* terminal */
+.term{background:var(--term-bg);color:var(--term-fg);border-radius:8px;padding:12px 14px;font-family:var(--font-mono);font-size:13px;line-height:1.55}
+.term .g{color:var(--term-g)}.term .a{color:var(--term-a)}
+.term p{margin:0 0 6px}.term p:last-child{margin:0}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:14px;margin-top:14px;min-width:0}
+.card.done{border-color:var(--ok);background:linear-gradient(0deg,var(--ok-soft),var(--ok-soft)) }
+.ph{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.badge{font-family:var(--font-mono);font-size:11px;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--muted);background:var(--panel)}
+.card.done .badge{color:var(--ok);border-color:var(--ok)}
+pre.code{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 11px;margin:8px 0;font:13px/1.5 var(--font-mono);overflow-x:auto}
+code{font-family:var(--font-mono);background:var(--panel2);padding:0 4px;border-radius:4px;font-size:.92em}
+.ans{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.ans input[type=text]{flex:1 1 170px;min-width:0;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel)}
+.fb{margin-top:8px;font-weight:500;min-height:1em}
+.fb.bad{color:var(--bad)}.fb.ok{color:var(--ok)}
+.opts{display:grid;gap:6px;margin-top:8px}
+.opt{text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 11px;cursor:pointer}
+.opt:hover{border-color:var(--accent)}
+.opt.bad{border-color:var(--bad);background:var(--bad-soft)}
+.opt.ok{border-color:var(--ok);background:var(--ok-soft)}
+.hints{margin-top:8px;display:grid;gap:6px}
+.hint{background:var(--note-bg);border:1px solid var(--note-line);color:var(--note-fg);border-radius:7px;padding:6px 10px;font-size:13px}
+.ex{margin-top:10px;padding:9px 12px;border-left:4px solid var(--ok);background:var(--panel);border-radius:0 7px 7px 0}
+.dwrap{overflow-x:auto;margin:8px 0}
+table.dt{border-collapse:collapse;font-size:13px;min-width:100%}
+table.dt th,table.dt td{border:1px solid var(--line);padding:4px 9px;text-align:left;white-space:nowrap}
+table.dt thead th{background:var(--panel2)}
+table.dt tr.hl td{background:var(--note-bg)}
+table.dt tr.out{background:var(--bad-soft);text-decoration:line-through;color:var(--muted)}
+.bits{display:flex;gap:4px;flex-wrap:wrap;margin:8px 0}
+.bit{width:40px;border:1px solid var(--line);border-radius:7px;background:var(--panel);cursor:pointer;padding:3px 0;text-align:center;font-family:var(--font-mono)}
+.bit small{display:block;color:var(--muted);font-size:10px}
+.bit.on{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.bit.on small{color:#d7e6f5}
+.pk{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:7px;padding:5px 8px;margin:5px 0;background:var(--panel);font-family:var(--font-mono);font-size:13px}
+.pk .n{flex:none;background:var(--accent-soft);color:var(--accent-ink);border-radius:5px;padding:0 7px}
+.pk .t{flex:1;min-width:0;overflow-wrap:anywhere}
+.post{border:1px solid var(--line);border-radius:9px;padding:8px 11px;margin:6px 0;background:var(--panel)}
+.post b{font-size:13px}.post small{color:var(--muted)}
+.cv{display:block;width:100%;max-width:600px;border:1px solid var(--line);border-radius:7px;image-rendering:pixelated;background:#777}
+.sl{display:flex;gap:10px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.sl input[type=range]{flex:1 1 200px;min-width:0}
+.bars{display:flex;align-items:flex-end;gap:4px;height:120px;border-bottom:1px solid var(--line);margin:8px 0 2px;position:relative;padding-top:6px}
+.bars i{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-width:0;position:relative}
+.bars i.hi{background:var(--bad)}
+.bars i span{position:absolute;top:-15px;left:0;right:0;text-align:center;font:10px var(--font-mono);color:var(--muted)}
+.bars .thr{position:absolute;left:0;right:0;border-top:2px dashed var(--warn)}
+.bars .thr em{position:absolute;right:0;top:-17px;font:11px var(--font-mono);color:var(--warn);font-style:normal}
+.win{margin-top:14px;border:2px solid var(--ok);border-radius:10px;padding:12px 14px;background:var(--ok-soft)}
+details.dos{margin-top:10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:8px 12px}
+details.dos summary{cursor:pointer;font-weight:600}
+details.dos p{margin:8px 0 0}
+.side{display:grid;gap:14px;min-width:0}
+.sidecard{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--panel)}
+.sidecard h3{margin-bottom:8px}
+.cl{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.cl li{background:var(--note-bg);border:1px solid var(--note-line);color:var(--note-fg);border-radius:7px;padding:6px 9px;font-size:13px}
+.cl li b{font-family:var(--font-mono);font-size:11px;display:block;opacity:.8}
+.sus td.c{text-align:center}
+.sus tr.x{opacity:.4}
+.sus tr.x td{text-decoration:line-through}
+.sus .nm{font-weight:600}
+.stars{font-size:26px;letter-spacing:4px;color:var(--warn)}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:6px 12px;background:var(--panel)}
+.kpi b{display:block;font-size:18px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:#222;color:#fff;padding:9px 16px;border-radius:8px;z-index:20;max-width:90vw}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.two{grid-template-columns:minmax(0,1fr)}h1{font-size:22px}}
+</style>
+<div id="top" class="band"><div class="inner row">
+  <div class="brand">Opération Cyclope <small>escape game SNT</small></div>
+  <span class="sp"></span>
+  <span class="pill" id="pSalles" hidden></span><span class="pill" id="pHints" hidden></span><span class="pill" id="pClock" hidden>00:00</span>
+  <button class="btn sm" id="bReset" hidden>Recommencer</button>
+</div></div>
+<main class="inner" id="stage"></main>
+<div id="toast" hidden></div>
+
+<script>
+/*CORE-START*/
+'use strict';
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v === true) el.setAttribute(k, '');
+    else el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k.nodeType ? k : document.createTextNode(k));
+  return el;
+}
+let toastT = null;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3000); }
+function isSmall() { try { return window.matchMedia('(max-width:820px)').matches; } catch (e) { return false; } }
+const KEYS = { act: 'snt-escape-cyclope-v1', code: 'snt-escape-cyclope-extra-v1' };
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* stockage indisponible */ } }
+function sv(tag, attrs, ...kids) {
+  const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const k in (attrs || {})) e.setAttribute(k, attrs[k]);
+  kids.forEach(c => e.append(c));
+  return e;
+}
+
+/*G0-START*/
+/* ---------- logique et données pures du jeu (testables sous node) ---------- */
+const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
+const netAddr = (ip, m) => ip.map((o, i) => o & m[i]);
+const BUILD = [{ n: 'A', net: [172, 16, 10, 0] }, { n: 'B', net: [172, 16, 20, 0] }, { n: 'C', net: [172, 16, 30, 0] }];
+const PACKETS = [{ seq: 3, t: 'EFFACER ' }, { seq: 1, t: 'TRANSFERT ' }, { seq: 5, t: 'TRACES.' }, { seq: 2, t: 'TERMINE. ' }, { seq: 4, t: 'LES ' }];
+const BADGE_LOG = [
+  ['07:52', 4417, 'Entrée'], ['08:03', 5120, 'Entrée'], ['12:30', 5120, 'Cantine'], ['18:05', 3308, 'Salle serveur'], ['19:40', 4417, 'Entrée'], ['23:58', 6021, 'Parking'],
+  ['00:41', 2250, 'Parking'], ['01:20', 6021, 'Entrée'], ['02:14', 7734, 'Salle serveur'], ['02:31', 7734, 'Parking'], ['03:12', 2250, 'Entrée'], ['05:45', 5120, 'Entrée']
+].map(r => ({ t: r[0], m: +r[0].slice(0, 2) * 60 + +r[0].slice(3), b: r[1], p: r[2] }));
+const STAFF = [{ b: 2250, nom: 'Marc Lefèvre', svc: 'Infrastructure' }, { b: 3308, nom: 'Mélanie Roux', svc: 'Infrastructure' }, { b: 4417, nom: 'Hugo Petit', svc: 'Comptabilité' }, { b: 5120, nom: 'Sarah Colin', svc: 'Ressources humaines' }, { b: 6021, nom: 'Camille Noël', svc: 'Infrastructure' }, { b: 7734, nom: 'Max Delattre', svc: 'Infrastructure' }];
+const CITIES = [{ n: 'Lyon', lat: 45.76, lon: 4.84 }, { n: 'Saint-Étienne', lat: 45.44, lon: 4.39 }, { n: 'Grenoble', lat: 45.19, lon: 5.72 }, { n: 'Valence', lat: 44.93, lon: 4.89 }, { n: 'Annecy', lat: 45.90, lon: 6.13 }, { n: 'Chambéry', lat: 45.57, lon: 5.92 }];
+const dms = (d, m) => d + m / 60;
+const nearest = (lat, lon) => CITIES.map(c => ({ c, d: Math.hypot(c.lat - lat, (c.lon - lon) * Math.cos(lat * Math.PI / 180)) })).sort((a, b) => a.d - b.d)[0].c;
+/* image cachée : police 5×7 */
+const FONT = { M: ['10001', '11011', '10101', '10101', '10001', '10001', '10001'], O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'], T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'] };
+const IW = 100, IH = 34;
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hiddenImage() {
+  const rnd = mulberry(1913), px = new Array(IW * IH), mask = new Array(IW * IH).fill(false), word = 'MOTO', sc = 3, w = word.length * 5 * sc + (word.length - 1) * sc, ox = Math.floor((IW - w) / 2), oy = Math.floor((IH - 7 * sc) / 2);
+  [...word].forEach((ch, li) => FONT[ch].forEach((row, y) => [...row].forEach((c, x) => { if (c === '1') for (let dy = 0; dy < sc; dy++) for (let dx = 0; dx < sc; dx++) mask[(oy + y * sc + dy) * IW + ox + li * 6 * sc + x * sc + dx] = true; })));
+  for (let i = 0; i < px.length; i++) px[i] = mask[i] ? 121 + Math.floor(rnd() * 11) : 96 + Math.floor(rnd() * 23);
+  return { px, mask };
+}
+const MOUV = [12, 18, 25, 41, 38, 22, 15, 33, 29, 45, 52, 31, 20, 14], SEUIL = 30;
+const SUSP = [
+  { nom: 'Max Delattre', bat: 'B', hobby: 'Échecs', svc: 'Infrastructure', ville: 'Grenoble', tr: 'Moto', ini: 'M' },
+  { nom: 'Mélanie Roux', bat: 'B', hobby: 'Échecs', svc: 'Infrastructure', ville: 'Lyon', tr: 'Vélo', ini: 'M' },
+  { nom: 'Mehdi Bouvier', bat: 'B', hobby: 'Échecs', svc: 'Développement', ville: 'Grenoble', tr: 'Moto', ini: 'M' },
+  { nom: 'Marc Lefèvre', bat: 'A', hobby: 'Jeux vidéo', svc: 'Infrastructure', ville: 'Grenoble', tr: 'Moto', ini: 'M' },
+  { nom: 'Camille Noël', bat: 'B', hobby: 'Échecs', svc: 'Infrastructure', ville: 'Grenoble', tr: 'Moto', ini: 'C' }
+];
+const ATTR = [['bat', 'Bâtiment', 'r1'], ['hobby', 'Centre d’intérêt', 'r3'], ['svc', 'Service', 'r4'], ['ville', 'Domicile', 'r5'], ['tr', 'Transport', 'r6'], ['ini', 'Initiale du prénom', 'r7']];
+const TRUTH = { bat: 'B', hobby: 'Échecs', svc: 'Infrastructure', ville: 'Grenoble', tr: 'Moto', ini: 'M' };
+if (typeof module !== 'undefined') module.exports = { netAddr, BUILD, PACKETS, BADGE_LOG, STAFF, CITIES, dms, nearest, hiddenImage, IW, IH, MOUV, SEUIL, SUSP, ATTR, TRUTH };
+/*G0-END*/
+
+/*G1-START*/
+/* ---------- contenu : salles, énigmes, indices, dossiers ---------- */
+const norm = s => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim().replace(',', '.');
+const num = s => { const t = norm(s); return /^-?\d+(\.\d+)?$/.test(t) ? parseFloat(t) : NaN; };
+const pre = t => h('pre', { class: 'code' }, t);
+const tbl = (head, rows, opt) => h('div', { class: 'dwrap' }, h('table', { class: 'dt' }, h('thead', null, h('tr', null, head.map(x => h('th', null, x)))), h('tbody', null, rows.map(r => { const c = opt && opt.cls ? opt.cls(r) : ''; return h('tr', { class: c }, r.map(x => h('td', null, x))); }))));
+
+function bitsW(api, done) {
+  let v = [0, 0, 0, 0, 0, 0, 0, 0];
+  const val = () => v.reduce((a, b, i) => a + b * (128 >> i), 0);
+  const out = h('div', { class: 'mono' });
+  const row = h('div', { class: 'bits' });
+  const draw = () => { row.replaceChildren(...v.map((b, i) => h('button', { class: 'bit' + (b ? ' on' : ''), 'aria-pressed': b ? 'true' : 'false', 'aria-label': 'bit de poids ' + (128 >> i), onclick: () => { if (done) return; v[i] ^= 1; draw(); } }, h('small', null, 128 >> i), String(b)))); out.textContent = 'Mot : ' + v.join('') + '  →  valeur décimale : ' + val(); };
+  if (done) v = [1, 0, 1, 0, 1, 1, 0, 1];
+  draw();
+  const wrap = h('div', null, row, out);
+  if (!done) wrap.append(h('div', { class: 'ans' }, h('button', { class: 'btn pri', onclick: () => api.submit(val() === 173) }, 'Valider le mot')));
+  return wrap;
+}
+function packetsW(api, done) {
+  let ord = PACKETS.slice();
+  if (done) ord.sort((a, b) => a.seq - b.seq);
+  const box = h('div');
+  const draw = () => {
+    box.replaceChildren(...ord.map((p, i) => h('div', { class: 'pk' }, h('span', { class: 'n' }, 'seq ' + p.seq), h('span', { class: 't' }, p.t.trim()),
+      done ? null : h('button', { class: 'btn sm', 'aria-label': 'monter', disabled: i === 0, onclick: () => { [ord[i - 1], ord[i]] = [ord[i], ord[i - 1]]; draw(); } }, '▲'),
+      done ? null : h('button', { class: 'btn sm', 'aria-label': 'descendre', disabled: i === ord.length - 1, onclick: () => { [ord[i + 1], ord[i]] = [ord[i], ord[i + 1]]; draw(); } }, '▼'))));
+  };
+  draw();
+  const wrap = h('div', null, box);
+  if (!done) wrap.append(h('div', { class: 'ans' }, h('button', { class: 'btn pri', onclick: () => api.submit(ord.every((p, i) => p.seq === i + 1)) }, 'Reconstituer le message')));
+  return wrap;
+}
+function badgeW() {
+  let lieu = 'Tous', plage = 'Toute la journée';
+  const box = h('div');
+  const draw = () => {
+    const rows = BADGE_LOG.filter(r => (lieu === 'Tous' || r.p === lieu) && (plage === 'Toute la journée' || r.m < 300));
+    box.replaceChildren(h('div', { class: 'sl' },
+      h('label', null, 'Lieu : ', h('select', { onchange: e => { lieu = e.target.value; draw(); } }, ['Tous', 'Entrée', 'Cantine', 'Salle serveur', 'Parking'].map(x => h('option', { selected: x === lieu }, x)))),
+      h('label', null, 'Heure : ', h('select', { onchange: e => { plage = e.target.value; draw(); } }, ['Toute la journée', 'Nuit (avant 05:00)'].map(x => h('option', { selected: x === plage }, x))))),
+      tbl(['Heure', 'N° de badge', 'Lieu'], rows.map(r => [r.t, String(r.b), r.p])), h('div', { class: 'muted' }, rows.length + ' ligne(s) affichée(s) sur ' + BADGE_LOG.length + '.'));
+  };
+  draw(); return box;
+}
+function imgW(api, done) {
+  const { px } = hiddenImage();
+  const cv = h('canvas', { class: 'cv', width: IW, height: IH, role: 'img', 'aria-label': 'Image en niveaux de gris dans laquelle un mot est caché' });
+  const info = h('div', { class: 'mono' });
+  const draw = t => {
+    const g = cv.getContext('2d'), im = g.createImageData(IW, IH);
+    px.forEach((v, i) => { const c = t === 0 ? v : (v >= t ? 255 : 0); im.data[i * 4] = im.data[i * 4 + 1] = im.data[i * 4 + 2] = c; im.data[i * 4 + 3] = 255; });
+    g.putImageData(im, 0, 0);
+    info.textContent = t === 0 ? 'Image brute : niveaux de gris entre 96 et 131.' : 'Seuil = ' + t + ' : pixel ≥ ' + t + ' → blanc (255), sinon noir (0).';
+  };
+  const sl = h('input', { type: 'range', min: 0, max: 255, value: done ? 120 : 0, 'aria-label': 'seuil', oninput: e => draw(+e.target.value) });
+  draw(done ? 120 : 0);
+  return h('div', null, cv, h('div', { class: 'sl' }, h('span', null, 'Seuil'), sl), info);
+}
+function barsW() {
+  const mx = 60;
+  return h('div', null, h('div', { class: 'bars', role: 'img', 'aria-label': 'Mesures du capteur de mouvement' },
+    ...MOUV.map(v => h('i', { class: v > SEUIL ? 'hi' : '', style: 'height:' + (v / mx * 100) + '%' }, h('span', null, String(v)))),
+    h('div', { class: 'thr', style: 'bottom:' + (SEUIL / mx * 100) + '%' }, h('em', null, 'seuil ' + SEUIL))),
+    h('div', { class: 'muted' }, '14 mesures, une par heure, de 17 h à 6 h (nombre de mouvements détectés).'));
+}
+
+const ROOMS = [
+  {
+    id: 'sas', n: 'Sas', th: 'Python et nombres',
+    intro: ['> Connexion à CYCLOPE… port série ouvert.', '> SAS D’ACCÈS : le verrou attend un code construit à partir de trois nombres.', '> Un agent sait compter en binaire et en hexadécimal. Pas un intrus.'],
+    pz: [
+      { id: 'p0a', t: 'Premier verrou : le script d’accès', q: 'Le script de vérification du sas contient ce code Python. Quel nombre s’affiche ?', w: () => pre('x = 0b101010 + 0x0A\nprint(x)'), kind: 'text', ph: 'Nombre affiché', ok: v => num(v) === 52, h: ['0b101010 est un nombre écrit en binaire, 0x0A en hexadécimal. Convertis-les d’abord en décimal.', '0b101010 = 32 + 8 + 2 = 42 et 0x0A = 10.'], ex: '0b101010 vaut 42 et 0x0A vaut 10 : l’addition donne <b>52</b>.' },
+      { id: 'p0b', t: 'Deuxième verrou : le mot de 8 bits', q: 'Allume les bits (clique dessus) pour former un octet qui vaut <b>173</b> en décimal.', kind: 'custom', w: bitsW, h: ['Commence par le bit de poids fort : 128 ≤ 173 donc il est allumé. Reste 173 − 128 = 45.', '173 = 128 + 32 + 8 + 4 + 1.'], ex: '173 = 128 + 32 + 8 + 4 + 1, soit <code>10101101</code> en binaire.' },
+      { id: 'p0c', t: 'Troisième verrou : le compteur qui déborde', q: 'Le compteur du sas est stocké sur <b>un octet</b> (valeurs de 0 à 255). Il vaut 250 et le système lui ajoute 10. Quelle valeur est enregistrée ?', kind: 'text', ph: 'Valeur enregistrée', ok: v => num(v) === 4, h: ['260 ne tient pas dans un octet : le compteur « repart de 0 » après 255.', '260 − 256 = ?'], ex: '260 dépasse 255 : on obtient <b>260 − 256 = 4</b>. C’est un <em>dépassement de capacité</em>, la même famille d’erreur que celle qui a détruit Ariane 5 en 1996.' }
+    ],
+    clue: { t: 'Accès au poste espion CYCLOPE obtenu. Il est branché quelque part dans l’entreprise et possède une adresse IP : 172.16.20.77.' },
+    dos: ['Ariane 501 (4 juin 1996)', 'Le 4 juin 1996, à Kourou, le vol inaugural de la fusée européenne Ariane 5 explose environ 37 secondes après le décollage. Un logiciel hérité d’Ariane 4 convertissait une valeur décimale sur 64 bits en entier sur 16 bits. La trajectoire d’Ariane 5 produisait une valeur trop grande : dépassement de capacité, erreur non gérée, trajectoire perdue. La perte est estimée à environ 370 millions de dollars. Une simple question de représentation des nombres.']
+  },
+  {
+    id: 'inet', n: 'Salle des routeurs', th: 'Internet',
+    intro: ['> SALLE DES ROUTEURS : il faut localiser physiquement CYCLOPE.', '> Le poste a pour IP 172.16.20.77 avec le masque 255.255.255.0.', '> Chaque bâtiment possède son propre réseau.'],
+    pz: [
+      { id: 'p1a', t: 'Quel est son réseau ?', q: 'Calcule l’<b>adresse réseau</b> de 172.16.20.77 avec le masque 255.255.255.0. (On fait un « ET » bit à bit entre l’adresse et le masque.)', kind: 'text', ph: 'a.b.c.d', ok: v => norm(v).replace(/\s/g, '') === '172.16.20.0', h: ['255 en binaire vaut 11111111 : un ET avec 255 conserve l’octet. Un ET avec 0 donne 0.', 'Les trois premiers octets sont conservés, le dernier devient 0.'], ex: 'Masque /24 : les 3 premiers octets sont gardés, le dernier est mis à 0 → <b>172.16.20.0</b>.' },
+      { id: 'p1b', t: 'Dans quel bâtiment ?', q: 'Plan du site :', w: () => tbl(['Bâtiment', 'Adresse réseau', 'Masque'], BUILD.map(b => ['Bâtiment ' + b.n, b.net.join('.'), '255.255.255.0'])), kind: 'qcm', o: ['Bâtiment B', 'Bâtiment A', 'Bâtiment C'], h: ['Compare ton adresse réseau avec celles du tableau.'], ex: '172.16.20.0 correspond au <b>bâtiment B</b>.' },
+      { id: 'p1c', t: 'Le message en paquets', q: 'CYCLOPE émet un message découpé en paquets reçus dans le désordre. Comme TCP, remets-les dans l’ordre grâce au numéro de séquence.', kind: 'custom', w: packetsW, h: ['Le plus petit numéro de séquence doit être en premier.', 'Ordre attendu : 1, 2, 3, 4, 5.'], ex: 'Message reconstitué : « <b>TRANSFERT TERMINE. EFFACER LES TRACES.</b> ». Quelqu’un a programmé l’effacement des traces : il faut faire vite.' }
+    ],
+    clue: { a: 'bat', t: 'Le poste espion est branché dans le bâtiment B. Il a envoyé : « TRANSFERT TERMINE. EFFACER LES TRACES. »' },
+    dos: ['Cyclades et Louis Pouzin', 'Dans les années 1970, l’ingénieur français Louis Pouzin conçoit Cyclades, un réseau expérimental dont les messages sont découpés en datagrammes indépendants, remis dans l’ordre par le destinataire. Cette idée a fortement influencé TCP/IP, le protocole utilisé aujourd’hui par Internet.']
+  },
+  {
+    id: 'web', n: 'Salle des serveurs web', th: 'Le Web',
+    intro: ['> SALLE DES SERVEURS WEB : comment CYCLOPE est-il entré ?', '> Un employé a cliqué sur un lien reçu par courriel : « Nouveau règlement intérieur ».', '> Voici le courriel et le journal du serveur.'],
+    pz: [
+      { id: 'p2a', t: 'Le lien piégé', q: 'Le courriel proposait quatre liens. Lequel mène à un <b>faux</b> site (hameçonnage) ? Rappel : le nom de domaine réel se lit juste avant le premier « / », en partant de la droite.', kind: 'qcm', o: ['https://isere-dynamique.fr.acces-rh.net/connexion', 'https://www.isere-dynamique.fr/intranet', 'https://intranet.isere-dynamique.fr/login', 'https://isere-dynamique.fr/contact'], h: ['Regarde la fin du nom de domaine, juste avant le premier « / ».', 'Le domaine réel est « acces-rh.net » : le début n’est que un sous-domaine.'], ex: 'Le vrai domaine est <b>acces-rh.net</b> ; « isere-dynamique.fr » n’y figure que comme sous-domaine pour tromper la victime.' },
+      { id: 'p2b', t: 'Le journal du serveur', q: 'Combien de requêtes ont <b>réussi</b> (code HTTP 200) ?', w: () => pre('GET /index.html      200\nGET /admin           403\nGET /backup.zip      200\nGET /secret          404\nGET /export.csv      200\nGET /config.php      500\nGET /logo.png        200'), kind: 'text', ph: 'Nombre', ok: v => num(v) === 4, h: ['200 = succès, 403 = interdit, 404 = introuvable, 500 = erreur du serveur.'], ex: '4 requêtes ont réussi : index.html, <b>backup.zip</b>, <b>export.csv</b> et logo.png. L’intrus a donc pu télécharger la sauvegarde.' }
+    ],
+    clue: { t: 'L’intrusion vient d’un hameçonnage (faux site acces-rh.net). Le pirate a téléchargé backup.zip et export.csv.' },
+    dos: ['La naissance du Web au CERN', 'En 1989, au CERN (laboratoire installé à cheval sur la frontière franco-suisse), Tim Berners-Lee propose un système de pages reliées par des liens hypertextes. Avec Robert Cailliau, il met au point le World Wide Web, fondé sur trois piliers : l’URL, le protocole HTTP et le langage HTML. En 1993, le CERN place la technologie dans le domaine public.']
+  },
+  {
+    id: 'soc', n: 'Salle des réseaux', th: 'Réseaux sociaux',
+    intro: ['> SALLE DES RÉSEAUX : CYCLOPE contactait un compte anonyme.', '> Compte repéré : @cyclope_38. Voici ses dernières publications publiques.'],
+    pz: [
+      { id: 'p3a', t: 'Profil du compte anonyme', q: 'Quel <b>centre d’intérêt</b> revient dans les publications ?', w: () => h('div', null, [['@cyclope_38', 'Soirée tranquille. Mon fou en f3 a sauvé la partie. #nuit'], ['@cyclope_38', 'Roque côté roi, puis mat en trois coups. #tournoi38'], ['@cyclope_38', 'Longue journée au bureau. Vivement ce soir.'], ['@cyclope_38', 'Tournoi samedi au club, qui vient ?'], ['@cyclope_38', 'La meilleure défense, c’est l’anticipation. #cybersécurité']].map(p => h('div', { class: 'post' }, h('b', null, p[0]), h('div', null, p[1])))), kind: 'text', ph: 'Un mot', ok: v => /echec/.test(norm(v)), h: ['Fou, roque, mat, tournoi, club… de quel jeu parle-t-on ?'], ex: 'Fou, roque, mat : le compte parle d’<b>échecs</b>.' },
+      { id: 'p3b', t: 'Pourquoi il s’est trahi', q: 'Même anonyme, ce compte peut être recoupé avec des profils réels. Quel comportement le rend identifiable ?', kind: 'qcm', o: ['Publier des détails personnels recoupables (loisirs, horaires, club)', 'Utiliser un pseudonyme', 'Avoir un mot de passe long', 'Mettre un avatar générique'], h: ['Réfléchis à ce qui permet de relier un compte à une personne réelle.'], ex: 'Des détails publiés (loisir, club, horaires) se <b>recoupent</b> avec d’autres sources : l’anonymat n’est jamais absolu.' }
+    ],
+    clue: { a: 'hobby', t: 'La taupe est passionnée d’échecs (joue en club, mentionne des tournois).' },
+    dos: ['TV5Monde, 8 avril 2015', 'Dans la soirée du 8 avril 2015, la chaîne francophone TV5Monde voit ses douze chaînes cesser d’émettre et ses sites ainsi que ses comptes de réseaux sociaux piratés par des attaquants se présentant comme djihadistes. L’enquête a ensuite évoqué un groupe lié à la Russie, et une intrusion préparée plusieurs semaines à l’avance. Coût : plusieurs millions d’euros. Un rappel que les comptes de réseaux sociaux sont des cibles.']
+  },
+  {
+    id: 'data', n: 'Archives', th: 'Données structurées',
+    intro: ['> ARCHIVES : le journal des badges du local technique.', '> CYCLOPE n’a pas pu être posé sans entrer. Cherche l’accès nocturne à la salle serveur.', '> Filtre le tableau ci-dessous comme le ferait un tableur.'],
+    pz: [
+      { id: 'p4a', t: 'Le badge de la nuit', q: 'Quel numéro de badge est entré en <b>Salle serveur</b> entre 00 h et 05 h ?', w: badgeW, kind: 'text', ph: 'N° de badge', ok: v => num(v) === 7734, h: ['Utilise les deux filtres : lieu = Salle serveur, heure = nuit.', 'Il ne reste qu’une seule ligne.'], ex: 'Une seule ligne : 02:14, <b>badge 7734</b>, Salle serveur.' },
+      { id: 'p4b', t: 'Qui est derrière le badge ?', q: 'Annuaire des badges (noms masqués conformément au RGPD). Dans quel <b>service</b> travaille le titulaire du badge 7734 ?', w: () => tbl(['N° de badge', 'Service'], STAFF.map(s => [String(s.b), s.svc])), kind: 'text', ph: 'Service', ok: v => /infra/.test(norm(v)), h: ['Fais une jointure : cherche le numéro du badge dans la deuxième table.'], ex: 'Le badge 7734 appartient au service <b>Infrastructure</b>.' }
+    ],
+    clue: { a: 'svc', t: 'La taupe travaille au service Infrastructure (badge 7734, salle serveur à 02 h 14).' },
+    dos: ['SAFARI, la CNIL et le RGPD', 'En mars 1974, le journal Le Monde révèle le projet SAFARI : l’administration française veut interconnecter les fichiers des citoyens grâce à un identifiant unique. L’émotion est telle qu’elle conduit à la loi Informatique et Libertés du 6 janvier 1978 et à la création de la CNIL. Depuis 2018, le RGPD européen protège encore davantage nos données personnelles.']
+  },
+  {
+    id: 'geo', n: 'Salle des cartes', th: 'Localisation',
+    intro: ['> SALLE DES CARTES : CYCLOPE enregistrait la position du téléphone de la taupe.', '> Dernière position : 45° 11′ N, 5° 43′ E (degrés et minutes).', '> 1° = 60′ (minutes d’arc).'],
+    pz: [
+      { id: 'p5a', t: 'Conversion', q: 'Convertis la latitude <b>45° 11′</b> en degrés décimaux (arrondi au centième).', kind: 'text', ph: 'ex : 45,12', ok: v => num(v) === 45.18, h: ['Degrés décimaux = degrés + minutes / 60.', '11 / 60 ≈ 0,183.'], ex: '45 + 11/60 ≈ <b>45,18</b>. Pour la longitude, 5 + 43/60 ≈ 5,72.' },
+      { id: 'p5b', t: 'Quelle ville ?', q: 'Les coordonnées décimales sont (45,18 ; 5,72). Quelle est la ville la plus proche ?', w: () => tbl(['Ville', 'Latitude', 'Longitude'], CITIES.map(c => [c.n, fmt(c.lat), fmt(c.lon)])), kind: 'text', ph: 'Ville', ok: v => norm(v) === 'grenoble', h: ['Compare surtout les deux coordonnées avec celles du tableau.'], ex: '(45,19 ; 5,72) est presque identique à (45,18 ; 5,72) : <b>Grenoble</b>.' }
+    ],
+    clue: { a: 'ville', t: 'La taupe dort à Grenoble.' },
+    dos: ['La carte de Cassini et StravaLeaks', 'Au XVIIIe siècle, la famille Cassini réalise par triangulation la première carte générale de la France. En 2024, l’enquête « StravaLeaks » du journal Le Monde a montré que les parcours sportifs publiés par des gardes du corps de chefs d’État révélaient des lieux sensibles : nos positions sont des données.']
+  },
+  {
+    id: 'photo', n: 'Laboratoire photo', th: 'Photographie numérique',
+    intro: ['> LABORATOIRE PHOTO : une image anodine est stockée sur CYCLOPE.', '> Elle contient un mot caché (stéganographie) dans de très légères variations de gris.'],
+    pz: [
+      { id: 'p6a', t: 'Le poids de l’image', q: 'La photo originale mesure <b>4000 × 3000 pixels</b>, en couleurs RVB sur 3 octets par pixel, sans compression. Quel est son poids en <b>Mo</b> (1 Mo = 10⁶ octets) ?', kind: 'text', ph: 'en Mo', ok: v => num(v) === 36, h: ['Nombre de pixels × 3 octets.', '4000 × 3000 = 12 000 000 pixels.'], ex: '12 000 000 × 3 = 36 000 000 octets = <b>36 Mo</b>.' },
+      { id: 'p6b', t: 'Révéler le mot caché', q: 'Déplace le curseur de <b>seuil</b> : chaque pixel devient blanc s’il est ≥ au seuil, noir sinon. Quel mot apparaît ?', w: imgW, kind: 'text', ph: 'Le mot', ok: v => norm(v) === 'moto', h: ['Le fond a des gris compris entre 96 et 118, le texte entre 121 et 131.', 'Essaie un seuil de 120.'], ex: 'Avec un seuil de 120, on voit le mot <b>MOTO</b>.' }
+    ],
+    clue: { a: 'tr', t: 'Image cachée : « MOTO ». La taupe se déplace en moto.' },
+    dos: ['Niépce et la première photographie', 'Vers 1826, à Saint-Loup-de-Varennes (Saône-et-Loire), Nicéphore Niépce réalise « Point de vue du Gras », la plus ancienne photographie conservée, après plusieurs heures de pose. Presque deux siècles plus tard, une image est un tableau de pixels dont on peut modifier très légèrement les valeurs pour y cacher des messages.']
+  },
+  {
+    id: 'emb', n: 'Salle des capteurs', th: 'Objets connectés',
+    intro: ['> SALLE DES CAPTEURS : le détecteur de mouvement du local a été piraté.', '> Il envoie ses mesures et une trame de type ASCII à CYCLOPE.', '> ASCII : 0x41 = A, 0x42 = B, 0x43 = C…'],
+    pz: [
+      { id: 'p7a', t: 'Les mouvements suspects', q: 'Un programme embarqué déclenche une alerte si le nombre de mouvements dépasse <b>30</b>. Combien de mesures déclenchent l’alerte (strictement supérieures à 30) ?', w: barsW, kind: 'text', ph: 'Nombre', ok: v => num(v) === 6, h: ['Compte les barres rouges, au-dessus du trait pointillé.'], ex: 'Valeurs supérieures à 30 : 41, 38, 33, 45, 52, 31 → <b>6</b> alertes.' },
+      { id: 'p7b', t: 'La trame secrète', q: 'La dernière trame émise est <code>A5 4D 3F</code> (en hexadécimal) : 1er octet = début de trame, 2e octet = <b>initiale du prénom</b> en ASCII, 3e octet = contrôle. Quelle est cette lettre ?', kind: 'text', ph: 'Une lettre', ok: v => norm(v) === 'm', h: ['0x4D = 4×16 + 13 = 77.', '0x41 = A (65). 0x4D − 0x41 = 12, donc la 13e lettre : …'], ex: '0x4D = 77, c’est le code ASCII de la lettre <b>M</b>.' }
+    ],
+    clue: { a: 'ini', t: 'L’initiale du prénom de la taupe est « M ».' },
+    dos: ['OVH et le botnet Mirai (2016)', 'En septembre 2016, l’hébergeur français OVH subit une attaque par déni de service d’environ 1 Tbit/s, menée par le botnet Mirai, composé de plus de 140 000 objets connectés (caméras, enregistreurs vidéo) protégés par des mots de passe par défaut. Un objet connecté mal sécurisé devient une arme.']
+  }
+];
+/*G1-END*/
+
+/*GUI-START*/
+const fresh = () => ({ st: 0, t0: 0, t1: 0, cur: 0, ok: {}, hint: {}, wrong: 0 });
+let S = Object.assign(fresh(), lsGet(KEYS.act, {}));
+const save = () => lsSet(KEYS.act, S);
+const roomDone = r => r.pz.every(p => S.ok[p.id]);
+const nDone = () => ROOMS.filter(roomDone).length;
+const unlocked = i => i === 0 || ROOMS.slice(0, Math.min(i, ROOMS.length)).every(roomDone);
+const hintsTotal = () => Object.values(S.hint).reduce((a, b) => a + b, 0);
+const clues = () => ROOMS.filter(roomDone).map(r => ({ r, c: r.clue }));
+const FIN = ROOMS.length;
+let resetAsk = false, struck = {};
+
+function shuffle(a, seed) { const r = mulberry(seed), b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; }
+function hash(s) { let x = 7; for (const c of s) x = (x * 31 + c.charCodeAt(0)) | 0; return x; }
+const keepScroll = fn => { const y = window.scrollY; fn(); window.scrollTo(0, y); };
+const mmss = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+
+function topbar() {
+  const on = S.st > 0;
+  $('#pSalles').hidden = $('#pHints').hidden = $('#pClock').hidden = $('#bReset').hidden = !on;
+  $('#pSalles').textContent = 'Salles ' + nDone() + '/' + ROOMS.length;
+  $('#pHints').textContent = 'Indices ' + hintsTotal();
+  $('#bReset').textContent = resetAsk ? 'Confirmer : tout effacer' : 'Recommencer';
+  $('#bReset').className = 'btn sm' + (resetAsk ? ' bad' : '');
+  tick();
+}
+function tick() { if (S.st === 1) $('#pClock').textContent = mmss(Date.now() - S.t0); else if (S.st === 2) $('#pClock').textContent = mmss(S.t1 - S.t0); }
+
+function render() {
+  topbar();
+  const st = $('#stage');
+  st.replaceChildren(S.st === 0 ? intro() : S.st === 2 ? ending() : game());
+}
+
+function intro() {
+  const started = S.t0 > 0;
+  return h('div', { style: 'max-width:760px;margin:0 auto' },
+    h('h1', null, 'Opération Cyclope'),
+    h('p', { class: 'muted' }, 'Un escape game pour réviser les thèmes de SNT.'),
+    h('div', { class: 'term' },
+      h('p', { class: 'g' }, '> DIRECTION DU RENSEIGNEMENT NUMÉRIQUE : DOSSIER CONFIDENTIEL'),
+      h('p', null, 'Agent, bienvenue. Cette nuit, un mini-ordinateur espion nommé CYCLOPE a été découvert dans les locaux de la société Isère Dynamique, près de Grenoble. Il a copié des plans industriels et va effacer ses traces au lever du jour.'),
+      h('p', null, 'Quelqu’un de l’intérieur l’a installé : une taupe. Tu dois pirater CYCLOPE, salle après salle, rassembler les indices dans ton carnet, puis démasquer la taupe parmi cinq suspects.'),
+      h('p', { class: 'a' }, '> Mission : 8 salles, 1 coupable. Bonne chance.')),
+    h('div', { class: 'card' }, h('h3', null, 'Règles'),
+      h('ul', null,
+        h('li', null, 'Chaque salle correspond à un thème du programme : Python et nombres, Internet, Web, réseaux sociaux, données, localisation, photographie, objets connectés.'),
+        h('li', null, 'Une salle s’ouvre quand la précédente est résolue. Chaque salle te donne un indice pour ton carnet.'),
+        h('li', null, 'Tu peux demander des indices, mais ils coûtent des points. Une mauvaise accusation aussi.'),
+        h('li', null, 'Le scénario est fictif ; les dossiers historiques, eux, racontent des événements réels en France.'))),
+    h('div', { class: 'ans' },
+      h('button', { class: 'btn pri', onclick: () => { if (!started) { S = fresh(); S.t0 = Date.now(); } S.st = 1; save(); render(); } }, started ? 'Reprendre la mission' : 'Accepter la mission')));
+}
+
+function hall() {
+  return h('div', { class: 'hall', role: 'navigation', 'aria-label': 'Salles' }, ...ROOMS.concat([{ n: 'Confrontation', th: 'Qui est la taupe ?' }]).map((r, i) => {
+    const ok = i < FIN ? roomDone(r) : false, lock = i === FIN ? nDone() < FIN : !unlocked(i);
+    return h('button', { class: 'door' + (S.cur === i ? ' cur' : '') + (ok ? ' ok' : '') + (lock ? ' lock' : ''), disabled: lock, 'aria-label': r.n + (ok ? ' (résolue)' : lock ? ' (verrouillée)' : ''), onclick: () => { S.cur = i; save(); render(); window.scrollTo(0, 0); } },
+      h('b', null, i < FIN ? 'SALLE ' + (i + 1) + (ok ? ' ✓' : lock ? ' ⛔' : '') : 'FINALE' + (lock ? ' ⛔' : '')), h('span', null, r.n));
+  }));
+}
+function carnet() {
+  const cl = clues();
+  return h('div', { class: 'side' }, h('div', { class: 'sidecard' }, h('h3', null, 'Carnet d’enquête'),
+    cl.length ? h('ul', { class: 'cl' }, cl.map(x => h('li', null, h('b', null, 'SALLE ' + (ROOMS.indexOf(x.r) + 1) + ' · ' + x.r.th), x.c.t))) : h('p', { class: 'muted' }, 'Les indices trouvés apparaîtront ici.')));
+}
+function game() {
+  const main = S.cur === FIN ? finale() : room(ROOMS[S.cur], S.cur);
+  return h('div', null, hall(), h('div', { class: 'grid' }, main, carnet()));
+}
+
+function room(r, i) {
+  const wrap = h('div', { style: 'min-width:0' });
+  wrap.append(h('h2', null, 'Salle ' + (i + 1) + ' : ' + r.n), h('div', { class: 'muted' }, 'Thème : ' + r.th),
+    h('div', { class: 'term', style: 'margin-top:10px' }, r.intro.map(l => h('p', { class: l.startsWith('> ') ? '' : 'a' }, l))));
+  r.pz.forEach((p, k) => wrap.append(puzzle(r, p, k)));
+  if (roomDone(r)) wrap.append(h('div', { class: 'win' }, h('b', null, 'Salle résolue.'), h('p', { style: 'margin:6px 0' }, 'Nouvel indice dans ton carnet : ', h('em', null, r.clue.t)),
+    h('div', { class: 'ans' }, h('button', { class: 'btn pri', onclick: () => { S.cur = i + 1; save(); render(); window.scrollTo(0, 0); } }, i + 1 < FIN ? 'Salle suivante' : 'Aller à la confrontation'))),
+    h('details', { class: 'dos' }, h('summary', null, 'Dossier réel : ' + r.dos[0]), h('p', null, r.dos[1])));
+  return wrap;
+}
+
+function puzzle(r, p, k) {
+  const done = !!S.ok[p.id];
+  const card = h('section', { class: 'card' + (done ? ' done' : '') });
+  const fb = h('div', { class: 'fb', role: 'status' });
+  const api = { submit: good => { if (good) solve(); else { fb.textContent = 'Ce n’est pas le bon résultat. Réessaie !'; fb.className = 'fb bad'; } } };
+  const solve = () => { S.ok[p.id] = 1; save(); keepScroll(() => { const was = roomDone(r); render(); if (!was && roomDone(r)) toast('Salle déverrouillée !'); }); };
+  card.append(h('div', { class: 'ph' }, h('span', { class: 'badge' }, 'ÉNIGME ' + (k + 1) + (done ? ' ✓' : '')), h('h3', null, p.t)), h('div', { html: p.q }));
+  if (p.w) card.append(p.w(api, done));
+  if (!done) {
+    if (p.kind === 'text') {
+      const inp = h('input', { type: 'text', placeholder: p.ph, autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', 'aria-label': 'Ta réponse' });
+      const go = () => api.submit(p.ok(inp.value));
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+      card.append(h('div', { class: 'ans' }, inp, h('button', { class: 'btn pri', onclick: go }, 'Valider')));
+    } else if (p.kind === 'qcm') {
+      const opts = shuffle(p.o, hash(p.id));
+      card.append(h('div', { class: 'opts' }, opts.map(o => { const b = h('button', { class: 'opt', onclick: () => { if (o === p.o[0]) { b.className = 'opt ok'; solve(); } else { b.className = 'opt bad'; fb.textContent = 'Non, cherche encore.'; fb.className = 'fb bad'; } } }, o); return b; })));
+    }
+    card.append(fb);
+    const hl = h('div', { class: 'hints' }), n = S.hint[p.id] || 0;
+    const hb = h('button', { class: 'btn sm', style: 'margin-top:8px' }, '');
+    const drawH = () => { const c = S.hint[p.id] || 0; hl.replaceChildren(...p.h.slice(0, c).map((t, i) => h('div', { class: 'hint' }, 'Indice ' + (i + 1) + ' : ' + t))); hb.textContent = 'Demander un indice (' + c + '/' + p.h.length + ')'; hb.disabled = c >= p.h.length; };
+    hb.onclick = () => { S.hint[p.id] = (S.hint[p.id] || 0) + 1; save(); drawH(); topbar(); };
+    drawH(); card.append(hb, hl);
+  } else {
+    card.append(h('div', { class: 'ex', html: p.ex }));
+  }
+  return card;
+}
+
+function finale() {
+  const wrap = h('div', { style: 'min-width:0' });
+  wrap.append(h('h2', null, 'Confrontation'), h('div', { class: 'muted' }, 'Thème : tout le programme'),
+    h('div', { class: 'term', style: 'margin-top:10px' }, h('p', null, '> CYCLOPE est entièrement déchiffré. Il ne reste qu’une personne à interpeller.'), h('p', { class: 'a' }, '> Compare chaque suspect avec tes indices, raye ceux qui sont écartés, puis interpelle la taupe.')));
+  const msg = h('div', { class: 'fb bad', role: 'status' });
+  const rows = SUSP.map(s => {
+    const tr = h('tr', { class: struck[s.nom] ? 'x' : '' });
+    const draw = () => { tr.className = struck[s.nom] ? 'x' : ''; };
+    tr.append(h('td', { class: 'nm' }, s.nom), ...ATTR.map(a => h('td', null, s[a[0]])),
+      h('td', null, h('button', { class: 'btn sm', onclick: () => { struck[s.nom] = !struck[s.nom]; draw(); } }, 'Rayer / garder')),
+      h('td', null, h('button', { class: 'btn sm pri', onclick: function () {
+        if (this.dataset.c !== '1') { this.dataset.c = '1'; this.textContent = 'Confirmer ?'; return; }
+        accuse(s, msg);
+      } }, 'Interpeller')));
+    return tr;
+  });
+  wrap.append(h('div', { class: 'card' }, h('h3', null, 'Les cinq suspects'),
+    h('div', { class: 'dwrap' }, h('table', { class: 'dt sus' }, h('thead', null, h('tr', null, h('th', null, 'Nom'), ...ATTR.map(a => h('th', null, a[1])), h('th', null, ''), h('th', null, ''))), h('tbody', null, rows))), msg));
+  return wrap;
+}
+function accuse(s, msg) {
+  const bad = ATTR.find(a => s[a[0]] !== TRUTH[a[0]]);
+  if (!bad) { S.st = 2; S.t1 = Date.now(); save(); render(); window.scrollTo(0, 0); return; }
+  S.wrong++; save(); topbar();
+  const rl = ROOMS.find(r => r.clue.a === bad[0]);
+  msg.textContent = s.nom + ' ne correspond pas : l’indice de la salle « ' + rl.n + ' » (' + bad[1].toLowerCase() + ') l’écarte. Revois ton carnet.';
+  render0(); function render0() { const y = window.scrollY; render(); window.scrollTo(0, y); const m = $('.fb.bad[role=status]'); if (m) m.textContent = msg.textContent; }
+}
+
+function ending() {
+  const pen = hintsTotal() + 2 * S.wrong, stars = pen <= 3 ? 3 : pen <= 9 ? 2 : 1, rank = ['Agent stagiaire', 'Agent confirmé', 'Agent d’élite'][stars - 1];
+  return h('div', { style: 'max-width:780px;margin:0 auto' },
+    h('h1', null, 'Mission accomplie'),
+    h('div', { class: 'stars', 'aria-label': stars + ' étoiles sur 3' }, '★'.repeat(stars) + '☆'.repeat(3 - stars)),
+    h('div', { class: 'muted' }, rank),
+    h('div', { class: 'kpis' }, h('div', { class: 'kpi' }, 'Temps', h('b', null, mmss(S.t1 - S.t0))), h('div', { class: 'kpi' }, 'Indices utilisés', h('b', null, hintsTotal())), h('div', { class: 'kpi' }, 'Mauvaises accusations', h('b', null, S.wrong))),
+    h('div', { class: 'term' },
+      h('p', { class: 'g' }, '> TAUPE IDENTIFIÉE : Max Delattre, service Infrastructure.'),
+      h('p', null, 'Domicilié à Grenoble, joueur d’échecs en club, il est arrivé en moto à 2 h 14 par le parking, a branché CYCLOPE dans le bâtiment B et a programmé l’effacement des traces. Il avait cliqué sur le lien piégé, puis s’est trahi par ses publications, son badge et ses déplacements.'),
+      h('p', { class: 'a' }, '> Il est interpellé à l’aube. Les plans industriels n’ont pas quitté le réseau. Bravo, agent.')),
+    h('div', { class: 'card' }, h('h3', null, 'Ce que tu as mobilisé'), h('ul', null, ROOMS.map(r => h('li', null, h('b', null, r.n + ' : '), r.th + ' (dossier : ' + r.dos[0] + ')')))),
+    ROOMS.map(r => h('details', { class: 'dos' }, h('summary', null, 'Dossier réel : ' + r.dos[0]), h('p', null, r.dos[1]))),
+    h('div', { class: 'ans' }, h('button', { class: 'btn pri', onclick: () => { S = fresh(); struck = {}; save(); render(); window.scrollTo(0, 0); } }, 'Rejouer')));
+}
+
+$('#bReset').addEventListener('click', () => { if (!resetAsk) { resetAsk = true; topbar(); setTimeout(() => { resetAsk = false; topbar(); }, 4000); return; } resetAsk = false; S = fresh(); struck = {}; save(); render(); window.scrollTo(0, 0); });
+setInterval(tick, 1000);
+if (S.cur > FIN || S.cur < 0 || (S.cur < FIN && !unlocked(S.cur))) S.cur = 0;
+render();
+/*GUI-END*/
+
+</script>
+
+</body></html>

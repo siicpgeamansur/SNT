@@ -54,7 +54,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
 
 <div class="layout">
   <section class="panel">
-    <canvas id="game" width="640" height="360" aria-label="Arène de chasse au trésor"></canvas>
+    <canvas id="game" width="960" height="540" aria-label="Arène de chasse au trésor"></canvas>
     <div class="controls">
       <button id="start" class="primary">▶ Jouer / Reprendre</button>
       <button id="stop">⏸ Pause</button>
@@ -114,7 +114,7 @@ const map=[
 "100000000000001",
 "111111111111111"
 ];
-const MW=map[0].length, MH=map.length, TS=32; /* taille d'une case en pixels */
+const MW=map[0].length, MH=map.length, TS=48; /* taille d'une case en pixels */
 const wall=(x,y)=>{const cx=Math.floor(x),cy=Math.floor(y);return cx<0||cy<0||cx>=MW||cy>=MH||map[cy][cx]==="1";};
 const free=(x,y)=>!wall(x-.28,y-.28)&&!wall(x+.28,y-.28)&&!wall(x-.28,y+.28)&&!wall(x+.28,y+.28);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
@@ -123,7 +123,7 @@ const GOAL_SOLO=15, ROUND_SECONDS=90, GEM_VALUE=1, CHEST_VALUE=3, GEM_COUNT=8;
 
 let me={x:1.5,y:1.5,score:0,anim:0};
 let gems=[], running=false, over=false, soloTime=0, endMessage="";
-let netMode=false, peer=null, host=false, lastSend=0;
+let netMode=false, peer=null, host=false, lastSend=0, netPrev={x:-1,y:-1,n:""};
 let connections=new Map(), remote=new Map();
 let keys={};
 const palette=["#00f0ff","#ff3366","#00ff88","#ffcc00","#b866ff","#ff66b8","#66ccff","#ff8844"];
@@ -171,44 +171,44 @@ function draw(t){
     const gx=OX+g.x*TS, gy=OY+g.y*TS, bob=Math.sin(t/300+g.pulse)*3;
     if(g.kind==="gem"){
       ctx.fillStyle="#00ff88"; ctx.beginPath();
-      ctx.moveTo(gx,gy-8+bob);ctx.lineTo(gx+7,gy+bob);ctx.lineTo(gx,gy+8+bob);ctx.lineTo(gx-7,gy+bob);
+      ctx.moveTo(gx,gy-12+bob);ctx.lineTo(gx+11,gy+bob);ctx.lineTo(gx,gy+12+bob);ctx.lineTo(gx-11,gy+bob);
       ctx.closePath();ctx.fill();
-      ctx.strokeStyle="rgba(0,255,136,.35)";ctx.beginPath();ctx.arc(gx,gy+bob,11,0,7);ctx.stroke();
+      ctx.strokeStyle="rgba(0,255,136,.35)";ctx.beginPath();ctx.arc(gx,gy+bob,17,0,7);ctx.stroke();
     }else{
-      ctx.font="17px system-ui"; ctx.textAlign="center";
-      ctx.fillText("💰",gx,gy+6+bob);
-      ctx.strokeStyle="rgba(255,204,0,.35)";ctx.beginPath();ctx.arc(gx,gy+bob,12,0,7);ctx.stroke();
+      ctx.font="26px system-ui"; ctx.textAlign="center";
+      ctx.fillText("💰",gx,gy+9+bob);
+      ctx.strokeStyle="rgba(255,204,0,.35)";ctx.beginPath();ctx.arc(gx,gy+bob,19,0,7);ctx.stroke();
     }
   }
   /* joueurs distants */
   for(const [id,p] of remote){
     const rx=OX+p.x*TS, ry=OY+p.y*TS;
     ctx.fillStyle=colorOf(id);
-    ctx.beginPath();ctx.arc(rx,ry,9,0,7);ctx.fill();
-    ctx.fillStyle="#fff";ctx.font="bold 11px system-ui";ctx.textAlign="center";
-    ctx.fillText(String(p.name||"?").slice(0,10),rx,ry-14);
-    ctx.fillStyle="#071018";ctx.fillRect(rx-14,ry-20,28,4);
-    ctx.fillStyle=colorOf(id);ctx.fillRect(rx-14,ry-20,28*clamp(p.score/20,0,1),4);
+    ctx.beginPath();ctx.arc(rx,ry,13,0,7);ctx.fill();
+    ctx.fillStyle="#fff";ctx.font="bold 15px system-ui";ctx.textAlign="center";
+    ctx.fillText(String(p.name||"?").slice(0,10),rx,ry-20);
+    ctx.fillStyle="#071018";ctx.fillRect(rx-20,ry-30,40,6);
+    ctx.fillStyle=colorOf(id);ctx.fillRect(rx-20,ry-30,40*clamp(p.score/20,0,1),6);
   }
   /* moi */
   const mx=OX+me.x*TS,my=OY+me.y*TS;
   ctx.fillStyle=host||!netMode?"#00f0ff":"#ffcc00";
-  ctx.beginPath();ctx.arc(mx,my,9,0,7);ctx.fill();
-  ctx.fillStyle="#fff";ctx.font="bold 11px system-ui";ctx.textAlign="center";
-  ctx.fillText(($("nick").value||"Moi").slice(0,10),mx,my-14);
-  ctx.fillStyle="#071018";ctx.fillRect(mx-14,my-20,28,4);
-  ctx.fillStyle="#00ff88";ctx.fillRect(mx-14,my-20,28*clamp(me.score/20,0,1),4);
+  ctx.beginPath();ctx.arc(mx,my,13,0,7);ctx.fill();
+  ctx.fillStyle="#fff";ctx.font="bold 15px system-ui";ctx.textAlign="center";
+  ctx.fillText(($("nick").value||"Moi").slice(0,10),mx,my-20);
+  ctx.fillStyle="#071018";ctx.fillRect(mx-20,my-30,40,6);
+  ctx.fillStyle="#00ff88";ctx.fillRect(mx-20,my-30,40*clamp(me.score/20,0,1),6);
   /* HUD */
-  ctx.fillStyle="#eaf1ff";ctx.font="bold 15px system-ui";ctx.textAlign="left";
-  ctx.fillText("💎 "+me.score+(netMode?"":" / "+GOAL_SOLO),14,26);
-  if(soloTime>0&&!netMode) ctx.fillText("⏱ "+Math.max(0,Math.ceil(soloTime))+" s",14,48);
-  else ctx.fillText(netMode?"🌐 CHASSE EN LIGNE":"🤖 MODE SOLO",14,48);
+  ctx.fillStyle="#eaf1ff";ctx.font="bold 20px system-ui";ctx.textAlign="left";
+  ctx.fillText("💎 "+me.score+(netMode?"":" / "+GOAL_SOLO),18,34);
+  if(soloTime>0&&!netMode) ctx.fillText("⏱ "+Math.max(0,Math.ceil(soloTime))+" s",18,64);
+  else ctx.fillText(netMode?"🌐 CHASSE EN LIGNE":"🤖 MODE SOLO",18,64);
   if(over){
     ctx.fillStyle="rgba(0,0,0,.55)";ctx.fillRect(0,0,W,H);
-    ctx.fillStyle="#ffcc00";ctx.font="bold 26px system-ui";ctx.textAlign="center";
-    ctx.fillText("🏁 Partie terminée !",W/2,H/2-14);
-    ctx.fillStyle="#eaf1ff";ctx.font="15px system-ui";
-    ctx.fillText(endMessage,W/2,H/2+18);
+    ctx.fillStyle="#ffcc00";ctx.font="bold 34px system-ui";ctx.textAlign="center";
+    ctx.fillText("🏁 Partie terminée !",W/2,H/2-20);
+    ctx.fillStyle="#eaf1ff";ctx.font="19px system-ui";
+    ctx.fillText(endMessage,W/2,H/2+24);
   }
 }
 
@@ -321,10 +321,14 @@ function frame(t){
   const dt=Math.min(.05,(t-frame.last)/1000);frame.last=t;
   if(running){
     move(dt);
-    if(netMode&&peer&&t-lastSend>50){
-      lastSend=t;
-      const st={type:"state",x:me.x,y:me.y,name:($("nick").value||"Joueur").slice(0,16)};
-      if(host)broadcast(st);else sendHost(st);
+    /* envoi réseau : uniquement si l'état a changé (allège la charge à 8 joueurs) */
+    if(netMode&&peer&&t-lastSend>60){
+      const n=($("nick").value||"Joueur").slice(0,16);
+      if(me.x!==netPrev.x||me.y!==netPrev.y||n!==netPrev.n){
+        lastSend=t;netPrev={x:me.x,y:me.y,n};
+        const st={type:"state",x:me.x,y:me.y,name:n};
+        if(host)broadcast(st);else sendHost(st);
+      }
     }
   }
   draw(t);

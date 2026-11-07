@@ -52,7 +52,7 @@ label{display:block;color:var(--muted);font-size:12px;margin:10px 0 6px;font-wei
 
 <div class="layout">
   <section class="panel">
-    <canvas id="game" width="640" height="360" aria-label="Arène des serpents"></canvas>
+    <canvas id="game" width="960" height="540" aria-label="Arène des serpents"></canvas>
     <div class="controls">
       <button id="start" class="primary">▶ Jouer / Reprendre</button>
       <button id="stop">⏸ Pause</button>
@@ -99,7 +99,7 @@ const $=id=>document.getElementById(id), canvas=$("game"), ctx=canvas.getContext
 const W=canvas.width, H=canvas.height;
 
 /* ---- grille : 32 x 18 cases, bordures en dur, quelques piliers ---- */
-const GW=32, GH=18, TS=20, OX=(W-GW*TS)/2, OY=(H-GH*TS)/2;
+const GW=32, GH=18, TS=30, OX=(W-GW*TS)/2, OY=(H-GH*TS)/2;
 const PILLARS=[[7,4],[24,4],[7,13],[24,13],[15,8],[16,9],[15,9],[16,8]].map(([x,y])=>({x,y}));
 const isWall=(x,y)=>x<0||y<0||x>=GW||y>=GH||PILLARS.some(p=>p.x===x&&p.y===y);
 const inBody=(body,x,y,skipHead)=>body.some((s,i)=>(!skipHead||i>0)&&s.x===x&&s.y===y);
@@ -112,7 +112,7 @@ const opposite={up:"down",down:"up",left:"right",right:"left"};
 
 let me={body:null,dir:"right",pending:"right",apples:0,deadFlash:0};
 let foods=[], running=false, tickAcc=0, TICK=0.13; /* vitesse : une case toutes les 130 ms */
-let netMode=false, peer=null, host=false, lastSend=0;
+let netMode=false, peer=null, host=false, lastSend=0, netPrev="";
 let connections=new Map(), remote=new Map();
 let best=3;
 
@@ -156,9 +156,9 @@ function draw(t){
   /* pommes */
   for(const f of foods){
     const[fx,fy]=cell(f.x,f.y), bob=Math.sin(t/300+f.x)*2;
-    ctx.font=(TS-2)+"px system-ui"; ctx.textAlign="center";
+    ctx.font=(TS+8)+"px system-ui"; ctx.textAlign="center";
     ctx.fillText("🍎",fx+TS/2,fy+TS-4+bob);
-    ctx.strokeStyle="rgba(255,51,102,.25)";ctx.beginPath();ctx.arc(fx+TS/2,fy+TS/2+bob,11,0,7);ctx.stroke();
+    ctx.strokeStyle="rgba(255,51,102,.25)";ctx.beginPath();ctx.arc(fx+TS/2,fy+TS/2+bob,16,0,7);ctx.stroke();
   }
   /* serpents distants */
   for(const [id,p] of remote){
@@ -166,8 +166,8 @@ function draw(t){
     const col=colorOf(id);
     drawSnake(p.body,col,p.body.length);
     const[hx,hy]=cell(p.body[0].x,p.body[0].y);
-    ctx.fillStyle="#fff";ctx.font="bold 10px system-ui";ctx.textAlign="center";
-    ctx.fillText(String(p.name||"?").slice(0,10),hx+TS/2,hy-3);
+    ctx.fillStyle="#fff";ctx.font="bold 14px system-ui";ctx.textAlign="center";
+    ctx.fillText(String(p.name||"?").slice(0,10),hx+TS/2,hy-4);
   }
   /* mon serpent */
   if(me.body){
@@ -175,9 +175,9 @@ function draw(t){
     if(me.deadFlash>0){ me.deadFlash-=.05; ctx.fillStyle=`rgba(255,51,102,${me.deadFlash*.4})`; ctx.fillRect(0,0,W,H); }
   }
   /* HUD */
-  ctx.fillStyle="#eaf1ff";ctx.font="bold 15px system-ui";ctx.textAlign="left";
-  ctx.fillText("🍎 "+me.apples+" · 🐍 "+snakeLen(),14,26);
-  ctx.fillText(!netMode?("⭐ Record : "+best):(host?"🌐 HÔTE · "+(remote.size+1)+" serpents":"🌐 ARÈNE EN LIGNE"),14,48);
+  ctx.fillStyle="#eaf1ff";ctx.font="bold 20px system-ui";ctx.textAlign="left";
+  ctx.fillText("🍎 "+me.apples+" · 🐍 "+snakeLen(),18,34);
+  ctx.fillText(!netMode?("⭐ Record : "+best):(host?"🌐 HÔTE · "+(remote.size+1)+" serpents":"🌐 ARÈNE EN LIGNE"),18,64);
 }
 function drawSnake(body,col,len){
   for(let i=body.length-1;i>=0;i--){
@@ -191,8 +191,8 @@ function drawSnake(body,col,len){
       /* yeux */
       ctx.fillStyle="#03050a";
       const d=DIRS[me.dir]||[1,0];
-      ctx.fillRect(x+TS/2-4+d[0]*3,y+TS/2-4+d[1]*3,3,3);
-      ctx.fillRect(x+TS/2+1+d[0]*3,y+TS/2+1+d[1]*3,3,3);
+      ctx.fillRect(x+TS/2-6+d[0]*4,y+TS/2-6+d[1]*4,4,4);
+      ctx.fillRect(x+TS/2+2+d[0]*4,y+TS/2+2+d[1]*4,4,4);
     }else{
       ctx.globalAlpha=.35+.6*fade;
       ctx.fillRect(x+2,y+2,TS-4,TS-4);
@@ -310,10 +310,15 @@ function frame(t){
   if(running){
     tickAcc+=dt;
     while(tickAcc>=TICK){ tickAcc-=TICK; tick(); }
-    if(netMode&&peer&&t-lastSend>110){
-      lastSend=t;
-      const st={type:"state",id:peer?peer.id:"host",name:($("nick").value||"Joueur").slice(0,16),body:me.body};
-      if(host)broadcast(st);else sendHost(st);
+    /* envoi réseau : uniquement si le serpent a bougé depuis le dernier envoi */
+    if(netMode&&peer&&t-lastSend>110&&me.body){
+      const last=me.body[me.body.length-1];
+      const sig=me.body.length+"@"+me.body[0].x+","+me.body[0].y+";"+last.x+","+last.y;
+      if(sig!==netPrev){
+        lastSend=t;netPrev=sig;
+        const st={type:"state",id:peer?peer.id:"host",name:($("nick").value||"Joueur").slice(0,16),body:me.body};
+        if(host)broadcast(st);else sendHost(st);
+      }
     }
     if(!netMode&&snakeLen()>best){best=snakeLen();}
   }

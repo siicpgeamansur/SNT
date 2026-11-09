@@ -1799,14 +1799,14 @@ const ACT = {
       { q: 'Sans passerelle, PC 1 peut-il joindre PC 3 ?', o: ['Oui, le commutateur s’en charge', 'Oui, grâce au masque', 'Non, il ne sait pas où envoyer un paquet destiné à un autre réseau', 'Oui, mais plus lentement'], a: 2, w: 'Le commutateur ne connaît que le réseau local. Il faut un routeur et une passerelle configurée.' }
     ]
   },
-  internet: {
+internet: {
     title: 'DHCP, DNS et site web', level: 'Niveau 3 · Du nom de site à la page', time: '25 min',
     goal: 'Suivre tout ce qui se passe quand on tape l’adresse d’un site : obtention d’une adresse (DHCP), traduction du nom (DNS), connexion (TCP) et demande de la page (HTTP).',
     steps: [
       '<b>Conception.</b> Le <b>PC élève</b> n’a pas d’adresse : il est réglé sur DHCP. Le serveur DHCP, le serveur DNS et le serveur web sont des machines avec le logiciel correspondant. Le routeur relie les deux réseaux.',
       '<b>Simulation.</b> Au démarrage, le PC élève demande une adresse. Cliquez dessus, onglet <b>Échanges</b> : vous voyez les 4 messages DHCP (DISCOVER, OFFER, REQUEST, ACK).',
       'Onglet <b>Terminal</b> : ' + cm('ipconfig') + '. Le PC a reçu une adresse, une passerelle et l’adresse du serveur DNS.',
-      'Tapez ' + cm('host www.exemple.fr') + ' : le serveur DNS répond par une adresse IP. Retrouvez la requête et la réponse (en UDP) dans Échanges.',
+      'Tapez ' + cm('host www.exemple.fr') + ' : le serveur DNS répond par une adresse IP. Retrouvez la requête et la réponse dans <b>Échanges</b>, puis cliquez sur la ligne pour vérifier dans les détails qu’elles utilisent le protocole <b>UDP</b> (couche transport).',
       'Onglet <b>Navigateur</b> : saisissez ' + cm('http://www.exemple.fr') + ' puis « Aller ». Dans Échanges, repérez dans l’ordre : DNS, connexion TCP (SYN, SYN ACK, ACK), requête HTTP (GET), réponse 200.',
       'Cliquez sur le lien « Page de SNT » de la page affichée : une nouvelle requête HTTP est envoyée.',
       'Cliquez sur la ligne HTTP et lisez la couche <b>Application</b> : la requête et la réponse sont du texte.'

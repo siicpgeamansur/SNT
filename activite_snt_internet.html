@@ -1747,7 +1747,7 @@ const ACT = {
     qcm: [
       { q: 'Combien de câbles faut-il pour relier 6 ordinateurs deux à deux, sans commutateur ?', o: ['6', '12', '30', '15'], a: 3, w: '6 × 5 / 2 = 15, ou encore 5 + 4 + 3 + 2 + 1 = 15.' },
       { q: 'Avec un commutateur, combien de câbles faut-il pour 6 ordinateurs ?', o: ['6', '15', '1', '12'], a: 0, w: 'Un câble par ordinateur, de l’ordinateur vers le commutateur.' },
-      { q: 'Combien de câbles faut-il pour relier 10 ordinateurs deux à deux ?', o: ['90', '45', '20', '10'], a: 1, w: '10 × 9 / 2 = 45. Avec n = 9 : 9 × 10 / 2 = 45.' },
+      { q: 'Combien de câbles faut-il pour relier 10 ordinateurs deux à deux (sans commutateur/switch) ?', o: ['90', '45', '20', '10'], a: 1, w: '10 × 9 / 2 = 45. Avec n = 9 : 9 × 10 / 2 = 45.' },
       { q: 'Sans commutateur, combien de cartes réseau faut-il dans chacun des 6 ordinateurs ?', o: ['6', '1', '5', '15'], a: 2, w: 'Chaque ordinateur est relié aux 5 autres : il faut une carte réseau pour chaque câble.' },
       { q: 'Dans la formule S(n) = n × (n + 1) / 2 appliquée aux câbles, que vaut n ?', o: ['Le nombre de câbles', 'Le nombre de commutateurs', 'Le nombre de machines moins 1', 'Le nombre de machines'], a: 2, w: 'Avec m machines, n = m − 1. Pour 6 machines : n = 5 et S = 5 × 6 / 2 = 15.' },
       { q: 'À partir de combien d’ordinateurs le commutateur demande-t-il moins de câbles que les liaisons deux à deux ?', o: ['3', '4', '5', '6'], a: 1, w: 'Pour 3 machines : 3 câbles dans les deux cas. Pour 4 machines : 6 câbles contre 4 avec un commutateur.' },

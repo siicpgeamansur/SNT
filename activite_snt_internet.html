@@ -1750,7 +1750,7 @@ const ACT = {
       { q: 'Combien de câbles faut-il pour relier 10 ordinateurs deux à deux (sans commutateur/switch) ?', o: ['90', '45', '20', '10'], a: 1, w: '10 × 9 / 2 = 45. Avec n = 9 : 9 × 10 / 2 = 45.' },
       { q: 'Sans commutateur, combien de cartes réseau faut-il dans chacun des 6 ordinateurs ?', o: ['6', '1', '5', '15'], a: 2, w: 'Chaque ordinateur est relié aux 5 autres : il faut une carte réseau pour chaque câble.' },
       { q: 'Dans la formule S(n) = n × (n + 1) / 2 appliquée aux câbles, que vaut n ?', o: ['Le nombre de câbles', 'Le nombre de commutateurs', 'Le nombre de machines moins 1', 'Le nombre de machines'], a: 2, w: 'Avec m machines, n = m − 1. Pour 6 machines : n = 5 et S = 5 × 6 / 2 = 15.' },
-      { q: 'À partir de combien d’ordinateurs le commutateur demande-t-il moins de câbles que les liaisons deux à deux ?', o: ['3', '4', '5', '6'], a: 1, w: 'Pour 3 machines : 3 câbles dans les deux cas. Pour 4 machines : 6 câbles contre 4 avec un commutateur.' },
+      { q: 'À partir de combien d’ordinateurs le commutateur demande-t-il strictement moins de câbles que les liaisons deux à deux ?', o: ['3', '4', '5', '6'], a: 1, w: 'Pour 3 machines : 3 câbles dans les deux cas. Pour 4 machines : 6 câbles contre 4 avec un commutateur.' },
       { q: '8 personnes se serrent la main, chacune une seule fois avec chaque autre. Combien de poignées de main ?', o: ['16', '56', '28', '64'], a: 2, w: 'Chacun serre 7 mains : 8 × 7 = 56, mais chaque poignée est comptée deux fois, donc 56 / 2 = 28. C’est le lemme des poignées de main.' }
     ]
   },

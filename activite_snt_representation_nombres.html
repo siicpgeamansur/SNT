@@ -332,8 +332,18 @@ button.bit{cursor:pointer}
 .verdict{border-radius:8px;padding:9px 12px;margin:10px 0;font-size:14px}.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
 input.bad{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
 .pwlbl span:only-child{width:auto}
-
-
+/* ---- roulettes ---- */
+.wheels{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;margin:12px 0}
+.wgap{width:14px;flex:none}
+.wcol{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:54px}
+.wlab{font:11px var(--font-mono);color:var(--muted);text-align:center;max-width:76px;line-height:1.2}
+.wbtn{width:46px;padding:2px 0;line-height:1.1}
+.wbtn:disabled{opacity:.4;cursor:not-allowed}
+.drum{position:relative;width:46px;height:108px;border:2px solid var(--node-stroke);border-radius:10px;overflow:hidden;background:#fff;flex:none}
+.drum::before{content:"";position:absolute;left:0;right:0;top:36px;height:36px;background:var(--accent-soft);border-top:1px solid var(--accent);border-bottom:1px solid var(--accent);z-index:0}
+.drum::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#ffffff 0,rgba(255,255,255,0) 34%,rgba(255,255,255,0) 66%,#ffffff 100%);z-index:2}
+.dstrip{position:relative;z-index:1}
+.dg{height:36px;line-height:36px;text-align:center;font:600 22px var(--font-mono);color:var(--fg)}
 </style>
 <div id="app">
   <header class="band"><div class="inner row">
@@ -391,7 +401,7 @@ const toBin = (v, w) => ((v >>> 0) % Math.pow(2, w || 8)).toString(2).padStart(w
 const toHex = (v, d) => (v >>> 0).toString(16).toUpperCase().padStart(d || 2, '0');
 const grp4 = s => { const c = s.replace(/\s+/g, ''); return c.padStart(Math.ceil(c.length / 4) * 4, '0').replace(/(.{4})(?=.)/g, '$1 '); };
 const fmt = n => (Math.round(n * 100) / 100).toString().replace('.', ',');
-const fmtN = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const fmtN = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 const gray = n => (n ^ (n >> 1)) >>> 0;
 function ungray(g) { let n = 0; for (; g; g >>= 1) n ^= g; return n >>> 0; }
 function divSteps(n) { const l = []; let m = n; if (m === 0) l.push({ m: 0, q: 0, r: 0 }); while (m > 0) { l.push({ m, q: Math.floor(m / 2), r: m % 2 }); m = Math.floor(m / 2); } return l; }
@@ -557,7 +567,7 @@ function mountW2(root) {
     h('p', null, 'Les longues suites de 0 et de 1 sont pénibles à lire et à recopier. On utilise donc la ', h('b', null, 'base 16'), ' (hexadécimal) : seize chiffres, 0 à 9 puis les lettres A (10), B (11), C (12), D (13), E (14), F (15). Le préfixe ', h('code', { class: 'k' }, '0x'), ' (ou le symbole #) signale cette base.'));
   /* tableau */
   const hx = '0123456789ABCDEF'.split('');
-  root.append(h('div', { class: 'dwrap' }, h('table', { class: 'ctable narrow', style: 'margin:0' }, h('tbody',
+  root.append(h('div', { class: 'dwrap' }, h('table', { class: 'ctable narrow', style: 'margin:0' }, h('tbody', null,
     h('tr', null, h('th', null, 'Décimal'), hx.map((d, i) => h('td', null, String(i)))),
     h('tr', null, h('th', null, 'Hexa'), hx.map(d => h('td', null, h('b', null, d)))),
     h('tr', null, h('th', null, 'Binaire'), hx.map((d, i) => h('td', null, toBin(i, 4))))))));
@@ -873,6 +883,211 @@ function mountW5(root) {
 WORKSHOPS.push({ id: 'n5', title: 'Code Gray', hint: 'Comparez binaire et Gray, observez un codeur rotatif et convertissez dans les deux sens.', mount: mountW5, reset: () => { if (W5.auto) clearInterval(W5.auto); Object.assign(W5, { n: 5, prev: 4, auto: null, mode: 'gray', k: 3, v: 205, gin: '01110100', nb: 3 }); } });
 /*N5-END*/
 
+/*N6-START*/
+/* ---------- Atelier 6 : roulettes ---------- */
+const SYM = '0123456789ABCDEF';
+const LV = [1800, 1300, 950, 700, 500, 350, 240, 160, 100, 60];
+const BASES = {
+  dec: { b: 10, name: 'Décimal', max: 5, def: 3 },
+  bin: { b: 2, name: 'Binaire', max: 8, def: 4 },
+  gray: { b: 2, name: 'Binaire réfléchi', max: 8, def: 4 },
+  hex: { b: 16, name: 'Hexadécimal', max: 4, def: 2 }
+};
+const DECN = ['unités', 'dizaines', 'centaines', 'milliers', 'dizaines de milliers'];
+const wcolLab = (key, j) => key === 'dec' ? DECN[j] : String(Math.pow(BASES[key].b, j));
+const wtext = (key, j) => key === 'dec' ? 'des ' + DECN[j] : 'de poids ' + Math.pow(BASES[key].b, j);
+function wdigits(v, key, k) {
+  const b = BASES[key].b, out = [], g = gray(v);
+  for (let i = 0; i < k; i++) out.push(key === 'gray' ? (g >> i) & 1 : Math.floor(v / Math.pow(b, i)) % b);
+  return out;
+}
+const reducedMotion = () => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+/* une roulette : affiche le chiffre précédent, le chiffre courant et le suivant ; tourne d'un cran avec animation */
+function makeWheel(base, d0) {
+  const RH = 36, strip = h('div', { class: 'dstrip' }), el = h('div', { class: 'drum', role: 'img' }, strip);
+  let shown = d0, target = d0, timers = [];
+  const sym = d => SYM[((d % base) + base) % base];
+  const rows = (from, n) => { strip.innerHTML = ''; for (let k = 0; k < n; k++) strip.append(h('div', { class: 'dg' }, sym(from + k))); };
+  const still = d => { shown = d; target = d; strip.style.transition = 'none'; strip.style.transform = 'translateY(0)'; rows(d - 1, 3); el.setAttribute('aria-label', 'chiffre ' + sym(d)); };
+  const clear = () => { timers.forEach(clearTimeout); timers = []; };
+  function set(d, o) {
+    o = o || {}; clear();
+    if (shown !== target) still(target);
+    if (d === shown) return;
+    const diff = ((d - shown) % base + base) % base;
+    let dir = 0;
+    if (diff === 1 && base === 2) dir = o.dir || 1; else if (diff === 1) dir = 1; else if (diff === base - 1) dir = -1;
+    target = d;
+    const ms = o.ms == null ? 260 : o.ms, delay = o.delay || 0;
+    if (!dir || ms <= 0 || reducedMotion()) {
+      if (delay > 0) timers.push(setTimeout(() => still(d), delay)); else still(d);
+      return;
+    }
+    const go = () => {
+      let y0, y1;
+      if (dir > 0) { rows(shown - 2, 6); y0 = -RH; y1 = -2 * RH; } else { rows(shown - 3, 6); y0 = -2 * RH; y1 = -RH; }
+      strip.style.transition = 'none'; strip.style.transform = 'translateY(' + y0 + 'px)';
+      void strip.offsetHeight;
+      strip.style.transition = 'transform ' + ms + 'ms ease-in-out'; strip.style.transform = 'translateY(' + y1 + 'px)';
+      timers.push(setTimeout(() => still(d), ms + 30));
+    };
+    if (delay > 0) timers.push(setTimeout(go, delay)); else go();
+  }
+  still(d0);
+  return { el, set, still };
+}
+function describeTurn(old, nd, i, dir, wrapped, key) {
+  const sy = d => SYM[d];
+  if (key === 'gray') {
+    const j = nd.findIndex((x, n) => x !== old[n]);
+    return 'Une seule roulette change : celle ' + wtext(key, j) + ' (' + sy(old[j]) + ' → ' + sy(nd[j]) + ').' + (j > 0 ? ' Les roulettes de droite restent immobiles : elles repartent ensuite dans l’autre sens (effet miroir).' : '') + (wrapped ? ' Le tour est complet : on revient au début du cycle.' : '');
+  }
+  const parts = ['Roulette ' + wtext(key, i) + ' : ' + sy(old[i]) + ' → ' + sy(nd[i])];
+  let carry = false;
+  nd.forEach((x, j) => { if (j !== i && x !== old[j]) { carry = true; parts.push((dir > 0 ? 'retenue' : 'emprunt') + ' : roulette ' + wtext(key, j) + ' ' + sy(old[j]) + ' → ' + sy(x)); } });
+  if (wrapped) parts.push(dir > 0 ? 'dépassement : la dernière roulette dépasse aussi, la retenue finale est perdue' : 'on revient au plus grand nombre (on ne peut pas emprunter plus à gauche)');
+  else if (!carry) parts.push(dir > 0 ? 'pas de retenue' : 'pas d’emprunt');
+  return parts.join(' ; ') + '.';
+}
+const W6 = { mode: 'man', base: 'dec', k: 3, v: 0, auto: null, lvl: 3, adir: 1, log: [], dr: newDrill() };
+function mountW6(root) {
+  if (W6.auto) { clearInterval(W6.auto); W6.auto = null; }
+  root.append(h('h2', null, 'Roulette : quand on dépasse, on retient'),
+    h('p', null, 'Sur un compteur kilométrique, un cadenas à code ou la roulette d’un téléphone, chaque roulette ne montre qu’un seul chiffre. Quand une roulette dépasse son dernier chiffre (9 en décimal), elle revient à 0 et la roulette suivante, à gauche, avance d’un cran : c’est la ', h('b', null, 'retenue'), '. Le même mécanisme existe dans toutes les écritures.'));
+  const ctrl = h('div'), wheelsBox = h('div', { class: 'wheels' }), note = h('p', { class: 'small' }), info = h('div'), logBox = h('ul', { class: 'rlog', 'aria-live': 'polite' });
+  let wheels = [], playBtn = null, lastW = 0;
+  const B = () => BASES[W6.base], N = () => Math.pow(B().b, W6.k), dig = () => wdigits(W6.v, W6.base, W6.k);
+  const stopAuto = () => { if (W6.auto) { clearInterval(W6.auto); W6.auto = null; } if (playBtn) playBtn.textContent = 'Lancer'; };
+  function drawLog() { logBox.innerHTML = ''; W6.log.forEach(m => logBox.append(h('li', null, m))); }
+  function drawInfo() {
+    const s = dig().slice().reverse().map(x => SYM[x]).join('');
+    const L = [['Écriture affichée', (W6.base === 'hex' ? '0x' : '') + s], ['Valeur (en décimal)', String(W6.v)]];
+    if (W6.base === 'gray') L.push(['Binaire ordinaire', toBin(W6.v, W6.k)]);
+    L.push(['Plus grand nombre affichable', fmtN(N() - 1)]);
+    info.innerHTML = ''; info.append(stats(L));
+  }
+  function turn(i, dir) {
+    const old = dig(), Nn = N(), step = W6.base === 'gray' ? 1 : Math.pow(B().b, i), raw = W6.v + dir * step, wrapped = raw < 0 || raw >= Nn;
+    W6.v = ((raw % Nn) + Nn) % Nn;
+    const nd = dig(), auto = W6.mode === 'auto', ivl = LV[W6.lvl - 1], ms = auto ? Math.min(260, Math.round(ivl * 0.6)) : 260;
+    wheels.forEach((w, j) => {
+      if (old[j] === nd[j]) return;
+      w.set(nd[j], { dir, ms, delay: auto ? (ivl >= 900 ? j * 90 : 0) : Math.abs(j - i) * 150 });
+    });
+    W6.log.unshift(describeTurn(old, nd, i, dir, wrapped, W6.base)); if (W6.log.length > 8) W6.log.length = 8;
+    drawLog(); drawInfo();
+  }
+  function jump(val) {
+    W6.v = val; W6.log = []; const d = dig();
+    wheels.forEach((w, j) => w.set(d[j], { ms: 0 }));
+    drawInfo(); drawLog();
+  }
+  function build() {
+    wheelsBox.innerHTML = ''; wheels = [];
+    const d = dig(), man = W6.mode === 'man', gr = W6.base === 'gray';
+    for (let i = W6.k - 1; i >= 0; i--) {
+      const w = makeWheel(B().b, d[i]); wheels[i] = w;
+      const off = gr && i > 0;
+      const up = man ? h('button', { type: 'button', class: 'btn sm wbtn', disabled: off, 'aria-label': 'Augmenter la roulette ' + wtext(W6.base, i), onclick: () => turn(i, 1) }, '▲') : null;
+      const dn = man ? h('button', { type: 'button', class: 'btn sm wbtn', disabled: off, 'aria-label': 'Diminuer la roulette ' + wtext(W6.base, i), onclick: () => turn(i, -1) }, '▼') : null;
+      w.el.addEventListener('wheel', e => {
+        if (W6.mode !== 'man' || off) return;
+        e.preventDefault(); const t = Date.now(); if (t - lastW < 160) return; lastW = t;
+        turn(i, e.deltaY < 0 ? 1 : -1);
+      }, { passive: false });
+      wheelsBox.append(h('div', { class: 'wcol' }, up, w.el, dn, h('div', { class: 'wlab' }, wcolLab(W6.base, i))));
+      if ((W6.base === 'bin' || gr) && i > 0 && i % 4 === 0) wheelsBox.append(h('span', { class: 'wgap' }));
+    }
+    note.textContent = man ? (gr ? 'En binaire réfléchi, seule la roulette de droite se commande (flèches ou molette) : les autres tournent d’elles-mêmes, car un seul bit change à chaque cran.' : 'Cliquez sur ▲ ou ▼ sous une roulette (ou faites défiler la molette de la souris dessus) : si elle dépasse son dernier chiffre, la roulette de gauche est augmentée de 1.') : 'Réglez la vitesse puis lancez le défilement : observez la retenue qui se propage vers la gauche.';
+    drawInfo(); drawLog();
+  }
+  function drawCtrl() {
+    ctrl.innerHTML = ''; playBtn = null;
+    ctrl.append(chipsRow([['man', 'Mode manuel'], ['auto', 'Mode automatique']], W6.mode, m => { stopAuto(); W6.mode = m; drawCtrl(); build(); }, 'Mode'));
+    ctrl.append(chipsRow(Object.keys(BASES).map(k => [k, BASES[k].name]), W6.base, key => { stopAuto(); W6.base = key; W6.k = BASES[key].def; W6.v = 0; W6.log = []; drawCtrl(); build(); }, 'Écriture'));
+    const kIn = h('input', { type: 'range', min: 1, max: B().max, value: W6.k, 'aria-label': 'Nombre de roulettes' }), kv = h('b', null, String(W6.k));
+    kIn.addEventListener('input', () => { W6.k = +kIn.value; kv.textContent = String(W6.k); W6.v = W6.v % N(); W6.log = []; build(); });
+    ctrl.append(h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:260px' }, h('span', null, 'Nombre de roulettes : ', kv), kIn)));
+    if (W6.mode === 'man') {
+      ctrl.append(h('div', { class: 'opts' },
+        h('button', { class: 'btn sm', type: 'button', onclick: () => jump(0) }, 'Mettre à 0'),
+        h('button', { class: 'btn sm', type: 'button', onclick: () => jump(Math.pow(B().b, Math.min(2, W6.k)) - 1 - (W6.base === 'gray' ? 0 : 0)) }, 'Juste avant une retenue'),
+        h('button', { class: 'btn sm', type: 'button', onclick: () => jump(N() - 1) }, 'Plus grand nombre')));
+    } else {
+      playBtn = h('button', { class: 'btn pri', type: 'button' }, W6.auto ? 'Pause' : 'Lancer');
+      const startAuto = () => { W6.auto = setInterval(tick, LV[W6.lvl - 1]); playBtn.textContent = 'Pause'; };
+      const tick = () => { if (!wheelsBox.isConnected) { clearInterval(W6.auto); W6.auto = null; return; } turn(0, W6.adir); };
+      playBtn.addEventListener('click', () => { if (W6.auto) stopAuto(); else startAuto(); });
+      const sp = h('input', { type: 'range', min: 1, max: 10, value: W6.lvl, 'aria-label': 'Vitesse' }), spv = h('b', null, '');
+      const spTxt = () => { spv.textContent = 'un cran toutes les ' + (LV[W6.lvl - 1] / 1000).toFixed(2).replace('.', ',') + ' s'; };
+      spTxt();
+      sp.addEventListener('input', () => { W6.lvl = +sp.value; spTxt(); if (W6.auto) { clearInterval(W6.auto); W6.auto = setInterval(tick, LV[W6.lvl - 1]); } });
+      ctrl.append(chipsRow([[1, 'Compter (+1)'], [-1, 'Décompter (−1)']], W6.adir, d => { W6.adir = d; drawCtrl(); }, 'Sens'));
+      ctrl.append(h('div', { class: 'opts' }, playBtn, h('button', { class: 'btn', type: 'button', onclick: () => jump(0) }, 'Remettre à 0'), h('label', { class: 'fld', style: 'width:280px' }, h('span', null, 'Vitesse : ', spv), sp)));
+    }
+  }
+  root.append(h('h3', null, '1. Les roulettes'), ctrl, wheelsBox, note, info, h('p', { class: 'small' }, 'Journal des retenues (le plus récent en haut) :'), logBox);
+  drawCtrl(); build();
+  /* 2 */
+  root.append(h('h3', null, '2. Le même mécanisme dans toutes les écritures'),
+    h('p', null, 'Chaque roulette possède autant de positions que la base : 10 en décimal, 2 en binaire, 16 en hexadécimal. Quand une roulette passe de son dernier chiffre au premier, elle pousse la roulette de gauche d’un cran. Pour 999 + 1, 1111 + 1 et 0xFF + 1, la retenue se propage de la même façon, de droite à gauche, exactement comme dans une addition posée.'),
+    tableEl([
+      { e: 'Décimal', p: '10', d: '9', a: '0, et la roulette de gauche avance de 1' },
+      { e: 'Binaire', p: '2', d: '1', a: '0, et la roulette de gauche avance de 1' },
+      { e: 'Hexadécimal', p: '16', d: 'F (15)', a: '0, et la roulette de gauche avance de 1' },
+      { e: 'Binaire réfléchi', p: '2', d: '1', a: 'la roulette de gauche change, celle-ci repart dans l’autre sens' }
+    ], ['e', 'p', 'd', 'a'], { e: 'Écriture', p: 'Positions par roulette', d: 'Dernier chiffre', a: 'Après le dernier chiffre' }),
+    h('p', { class: 'small' }, 'Si toutes les roulettes sont au maximum (999, 1111, 0xFF…), un cran de plus les remet toutes à 0 : la retenue qui sort de la dernière roulette est perdue. C’est le dépassement vu dans l’atelier « Additions et négatifs ».'));
+  /* 3 */
+  const box = h('div');
+  const g1 = () => { const big = rnd(0, 1), n = big ? rnd(1, 8) * 100 + 99 : rnd(1, 8) * 10 + 9, pad = big ? 3 : 2; return { t: 'Les roulettes décimales affichent ' + String(n).padStart(pad, '0') + '. Que lit-on après un cran vers le haut sur la roulette des unités ?', ph: 'ex. ' + '0'.repeat(pad), a: String(n + 1).padStart(pad, '0'), ok: s => eqNum(s, n + 1, 10), e: 'Chaque 9 repasse à 0 et pousse la roulette suivante : ' + n + ' + 1 = ' + (n + 1) + '.' }; };
+  const g2 = () => { const v = rnd(0, 14); return { t: 'Quatre roulettes binaires affichent ' + toBin(v, 4) + '. Que lit-on après un cran vers le haut ?', ph: '0000', a: toBin(v + 1, 4), ok: s => eqNum(s, v + 1, 2), e: v + ' + 1 = ' + (v + 1) + ' = ' + toBin(v + 1, 4) + '₂.' }; };
+  const g3 = () => { const d = rnd(1, 14) * 16 + 15; return { t: 'Deux roulettes hexadécimales affichent ' + toHex(d, 2) + '. Que lit-on après un cran vers le haut ?', ph: 'ex. A0', a: toHex(d + 1, 2), ok: s => eqNum(s, d + 1, 16), e: 'F repasse à 0 et la roulette de gauche avance de 1 : 0x' + toHex(d + 1, 2) + '.' }; };
+  const g4 = () => { const c = [['99', 10, '00'], ['1111', 2, '0000'], ['FF', 16, '00']][rnd(0, 2)]; return { t: 'Les roulettes affichent ' + c[0] + ' (le maximum). Que lit-on après un cran vers le haut ?', ph: c[2], a: c[2], ok: s => eqNum(s, 0, c[1]), e: 'Dépassement : toutes les roulettes reviennent à 0, la retenue finale est perdue.' }; };
+  const g5 = () => { const n = rnd(1, 8) * 100; return { t: 'Trois roulettes décimales affichent ' + n + '. Que lit-on après un cran vers le bas sur la roulette des unités ?', ph: '000', a: String(n - 1).padStart(3, '0'), ok: s => eqNum(s, n - 1, 10), e: 'Emprunt : 0 passe à 9 et la roulette de gauche recule de 1.' }; };
+  const g6 = () => { const n = rnd(0, 6); return { t: 'Code Gray sur 3 roulettes : ' + toBin(gray(n), 3) + '. Quel code lit-on au cran suivant ?', ph: '000', a: toBin(gray(n + 1), 3), ok: s => eqNum(s, gray(n + 1), 2), e: 'Un seul bit change entre deux codes consécutifs.' }; };
+  drill(box, [g1, g2, g3, g4, g5, g6], W6.dr);
+  root.append(h('h3', null, '3. À vous de jouer'), box);
+}
+WORKSHOPS.push({ id: 'n6', title: 'Roulette', hint: 'Tournez les roulettes à la main ou laissez-les tourner seules : observez la retenue en décimal, binaire, binaire réfléchi et hexadécimal.', mount: mountW6, reset: () => { if (W6.auto) clearInterval(W6.auto); Object.assign(W6, { mode: 'man', base: 'dec', k: 3, v: 0, auto: null, lvl: 3, adir: 1, log: [], dr: newDrill() }); } });
+/* animation du cours : trois écritures en parallèle de 0 à 255 */
+const ANIM = { v: 0, lvl: 2, run: true, t: null };
+function mountAnim(box) {
+  if (ANIM.t) { clearInterval(ANIM.t); ANIM.t = null; }
+  const groups = [['Décimal', 10, 3], ['Binaire', 2, 8], ['Hexadécimal', 16, 2]];
+  const sets = [], grid = h('div'), val = h('p', { class: 'small' });
+  const dg = (v, b, i) => Math.floor(v / Math.pow(b, i)) % b;
+  groups.forEach(g => {
+    const b = g[1], k = g[2], row = h('div', { class: 'wheels' }), ws = [];
+    for (let i = k - 1; i >= 0; i--) {
+      const w = makeWheel(b, dg(ANIM.v, b, i)); ws[i] = w;
+      row.append(h('div', { class: 'wcol' }, w.el, h('div', { class: 'wlab' }, String(Math.pow(b, i)))));
+      if (b === 2 && i > 0 && i % 4 === 0) row.append(h('span', { class: 'wgap' }));
+    }
+    grid.append(h('p', { class: 'score' }, g[0] + ' : ' + k + ' roulette' + (k > 1 ? 's' : '')), row);
+    sets.push({ b, ws });
+  });
+  const txt = () => { val.textContent = 'Valeur : ' + ANIM.v + ' · binaire ' + grp4(toBin(ANIM.v, 8)) + ' · hexadécimal 0x' + toHex(ANIM.v, 2); };
+  function apply(ms) {
+    const ivl = LV[ANIM.lvl - 1];
+    sets.forEach(s => s.ws.forEach((w, i) => w.set(dg(ANIM.v, s.b, i), { dir: 1, ms: ms == null ? Math.min(260, Math.round(ivl * 0.6)) : ms, delay: ms === 0 ? 0 : (ivl >= 900 ? i * 90 : 0) })));
+    txt();
+  }
+  const step = () => { if (!grid.isConnected) { clearInterval(ANIM.t); ANIM.t = null; return; } ANIM.v = (ANIM.v + 1) % 256; apply(); };
+  const restart = () => { if (ANIM.t) { clearInterval(ANIM.t); ANIM.t = null; } if (ANIM.run) ANIM.t = setInterval(step, LV[ANIM.lvl - 1]); };
+  const play = h('button', { class: 'btn pri', type: 'button' }, ANIM.run ? 'Pause' : 'Lancer');
+  play.addEventListener('click', () => { ANIM.run = !ANIM.run; play.textContent = ANIM.run ? 'Pause' : 'Lancer'; restart(); });
+  const one = h('button', { class: 'btn', type: 'button', onclick: () => { ANIM.v = (ANIM.v + 1) % 256; apply(); } }, 'Un cran');
+  const rst = h('button', { class: 'btn', type: 'button', onclick: () => { ANIM.v = 0; apply(0); } }, 'Revenir à 0');
+  const sp = h('input', { type: 'range', min: 1, max: 10, value: ANIM.lvl, 'aria-label': 'Vitesse de l’animation' }), spv = h('b', null, '');
+  const spTxt = () => { spv.textContent = 'un cran toutes les ' + (LV[ANIM.lvl - 1] / 1000).toFixed(2).replace('.', ',') + ' s'; };
+  spTxt();
+  sp.addEventListener('input', () => { ANIM.lvl = +sp.value; spTxt(); restart(); });
+  box.append(h('div', { class: 'opts' }, play, one, rst, h('label', { class: 'fld', style: 'width:300px' }, h('span', null, 'Vitesse : ', spv), sp)), grid, val);
+  txt(); restart();
+}
+/*N6-END*/
+
 /*ACT-START*/
 const ACT = {
   n1: {
@@ -993,6 +1208,30 @@ const ACT = {
       { q: 'Pourquoi un codeur rotatif utilise-t-il le code Gray ?', o: ['Il est plus compact', 'Pendant un passage, la lecture donne toujours une position voisine', 'Il est plus facile à mémoriser', 'Il évite les retenues'], a: 1, w: 'Un seul bit incertain : l’erreur est au pire d’un pas.' },
       { q: 'Comment calcule-t-on le Gray d’un nombre n ?', o: ['n + 1', 'n XOR (n décalé d’un bit à droite)', 'NOT n', 'n × 2'], a: 1, w: 'Chaque bit Gray est le XOR d’un bit et de son voisin de gauche.' }
     ]
+  },
+  n6: {
+    title: 'Roulette', level: 'Niveau 1 · Observer', time: '25 min', course: 'roulettes',
+    goal: 'Comprendre la retenue comme le passage d’une roulette de son dernier chiffre au premier, dans toutes les écritures (décimal, binaire, hexadécimal, binaire réfléchi).',
+    steps: [
+      'Choisissez « Décimal » avec 3 roulettes, en mode manuel. Avec ▲ sous la roulette des unités, amenez le compteur à 009, puis cliquez encore une fois. Que deviennent les unités ? Et les dizaines ?',
+      'Cliquez sur « Juste avant une retenue » (099) puis sur ▲ des unités : combien de roulettes changent ? Lisez le journal sous les roulettes.',
+      'Remettez le compteur à 0 puis cliquez sur ▼ : que se passe-t-il ? C’est l’emprunt, le contraire de la retenue.',
+      'Passez en « Binaire » avec 4 roulettes et comptez de 0 à 15 avec ▲. Quand plusieurs roulettes changent-elles en même temps ? Observez 0111 → 1000.',
+      'Passez en « Hexadécimal » (2 roulettes) : amenez les unités à F puis ajoutez un cran. Quelle écriture obtenez-vous ?',
+      'Passez en « Binaire réfléchi » : tournez la roulette de droite et vérifiez qu’une seule roulette change à chaque cran. Puis essayez le mode automatique et réglez la vitesse.'
+    ],
+    defi: { q: 'Un compteur a 4 roulettes décimales : quel est le plus grand nombre affichable, et que lit-on après un cran de plus ? Avec 8 roulettes binaires, quel est le plus grand nombre, et que devient 1111 1111 après un cran ?',
+      a: 'Avec 4 roulettes décimales : <b>9999</b> ; un cran de plus donne <b>0000</b> (la retenue qui sort de la dernière roulette est perdue : c’est un dépassement). Avec 8 roulettes binaires : 2⁸ − 1 = <b>255</b>, et 1111 1111 devient <b>0000 0000</b> : c’est le dépassement d’un octet.' },
+    qcm: [
+      { q: 'Une roulette décimale affiche 9. Après un cran vers le haut :', o: ['elle affiche 10', 'elle affiche 0 et la roulette de gauche avance d’un cran', 'elle reste à 9', 'elle affiche A'], a: 1, w: 'Une roulette ne montre qu’un chiffre : 9 → 0, avec une retenue sur la roulette suivante.' },
+      { q: 'Trois roulettes décimales affichent 199. Après un cran sur les unités :', o: ['110', '200', '190', '1000'], a: 1, w: 'Unités 9 → 0 (retenue), dizaines 9 → 0 (retenue), centaines 1 → 2.' },
+      { q: 'Combien de positions possède une roulette binaire ?', o: ['1', '2', '10', '16'], a: 1, w: 'Seulement 0 et 1.' },
+      { q: 'Quatre roulettes binaires affichent 0111. Après un cran :', o: ['1000', '0112', '1111', '0110'], a: 0, w: 'Les trois roulettes à 1 repassent à 0 en poussant la suivante : 7 + 1 = 8 = 1000.' },
+      { q: 'Une roulette hexadécimale affiche F. Après un cran :', o: ['elle affiche G', 'elle affiche 10', 'elle affiche 0 et la roulette de gauche avance d’un cran', 'elle affiche A'], a: 2, w: 'Après F (15), la roulette revient à 0 avec une retenue.' },
+      { q: 'Combien de roulettes pour écrire tous les nombres de 0 à 255 en binaire, puis en hexadécimal ?', o: ['8 puis 2', '3 puis 2', '8 puis 3', '2 puis 8'], a: 0, w: '255 = 1111 1111₂ = 0xFF.' },
+      { q: 'Trois roulettes décimales affichent 999. Après un cran vers le haut :', o: ['1000', '000 (la retenue finale est perdue)', '999', '100'], a: 1, w: 'Dépassement : toutes les roulettes reviennent à 0.' },
+      { q: 'Dans le code Gray (binaire réfléchi), à chaque cran :', o: ['toutes les roulettes changent', 'une seule roulette change', 'aucune roulette ne change', 'deux roulettes changent'], a: 1, w: 'C’est la propriété essentielle du code Gray.' }
+    ]
   }
 };
 Object.keys(ACT).forEach((k, ki) => ACT[k].qcm.forEach((q, i) => { const n = q.o.length, tg = (i * 3 + ki + 1) % n, sh = ((tg - q.a) % n + n) % n; q.o = q.o.map((_, j) => q.o[(j - sh + n) % n]); q.a = tg; }));
@@ -1026,6 +1265,20 @@ COURSE.push({ id: 'hexa', t: 'L’hexadécimal', h: `
 <h3>Où le rencontre-t-on ?</h3>
 <p>Dans les couleurs (#RRGGBB : trois octets, rouge, vert, bleu), les adresses de la mémoire, les adresses MAC des cartes réseau, les codes d’erreur… Partout où l’on veut écrire des octets de façon courte.</p>
 <div class="retain"><b>À retenir.</b> 1 chiffre hexadécimal = 4 bits ; 1 octet = 2 chiffres hexadécimaux. La conversion avec le binaire se fait par paquets de 4 bits, sans calcul.</div>` });
+
+COURSE.push({ id: 'roulettes', t: 'Les roulettes', after: art => mountAnim(art.querySelector('#cAnim')), h: `
+<p>Imaginez un compteur kilométrique, un cadenas à code ou la roulette de l’horloge d’un téléphone : <b>chaque roulette ne montre qu’un seul chiffre</b>. Quand une roulette dépasse son dernier chiffre, elle revient au premier et <b>fait avancer d’un cran la roulette située à sa gauche</b> : c’est la <b>retenue</b>.</p>
+<p>L’animation ci-dessous fait défiler les nombres de <b>0 à 255</b> dans trois écritures en même temps : 3 roulettes décimales, 8 roulettes binaires et 2 roulettes hexadécimales. La vitesse est réglable.</p>
+<div class="widget" id="cAnim"></div>
+<h3>Ce que l’on observe</h3>
+<ul>
+<li>La roulette de droite tourne le plus vite : à chaque cran en décimal et en binaire, et de 0 à F en hexadécimal.</li>
+<li>En décimal, quand les unités passent de 9 à 0, les dizaines avancent d’un cran (09 → 10, 99 → 100).</li>
+<li>En binaire, une roulette n’a que deux positions : elle pousse donc sa voisine un cran sur deux. De 0111 1111 à 1000 0000, les huit roulettes changent en même temps.</li>
+<li>En hexadécimal, la roulette des unités fait un tour complet (0 à F) avant de pousser celle de gauche : 0x0F → 0x10, puis 0xFF → 0x00.</li>
+<li>Après 255, toutes les roulettes reviennent à 0 : avec 8 roulettes binaires, la retenue finale est perdue. C’est le <b>dépassement</b> d’un octet.</li>
+</ul>
+<div class="retain"><b>À retenir.</b> Une roulette a autant de positions que la base (10, 2 ou 16). Après le dernier chiffre, elle revient à 0 et la roulette de gauche avance de 1 : c’est la retenue, dans toutes les bases.</div>` });
 
 COURSE.push({ id: 'addition', t: 'Addition, dépassement et nombres négatifs', h: `
 <h3>Additionner</h3>
@@ -1188,6 +1441,7 @@ function renderCourse() {
   const top = h('div', { class: 'ctop' }, h('b', null, 'Cours : la représentation des nombres'), h('button', { class: 'btn pri sm', type: 'button', onclick: () => { CS.open = false; renderCourse(); } }, 'Retour à l’atelier'));
   box.append(top, sel, h('div', { class: 'cwrap' }, nav, art));
   const sc = box.querySelector('.cwrap'); if (sc) sc.scrollTop = 0; box.scrollTop = 0;
+  if (cur.after) cur.after(art);
 }
 function openCourse(id) { if (id) CS.id = id; CS.open = true; renderCourse(); }
 $('#bCourse').addEventListener('click', () => { CS.open = !CS.open; renderCourse(); });
@@ -1201,7 +1455,7 @@ function openDlg(title, body) {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#dlg').hidden) closeDlg(); });
 $('#bHelp').addEventListener('click', () => {
-  openDlg('Aide', h('div', { html: '<p>Cinq ateliers pour comprendre comment les nombres sont représentés dans un ordinateur (SNT, seconde) : binaire, hexadécimal, additions et nombres négatifs, opérations logiques et masques, code Gray. Les simulations sont simplifiées.</p>' +
+  openDlg('Aide', h('div', { html: '<p>Six ateliers pour comprendre comment les nombres sont représentés dans un ordinateur (SNT, seconde) : binaire, hexadécimal, additions et nombres négatifs, opérations logiques et masques, code Gray, roulettes. Les simulations sont simplifiées.</p>' +
     '<h3>Utilisation</h3><ul><li>Choisissez un atelier dans la barre du haut.</li><li>Le bouton <b>Activité</b> affiche les consignes, un défi et un QCM avec correction.</li><li>Le bouton <b>Cours</b> détaille toutes les notions.</li></ul>' +
     '<h3>Vos données</h3><p>Les réponses au QCM sont mémorisées dans ce navigateur uniquement.</p>' }));
 });

@@ -332,6 +332,10 @@ button.bit{cursor:pointer}
 .verdict{border-radius:8px;padding:9px 12px;margin:10px 0;font-size:14px}.verdict.yes{background:rgba(30,122,46,.15)}.verdict.no{background:rgba(192,40,31,.13)}
 input.bad{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
 .pwlbl span:only-child{width:auto}
+/* ---- encadres pedagogiques : conventions et unites ---- */
+.notebox{border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:8px;padding:10px 12px;margin:12px 0;background:var(--panel)}
+.notebox h3{margin:4px 0 7px}.notebox p{margin:6px 0}.notebox code{font:13px var(--font-mono);background:var(--panel2);padding:1px 4px;border-radius:4px}
+.notetable{width:100%;border-collapse:collapse;margin:8px 0;font-size:13.5px}.notetable th,.notetable td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}.notetable th{background:var(--panel2)}
 /* ---- roulettes ---- */
 .wheels{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;margin:12px 0}
 .wgap{width:14px;flex:none}
@@ -512,7 +516,7 @@ function mountW1(root) {
   }
   const btn = (t, f) => h('button', { class: 'btn sm', type: 'button', onclick: () => { W1.v = f(W1.v) & 255; drawOct(); } }, t);
   root.append(h('h3', null, '1. Un octet à construire'),
-    h('p', null, 'Un ', h('b', null, 'bit'), ' est un chiffre binaire (0 ou 1). Un ', h('b', null, 'octet'), ' est un groupe de 8 bits. Cliquez sur les bits pour les allumer ou les éteindre : la valeur d’un bit dépend de sa position (de droite à gauche : 1, 2, 4, 8, 16, 32, 64, 128).'),
+    h('p', null, 'Un ', h('b', null, 'bit'), ' (contraction de « binary digit ») est un chiffre binaire qui ne peut prendre que deux valeurs : 0 ou 1. Dans un nombre écrit en binaire, le ', h('b', null, 'poids d’un bit'), ' est la valeur de sa position : en partant de la droite, les poids sont 2⁰ = 1, 2¹ = 2, 2² = 4, 2³ = 8, etc. Le bit placé à une position donnée contribue à la valeur du nombre s’il vaut 1 ; s’il vaut 0, sa contribution est nulle. Un ', h('b', null, 'octet'), ' est un groupe de 8 bits. Cliquez sur les bits pour les allumer ou les éteindre : la valeur d’un bit dépend de sa position (de droite à gauche : 1, 2, 4, 8, 16, 32, 64, 128).'),
     powerRow(8), rowBox, pw, sw,
     h('div', { class: 'opts' }, btn('Tout éteindre', () => 0), btn('Tout allumer', () => 255), btn('Décaler à gauche', v => v << 1), btn('Décaler à droite', v => v >> 1)),
     h('p', { class: 'small' }, 'Essayez « Décaler à gauche » à partir de 00000101 : que devient la valeur à chaque clic ? Et « Décaler à droite » ?'));
@@ -530,7 +534,7 @@ function mountW1(root) {
   }
   din.addEventListener('input', drawDiv);
   root.append(h('h3', null, '2. Convertir : décimal → binaire'),
-    h('p', null, h('b', null, 'Méthode des divisions. '), 'On divise le nombre par 2 et on note le reste (0 ou 1), puis on recommence avec le quotient jusqu’à obtenir 0. Le reste est le chiffre des unités en base 2 ; le quotient contient tous les autres chiffres, qu’on extrait de la même façon.'),
+    h('p', null, h('b', null, 'Méthode des divisions. '), 'On divise le nombre par 2 et on note le reste (0 ou 1), puis on recommence avec le quotient jusqu’à obtenir 0. Dans une division euclidienne, le reste est ce qui reste après avoir retiré au dividende le plus grand multiple du diviseur qui ne le dépasse pas : nombre = diviseur × quotient + reste, avec 0 ≤ reste < diviseur. Ici, chaque division par 2 donne donc un reste égal à 0 ou 1. Le premier reste obtenu est le bit de poids faible (le chiffre des unités en base 2) ; les restes suivants donnent les bits de poids de plus en plus élevés. On les lit donc de bas en haut.'),
     h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:180px' }, h('span', null, 'Nombre (0 à 1023)'), din)), dsteps,
     h('p', null, h('b', null, 'Binaire → décimal. '), 'On additionne les poids des bits à 1. Exemple : 1011 0110₂ = 128 + 32 + 16 + 4 + 2 = 182.'));
   drawDiv();
@@ -547,7 +551,7 @@ function mountW1(root) {
   root.append(h('h3', null, '3. Combien de valeurs avec n bits ?'),
     h('p', null, 'Avec 1 bit : 2 valeurs (0 et 1). Avec 2 bits : 4. Chaque bit supplémentaire ', h('b', null, 'double'), ' le nombre de possibilités : avec n bits on peut écrire 2ⁿ valeurs différentes, de 0 à 2ⁿ − 1.'),
     h('div', { class: 'opts' }, h('label', { class: 'fld', style: 'width:260px' }, h('span', null, 'Nombre de bits : ', sv1), sl)), cap,
-    h('p', { class: 'small' }, 'Unités : 1 ko (kilooctet) = 1 000 octets ; 1 Kio (kibioctet) = 2¹⁰ = 1 024 octets. Le préfixe « kibi » rappelle que la taille est une puissance de 2.'));
+    h('p', { class: 'small' }, 'Attention aux unités : 1 ko (kilooctet) = 1 000 octets, tandis que 1 Kio (kibioctet) = 1 024 octets = 2¹⁰ octets. Le ko utilise le préfixe décimal kilo (×1 000) ; le Kio utilise le préfixe binaire kibi (×1 024). On emploie le Kio pour exprimer naturellement des capacités liées aux puissances de 2 (mémoire, tailles de blocs, adressage). Les fabricants de disques annoncent souvent des capacités en ko, Mo ou Go décimaux ; certains systèmes affichent des Kio, Mio ou Gio. Il ne s’agit pas d’une différence de capacité réelle, mais de deux unités distinctes.'));
   drawCap();
   /* 4. jeu */
   const box = h('div');
@@ -564,7 +568,7 @@ WORKSHOPS.push({ id: 'n1', title: 'Bits et octets', hint: 'Construisez un octet 
 const W2 = { v: 205, bin: '1011010111', r: 255, g: 128, b: 0, dr: newDrill() };
 function mountW2(root) {
   root.append(h('h2', null, 'L’hexadécimal : écrire court'),
-    h('p', null, 'Les longues suites de 0 et de 1 sont pénibles à lire et à recopier. On utilise donc la ', h('b', null, 'base 16'), ' (hexadécimal) : seize chiffres, 0 à 9 puis les lettres A (10), B (11), C (12), D (13), E (14), F (15). Le préfixe ', h('code', { class: 'k' }, '0x'), ' (ou le symbole #) signale cette base.'));
+    h('p', null, 'Les longues suites de 0 et de 1 sont pénibles à lire et à recopier. On utilise donc la ', h('b', null, 'base 16'), ' (hexadécimal) : seize chiffres, 0 à 9 puis les lettres A (10), B (11), C (12), D (13), E (14), F (15). Le préfixe ', h('code', { class: 'k' }, '0x'), '. En programmation, le préfixe 0x signale un entier écrit en hexadécimal. Le caractère # n’est pas un préfixe hexadécimal universel : dans une couleur CSS, il introduit une notation de couleur telle que #RRGGBB, dont les chiffres sont interprétés par groupes de deux en hexadécimal.'));
   /* tableau */
   const hx = '0123456789ABCDEF'.split('');
   root.append(h('div', { class: 'dwrap' }, h('table', { class: 'ctable narrow', style: 'margin:0' }, h('tbody', null,
@@ -1239,24 +1243,52 @@ Object.keys(ACT).forEach((k, ki) => ACT[k].qcm.forEach((q, i) => { const n = q.o
 
 /*COURSE-START*/
 const COURSE = [];
+COURSE.push({ id: 'notations', t: 'Lire et écrire les nombres', h: `
+<p>Un même nombre peut être écrit de plusieurs façons. La <b>base</b> indique combien de chiffres différents sont disponibles et quelle valeur possède chaque position. Il faut toujours savoir si l’on demande une valeur en <b>décimal</b>, en <b>binaire</b> ou en <b>hexadécimal</b>.</p>
+<table class="notetable"><thead><tr><th>Écriture</th><th>Exemple pour la valeur trente et un</th><th>Où l’utiliser ?</th></tr></thead><tbody>
+<tr><td>Décimale (base 10)</td><td><code>31</code></td><td>Écriture usuelle en mathématiques et en Python. En Python, un entier sans préfixe est décimal.</td></tr>
+<tr><td>Binaire (base 2)</td><td><code>11111₂</code> en cours ; <code>0b11111</code> en Python</td><td>La notation avec indice ₂ est une convention mathématique/pédagogique. En Python, on écrit le préfixe <code>0b</code> (zéro + lettre b).</td></tr>
+<tr><td>Hexadécimale (base 16)</td><td><code>1F₁₆</code> en cours ; <code>0x1F</code> en Python</td><td>L’indice ₁₆ indique la base en écriture mathématique. En Python, le préfixe <code>0x</code> (zéro + lettre x) indique l’hexadécimal.</td></tr>
+</tbody></table>
+<div class="notebox"><h3>La règle à appliquer en Python</h3>
+<p><code>31</code> est décimal ; <code>0b11111</code> est binaire ; <code>0x1F</code> est hexadécimal. Python comprend ces trois écritures comme le même entier : <code>31</code>.</p>
+<pre class="code">a = 31       # entier ecrit en decimal (base par defaut)
+b = 0b11111  # entier ecrit en binaire
+c = 0x1F     # entier ecrit en hexadecimal
+print(a == b == c)  # True</pre>
+<p>Le préfixe fait partie de l’écriture du code source : il indique à Python comment lire les chiffres qui suivent. Il ne change pas la valeur du nombre.</p></div>
+<div class="notebox"><h3>Et les indices ₂ ou ₁₆ ?</h3>
+<p>Dans un cours de mathématiques, on peut écrire <code>11111₂</code> pour préciser que les chiffres sont en base 2, ou <code>1F₁₆</code> pour préciser la base 16. Cet indice est une annotation mathématique placée après le nombre : <b>ce n’est pas la syntaxe Python</b>. Il ne faut donc pas recopier <code>11111₂</code> tel quel dans un programme Python.</p>
+<p>Quand aucune base n’est indiquée dans un calcul usuel, on considère généralement que l’écriture est décimale. Dans un programme Python, c’est également le cas pour un entier écrit sans préfixe.</p></div>
+<div class="notebox"><h3>Le caractère # : attention au contexte</h3>
+<ul>
+<li><b>En CSS / HTML</b>, <code>#FF8040</code> est une notation de couleur : les deux premiers chiffres hexadécimaux codent le rouge, les deux suivants le vert et les deux derniers le bleu. Le caractère <code>#</code> introduit le code couleur ; ce n’est pas le préfixe général des nombres hexadécimaux.</li>
+<li><b>En Python</b>, <code>#</code> commence un commentaire : le texte qui suit sur la ligne n’est pas exécuté. Pour écrire un entier hexadécimal, on utilise <code>0x</code>, pas <code>#</code>.</li>
+<li><b>Dans ce cours</b>, on réservera donc <code>0b</code> et <code>0x</code> aux exemples de code, les indices <code>₂</code> et <code>₁₆</code> aux écritures mathématiques, et <code>#RRGGBB</code> aux couleurs.</li>
+</ul></div>
+<div class="formula">Même valeur : 31 en décimal = 11111₂ en binaire = 1F₁₆ en hexadécimal = <code>31</code> = <code>0b11111</code> = <code>0x1F</code> en Python.</div>
+<div class="retain"><b>À retenir.</b> Sans indication de base, on lit en décimal. En Python : <code>0b</code> = binaire, <code>0x</code> = hexadécimal. Dans les exercices, l’indice <code>₂</code> ou <code>₁₆</code> précise la base. Le symbole <code>#</code> dépend du langage et du contexte : couleur en CSS, commentaire en Python.</div>` });
+
 COURSE.push({ id: 'binaire', t: 'Le binaire', h: `
 <p>Nous comptons en <b>base 10</b> : dix chiffres, et chaque position vaut dix fois la précédente. Cette écriture « positionnelle » se généralise à toute base.</p>
-<p>Un ordinateur manipule des signaux électriques qui n’ont que deux états stables (passant ou bloqué, tension haute ou basse). On leur associe les deux chiffres <b>0 et 1</b> : c’est la <b>base 2</b>. Un chiffre binaire est un <b>bit</b>, et un groupe de 8 bits est un <b>octet</b>.</p>
+<p>Un ordinateur manipule des signaux physiques que ses circuits interprètent selon deux états (par exemple tension basse ou tension haute). On leur associe les deux chiffres <b>0 et 1</b> : c’est la <b>base 2</b>. Un chiffre binaire est un <b>bit</b> (contraction de « binary digit »). Un bit peut donc prendre deux valeurs : 0 ou 1. Un groupe de 8 bits est un <b>octet</b>.</p>
+<p>Dans une écriture positionnelle, le <b>poids d’un chiffre</b> est la valeur associée à sa position. En base 2, de droite à gauche, les poids sont 2⁰ = 1, 2¹ = 2, 2² = 4, 2³ = 8, etc. Le poids d’un bit est donc une puissance de 2. Si le bit vaut 1, il contribue de son poids à la valeur totale ; s’il vaut 0, il ne contribue pas.</p>
 <h3>Binaire vers décimal</h3>
 <p>Chaque position vaut une puissance de 2 :</p>
 <div class="formula">1100 1101₂ = 1×128 + 1×64 + 0×32 + 0×16 + 1×8 + 1×4 + 0×2 + 1×1 = 205</div>
 <table class="ctable narrow"><thead><tr><th>2⁷</th><th>2⁶</th><th>2⁵</th><th>2⁴</th><th>2³</th><th>2²</th><th>2¹</th><th>2⁰</th></tr></thead><tbody><tr><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr><tr><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr></tbody></table>
 <h3>Décimal vers binaire</h3>
-<p>On divise par 2 en notant les restes, puis on lit les restes <b>de bas en haut</b>. Exemple pour 37 : 37 = 18×2 + 1, 18 = 9×2 + 0, 9 = 4×2 + 1, 4 = 2×2 + 0, 2 = 1×2 + 0, 1 = 0×2 + 1 → 100101₂.</p>
+<p>On divise par 2 en notant les restes, puis on lit les restes <b>de bas en haut</b>. Un reste est le nombre qui demeure après avoir retiré au dividende le plus grand multiple du diviseur qui ne le dépasse pas. Dans une division euclidienne : dividende = diviseur × quotient + reste, avec 0 ≤ reste < diviseur. En divisant par 2, le reste vaut nécessairement 0 ou 1 : c’est précisément un chiffre binaire. Le premier reste obtenu est le bit de poids faible (à droite) ; les suivants correspondent à des poids de plus en plus grands. Exemple pour 37 : 37 = 18×2 + 1, 18 = 9×2 + 0, 9 = 4×2 + 1, 4 = 2×2 + 0, 2 = 1×2 + 0, 1 = 0×2 + 1 → 100101₂.</p>
 <h3>Combien de valeurs ?</h3>
 <p>Avec n bits on écrit 2ⁿ valeurs, de 0 à 2ⁿ − 1. Un octet : 256 valeurs (0 à 255). Chaque bit ajouté double le nombre de possibilités.</p>
 <table class="ctable"><thead><tr><th>Bits</th><th>Valeurs</th><th>Plus grand nombre</th></tr></thead><tbody><tr><td>4</td><td>16</td><td>15</td></tr><tr><td>8</td><td>256</td><td>255</td></tr><tr><td>16</td><td>65 536</td><td>65 535</td></tr><tr><td>24</td><td>16 777 216</td><td>16 777 215</td></tr><tr><td>32</td><td>4 294 967 296</td><td>4 294 967 295</td></tr></tbody></table>
 <h3>Unités</h3>
-<p>1 ko = 1 000 octets ; 1 Kio = 2¹⁰ = 1 024 octets ; 1 Mio = 2²⁰ octets.</p>
-<div class="retain"><b>À retenir.</b> Un bit vaut 0 ou 1. Un octet = 8 bits = 256 valeurs (0 à 255). Avec n bits, on écrit 2ⁿ valeurs différentes.</div>` });
+<p><b>1 ko (kilooctet) = 1 000 octets</b> : le préfixe kilo est décimal et signifie × 1 000. <b>1 Kio (kibioctet) = 1 024 octets = 2¹⁰ octets</b> : le préfixe kibi désigne une puissance de 2. De même, 1 Mo = 1 000 000 octets alors que 1 Mio = 2²⁰ = 1 048 576 octets.</p>
+<p>Pourquoi deux unités ? Les capacités informatiques sont souvent organisées en puissances de 2 : 1 024 octets correspond exactement à 2¹⁰ octets, ce qui est pratique pour parler de mémoire et de tailles de blocs. Mais les préfixes du système international (kilo, méga, giga) sont décimaux. Les fabricants de supports de stockage utilisent généralement les unités décimales (ko, Mo, Go), tandis que certains systèmes ou logiciels affichent des unités binaires (Kio, Mio, Gio). Ainsi, 1 Go et 1 Gio ne désignent pas la même quantité.</p>
+<div class="retain"><b>À retenir.</b> Un bit vaut 0 ou 1 ; son poids est une puissance de 2 liée à sa position. Un octet = 8 bits = 256 valeurs (0 à 255). Avec n bits, on écrit 2ⁿ valeurs différentes. 1 ko = 1 000 octets, mais 1 Kio = 1 024 octets.</div>` });
 
 COURSE.push({ id: 'hexa', t: 'L’hexadécimal', h: `
-<p>L’hexadécimal est la <b>base 16</b> : les chiffres 0 à 9 puis A (10), B (11), C (12), D (13), E (14), F (15). On le note avec le préfixe <code>0x</code> (ou <code>#</code> pour les couleurs).</p>
+<p>L’hexadécimal est la <b>base 16</b> : les chiffres 0 à 9 puis A (10), B (11), C (12), D (13), E (14), F (15). En écriture mathématique, on peut préciser la base avec l’indice ₁₆ (par exemple 1F₁₆). En Python, un entier hexadécimal commence par <code>0x</code> (par exemple <code>0x1F</code>). Le caractère <code>#</code> n’est pas un préfixe hexadécimal universel : il introduit notamment les couleurs CSS comme <code>#FF8040</code>.</p>
 <table class="ctable narrow"><thead><tr><th>Hexa</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>A</td><td>B</td><td>C</td><td>D</td><td>E</td><td>F</td></tr></thead><tbody><tr><th>Binaire</th><td>0000</td><td>0001</td><td>0010</td><td>0011</td><td>0100</td><td>0101</td><td>0110</td><td>0111</td><td>1000</td><td>1001</td><td>1010</td><td>1011</td><td>1100</td><td>1101</td><td>1110</td><td>1111</td></tr></tbody></table>
 <h3>Pourquoi 16 ?</h3>
 <p>16 = 2⁴ : un chiffre hexadécimal représente <b>exactement 4 bits</b>. Un octet s’écrit avec <b>2 chiffres</b>. Pour convertir, on découpe le binaire en paquets de 4 bits en partant de la droite : 1011 0111 → B7.</p>
@@ -1325,12 +1357,22 @@ COURSE.push({ id: 'limites', t: 'Ce que la page simplifie', h: `
 
 COURSE.push({ id: 'glossaire', t: 'Glossaire', h: `
 <dl class="gloss">
-<dt>Base</dt><dd>Nombre de chiffres d’un système de numération (10, 2, 16).</dd>
-<dt>Bit</dt><dd>Chiffre binaire, 0 ou 1.</dd>
-<dt>Octet</dt><dd>Groupe de 8 bits : 256 valeurs.</dd>
-<dt>Quartet</dt><dd>Groupe de 4 bits = un chiffre hexadécimal.</dd>
-<dt>Hexadécimal</dt><dd>Base 16 ; chiffres 0-9 et A-F ; préfixe 0x.</dd>
-<dt>Retenue</dt><dd>Chiffre reporté à la colonne suivante quand la somme dépasse la base.</dd>
+<dt>Base</dt><dd>Nombre de chiffres différents d’un système de numération positionnel : 10 en décimal, 2 en binaire, 16 en hexadécimal. La base détermine les poids des positions.</dd>
+<dt>Bit</dt><dd>Contraction de « binary digit » : un chiffre binaire qui vaut 0 ou 1. C’est la plus petite unité d’information binaire.</dd>
+<dt>Poids d’un bit</dt><dd>Valeur associée à la position du bit dans un nombre. En base 2, les poids de droite à gauche sont 2⁰, 2¹, 2², 2³, etc. Un bit à 1 apporte son poids à la somme ; un bit à 0 apporte zéro.</dd>
+<dt>Bit de poids faible / fort</dt><dd>Le bit de poids faible est le bit le plus à droite (poids 1). Le bit de poids fort est le bit le plus à gauche dans l’écriture de largeur fixée.</dd>
+<dt>Octet</dt><dd>Groupe de 8 bits. Il permet 2⁸ = 256 combinaisons différentes. Interprété comme un entier non signé, il représente les valeurs de 0 à 255.</dd>
+<dt>Quartet</dt><dd>Groupe de 4 bits, aussi appelé demi-octet. Il correspond exactement à un chiffre hexadécimal.</dd>
+<dt>Décimal</dt><dd>Écriture en base 10, avec les chiffres 0 à 9. En Python, un entier sans préfixe est décimal.</dd>
+<dt>Binaire</dt><dd>Écriture en base 2, avec les chiffres 0 et 1. En cours : indice ₂ (ex. 101₂). En Python : préfixe 0b (ex. 0b101).</dd>
+<dt>Hexadécimal</dt><dd>Écriture en base 16, avec les chiffres 0 à 9 et les lettres A à F. En cours : indice ₁₆ ; en Python : préfixe 0x.</dd>
+<dt>Préfixe 0b / 0x</dt><dd>En Python, 0b indique que les chiffres qui suivent sont binaires ; 0x indique qu’ils sont hexadécimaux. Sans préfixe, un entier est interprété en décimal.</dd>
+<dt>Indice ₂ / ₁₆</dt><dd>Notation mathématique qui précise la base d’un nombre. Ce n’est pas une syntaxe à recopier dans un programme Python.</dd>
+<dt>Symbole #</dt><dd>Son sens dépend du contexte : en CSS, il introduit une couleur comme #RRGGBB ; en Python, il commence un commentaire. Ce n’est pas le préfixe général d’un entier hexadécimal.</dd>
+<dt>Reste</dt><dd>Dans une division euclidienne, nombre qui vérifie dividende = diviseur × quotient + reste et qui est compris entre 0 inclus et le diviseur exclu. Lors d’une division par 2, il vaut 0 ou 1.</dd>
+<dt>Kilooctet (ko)</dt><dd>Unité décimale : 1 ko = 1 000 octets. Le préfixe kilo signifie × 1 000.</dd>
+<dt>Kibioctet (Kio)</dt><dd>Unité binaire : 1 Kio = 1 024 octets = 2¹⁰ octets. Le préfixe kibi indique une puissance de 2.</dd>
+<dt>Retenue</dt><dd>Chiffre reporté à la position suivante quand la somme d’une colonne atteint ou dépasse la base. En binaire, 1 + 1 = 10₂ : on écrit 0 et on retient 1.</dd>
 <dt>Dépassement</dt><dd>Perte de la retenue finale quand le résultat ne tient pas sur le nombre de bits disponible.</dd>
 <dt>Complément à 2</dt><dd>Écriture des nombres négatifs : inverser les bits puis ajouter 1.</dd>
 <dt>AND / OR / XOR / NOT</dt><dd>Opérations bit à bit : ET, OU, OU exclusif, NON.</dd>

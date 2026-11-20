@@ -375,8 +375,7 @@ input.bad{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
 .dt.bil td.gd{background:#d8f0dc}.dt.bil td.md{background:#fdebd0}.dt.bil td.bd{background:#fadbd8}.dt.bil td.nv{color:var(--muted)}.dt.bil tr.tot td{font-weight:700}
 #modeSeg button.live::after{content:"●";color:#e74c3c;margin-left:4px;font-size:10px}
 .opt input[type=checkbox]{width:auto}
-
-
+.fstr-note{background:var(--note-bg);border:1px solid var(--note-line);border-left:4px solid var(--warn);color:var(--note-fg);border-radius:6px;padding:7px 11px;margin:8px 0;font-size:13px;line-height:1.45}
 </style>
 <div id="app">
   <header class="band"><div class="inner row">
@@ -1195,7 +1194,7 @@ print(notes[1] + notes[-1])`, o: ['26', '23', '31', '40'], e: 'Les indices comme
 for i in range(1, 5):
     total += i * i
 print(total)`, ans: '30', e: '<code>range(1, 5)</code> donne 1, 2, 3, 4 (la borne 5 est exclue). On additionne les carrés : 1 + 4 + 9 + 16 = 30. <code>total += x</code> signifie <code>total = total + x</code>.', lien: 'Cumuler des valeurs dans une boucle est la base de toutes les statistiques.' },
-{ s: 'py', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `nom = "Ada"
+{ s: 'py', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `nom = "Ada"
 age = 17
 print(f"{nom} aura {age + 1} ans")`, ans: 'Ada aura 18 ans', e: 'Dans une <b>f-string</b>, ce qui est entre accolades est calculé puis inséré dans le texte : <code>age + 1</code> vaut 18.', lien: 'Les f-strings servent à fabriquer des messages, des pages HTML ou des requêtes.' },
 { s: 'py', l: 2, k: 'qcm', ask: 'Quelle erreur Python signale-t-il à l’exécution de ce programme ?', code: `liste = [1, 2, 3]
@@ -1238,7 +1237,7 @@ while n > 0:
     r = str(n % 2) + r
     n = n // 2
 print(r)`, ans: '100101', e: 'C’est la <b>méthode des divisions</b> : on note le reste (n % 2) puis on divise par 2. Les restes sont 1, 0, 1, 0, 0, 1 et, comme chaque nouveau reste est placé <b>devant</b>, on les lit de bas en haut : 100101.', lien: 'L’algorithme qui convertit un entier en binaire.' },
-{ s: 'nb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `print(f"{205:08b} {205:X}")`, ans: '11001101 CD', e: 'Le format <code>08b</code> écrit en binaire sur 8 caractères complétés par des zéros ; <code>X</code> écrit en hexadécimal majuscule. 205 = 1100 1101₂ = 0xCD (1100 = C, 1101 = D).', lien: 'Un chiffre hexadécimal représente exactement 4 bits.' },
+{ s: 'nb', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `print(f"{205:08b} {205:X}")`, ans: '11001101 CD', e: 'Le format <code>08b</code> écrit en binaire sur 8 caractères complétés par des zéros ; <code>X</code> écrit en hexadécimal majuscule. 205 = 1100 1101₂ = 0xCD (1100 = C, 1101 = D).', lien: 'Un chiffre hexadécimal représente exactement 4 bits.' },
 { s: 'nb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `a = 0xA5
 print(a & 0x0F, a >> 4)`, ans: '5 10', e: '0xA5 = 1010 0101₂. <code>& 0x0F</code> est un <b>masque</b> qui garde les 4 bits de droite : 0101 = 5. <code>>> 4</code> décale de 4 bits vers la droite : il reste 1010 = 10.', lien: 'Masques et décalages permettent d’extraire des morceaux d’un nombre (canaux de couleur, champs d’adresse).' },
 { s: 'nb', l: 2, k: 'qcm', ask: 'Un octet ne peut stocker que 0 à 255. Qu\'affiche ce programme ?', code: `print((200 + 100) % 256)`, o: ['44', '300', '56', '255'], e: '200 + 100 = 300 dépasse 255 : sur un octet, la retenue finale est perdue et le résultat est calculé <b>modulo 256</b> : 300 − 256 = 44.', lien: 'Le dépassement (overflow) : un résultat trop grand « reboucle ».' },
@@ -1323,7 +1322,7 @@ for nom, texte in pages.items():
             index[mot] = []
         index[mot].append(nom)
 print(index["chien"])`, ans: "['p1', 'p2']", e: 'On construit un <b>index inversé</b> : pour chaque mot, la liste des pages qui le contiennent. « chien » apparaît dans p1 puis dans p2. Chercher un mot revient alors à lire une entrée du dictionnaire, sans relire toutes les pages.', lien: 'Les moteurs de recherche indexent le Web à l’avance pour répondre vite.' },
-{ s: 'web', l: 2, k: 'qcm', ask: 'Qu\'affiche ce programme ?', code: `titre = "Mon site"
+{ s: 'web', l: 3, k: 'qcm', ask: 'Qu\'affiche ce programme ?', code: `titre = "Mon site"
 print(f"<h1>{titre.upper()}</h1>")`, o: ['<h1>MON SITE</h1>', '<h1>Mon site</h1>', '<h1>{titre.upper()}</h1>', 'MON SITE'], e: 'Dans la f-string, <code>{titre.upper()}</code> est remplacé par le titre en majuscules, inséré entre les balises <code>&lt;h1&gt;</code>.', lien: 'Les gabarits de pages insèrent des données dans du HTML.' },
 { s: 'web', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `liens = {"A": ["B", "C"], "B": ["C"], "C": ["A"], "D": ["C"]}
 entrants = {"A": 0, "B": 0, "C": 0, "D": 0}
@@ -1349,7 +1348,7 @@ print(len(amis["Zoé"]))`, ans: '2', e: 'Chaque personne est associée à la lis
 print(sum(likes))`, ans: '59', e: '<code>sum</code> additionne tous les éléments de la liste : 12 + 40 + 7 = 59.', lien: 'Les réactions sont des données mesurables qui alimentent les classements.' },
 { s: 'soc', l: 1, k: 'qcm', ask: 'Qu\'affiche ce programme ?', code: `amis = {"Zoé": ["Léo", "Mia"]}
 print("Mia" in amis["Zoé"])`, o: ['True', 'False', 'Mia', 'KeyError'], e: '<code>in</code> teste l’appartenance à une liste et renvoie un booléen : « Mia » est dans la liste des amis de Zoé, donc <code>True</code>.', lien: 'Vérifier si deux personnes sont en relation.' },
-{ s: 'soc', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `abonnes = 1200
+{ s: 'soc', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `abonnes = 1200
 print(f"{abonnes / 1000}k")`, ans: '1.2k', e: '1200 ÷ 1000 = 1.2 : la division renvoie un flottant, inséré dans le texte, suivi de la lettre k.', lien: 'Les plateformes abrègent les nombres d’abonnés.' },
 { s: 'soc', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `a = ["Léo", "Mia", "Sam"]
 b = ["Mia", "Sam", "Eli"]
@@ -1446,7 +1445,7 @@ print(len(ids) == len(uniques), uniques)`, ans: 'False [1, 2, 3]', e: 'On constr
 
 /* ===== Localisation, cartographie, mobilité ===== */
 Q.push(
-{ s: 'geo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `lat = 48.85
+{ s: 'geo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `lat = 48.85
 lon = 2.35
 print(f"Paris : {lat} N, {lon} E")`, ans: 'Paris : 48.85 N, 2.35 E', e: 'La position sur Terre se donne par deux nombres : la <b>latitude</b> (nord/sud, par rapport à l’équateur) et la <b>longitude</b> (est/ouest, par rapport au méridien de Greenwich). La f-string les insère dans le texte.', lien: 'Un point de la Terre = un couple (latitude, longitude).' },
 { s: 'geo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `distance = 120
@@ -1463,7 +1462,7 @@ print(math.sqrt(3 ** 2 + 4 ** 2))`, ans: '5.0', e: 'C’est le théorème de Pyt
 print(int(d), (d - int(d)) * 60)`, ans: '48 30.0', e: 'Un angle de 48,5° vaut 48 degrés et 0,5 × 60 = 30 minutes (48° 30′). <code>int(d)</code> garde la partie entière ; la partie décimale est multipliée par 60 car 1° = 60′.', lien: 'Coordonnées en degrés décimaux ou en degrés-minutes-secondes.' },
 { s: 'geo', l: 2, k: 'out', ask: 'Les valeurs sont (distance en km, durée en minutes). Qu\'affiche ce programme ?', code: `trajets = {"autoroute": (80, 50), "nationale": (60, 55), "ville": (30, 60)}
 print(min(trajets, key=lambda t: trajets[t][1]))`, ans: 'autoroute', e: '<code>min(..., key=...)</code> choisit le trajet dont la durée (indice 1 du tuple) est la plus petite : 50 minutes pour l’autoroute. Le plus court en distance (« ville », 30 km) n’est pas le plus rapide : un GPS doit choisir un critère.', lien: 'Itinéraire le plus rapide ou le plus court : deux critères différents.' },
-{ s: 'geo', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `d = 45
+{ s: 'geo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `d = 45
 t = 30
 print(f"{d / (t / 60):.1f} km/h")`, ans: '90.0 km/h', e: 'La durée est en minutes : on la convertit en heures (30 ÷ 60 = 0,5 h). Vitesse = 45 ÷ 0,5 = 90 km/h. Le format <code>:.1f</code> impose une décimale.', lien: 'Convertir les unités avant de calculer une vitesse.' },
 { s: 'geo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `arrets = [(0, 0), (3, 4), (6, 1), (2, 2)]
@@ -1579,6 +1578,323 @@ conso_mesure = 50
 conso_moyenne = (conso_mesure * 6 + conso_veille * 3594) / 3600
 print(round(conso_moyenne, 2), round(capacite / conso_moyenne / 24))`, ans: '2.08 40', e: 'Sur une heure (3600 s) : 6 s de mesure à 50 mA et 3594 s de veille à 2 mA. La moyenne pondérée vaut (300 + 7188) ÷ 3600 ≈ 2,08 mA. L’autonomie en heures est capacité ÷ consommation ≈ 961 h, soit environ 40 jours. Presque toute l’énergie est consommée en <b>veille</b> : réduire la consommation de veille est plus efficace que d’espacer les mesures.', lien: 'Concevoir un objet qui dure des mois sur batterie.' }
 );
+/* ===== 108 QUESTIONS SUPPLÉMENTAIRES ===== */
+Q.push(
+/* --- Bases de Python (+12) --- */
+{ s: 'py', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `a = 4
+b = 3
+a = a + b
+b = a - b
+print(a, b)`, ans: '7 4', e: '<code>a</code> prend la valeur 4 + 3 = 7, puis <code>b</code> prend la nouvelle valeur de <code>a</code> moins <code>b</code> : 7 − 3 = 4.', lien: 'Comprendre l’ordre d’exécution séquentiel et la mise à jour des variables.' },
+{ s: 'py', l: 1, k: 'qcm', ask: 'Qu\'affiche ce programme ?', code: `print(10 > 5 and 3 == 4)`, o: ['False', 'True', 'Error', '10'], e: '<code>10 > 5</code> est vrai (<code>True</code>), mais <code>3 == 4</code> est faux (<code>False</code>). Avec l’opérateur logique <code>and</code>, il faut que les deux conditions soient vraies.', lien: 'Les tests logiques permettent de combiner plusieurs critères de filtrage.' },
+{ s: 'py', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `texte = "Python"
+print(texte[0] + texte[2] + texte[5])`, ans: 'Ptn', e: 'Les indices commencent à 0 : <code>texte[0]</code> est <code>P</code>, <code>texte[2]</code> est <code>t</code> et <code>texte[5]</code> est <code>n</code>. L’opérateur <code>+</code> colle les caractères.', lien: 'Accéder aux caractères d’une chaîne par leur position.' },
+{ s: 'py', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `for k in range(3):
+    print(k * 10)`, ans: '0\n10\n20', e: '<code>range(3)</code> génère 0, 1 puis 2. À chaque tour de boucle, <code>print</code> affiche sur une nouvelle ligne.', lien: 'Automatiser une répétition un nombre connu de fois.' },
+{ s: 'py', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `nombres = [12, 5, 19, 8]
+m = nombres[0]
+for x in nombres:
+    if x > m:
+        m = x
+print(m)`, ans: '19', e: 'Algorithme classique de recherche du maximum : <code>m</code> démarre à 12, passe à 19 quand il rencontre 19, et ignore 8.', lien: 'Rechercher une valeur extrême dans un relevé de mesures.' },
+{ s: 'py', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `phrase = "informatique"
+compteur = 0
+for lettre in phrase:
+    if lettre in "aeiouy":
+        compteur += 1
+print(compteur)`, ans: '6', e: 'On parcourt chaque lettre de <code>"informatique"</code> et on compte les voyelles : i, o, a, i, u, e → 6 voyelles.', lien: 'Parcourir un texte caractère par caractère pour analyser son contenu.' },
+{ s: 'py', l: 2, k: 'qcm', ask: 'Qu\'affiche ce programme ?', code: `def double(x):
+    return x * 2
+
+print(double(double(3)))`, o: ['12', '6', '9', '33'], e: 'On évalue d’abord l’appel intérieur : <code>double(3)</code> renvoie 6, puis <code>double(6)</code> renvoie 12.', lien: 'Composer des fonctions permet de découper un problème complexe en étapes simples.' },
+{ s: 'py', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `jours = ["lun", "mar", "mer", "jeu", "ven"]
+print(jours[1:4])`, ans: "['mar', 'mer', 'jeu']", e: 'Le découpage (slicing) <code>[1:4]</code> extrait les éléments de l’indice 1 inclus jusqu’à l’indice 4 exclu (indices 1, 2 et 3).', lien: 'Extraire une tranche de données (par exemple les jours ouvrés d’une semaine).' },
+{ s: 'py', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `produit = "Clé USB"
+prix = 12.5
+qte = 3
+print(f"{produit} : {prix * qte:.2f} EUR")`, ans: 'Clé USB : 37.50 EUR', e: 'La f-string évalue <code>prix * qte</code> (37.5) et le spécificateur <code>:.2f</code> force l’affichage avec 2 chiffres après la virgule (<code>37.50</code>).', lien: 'Formater proprement des montants ou des mesures numériques.' },
+{ s: 'py', l: 3, k: 'code', ask: 'Écrivez la fonction <code>compter_positifs(liste)</code> qui renvoie le nombre d’éléments strictement positifs (<code>&gt; 0</code>) dans <code>liste</code>.', start: 'def compter_positifs(liste):\n    ', tests: [{ label: 'mélange', expr: 'compter_positifs([-3, 0, 4, 7, -1])', eq: '2' }, { label: 'aucun positif', expr: 'compter_positifs([-5, 0, -2])', eq: '0' }, { label: 'liste vide', expr: 'compter_positifs([])', eq: '0' }], sol: 'def compter_positifs(liste):\n    nb = 0\n    for x in liste:\n        if x > 0:\n            nb += 1\n    return nb', e: 'On initialise un compteur à 0 et on l’incrémente uniquement lorsque l’élément <code>x</code> vérifie <code>x > 0</code> (0 est exclu car on demande strictement positif).', lien: 'Filtrer et dénombrer des valeurs valides dans un jeu de données.' },
+{ s: 'py', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `def mystere(mot):
+    res = ""
+    for c in mot:
+        res = c + res
+    return res
+
+print(mystere("SNT"))`, ans: 'TNS', e: 'À chaque tour, le caractère courant <code>c</code> est ajouté <b>devant</b> <code>res</code> : <code>"S"</code>, puis <code>"NS"</code>, puis <code>"TNS"</code>. La fonction inverse la chaîne.', lien: 'Manipulation de chaînes et construction progressive d’un résultat.' },
+{ s: 'py', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `grille = [[1, 2], [3, 4], [5, 6]]
+s = 0
+for ligne in grille:
+    s += ligne[1]
+print(s)`, ans: '12', e: '<code>grille</code> est une liste de listes (tableau 2D). À chaque ligne, on prend l’élément d’indice 1 (la deuxième colonne) : 2 + 4 + 6 = 12.', lien: 'Parcourir une colonne d’une table ou d’une matrice d’image.' },
+
+/* --- Représentation des nombres (+12) --- */
+{ s: 'nb', l: 1, k: 'qcm', ask: 'Quelle est la valeur décimale du nombre binaire <code>0b1100</code> ?', o: ['12', '10', '6', '14'], e: 'En base 2, les poids de droite à gauche sont 1, 2, 4, 8 : <code>1100₂</code> = 1×8 + 1×4 + 0×2 + 0×1 = 12.', lien: 'Lire un octet ou un quartet en additionnant les poids des bits à 1.' },
+{ s: 'nb', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `print(0x10 + 0b10)`, ans: '18', e: '<code>0x10</code> vaut 16 en base 10 et <code>0b10</code> vaut 2 en base 10. Python effectue l’addition en entier et affiche 18.', lien: 'Les préfixes 0x (hexadécimal) et 0b (binaire) désignent la base d’écriture.' },
+{ s: 'nb', l: 1, k: 'qcm', ask: 'Combien de bits contient un fichier de 3 octets ?', o: ['24', '3', '16', '30'], e: 'Un octet est composé de 8 bits. Donc 3 octets = 3 × 8 = 24 bits.', lien: 'Unités de mesure de l’information numérique.' },
+{ s: 'nb', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `print(int("1F", 16))`, ans: '31', e: 'En hexadécimal, <code>1</code> vaut 1×16 = 16 et <code>F</code> vaut 15. Total : 16 + 15 = 31.', lien: 'Convertir une composante hexadécimale (comme dans un code couleur CSS).' },
+{ s: 'nb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `bits = "10110"
+val = 0
+for b in bits:
+    val = val * 2 + int(b)
+print(val)`, ans: '22', e: 'Algorithme de Horner : à chaque bit lu de gauche à droite, on multiplie la valeur accumulée par 2 et on ajoute le bit (0 → 1 → 2 → 5 → 11 → 22).', lien: 'Méthode efficace utilisée par les processeurs pour évaluer un nombre binaire.' },
+{ s: 'nb', l: 2, k: 'qcm', ask: 'Quelle est l’écriture hexadécimale de l’octet <code>0b10101111</code> ?', o: ['0xAF', '0x9F', '0xBE', '0x1015'], e: 'On découpe l’octet en deux blocs de 4 bits : <code>1010₂</code> = 10 = <code>A</code> et <code>1111₂</code> = 15 = <code>F</code>, soit <code>0xAF</code>.', lien: 'L’hexadécimal sert d’écriture compacte du binaire (1 chiffre hexa = 4 bits).' },
+{ s: 'nb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `kio = 2 * 1024
+ko = 2 * 1000
+print(kio - ko)`, ans: '48', e: '1 kibioctet (Kio) = 2¹⁰ = 1024 octets, alors que 1 kilo-octet (ko) = 10³ = 1000 octets. Sur 2 Kio, l’écart est de 2048 − 2000 = 48 octets.', lien: 'Différence entre préfixes binaires (Kio, Mio) et décimaux (ko, Mo).' },
+{ s: 'nb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `x = 13
+print(x & 1, (x + 1) & 1)`, ans: '1 0', e: 'Le bit de poids faible (poids 1) vaut 1 pour un nombre impair (13) et 0 pour un nombre pair (14). L’opérateur <code>& 1</code> isole ce bit.', lien: 'Tester la parité d’un entier directement au niveau binaire.' },
+{ s: 'nb', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `r, g, b = 255, 16, 128
+print(f"#{r:02X}{g:02X}{b:02X}")`, ans: '#FF1080', e: 'Chaque composante RVB est convertie sur 2 chiffres hexadécimaux majuscules (<code>02X</code>) : 255 → <code>FF</code>, 16 → <code>10</code>, 128 → <code>80</code>.', lien: 'Générer un code couleur hexadécimal pour le Web à partir de valeurs RVB.' },
+{ s: 'nb', l: 3, k: 'code', ask: 'Écrivez la fonction <code>poids_fort(n)</code> qui renvoie la plus grande puissance de 2 inférieure ou égale à l’entier <code>n</code> (avec <code>n &gt;= 1</code>). Exemple : <code>poids_fort(45)</code> renvoie <code>32</code>.', start: 'def poids_fort(n):\n    ', tests: [{ label: 'poids_fort(45)', expr: 'poids_fort(45)', eq: '32' }, { label: 'poids_fort(16)', expr: 'poids_fort(16)', eq: '16' }, { label: 'poids_fort(1)', expr: 'poids_fort(1)', eq: '1' }], sol: 'def poids_fort(n):\n    p = 1\n    while p * 2 <= n:\n        p = p * 2\n    return p', e: 'On part de <code>p = 1</code> (2⁰) et on double <code>p</code> tant que <code>p * 2 <= n</code>. Pour 45, <code>p</code> prend les valeurs 1, 2, 4, 8, 16 puis s’arrête à 32.', lien: 'Première étape de la conversion décimal → binaire par soustractions des poids.' },
+{ s: 'nb', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `def est_palin_bin(n):
+    b = bin(n)[2:]
+    return b == b[::-1]
+
+print(est_palin_bin(9), est_palin_bin(10))`, ans: 'True False', e: '<code>bin(9)[2:]</code> vaut <code>"1001"</code>, qui se lit à l’identique à l’envers (<code>True</code>). <code>bin(10)[2:]</code> vaut <code>"1010"</code>, qui donne <code>"0101"</code> à l’envers (<code>False</code>).', lien: 'Manipuler la représentation binaire sous forme de chaîne.' },
+{ s: 'nb', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `octet = "11010110"
+somme = 0
+for i in range(8):
+    if octet[7 - i] == "1":
+        somme += 2 ** i
+print(somme)`, ans: '214', e: 'L’indice <code>7 - i</code> parcourt l’octet de droite à gauche (du bit de poids faible 2⁰ au bit de poids fort 2⁷) : 128 + 64 + 16 + 4 + 2 = 214.', lien: 'Calculer la valeur décimale d’un octet à partir du poids de chaque bit.' },
+
+/* --- Internet (+12) --- */
+{ s: 'inet', l: 1, k: 'qcm', ask: 'Dans une adresse IPv4, quelle valeur est impossible pour un octet ?', o: ['300', '0', '127', '255'], e: 'Chaque nombre d’une adresse IPv4 est codé sur 1 octet (8 bits), donc compris entre 0 et 255. 300 est impossible.', lien: 'Structure d’une adresse IPv4.' },
+{ s: 'inet', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `mac = "00:1A:2B:3C:4D:5E"
+print(len(mac.split(":")))`, ans: '6', e: 'Une adresse MAC (adresse physique d’une carte réseau) est composée de 6 octets écrits en hexadécimal séparés par des deux-points.', lien: 'Distinguer adresse physique (MAC) et adresse logique (IP).' },
+{ s: 'inet', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `ttl = 64
+sauts = 11
+print(ttl - sauts)`, ans: '53', e: 'Chaque routeur traversé décrémente le champ TTL (Time To Live) de 1. Si le TTL atteint 0, le paquet est détruit pour éviter les boucles infinies.', lien: 'Rôle des routeurs et du champ TTL dans un paquet IP.' },
+{ s: 'inet', l: 1, k: 'out', ask: 'Un fichier de 5 Mo (5 000 000 octets) est transmis à un débit de 10 Mbit/s. Qu\'affiche ce programme (durée en secondes) ?', code: `taille_bits = 5000000 * 8
+debit = 10000000
+print(taille_bits / debit)`, ans: '4.0', e: 'Il faut d’abord convertir les octets en bits (× 8) : 40 000 000 bits ÷ 10 000 000 bits/s = 4.0 secondes.', lien: 'Attention à la différence entre octets (o) et bits (b) dans les débits réseau.' },
+{ s: 'inet', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `ip = [10, 0, 42, 17]
+masque = [255, 255, 0, 0]
+hote = [a & (255 - m) for a, m in zip(ip, masque)]
+print(hote)`, ans: '[0, 0, 42, 17]', e: '<code>255 - m</code> inverse le masque : on isole ici la partie machine (hôte) de l’adresse IP dans un réseau /16.', lien: 'Identifier la partie réseau et la partie machine d’une adresse IP.' },
+{ s: 'inet', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `table_routage = {"10.0.0.0/8": "eth0", "192.168.1.0/24": "eth1", "0.0.0.0/0": "wlan0"}
+print(table_routage.get("172.16.0.0/16", table_routage["0.0.0.0/0"]))`, ans: 'wlan0', e: 'Lorsque la destination n’est pas dans la table, le routeur utilise la <b>route par défaut</b> (<code>0.0.0.0/0</code>), ici l’interface <code>wlan0</code>.', lien: 'Fonctionnement d’une table de routage et de la passerelle par défaut.' },
+{ s: 'inet', l: 2, k: 'qcm', ask: 'Quelle commande vérifie si une chaîne correspond bien à 4 nombres séparés par des points ?', code: `ip = "192.168.1.1"
+parts = ip.split(".")
+print(len(parts) == 4 and all(p.isdigit() for p in parts))`, o: ['True', 'False', '4', 'None'], e: '<code>split(".")</code> donne 4 morceaux et chacun ne contient que des chiffres (<code>isdigit()</code>), donc l’expression vaut <code>True</code>.', lien: 'Validation syntaxique d’une adresse IPv4.' },
+{ s: 'inet', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `recus = {1: "Bon", 3: "jour"}
+print("".join(recus[k] for k in sorted(recus)))`, ans: 'Bonjour', e: 'Les paquets peuvent arriver dans le désordre sur Internet : le protocole TCP les réassemble en les triant selon leur numéro de séquence.', lien: 'Commutation de paquets et réassemblage par TCP.' },
+{ s: 'inet', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `ip = [192, 168, 1, 5]
+print(".".join(f"{o:08b}" for o in ip))`, ans: '11000000.10101000.00000001.00000101', e: 'Chaque octet de l’adresse IPv4 est formaté sur 8 bits grâce à la f-string <code>f"{o:08b}"</code> puis relié par des points.', lien: 'Visualiser une adresse IPv4 en binaire sur 32 bits.' },
+{ s: 'inet', l: 3, k: 'code', ask: 'Écrivez la fonction <code>ip_valide(chaine)</code> qui renvoie <code>True</code> si <code>chaine</code> représente une adresse IPv4 valide (4 entiers entre 0 et 255 séparés par des points), et <code>False</code> sinon.', start: 'def ip_valide(chaine):\n    ', tests: [{ label: 'valide', expr: 'ip_valide("192.168.0.254")', eq: 'True' }, { label: 'octet > 255', expr: 'ip_valide("192.168.300.1")', eq: 'False' }, { label: '3 octets seulement', expr: 'ip_valide("10.0.1")', eq: 'False' }, { label: 'texte invalide', expr: 'ip_valide("10.0.a.1")', eq: 'False' }], sol: 'def ip_valide(chaine):\n    parts = chaine.split(".")\n    if len(parts) != 4:\n        return False\n    for p in parts:\n        if not p.isdigit():\n            return False\n        val = int(p)\n        if val < 0 or val > 255:\n            return False\n    return True', e: 'On vérifie successivement qu’il y a 4 morceaux, que chaque morceau est constitué uniquement de chiffres, et que sa valeur entière est comprise entre 0 et 255.', lien: 'Contrôler le format d’une adresse IPv4.' },
+{ s: 'inet', l: 3, k: 'out', ask: 'Qu\'affiche ce programme (calcul d’une somme de contrôle simple) ?', code: `octets = [120, 45, 200, 10]
+checksum = sum(octets) % 256
+print(checksum, (sum(octets) - checksum) % 256)`, ans: '119 0', e: 'La somme vaut 375 ; modulo 256, le reste est 119. À la réception, soustraire la somme de contrôle modulo 256 donne 0 si aucune erreur n’est survenue.', lien: 'Vérification de l’intégrité des données transmises.' },
+{ s: 'inet', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `couts = {"A-B": 2, "B-C": 5, "A-C": 10}
+direct = couts["A-C"]
+via_b = couts["A-B"] + couts["B-C"]
+print(min(direct, via_b))`, ans: '7', e: 'Le chemin direct coûte 10, alors que passer par le routeur B coûte 2 + 5 = 7. Le protocole de routage choisit le chemin de coût minimal.', lien: 'Principe du routage dynamique (plus court chemin pondéré).' },
+
+/* --- Le Web (+12) --- */
+{ s: 'web', l: 1, k: 'qcm', ask: 'Dans l’URL <code>http://lycee.fr:8080/cours/snt.html</code>, quel est le protocole utilisé ?', o: ['http', 'lycee.fr', '8080', '/cours/snt.html'], e: 'La partie située avant <code>://</code> indique le protocole de communication (ici <code>http</code>, non chiffré).', lien: 'Anatomie d’une URL.' },
+{ s: 'web', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `url = "https://exemple.fr/index.html"
+print(url.startswith("https://"))`, ans: 'True', e: '<code>startswith("https://")</code> vérifie si l’adresse utilise le protocole sécurisé HTTPS (chiffré par TLS).', lien: 'Sécurisation des échanges sur le Web avec HTTPS.' },
+{ s: 'web', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `balises = ["<html>", "<head>", "<body>", "</body>", "</html>"]
+print(balises.count("<body>"))`, ans: '1', e: 'La méthode <code>count</code> compte le nombre d’occurrences exactes de <code>"<body>"</code> dans la liste : 1.', lien: 'Structure arborescente d’un document HTML.' },
+{ s: 'web', l: 1, k: 'qcm', ask: 'Quel code de statut HTTP indique que la requête a réussi ?', o: ['200', '404', '403', '500'], e: '<code>200 OK</code> signifie que le serveur a trouvé et renvoyé la ressource. 403 = accès interdit, 404 = introuvable, 500 = erreur serveur.', lien: 'Dialogue client-serveur en HTTP.' },
+{ s: 'web', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `url = "https://site.fr/recherche?mot=velo&page=2#haut"
+sans_ancre = url.split("#")[0]
+print(sans_ancre.split("?")[1])`, ans: 'mot=velo&page=2', e: 'On retire d’abord l’ancre après <code>#</code>, puis on extrait la chaîne de requête (query string) située après <code>?</code>.', lien: 'Extraire les paramètres transmis dans une URL.' },
+{ s: 'web', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `css = "color: red; font-size: 16px;"
+regles = [r.strip() for r in css.split(";") if r.strip()]
+print(len(regles), regles[0])`, ans: '2 color: red', e: 'Le découpage sur <code>;</code> produit deux déclarations CSS non vides ; la première est <code>color: red</code>.', lien: 'Séparation du contenu (HTML) et de la mise en forme (CSS).' },
+{ s: 'web', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `cookies = {"session": "xyz", "theme": "sombre"}
+cookies["theme"] = "clair"
+print(len(cookies), cookies["theme"])`, ans: '2 clair', e: 'Modifier une clé existante dans un dictionnaire met à jour sa valeur sans ajouter de nouvelle entrée : la taille reste 2.', lien: 'Gestion des préférences utilisateur via les cookies.' },
+{ s: 'web', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `robots = ["Disallow: /admin", "Allow: /public"]
+interdits = [r.split(": ")[1] for r in robots if r.startswith("Disallow")]
+print(interdits)`, ans: "['/admin']", e: 'Le fichier <code>robots.txt</code> indique aux robots d’indexation des moteurs de recherche les répertoires à ne pas explorer.', lien: 'Fonctionnement des robots d’indexation (crawlers).' },
+{ s: 'web', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `texte = "Lien"
+cible = "https://edu.fr"
+print(f'<a href="{cible}">{texte}</a>')`, ans: '<a href="https://edu.fr">Lien</a>', e: 'La f-string insère la cible dans l’attribut <code>href</code> et le libellé entre les balises ouvrante et fermante <code><a></code>.', lien: 'Génération dynamique de liens hypertextes en HTML.' },
+{ s: 'web', l: 3, k: 'code', ask: 'Écrivez la fonction <code>extraire_domaine(url)</code> qui reçoit une URL commençant par <code>"http://"</code> ou <code>"https://"</code> et renvoie uniquement le nom de domaine (sans chemin ni port). Exemple : <code>extraire_domaine("https://www.lycee.fr/snt")</code> renvoie <code>"www.lycee.fr"</code>.', start: 'def extraire_domaine(url):\n    ', tests: [{ label: 'avec chemin', expr: 'extraire_domaine("https://www.lycee.fr/snt")', eq: "'www.lycee.fr'" }, { label: 'avec port', expr: 'extraire_domaine("http://localhost:8000/test")', eq: "'localhost'" }, { label: 'sans chemin', expr: 'extraire_domaine("https://edu.fr")', eq: "'edu.fr'" }], sol: 'def extraire_domaine(url):\n    hote = url.split("/")[2]\n    return hote.split(":")[0]', e: '<code>url.split("/")[2]</code> isole la partie hôte (ex. <code>localhost:8000</code>), puis <code>split(":")[0]</code> retire un éventuel numéro de port.', lien: 'Analyse syntaxique d’une URL par le navigateur.' },
+{ s: 'web', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `html = "<p>Bonjour <b>le</b> monde</p>"
+propre = ""
+dedans = False
+for c in html:
+    if c == "<":
+        dedans = True
+    elif c == ">":
+        dedans = False
+    elif not dedans:
+        propre += c
+print(propre)`, ans: 'Bonjour le monde', e: 'L’automate ignore tous les caractères situés entre <code><</code> et <code>></code> : il extrait uniquement le texte visible par l’internaute.', lien: 'Extraction du texte brut d’une page web pour l’indexation.' },
+{ s: 'web', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `scores = {"p1": 1.0, "p2": 1.0}
+liens = {"p1": ["p2"], "p2": ["p1"]}
+nouveaux = {"p1": 0.15 + 0.85 * scores["p2"], "p2": 0.15 + 0.85 * scores["p1"]}
+print(round(nouveaux["p1"], 2))`, ans: '1.0', e: 'Formule simplifiée du PageRank avec facteur d’amortissement 0,85 : les deux pages se renvoyant mutuellement leur score, l’équilibre reste à 1.0.', lien: 'Calcul itératif de popularité d’une page web.' },
+
+/* --- Réseaux sociaux (+12) --- */
+{ s: 'soc', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `graphe = {"A": ["B", "C"], "B": ["A"], "C": ["A"]}
+print(len(graphe))`, ans: '3', e: 'Le dictionnaire contient 3 clés : le graphe comporte donc 3 sommets (utilisateurs).', lien: 'Modéliser un réseau social par un graphe.' },
+{ s: 'soc', l: 1, k: 'qcm', ask: 'Dans un graphe non orienté (amitié réciproque), si A est ami avec B, alors :', code: `amis = {"A": ["B"], "B": ["A"]}`, o: ['B est aussi dans la liste de A', 'B ne peut pas avoir d’autres amis', 'Le graphe a 1 seul sommet', 'La relation est à sens unique'], e: 'Une relation d’amitié est symétrique (graphe non orienté), contrairement à un abonnement (« suivre ») qui est orienté.', lien: 'Graphe orienté vs graphe non orienté.' },
+{ s: 'soc', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `hashtags = ["#snt", "#python", "#snt", "#code"]
+print(len(set(hashtags)) if False else hashtags.count("#snt"))`, ans: '2', e: '<code>hashtags.count("#snt")</code> compte combien de fois le mot-clé <code>#snt</code> apparaît dans la liste : 2.', lien: 'Repérer les sujets tendances par comptage de hashtags.' },
+{ s: 'soc', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `partages = [3, 0, 12, 5]
+print(max(partages) - min(partages))`, ans: '12', e: 'L’étendue (maximum − minimum) vaut 12 − 0 = 12.', lien: 'Disparité de visibilité entre publications.' },
+{ s: 'soc', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `g = {"A": ["B", "C"], "B": ["A", "C"], "C": ["A", "B"]}
+aretes = sum(len(v) for v in g.values()) // 2
+print(aretes)`, ans: '3', e: 'La somme des degrés vaut 2 + 2 + 2 = 6. Comme chaque lien non orienté est compté deux fois (une fois à chaque extrémité), il y a 6 // 2 = 3 arêtes.', lien: 'Lemme des poignées de main dans un graphe.' },
+{ s: 'soc', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `abonnes = {"Léo": ["Mia", "Sam"], "Mia": ["Sam"], "Sam": []}
+followers_sam = [u for u in abonnes if "Sam" in abonnes[u]]
+print(followers_sam)`, ans: "['Léo', 'Mia']", e: 'Dans un graphe orienté d’abonnements, on cherche tous les utilisateurs <code>u</code> dont la liste d’abonnements contient <code>"Sam"</code>.', lien: 'Calculer les abonnés (degré entrant) dans un graphe orienté.' },
+{ s: 'soc', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `posts = [{"txt": "A", "likes": 10, "age": 1}, {"txt": "B", "likes": 30, "age": 6}]
+meilleur = max(posts, key=lambda p: p["likes"] / p["age"])
+print(meilleur["txt"])`, ans: 'A', e: 'L’algorithme de fil d’actualité privilégie la fraîcheur : A a 10 / 1 = 10 likes/heure contre 30 / 6 = 5 pour B.', lien: 'Classement algorithmique du fil d’actualité.' },
+{ s: 'soc', l: 2, k: 'qcm', ask: 'Qu\'affiche ce programme ?', code: `g = {"A": ["B"], "B": ["A"], "C": ["D"], "D": ["C"]}
+print("C" in g["A"])`, o: ['False', 'True', 'KeyError', 'None'], e: 'Le graphe est composé de deux composantes isolées (A–B et C–D) : C n’est pas voisin de A.', lien: 'Composantes connexes et isolement dans un réseau.' },
+{ s: 'soc', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `user = "Mia"
+amis = ["Léo", "Sam", "Zoé"]
+print(f"{user} a {len(amis)} amis ({', '.join(amis)})")`, ans: 'Mia a 3 amis (Léo, Sam, Zoé)', e: 'La f-string combine la longueur de la liste et l’assemblage des prénoms par <code>", ".join(amis)</code>.', lien: 'Générer un résumé de profil utilisateur.' },
+{ s: 'soc', l: 3, k: 'code', ask: 'Écrivez la fonction <code>rayon_excentricite(g, depart)</code> qui renvoie la plus grande distance (en nombre de liens) entre <code>depart</code> et n’importe quel autre sommet atteignable du graphe non orienté <code>g</code>.', start: 'def rayon_excentricite(g, depart):\n    ', tests: [{ label: 'chaîne A-B-C-D', expr: 'rayon_excentricite({"A": ["B"], "B": ["A", "C"], "C": ["B", "D"], "D": ["C"]}, "A")', eq: '3' }, { label: 'centre d’une étoile', expr: 'rayon_excentricite({"A": ["B", "C", "D"], "B": ["A"], "C": ["A"], "D": ["A"]}, "A")', eq: '1' }, { label: 'sommet isolé', expr: 'rayon_excentricite({"A": []}, "A")', eq: '0' }], sol: 'def rayon_excentricite(g, depart):\n    vus = [depart]\n    front = [depart]\n    dist = 0\n    while front:\n        suivant = []\n        for p in front:\n            for v in g[p]:\n                if v not in vus:\n                    vus.append(v)\n                    suivant.append(v)\n        if suivant:\n            dist += 1\n        front = suivant\n    return dist', e: 'On effectue un parcours en largeur par couches successives à partir de <code>depart</code> ; chaque nouvelle couche non vide augmente l’excentricité de 1.', lien: 'Mesurer l’excentricité d’un sommet (notion de rayon et diamètre d’un réseau social).' },
+{ s: 'soc', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `g = {"A": ["B", "C"], "B": ["A", "C"], "C": ["A", "B"]}
+triangles = 0
+for u in g:
+    for v in g[u]:
+        for w in g[v]:
+            if w in g[u]:
+                triangles += 1
+print(triangles // 6)`, ans: '1', e: 'Les trois sommets A, B et C sont tous reliés deux à deux : ils forment 1 triangle (chaque triangle est parcouru 6 fois : 3 sommets × 2 sens).', lien: 'Coefficient de clustering et communautés soudées.' },
+{ s: 'soc', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `fil = ["sport", "sport", "cuisine", "sport", "tech"]
+part_sport = fil.count("sport") / len(fil)
+print(part_sport > 0.5)`, ans: 'True', e: '60 % des contenus affichés portent sur le même thème : l’algorithme renforce les préférences passées et réduit la diversité.', lien: 'Phénomène de bulle de filtres.' },
+
+/* --- Données structurées (+12) --- */
+{ s: 'data', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `en_tete = "nom,prenom,classe"
+champs = en_tete.split(",")
+print(len(champs), champs[2])`, ans: '3 classe', e: 'La première ligne d’un fichier CSV donne les noms des descripteurs (colonnes) : ici il y a 3 descripteurs et le troisième est <code>classe</code>.', lien: 'Descripteurs d’une table de données.' },
+{ s: 'data', l: 1, k: 'qcm', ask: 'Quel type Python représente le mieux une ligne d’une table avec ses descripteurs ?', code: `ligne = {"titre": "Dune", "annee": 1965}`, o: ['dict', 'int', 'float', 'bool'], e: 'Un dictionnaire associe chaque nom de descripteur (clé) à la valeur correspondante de l’objet.', lien: 'Modélisation d’un objet en données structurées.' },
+{ s: 'data', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `t = [{"ville": "Paris"}, {"ville": "Lyon"}, {"ville": "Nice"}]
+print([x["ville"] for x in t])`, ans: "['Paris', 'Lyon', 'Nice']", e: 'Cette compréhension réalise une <b>projection</b> : on extrait uniquement la colonne <code>ville</code> de chaque enregistrement.', lien: 'Opération de projection sur une table.' },
+{ s: 'data', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `prix = ["12.5", "7.5"]
+print(float(prix[0]) + float(prix[1]))`, ans: '20.0', e: 'Les valeurs lues depuis un fichier texte (CSV/JSON) sont des chaînes : il faut les convertir avec <code>float()</code> avant d’additionner.', lien: 'Typage des données importées.' },
+{ s: 'data', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `livres = [{"titre": "A", "pages": 120}, {"titre": "B", "pages": 340}, {"titre": "C", "pages": 210}]
+gros = [l["titre"] for l in livres if l["pages"] > 200]
+print(gros)`, ans: "['B', 'C']", e: 'On sélectionne les lignes vérifiant <code>pages > 200</code> (B et C) puis on conserve leur titre.', lien: 'Requête de sélection et projection sur une collection.' },
+{ s: 'data', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `t1 = [{"id": 1, "nom": "Ada"}, {"id": 2, "nom": "Alan"}]
+t2 = [{"id": 1, "nom": "Ada"}, {"id": 3, "nom": "Grace"}]
+fusion = t1 + [x for x in t2 if x["id"] not in [y["id"] for y in t1]]
+print(len(fusion))`, ans: '3', e: 'Lors de la fusion de deux tables, on évite les doublons sur la clé primaire <code>id</code> : Ada (id 1) n’est pas ajoutée une seconde fois.', lien: 'Fusionner deux jeux de données sans dupliquer les identifiants.' },
+{ s: 'data', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `notes = [8, 12, 14, 15, 19]
+print(notes[len(notes) // 2])`, ans: '14', e: 'La liste est triée et contient 5 éléments : l’élément central d’indice <code>5 // 2 = 2</code> est la <b>médiane</b> (14).', lien: 'Indicateurs statistiques : médiane vs moyenne.' },
+{ s: 'data', l: 2, k: 'qcm', ask: 'Qu\'affiche ce programme ?', code: `data = {"meteo": {"ville": "Paris", "temp": 18}}
+print(data["meteo"]["temp"])`, o: ['18', 'Paris', 'KeyError', "{'ville': 'Paris', 'temp': 18}"], e: 'Structure imbriquée typique du format <b>JSON</b> : on accède d’abord à la clé <code>"meteo"</code>, puis à la clé <code>"temp"</code>.', lien: 'Lire des données hiérarchiques au format JSON.' },
+{ s: 'data', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `eleve = {"nom": "Léo", "moy": 14.25}
+print(f"{eleve['nom']};{eleve['moy']:.1f}")`, ans: 'Léo;14.2', e: 'La f-string produit une ligne prête à être écrite dans un fichier CSV avec séparateur point-virgule et arrondi à une décimale.', lien: 'Exporter des enregistrements vers un fichier CSV.' },
+{ s: 'data', l: 3, k: 'code', ask: 'Écrivez la fonction <code>filtrer_et_trier(table, seuil)</code> qui reçoit une liste de dictionnaires <code>{"nom": ..., "score": ...}</code>, garde ceux dont <code>score &gt;= seuil</code>, et renvoie la liste de leurs noms triés par score décroissant.', start: 'def filtrer_et_trier(table, seuil):\n    ', tests: [{ label: 'cas général', expr: 'filtrer_et_trier([{"nom": "A", "score": 12}, {"nom": "B", "score": 18}, {"nom": "C", "score": 9}], 10)', eq: "['B', 'A']" }, { label: 'aucun retenu', expr: 'filtrer_et_trier([{"nom": "A", "score": 5}], 10)', eq: '[]' }], sol: 'def filtrer_et_trier(table, seuil):\n    valides = [x for x in table if x["score"] >= seuil]\n    valides.sort(key=lambda x: x["score"], reverse=True)\n    return [x["nom"] for x in valides]', e: 'On enchaîne les trois opérations fondamentales sur les données structurées : <b>sélection</b> (filtrage), <b>tri</b> sur un descripteur, puis <b>projection</b> sur le nom.', lien: 'Chaîne complète de traitement d’une table de données.' },
+{ s: 'data', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `csv = "nom;age\\nAlice;16\\nBob;17"
+lignes = csv.split("\\n")[1:]
+print(sum(int(l.split(";")[1]) for l in lignes))`, ans: '33', e: '<code>[1:]</code> saute la ligne d’en-tête. On extrait ensuite le deuxième champ de chaque ligne, converti en entier : 16 + 17 = 33.', lien: 'Ignorer l’en-tête lors de la lecture d’un CSV.' },
+{ s: 'data', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `lignes = ["A;10", "B;20", "A;10"]
+uniques = list(dict.fromkeys(lignes))
+print(len(uniques))`, ans: '2', e: '<code>dict.fromkeys()</code> élimine les doublons tout en conservant l’ordre d’apparition : la ligne <code>"A;10"</code> n’est conservée qu’une fois.', lien: 'Nettoyage et dédoublonnage d’une base de données.' },
+
+/* --- Localisation, cartographie, mobilité (+12) --- */
+{ s: 'geo', l: 1, k: 'qcm', ask: 'Une latitude négative (par exemple <code>-33.86</code> pour Sydney) indique un lieu situé :', code: `lat = -33.86`, o: ['Dans l’hémisphère Sud', 'Dans l’hémisphère Nord', 'À l’ouest de Greenwich', 'À l’est de Greenwich'], e: 'La latitude mesure la position par rapport à l’équateur : positive au Nord, négative au Sud. La longitude mesure Est (+) / Ouest (−).', lien: 'Signe des coordonnées géographiques.' },
+{ s: 'geo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `trame = "$GPGGA,123519,4807.038,N,01131.000,E"
+champs = trame.split(",")
+print(champs[0], champs[3])`, ans: '$GPGGA N', e: 'Les récepteurs GPS envoient des trames normalisées <b>NMEA</b> séparées par des virgules. <code>$GPGGA</code> est l’identifiant de trame et <code>N</code> l’hémisphère Nord.', lien: 'Protocole NMEA 0183 utilisé par les puces GPS.' },
+{ s: 'geo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `etapes = [12, 8, 15]
+print(sum(etapes))`, ans: '35', e: 'La longueur totale d’un itinéraire composé de plusieurs tronçons est la somme des longueurs de chaque tronçon.', lien: 'Calcul de la distance totale d’un trajet.' },
+{ s: 'geo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `coord = (48.8566, 2.3522)
+print(round(coord[0], 2), round(coord[1], 2))`, ans: '48.86 2.35', e: 'Arrondir à 2 décimales en degrés correspond à une précision d’environ 1 km au sol.', lien: 'Précision des coordonnées GPS et protection de la vie privée.' },
+{ s: 'geo', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `trace = [(0, 0), (3, 0), (3, 4)]
+dist = 0
+for i in range(len(trace) - 1):
+    x1, y1 = trace[i]
+    x2, y2 = trace[i + 1]
+    dist += ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+print(dist)`, ans: '7.0', e: 'Premier segment de (0,0) à (3,0) : longueur 3. Deuxième segment de (3,0) à (3,4) : longueur 4. Total de la trace GPX : 7.0.', lien: 'Calculer la distance parcourue à partir d’une trace GPS.' },
+{ s: 'geo', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `deg, minutes, sec = 48, 51, 30
+decimal = deg + minutes / 60 + sec / 3600
+print(round(decimal, 4))`, ans: '48.8583', e: 'Conversion Sexagésimal (DMS) → Degrés décimaux : 48 + 51/60 + 30/3600 = 48 + 0,85 + 0,00833… = 48,8583°.', lien: 'Convertir des coordonnées DMS en degrés décimaux.' },
+{ s: 'geo', l: 2, k: 'qcm', ask: 'Au minimum, combien de satellites faut-il capter pour déterminer sa position 3D + synchroniser l’horloge du récepteur GPS ?', code: `satellites = ["S1", "S2", "S3", "S4"]
+print(len(satellites))`, o: ['4', '3', '2', '1'], e: 'Il y a 4 inconnues : latitude, longitude, altitude et le décalage d’horloge du récepteur. Il faut donc 4 satellites.', lien: 'Principe de la trilatération par satellite.' },
+{ s: 'geo', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `routes = [{"nom": "R1", "km": 10, "v": 50}, {"nom": "R2", "km": 12, "v": 80}]
+temps_min = [round(r["km"] / r["v"] * 60) for r in routes]
+print(temps_min)`, ans: '[12, 9]', e: 'R1 prend 10 / 50 × 60 = 12 min ; R2 prend 12 / 80 × 60 = 9 min. R2 est plus longue en distance mais plus rapide.', lien: 'Pondération des arêtes d’un graphe routier par le temps de parcours.' },
+{ s: 'geo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `lat, lon = 45.764, 4.835
+print(f'<trkpt lat="{lat}" lon="{lon}"></trkpt>')`, ans: '<trkpt lat="45.764" lon="4.835"></trkpt>', e: 'La f-string génère une balise XML conforme au format standard <b>GPX</b> utilisé pour échanger des traces GPS.', lien: 'Format de fichier GPX (GPS Exchange Format).' },
+{ s: 'geo', l: 3, k: 'code', ask: 'Écrivez la fonction <code>dans_zone(lat, lon, boite)</code> qui renvoie <code>True</code> si le point <code>(lat, lon)</code> est à l’intérieur (bords inclus) du rectangle <code>boite = (lat_min, lat_max, lon_min, lon_max)</code>, sinon <code>False</code>.', start: 'def dans_zone(lat, lon, boite):\n    ', tests: [{ label: 'dans Paris', expr: 'dans_zone(48.85, 2.35, (48.80, 48.90, 2.25, 2.45))', eq: 'True' }, { label: 'hors latitude', expr: 'dans_zone(49.00, 2.35, (48.80, 48.90, 2.25, 2.45))', eq: 'False' }, { label: 'sur la bordure', expr: 'dans_zone(48.80, 2.25, (48.80, 48.90, 2.25, 2.45))', eq: 'True' }], sol: 'def dans_zone(lat, lon, boite):\n    lat_min, lat_max, lon_min, lon_max = boite\n    return lat_min <= lat <= lat_max and lon_min <= lon <= lon_max', e: 'On dépaquette les 4 bornes de la boîte englobante (bounding box) et on teste que <code>lat</code> et <code>lon</code> sont bien dans leurs intervalles respectifs.', lien: 'Filtrer des points d’intérêt visibles sur une carte (bounding box).' },
+{ s: 'geo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `trame = "$GPGGA,123519,4807.038,N,01131.000,E,1,08,0.9,545.4,M"
+c = trame.split(",")
+print(c[1][:2] + "h" + c[1][2:4] + "m" + c[1][4:6] + "s")`, ans: '12h35m19s', e: 'Dans une trame NMEA <code>$GPGGA</code>, le champ d’indice 1 contient l’heure UTC au format <code>HHMMSS</code>.', lien: 'Décodage de l’horodatage dans une trame NMEA.' },
+{ s: 'geo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `villes = {"A": {"B": 4, "C": 2}, "B": {"D": 5}, "C": {"B": 1, "D": 8}, "D": {}}
+d = {"A": 0, "B": 99, "C": 99, "D": 99}
+for u in ["A", "C", "B"]:
+    for v, w in villes[u].items():
+        if d[u] + w < d[v]:
+            d[v] = d[u] + w
+print(d["D"])`, ans: '8', e: 'Relâchement des arêtes (principe de Dijkstra) : A → C (2), puis C → B (2 + 1 = 3), puis B → D (3 + 5 = 8), plus court que A → C → D (10).', lien: 'Algorithme de Dijkstra pour le calcul d’itinéraire.' },
+
+/* --- Photographie numérique (+12) --- */
+{ s: 'photo', l: 1, k: 'qcm', ask: 'Quelle couleur correspond au triplet RVB <code>(0, 255, 0)</code> ?', code: `px = (0, 255, 0)`, o: ['Vert pur', 'Rouge pur', 'Bleu pur', 'Jaune'], e: 'Les trois canaux sont dans l’ordre (Rouge, Vert, Bleu) : le vert est au maximum (255) et les deux autres sont à 0.', lien: 'Synthèse additive des couleurs RVB.' },
+{ s: 'photo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `r, g, b = 255, 255, 0
+print(r > 200 and g > 200 and b < 50)`, ans: 'True', e: 'En synthèse additive, le mélange de rouge et de vert donne du <b>jaune</b>.', lien: 'Mélange des couleurs primaires de la lumière.' },
+{ s: 'photo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `img = [[10, 20, 30], [40, 50, 60]]
+print(len(img), len(img[0]))`, ans: '2 3', e: '<code>len(img)</code> donne le nombre de lignes (hauteur = 2) et <code>len(img[0])</code> le nombre de colonnes (largeur = 3).', lien: 'Dimensions (hauteur × largeur) d’une matrice de pixels.' },
+{ s: 'photo', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `bits_par_pixel = 24
+print(2 ** bits_par_pixel)`, ans: '16777216', e: 'Avec 3 octets (24 bits) par pixel, on peut coder 2²⁴ = 16 777 216 couleurs différentes (« couleurs vraies »).', lien: 'Profondeur de couleur d’une image numérique.' },
+{ s: 'photo', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `img = [[10, 20], [30, 40], [50, 60]]
+print(img[::-1])`, ans: '[[50, 60], [30, 40], [10, 20]]', e: '<code>img[::-1]</code> inverse l’ordre des lignes de la matrice : cela réalise un <b>retournement vertical</b> (effet miroir haut/bas).', lien: 'Transformations géométriques sur une image.' },
+{ s: 'photo', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `ligne = [10, 20, 30, 40]
+print(ligne[::-1])`, ans: '[40, 30, 20, 10]', e: 'Inverser l’ordre des pixels sur chaque ligne réalise un <b>miroir horizontal</b>.', lien: 'Symétrie horizontale d’une photo.' },
+{ s: 'photo', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `exif = {"DateTime": "2026:05:12 14:30:00", "Model": "PhoneX", "GPS": (48.8, 2.3)}
+exif.pop("GPS")
+print("GPS" in exif, len(exif))`, ans: 'False 2', e: 'Les métadonnées <b>EXIF</b> enregistrées dans une photo contiennent souvent la position GPS ; les supprimer protège la vie privée avant partage.', lien: 'Métadonnées EXIF et vie privée.' },
+{ s: 'photo', l: 2, k: 'qcm', ask: 'Sur un capteur photographique équipé d’une matrice de Bayer, quelle couleur possède deux fois plus de photosites que les autres ?', code: `bayer = ["R", "G", "G", "B"]
+print(bayer.count("G"))`, o: ['Le vert (G)', 'Le rouge (R)', 'Le bleu (B)', 'Toutes sont à égalité'], e: 'L’œil humain étant plus sensible aux nuances de vert, la matrice de Bayer comporte 50 % de filtres verts, 25 % de rouges et 25 % de bleus.', lien: 'Fonctionnement des capteurs photo et matrice de Bayer.' },
+{ s: 'photo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `l, h = 4000, 3000
+print(f"{l * h / 1000000:.1f} Mpx")`, ans: '12.0 Mpx', e: '4000 × 3000 = 12 000 000 pixels, soit 12,0 mégapixels formatés avec une décimale par la f-string.', lien: 'Définition d’un capteur en mégapixels.' },
+{ s: 'photo', l: 3, k: 'code', ask: 'Écrivez la fonction <code>miroir_horizontal(image)</code> qui renvoie une <b>nouvelle</b> image (liste de listes) symétrique horizontalement (chaque ligne est inversée).', start: 'def miroir_horizontal(image):\n    ', tests: [{ label: '2x3', expr: 'miroir_horizontal([[1, 2, 3], [4, 5, 6]])', eq: '[[3, 2, 1], [6, 5, 4]]' }, { label: '1x2', expr: 'miroir_horizontal([[10, 20]])', eq: '[[20, 10]]' }], sol: 'def miroir_horizontal(image):\n    return [ligne[::-1] for ligne in image]', e: 'Pour chaque ligne de l’image, <code>ligne[::-1]</code> crée une nouvelle liste avec les pixels dans l’ordre inverse.', lien: 'Algorithme de symétrie d’une image numérique.' },
+{ s: 'photo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme (détection de contours horizontaux par différence entre voisins) ?', code: `ligne = [20, 20, 20, 200, 200]
+contours = [abs(ligne[i + 1] - ligne[i]) for i in range(len(ligne) - 1)]
+print(contours)`, ans: '[0, 0, 180, 0]', e: 'Dans les zones uniformes, la différence entre pixels voisins vaut 0. Au passage brutal de 20 à 200, la différence vaut 180 : le contour est détecté.', lien: 'Principe des filtres de détection de contours.' },
+{ s: 'photo', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `largeur_px = 1200
+resolution_dpi = 300
+print(largeur_px / resolution_dpi)`, ans: '4.0', e: 'La résolution (en ppp ou dpi, pixels par pouce) relie la définition en pixels à la taille physique : 1200 px ÷ 300 ppp = 4,0 pouces.', lien: 'Distinction entre définition (pixels) et résolution (ppp/dpi).' },
+
+/* --- Informatique embarquée et objets connectés (+12) --- */
+{ s: 'emb', l: 1, k: 'qcm', ask: 'Dans un système embarqué, quel composant transforme une grandeur physique (température, lumière) en signal électrique ?', code: `composants = ["capteur", "actionneur", "batterie"]
+print(composants[0])`, o: ['Un capteur', 'Un actionneur', 'Un écran', 'Une antenne'], e: 'Le <b>capteur</b> mesure l’environnement ; le microcontrôleur traite l’information ; l’<b>actionneur</b> (moteur, LED, vanne) agit sur l’environnement.', lien: 'Chaîne d’information : capteur → microcontrôleur → actionneur.' },
+{ s: 'emb', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `distance_cm = 18
+print("STOP" if distance_cm < 20 else "OK")`, ans: 'STOP', e: 'Un radar de recul ou un robot mobile compare la distance mesurée à un seuil de sécurité : 18 < 20 déclenche l’arrêt.', lien: 'Prise de décision temps réel dans un robot.' },
+{ s: 'emb', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `val_can = 512
+print(round(val_can / 1024 * 5, 1))`, ans: '2.5', e: 'Un convertisseur analogique-numérique (CAN) 10 bits code une tension de 0 à 5 V sur 1024 valeurs (0 à 1023) : 512 correspond à la moitié, soit 2,5 V.', lien: 'Numérisation d’un signal analogique par un microcontrôleur.' },
+{ s: 'emb', l: 1, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `etats_led = [1, 0, 1, 1, 0]
+print(sum(etats_led))`, ans: '3', e: 'Chaque <code>1</code> représente un état allumé : la somme compte le nombre de cycles où la LED était allumée.', lien: 'Commande tout-ou-rien (TOR) d’un actionneur.' },
+{ s: 'emb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `brutes = [21.0, 21.2, 99.9, 21.1]
+propres = [v for v in brutes if 0 <= v <= 50]
+print(round(sum(propres) / len(propres), 1))`, ans: '21.1', e: 'La valeur aberrante <code>99.9</code> (parasite capteur) est filtrée avant le calcul de la moyenne.', lien: 'Fiabilisation des données issues de capteurs.' },
+{ s: 'emb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `porte = "fermee"
+badge = True
+if porte == "fermee" and badge:
+    porte = "ouverte"
+print(porte)`, ans: 'ouverte', e: 'La transition d’état ne se produit que si l’état initial est <code>"fermee"</code> ET que l’événement <code>badge</code> est vrai.', lien: 'Logique combinatoire et contrôle d’accès.' },
+{ s: 'emb', l: 2, k: 'qcm', ask: 'Quelle technologie sans fil est privilégiée pour un capteur agricole envoyant quelques octets par heure à 10 km avec une pile durant plusieurs années ?', code: `reseaux = {"WiFi": 50, "Bluetooth": 10, "LoRa": 10000}
+print(max(reseaux, key=lambda r: reseaux[r]))`, o: ['LoRa', 'WiFi', 'Bluetooth', '5G'], e: 'Les réseaux LPWAN comme <b>LoRa</b> offrent une très longue portée et une très faible consommation électrique, au prix d’un faible débit.', lien: 'Réseaux basse consommation pour l’Internet des objets (IoT).' },
+{ s: 'emb', l: 2, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `octets = [0x01, 0x16, 0x3C]
+print(octets[1], octets[2])`, ans: '22 60', e: 'Une trame binaire compacte transporte l’identifiant du capteur (1), la température <code>0x16</code> = 22 °C et l’humidité <code>0x3C</code> = 60 %.', lien: 'Encodage compact des trames IoT.' },
+{ s: 'emb', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `capteur = "S04"
+temp = 23.456
+print(f"[{capteur}] T={temp:.1f}C")`, ans: '[S04] T=23.5C', e: 'La f-string met en forme une trame texte lisible contenant l’identifiant du capteur et la température arrondie au dixième.', lien: 'Formatage des messages de télémétrie.' },
+{ s: 'emb', l: 3, k: 'code', ask: 'Écrivez la fonction <code>compter_alertes(mesures, seuil)</code> qui renvoie le nombre de fois où la mesure passe de <code>&lt;= seuil</code> à <code>&gt; seuil</code> (front montant, c’est-à-dire uniquement au moment du franchissement).', start: 'def compter_alertes(mesures, seuil):\n    ', tests: [{ label: 'deux franchissements', expr: 'compter_alertes([20, 25, 32, 35, 28, 31], 30)', eq: '2' }, { label: 'déjà au-dessus au départ', expr: 'compter_alertes([35, 36, 37], 30)', eq: '0' }, { label: 'aucun dépassement', expr: 'compter_alertes([10, 20, 30], 30)', eq: '0' }], sol: 'def compter_alertes(mesures, seuil):\n    alertes = 0\n    for i in range(1, len(mesures)):\n        if mesures[i - 1] <= seuil and mesures[i] > seuil:\n            alertes += 1\n    return alertes', e: 'On compare chaque mesure <code>mesures[i]</code> à la précédente <code>mesures[i - 1]</code> : l’alerte n’est comptée qu’au moment précis du franchissement vers le haut.', lien: 'Détection d’événements (fronts montants) pour éviter les alertes répétitives.' },
+{ s: 'emb', l: 3, k: 'out', ask: 'Qu\'affiche ce programme (calcul d’un bit de contrôle XOR sur une trame) ?', code: `trame = [0b1010, 0b1100, 0b0110]
+bcc = 0
+for x in trame:
+    bcc = bcc ^ x
+print(bin(bcc))`, ans: '0b0', e: 'Le OU exclusif (<code>^</code>) cumulé sur <code>1010</code>, <code>1100</code> et <code>0110</code> annule tous les bits : le résultat vaut <code>0b0</code>.', lien: 'Contrôle d’intégrité (LRC/BCC) sur une liaison série embarquée.' },
+{ s: 'emb', l: 3, k: 'out', ask: 'Qu\'affiche ce programme ?', code: `consigne = 20
+mesure = 16
+kp = 2
+commande = max(0, min(100, kp * (consigne - mesure) * 10))
+print(commande)`, ans: '80', e: 'Régulation proportionnelle : l’écart vaut 20 − 16 = 4 °C, multiplié par le gain donne 80 % de puissance de chauffe, bornée entre 0 et 100 %.', lien: 'Asservissement proportionnel dans un système embarqué.' }
+);
 /*QD-END*/
 
 /*QUI-START*/
@@ -1629,6 +1945,10 @@ function qView(i, o) {
   card.append(h('div', { class: 'qh' }, o.num ? h('b', null, 'Question ' + o.num) : null, h('span', { class: 'lv l' + q.l, title: LVN[q.l] }, STAR[q.l]), h('span', { class: 'sc' }, SEC[q.s].c), h('span', { class: 'pts' }, PTS[q.l] + (PTS[q.l] > 1 ? ' points' : ' point'))));
   card.append(h('p', { class: 'qask', html: q.ask }));
   if (q.k !== 'code') card.append(codeEl(q.code));
+  const hasFstr = /\bf["']/.test(q.code || '') || /\bf["']/.test(q.sol || '');
+  if (hasFstr) {
+    card.append(h('div', { class: 'fstr-note', html: '<b>Note (hors programme SNT · niveau ★★★) :</b> ce code utilise une <i>f-string</i> (<code>f"..."</code>). En Python, le préfixe <code>f</code> permet d’insérer directement la valeur d’une variable ou d’un calcul entre accolades <code>{...}</code> à l’intérieur d’un texte.' }));
+  }
   const locked = () => o.locked;
   let optEls = [];
   if (q.k === 'qcm') {
@@ -1661,6 +1981,9 @@ function qView(i, o) {
       fb.append(q.k === 'qcm' ? h('p', { class: 'mono exp' }, q.o[0]) : q.k === 'out' ? h('pre', { class: 'code exp' }, q.ans) : codeEl(q.sol));
     }
     fb.append(h('div', { class: 'expl' }, h('p', { class: 'qlab' }, 'Explication'), h('p', { html: q.e }), q.lien ? h('p', { class: 'lien' }, h('b', null, 'Lien avec la SNT : '), q.lien) : null));
+    if (hasFstr) {
+      fb.append(h('div', { class: 'fstr-note', html: '<b>Rappel sur la notation <code>f"..."</code> (hors programme SNT) :</b> tout ce qui est écrit entre <code>{</code> et <code>}</code> est évalué par Python puis converti en texte. S’il y a deux-points après l’expression (ex. <code>:.1f</code> ou <code>:08b</code>), cela précise le format d’affichage (arrondi ou base binaire/hexadécimale).' }));
+    }
     return r;
   }
   return { el: card, show, fb };
@@ -1823,6 +2146,17 @@ function render() {
   ({ train: trainView, exam: examView, bilan: bilanView })[MODE](ws);
   if (MODE !== 'bilan') wipe = false;
   $('#scroller').scrollTop = 0;
+}
+function openDlg(title, body) {
+  const dlg = $('#dlg');
+  dlg.innerHTML = '';
+  const close = () => { dlg.hidden = true; dlg.innerHTML = ''; };
+  dlg.onclick = e => { if (e.target === dlg) close(); };
+  dlg.append(h('div', { class: 'dlgbox', role: 'dialog', 'aria-modal': 'true' },
+    h('header', null, h('b', null, title), h('button', { class: 'btn sm', type: 'button', onclick: close }, 'Fermer')),
+    h('div', { class: 'dbody' }, body),
+    h('footer', null, h('button', { class: 'btn pri', type: 'button', onclick: close }, 'Compris'))));
+  dlg.hidden = false;
 }
 function openHelp() {
   openDlg('Aide', h('div', null,

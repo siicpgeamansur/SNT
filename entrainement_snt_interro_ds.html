@@ -376,6 +376,37 @@ input.bad{border-color:var(--bad)!important;box-shadow:0 0 0 1px var(--bad)}
 #modeSeg button.live::after{content:"●";color:#e74c3c;margin-left:4px;font-size:10px}
 .opt input[type=checkbox]{width:auto}
 .fstr-note{background:var(--note-bg);border:1px solid var(--note-line);border-left:4px solid var(--warn);color:var(--note-fg);border-radius:6px;padding:7px 11px;margin:8px 0;font-size:13px;line-height:1.45}
+/* ---- quiz : présentation homogène, mémento, f-strings ---- */
+.brand small{margin-left:6px}
+.qcard{padding:14px 16px}
+.qh .kd{background:var(--accent-soft);color:var(--accent-ink);border-radius:99px;padding:1px 9px;font-size:12px;font-weight:500}
+.qctx{background:var(--panel2);border-left:3px solid var(--line);border-radius:6px;padding:7px 12px;margin:10px 0 0;font-size:13.5px;line-height:1.5}
+.qask{font-weight:600;font-size:15.5px;margin:10px 0 2px}
+.qhow{color:var(--muted);font-size:13px;margin:0 0 4px}
+.qlbl{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:12px 0 5px}
+.qfb .qlbl{text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg)}
+.qcard pre.code{margin:0}
+.qcard .qin{margin-top:0}
+.qfmt{margin:6px 0 0;line-height:1.5}
+.qfmt code,.fstr-note code,.memo code{font:12.5px var(--font-mono);background:rgba(0,0,0,.06);border-radius:4px;padding:0 4px}
+.fstr-note{margin:12px 0}
+.fstr-note p.ft{margin:2px 0 4px}
+.fstr-note ul.fl{margin:2px 0 6px;padding-left:20px}.fstr-note ul.fl li{margin:3px 0}
+.memo{border:1px solid var(--line);border-radius:8px;background:#fbfcfe;margin:12px 0}
+.memo>summary{cursor:pointer;padding:8px 12px;font-weight:600;font-size:13.5px;color:var(--accent-ink);background:var(--accent-soft);border-radius:7px;list-style:none}
+.memo>summary::-webkit-details-marker{display:none}
+.memo>summary::before{content:"▾ ";}
+.memo:not([open])>summary::before{content:"▸ ";}
+.memo[open]>summary{border-radius:7px 7px 0 0}
+.memo-in{padding:2px 14px 10px}
+.memo-in h4{margin:12px 0 2px;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mi{padding:8px 0;border-top:1px dashed var(--line)}.memo-in h4+.mi{border-top:0}
+.mi .mh code{font:600 13px var(--font-mono);color:var(--accent-ink);background:var(--accent-soft);padding:2px 7px;border-radius:4px}
+.mi p{margin:5px 0 3px;font-size:13.5px;line-height:1.5}
+.mex{margin:3px 0 0;font:12.5px/1.5 var(--font-mono);background:#1f2937;color:#f3f4f6;border-radius:6px;padding:5px 10px;white-space:pre-wrap;word-break:break-word}
+.mex .mar{color:#9be7a8}
+.qopts .opt{display:flex;align-items:center;gap:8px;line-height:1.4}
+@media (max-width:520px){#ws{padding:10px 8px}.qcard{padding:12px}.qask{font-size:15px}}
 </style>
 <div id="app">
   <header class="band"><div class="inner row">
@@ -1938,52 +1969,1517 @@ function grade(i) {
 }
 function record(i, ok) { const d = store(); d.res[i.q.id] = { ok, t: Date.now() }; saveStore(d); }
 
+/* ---------- Mémento, f-strings et énoncés homogènes ---------- */
+const MEMO = {
+"f:print": {
+"g": "Fonctions et méthodes",
+"sig": "print(a, b, …)",
+"d": "Affiche les valeurs à l’écran, séparées par une espace, puis passe à la ligne. Un texte est affiché <b>sans ses guillemets</b>.",
+"ex": [
+{
+"c": "",
+"e": "print(\"Salut\", 3 + 4)",
+"r": "Salut 7",
+"p": 1
+},
+{
+"c": "",
+"e": "print(2.5, \"m\")",
+"r": "2.5 m",
+"p": 1
+}
+]
+},
+"f:len": {
+"g": "Fonctions et méthodes",
+"sig": "len(x)",
+"d": "Renvoie le <b>nombre d’éléments</b> d’une liste, ou le nombre de caractères d’un texte.",
+"ex": [
+{
+"c": "",
+"e": "len(\"Bonjour\")",
+"r": "7",
+"p": 0
+},
+{
+"c": "l = [4, 8, 15, 16]",
+"e": "len(l)",
+"r": "4",
+"p": 0
+}
+]
+},
+"f:sum": {
+"g": "Fonctions et méthodes",
+"sig": "sum(liste)",
+"d": "Additionne tous les nombres d’une liste.",
+"ex": [
+{
+"c": "l = [2, 5, 9]",
+"e": "sum(l)",
+"r": "16",
+"p": 0
+}
+]
+},
+"f:range": {
+"g": "Fonctions et méthodes",
+"sig": "range(a, b)",
+"d": "Suite d’entiers de <b>a inclus</b> à <b>b exclu</b> (b n’est jamais atteint). <code>range(n)</code> commence à 0 et finit à n − 1. <code>range(a, b, pas)</code> avance de « pas » en « pas ». On la parcourt avec <code>for</code>. (Ici <code>list(…)</code> sert seulement à afficher la suite.)",
+"ex": [
+{
+"c": "",
+"e": "list(range(3, 7))",
+"r": "[3, 4, 5, 6]",
+"p": 0
+},
+{
+"c": "",
+"e": "list(range(5))",
+"r": "[0, 1, 2, 3, 4]",
+"p": 0
+},
+{
+"c": "",
+"e": "list(range(0, 10, 3))",
+"r": "[0, 3, 6, 9]",
+"p": 0
+}
+]
+},
+"f:round": {
+"g": "Fonctions et méthodes",
+"sig": "round(x, n)",
+"d": "Arrondit x à <b>n décimales</b> (sans n : à l’entier le plus proche). <b>Attention :</b> quand x est exactement au milieu (2,5 ; 3,5 …), Python arrondit à l’entier <b>pair</b> le plus proche.",
+"ex": [
+{
+"c": "",
+"e": "round(8.567, 1)",
+"r": "8.6",
+"p": 0
+},
+{
+"c": "",
+"e": "round(6.5)",
+"r": "6",
+"p": 0
+},
+{
+"c": "",
+"e": "round(7.5)",
+"r": "8",
+"p": 0
+}
+]
+},
+"f:int": {
+"g": "Fonctions et méthodes",
+"sig": "int(x)",
+"d": "Convertit en <b>entier</b>. Sur un nombre à virgule, la partie décimale est coupée (pas arrondie). <code>int(texte, 2)</code> lit le texte comme un nombre écrit en <b>base 2</b> (binaire) ; <code>int(texte, 16)</code> en base 16.",
+"ex": [
+{
+"c": "",
+"e": "int(\"42\")",
+"r": "42",
+"p": 0
+},
+{
+"c": "",
+"e": "int(7.9)",
+"r": "7",
+"p": 0
+},
+{
+"c": "",
+"e": "int(\"1001\", 2)",
+"r": "9",
+"p": 0
+}
+]
+},
+"f:float": {
+"g": "Fonctions et méthodes",
+"sig": "float(x)",
+"d": "Convertit en <b>nombre à virgule</b> (flottant).",
+"ex": [
+{
+"c": "",
+"e": "float(\"2.5\")",
+"r": "2.5",
+"p": 0
+},
+{
+"c": "",
+"e": "float(3)",
+"r": "3.0",
+"p": 0
+}
+]
+},
+"f:str": {
+"g": "Fonctions et méthodes",
+"sig": "str(x)",
+"d": "Convertit en <b>texte</b>. Deux textes se collent avec <code>+</code>.",
+"ex": [
+{
+"c": "",
+"e": "str(42)",
+"r": "'42'",
+"p": 0
+},
+{
+"c": "",
+"e": "\"N°\" + str(7)",
+"r": "'N°7'",
+"p": 0
+}
+]
+},
+"f:max": {
+"g": "Fonctions et méthodes",
+"sig": "max(liste)",
+"d": "Renvoie la <b>plus grande</b> valeur. Avec <code>key=fonction</code>, on compare les éléments d’après le résultat de cette fonction (<code>key=len</code> : d’après leur longueur).",
+"ex": [
+{
+"c": "",
+"e": "max([4, 9, 2])",
+"r": "9",
+"p": 0
+},
+{
+"c": "",
+"e": "max([\"a\", \"ccc\", \"bb\"], key=len)",
+"r": "'ccc'",
+"p": 0
+}
+]
+},
+"f:min": {
+"g": "Fonctions et méthodes",
+"sig": "min(liste)",
+"d": "Renvoie la <b>plus petite</b> valeur. Avec <code>key=fonction</code>, on compare d’après le résultat de la fonction.",
+"ex": [
+{
+"c": "",
+"e": "min([4, 9, 2])",
+"r": "2",
+"p": 0
+},
+{
+"c": "",
+"e": "min([\"aaa\", \"c\", \"bb\"], key=len)",
+"r": "'c'",
+"p": 0
+}
+]
+},
+"f:abs": {
+"g": "Fonctions et méthodes",
+"sig": "abs(x)",
+"d": "Valeur absolue : enlève le signe moins.",
+"ex": [
+{
+"c": "",
+"e": "abs(-8)",
+"r": "8",
+"p": 0
+},
+{
+"c": "",
+"e": "abs(5.5 - 9)",
+"r": "3.5",
+"p": 0
+}
+]
+},
+"f:bin": {
+"g": "Fonctions et méthodes",
+"sig": "bin(n)",
+"d": "Écriture <b>binaire</b> de l’entier n, sous forme de <b>texte</b> qui commence par <code>0b</code> (ce préfixe veut dire « binaire », il ne fait pas partie du nombre).",
+"ex": [
+{
+"c": "",
+"e": "bin(13)",
+"r": "'0b1101'",
+"p": 0
+},
+{
+"c": "",
+"e": "bin(9)",
+"r": "'0b1001'",
+"p": 0
+}
+]
+},
+"f:hex": {
+"g": "Fonctions et méthodes",
+"sig": "hex(n)",
+"d": "Écriture <b>hexadécimale</b> (base 16) de n, sous forme de texte commençant par <code>0x</code>. Chiffres : 0 à 9 puis a = 10, b = 11, c = 12, d = 13, e = 14, f = 15.",
+"ex": [
+{
+"c": "",
+"e": "hex(171)",
+"r": "'0xab'",
+"p": 0
+},
+{
+"c": "",
+"e": "hex(26)",
+"r": "'0x1a'",
+"p": 0
+}
+]
+},
+"f:sorted": {
+"g": "Fonctions et méthodes",
+"sig": "sorted(liste)",
+"d": "Renvoie une <b>nouvelle liste triée</b> par ordre croissant (la liste d’origine n’est pas modifiée). <code>reverse=True</code> : ordre décroissant. <code>key=fonction</code> : tri d’après le résultat de la fonction.",
+"ex": [
+{
+"c": "",
+"e": "sorted([5, 1, 4])",
+"r": "[1, 4, 5]",
+"p": 0
+},
+{
+"c": "",
+"e": "sorted([5, 1, 4], reverse=True)",
+"r": "[5, 4, 1]",
+"p": 0
+},
+{
+"c": "",
+"e": "sorted([\"bb\", \"a\", \"ccc\"], key=len)",
+"r": "['a', 'bb', 'ccc']",
+"p": 0
+}
+]
+},
+"f:zip": {
+"g": "Fonctions et méthodes",
+"sig": "zip(liste1, liste2)",
+"d": "Associe les éléments de deux listes <b>deux par deux</b>. Les paires obtenues s’écrivent entre parenthèses (ce sont des « tuples »). Se parcourt avec <code>for a, b in zip(l1, l2)</code>.",
+"ex": [
+{
+"c": "",
+"e": "list(zip([1, 2, 3], [\"a\", \"b\", \"c\"]))",
+"r": "[(1, 'a'), (2, 'b'), (3, 'c')]",
+"p": 0
+}
+]
+},
+"f:type": {
+"g": "Fonctions et méthodes",
+"sig": "type(x)",
+"d": "Donne le <b>type</b> de la valeur : <code>int</code> entier, <code>float</code> nombre à virgule, <code>str</code> texte, <code>bool</code> vrai/faux, <code>list</code> liste, <code>dict</code> dictionnaire.",
+"ex": [
+{
+"c": "",
+"e": "type(5)",
+"r": "<class 'int'>",
+"p": 0
+},
+{
+"c": "",
+"e": "type(\"5\")",
+"r": "<class 'str'>",
+"p": 0
+}
+]
+},
+"f:enumerate": {
+"g": "Fonctions et méthodes",
+"sig": "enumerate(liste)",
+"d": "Fournit à la fois le <b>numéro (indice)</b> et la valeur de chaque élément : <code>for i, x in enumerate(liste)</code>. L’indice commence à 0.",
+"ex": [
+{
+"c": "",
+"e": "list(enumerate([\"a\", \"b\", \"c\"]))",
+"r": "[(0, 'a'), (1, 'b'), (2, 'c')]",
+"p": 0
+}
+]
+},
+"f:all": {
+"g": "Fonctions et méthodes",
+"sig": "all(…)",
+"d": "Renvoie <code>True</code> si <b>tous</b> les éléments sont vrais, <code>False</code> sinon (<code>any(…)</code> : si <b>au moins un</b> est vrai).",
+"ex": [
+{
+"c": "",
+"e": "all([3 > 1, 2 > 1])",
+"r": "True",
+"p": 0
+},
+{
+"c": "",
+"e": "all([3 > 1, 2 > 5])",
+"r": "False",
+"p": 0
+}
+]
+},
+"f:any": {
+"g": "Fonctions et méthodes",
+"sig": "any(…)",
+"d": "Renvoie <code>True</code> si <b>au moins un</b> élément est vrai.",
+"ex": [
+{
+"c": "",
+"e": "any([3 < 1, 2 > 1])",
+"r": "True",
+"p": 0
+}
+]
+},
+"f:set": {
+"g": "Fonctions et méthodes",
+"sig": "set(liste)",
+"d": "Supprime les <b>doublons</b> : un ensemble contient chaque valeur une seule fois (l’ordre n’est pas garanti). <code>len(set(l))</code> compte les valeurs différentes.",
+"ex": [
+{
+"c": "",
+"e": "len(set([1, 2, 2, 3, 3, 3]))",
+"r": "3",
+"p": 0
+},
+{
+"c": "",
+"e": "set([1, 2, 2])",
+"r": "{1, 2}",
+"p": 0
+}
+]
+},
+"f:list": {
+"g": "Fonctions et méthodes",
+"sig": "list(x)",
+"d": "Fabrique une <b>liste</b> à partir d’une suite (un <code>range</code>, un texte, les clés d’un dictionnaire…).",
+"ex": [
+{
+"c": "",
+"e": "list(range(3))",
+"r": "[0, 1, 2]",
+"p": 0
+},
+{
+"c": "",
+"e": "list(\"abc\")",
+"r": "['a', 'b', 'c']",
+"p": 0
+}
+]
+},
+"f:dict": {
+"g": "Fonctions et méthodes",
+"sig": "dict(…)",
+"d": "Fabrique un dictionnaire (voir « dictionnaire » plus bas).",
+"ex": []
+},
+"m:split": {
+"g": "Fonctions et méthodes",
+"sig": "texte.split(séparateur)",
+"d": "Coupe le texte à chaque séparateur et renvoie la <b>liste des morceaux</b> (des textes, même si ce sont des chiffres). Sans argument, coupe aux espaces.",
+"ex": [
+{
+"c": "",
+"e": "\"a-b-c\".split(\"-\")",
+"r": "['a', 'b', 'c']",
+"p": 0
+},
+{
+"c": "",
+"e": "\"12 7 30\".split()",
+"r": "['12', '7', '30']",
+"p": 0
+}
+]
+},
+"m:append": {
+"g": "Fonctions et méthodes",
+"sig": "liste.append(x)",
+"d": "Ajoute x <b>à la fin</b> de la liste. La liste est modifiée ; <code>append</code> ne renvoie rien.",
+"ex": [
+{
+"c": "l = [1, 2]\nl.append(9)",
+"e": "l",
+"r": "[1, 2, 9]",
+"p": 0
+}
+]
+},
+"m:count": {
+"g": "Fonctions et méthodes",
+"sig": "x.count(y)",
+"d": "Compte combien de fois y apparaît dans la liste (ou dans le texte).",
+"ex": [
+{
+"c": "",
+"e": "[1, 2, 1, 1].count(1)",
+"r": "3",
+"p": 0
+},
+{
+"c": "",
+"e": "\"banane\".count(\"a\")",
+"r": "2",
+"p": 0
+}
+]
+},
+"m:get": {
+"g": "Fonctions et méthodes",
+"sig": "dico.get(clé, défaut)",
+"d": "Renvoie la valeur associée à la clé ; si la clé n’existe pas, renvoie <b>défaut</b> (au lieu de provoquer une erreur).",
+"ex": [
+{
+"c": "d = {\"a\": 1}",
+"e": "d.get(\"a\", 0)",
+"r": "1",
+"p": 0
+},
+{
+"c": "d = {\"a\": 1}",
+"e": "d.get(\"z\", 0)",
+"r": "0",
+"p": 0
+}
+]
+},
+"m:isdigit": {
+"g": "Fonctions et méthodes",
+"sig": "texte.isdigit()",
+"d": "Renvoie <code>True</code> si le texte n’est fait que de <b>chiffres</b> (et n’est pas vide).",
+"ex": [
+{
+"c": "",
+"e": "\"123\".isdigit()",
+"r": "True",
+"p": 0
+},
+{
+"c": "",
+"e": "\"12a\".isdigit()",
+"r": "False",
+"p": 0
+}
+]
+},
+"m:join": {
+"g": "Fonctions et méthodes",
+"sig": "séparateur.join(liste)",
+"d": "Colle les textes d’une liste en mettant le séparateur entre eux (<b>l’inverse de split</b>).",
+"ex": [
+{
+"c": "",
+"e": "\"-\".join([\"a\", \"b\", \"c\"])",
+"r": "'a-b-c'",
+"p": 0
+},
+{
+"c": "",
+"e": "\", \".join([\"x\", \"y\"])",
+"r": "'x, y'",
+"p": 0
+}
+]
+},
+"m:items": {
+"g": "Fonctions et méthodes",
+"sig": "dico.items()",
+"d": "Donne les paires <b>(clé, valeur)</b> d’un dictionnaire. Se parcourt avec <code>for cle, valeur in dico.items()</code>.",
+"ex": [
+{
+"c": "d = {\"a\": 1, \"b\": 2}",
+"e": "list(d.items())",
+"r": "[('a', 1), ('b', 2)]",
+"p": 0
+}
+]
+},
+"m:values": {
+"g": "Fonctions et méthodes",
+"sig": "dico.values()",
+"d": "Donne les <b>valeurs</b> d’un dictionnaire (<code>dico.keys()</code> : les clés).",
+"ex": [
+{
+"c": "d = {\"a\": 1, \"b\": 2}",
+"e": "list(d.values())",
+"r": "[1, 2]",
+"p": 0
+}
+]
+},
+"m:keys": {
+"g": "Fonctions et méthodes",
+"sig": "dico.keys()",
+"d": "Donne les <b>clés</b> d’un dictionnaire.",
+"ex": [
+{
+"c": "d = {\"a\": 1, \"b\": 2}",
+"e": "list(d.keys())",
+"r": "['a', 'b']",
+"p": 0
+}
+]
+},
+"m:replace": {
+"g": "Fonctions et méthodes",
+"sig": "texte.replace(a, b)",
+"d": "Remplace <b>toutes</b> les occurrences de a par b (renvoie un nouveau texte).",
+"ex": [
+{
+"c": "",
+"e": "\"10.5\".replace(\".\", \",\")",
+"r": "'10,5'",
+"p": 0
+}
+]
+},
+"m:startswith": {
+"g": "Fonctions et méthodes",
+"sig": "texte.startswith(début)",
+"d": "Renvoie <code>True</code> si le texte <b>commence par</b> début.",
+"ex": [
+{
+"c": "",
+"e": "\"ftp://a.fr\".startswith(\"http\")",
+"r": "False",
+"p": 0
+},
+{
+"c": "",
+"e": "\"https://a.fr\".startswith(\"https\")",
+"r": "True",
+"p": 0
+}
+]
+},
+"m:endswith": {
+"g": "Fonctions et méthodes",
+"sig": "texte.endswith(fin)",
+"d": "Renvoie <code>True</code> si le texte <b>se termine par</b> fin.",
+"ex": [
+{
+"c": "",
+"e": "\"photo.png\".endswith(\".png\")",
+"r": "True",
+"p": 0
+}
+]
+},
+"m:strip": {
+"g": "Fonctions et méthodes",
+"sig": "texte.strip()",
+"d": "Enlève les espaces (et retours à la ligne) au <b>début et à la fin</b> du texte. <code>strip(c)</code> enlève le caractère c.",
+"ex": [
+{
+"c": "",
+"e": "\"  salut  \".strip()",
+"r": "'salut'",
+"p": 0
+},
+{
+"c": "",
+"e": "\"//a//\".strip(\"/\")",
+"r": "'a'",
+"p": 0
+}
+]
+},
+"m:copy": {
+"g": "Fonctions et méthodes",
+"sig": "liste.copy()",
+"d": "Crée une <b>copie indépendante</b> de la liste (modifier la copie ne modifie pas l’original).",
+"ex": [
+{
+"c": "a = [1, 2]\nb = a.copy()\nb.append(3)",
+"e": "a",
+"r": "[1, 2]",
+"p": 0
+}
+]
+},
+"m:upper": {
+"g": "Fonctions et méthodes",
+"sig": "texte.upper()",
+"d": "Renvoie le texte en <b>MAJUSCULES</b> (<code>lower()</code> : en minuscules).",
+"ex": [
+{
+"c": "",
+"e": "\"snt\".upper()",
+"r": "'SNT'",
+"p": 0
+}
+]
+},
+"m:lower": {
+"g": "Fonctions et méthodes",
+"sig": "texte.lower()",
+"d": "Renvoie le texte en <b>minuscules</b> (<code>upper()</code> : en majuscules).",
+"ex": [
+{
+"c": "",
+"e": "\"SNT\".lower()",
+"r": "'snt'",
+"p": 0
+}
+]
+},
+"m:sort": {
+"g": "Fonctions et méthodes",
+"sig": "liste.sort()",
+"d": "Trie la liste <b>elle-même</b> (elle est modifiée ; rien n’est renvoyé). Mêmes options que <code>sorted</code>.",
+"ex": [
+{
+"c": "l = [3, 1, 2]\nl.sort()",
+"e": "l",
+"r": "[1, 2, 3]",
+"p": 0
+}
+]
+},
+"m:fromkeys": {
+"g": "Fonctions et méthodes",
+"sig": "dict.fromkeys(liste, v)",
+"d": "Crée un dictionnaire dont les <b>clés</b> sont les éléments de la liste, tous associés à la même valeur v.",
+"ex": [
+{
+"c": "",
+"e": "dict.fromkeys([\"a\", \"b\"], 0)",
+"r": "{'a': 0, 'b': 0}",
+"p": 0
+}
+]
+},
+"m:pop": {
+"g": "Fonctions et méthodes",
+"sig": "liste.pop()",
+"d": "Retire et <b>renvoie</b> le dernier élément de la liste (<code>pop(i)</code> : celui d’indice i ; pour un dictionnaire : <code>pop(clé)</code>).",
+"ex": [
+{
+"c": "l = [4, 5, 6]",
+"e": "l.pop()",
+"r": "6",
+"p": 0
+}
+]
+},
+"m:index": {
+"g": "Fonctions et méthodes",
+"sig": "liste.index(x)",
+"d": "Renvoie l’<b>indice</b> de la première occurrence de x.",
+"ex": [
+{
+"c": "",
+"e": "[\"a\", \"b\", \"c\"].index(\"c\")",
+"r": "2",
+"p": 0
+}
+]
+},
+"m:find": {
+"g": "Fonctions et méthodes",
+"sig": "texte.find(x)",
+"d": "Renvoie l’indice de la première occurrence de x dans le texte (−1 s’il n’y est pas).",
+"ex": [
+{
+"c": "",
+"e": "\"snt\".find(\"t\")",
+"r": "2",
+"p": 0
+}
+]
+},
+"m:format": {
+"g": "Fonctions et méthodes",
+"sig": "texte.format(…)",
+"d": "Remplace les <code>{}</code> du texte par les valeurs données.",
+"ex": [
+{
+"c": "",
+"e": "\"{} km\".format(12)",
+"r": "'12 km'",
+"p": 0
+}
+]
+},
+"m:insert": {
+"g": "Fonctions et méthodes",
+"sig": "liste.insert(i, x)",
+"d": "Insère x à l’indice i.",
+"ex": [
+{
+"c": "l = [1, 3]\nl.insert(1, 2)",
+"e": "l",
+"r": "[1, 2, 3]",
+"p": 0
+}
+]
+},
+"m:extend": {
+"g": "Fonctions et méthodes",
+"sig": "liste.extend(autre)",
+"d": "Ajoute à la fin tous les éléments d’une autre liste.",
+"ex": [
+{
+"c": "l = [1]\nl.extend([2, 3])",
+"e": "l",
+"r": "[1, 2, 3]",
+"p": 0
+}
+]
+},
+"m:remove": {
+"g": "Fonctions et méthodes",
+"sig": "liste.remove(x)",
+"d": "Retire la première occurrence de x.",
+"ex": [
+{
+"c": "l = [1, 2, 3, 2]\nl.remove(2)",
+"e": "l",
+"r": "[1, 3, 2]",
+"p": 0
+}
+]
+},
+"m:reverse": {
+"g": "Fonctions et méthodes",
+"sig": "liste.reverse()",
+"d": "Retourne la liste elle-même (ordre inversé).",
+"ex": [
+{
+"c": "l = [1, 2, 3]\nl.reverse()",
+"e": "l",
+"r": "[3, 2, 1]",
+"p": 0
+}
+]
+},
+"m:isalpha": {
+"g": "Fonctions et méthodes",
+"sig": "texte.isalpha()",
+"d": "Renvoie <code>True</code> si le texte n’est fait que de <b>lettres</b>.",
+"ex": [
+{
+"c": "",
+"e": "\"abc\".isalpha()",
+"r": "True",
+"p": 0
+}
+]
+},
+"m:capitalize": {
+"g": "Fonctions et méthodes",
+"sig": "texte.capitalize()",
+"d": "Met la première lettre en majuscule.",
+"ex": [
+{
+"c": "",
+"e": "\"snt\".capitalize()",
+"r": "'Snt'",
+"p": 0
+}
+]
+},
+"s:import": {
+"g": "Fonctions et méthodes",
+"sig": "import math",
+"d": "Charge le module <code>math</code> : on utilise ensuite ses fonctions en les préfixant par <code>math.</code> (ex. <code>math.sqrt(…)</code>).",
+"ex": [
+{
+"c": "import math",
+"e": "math.sqrt(49)",
+"r": "7.0",
+"p": 0
+}
+]
+},
+"m:math.sqrt": {
+"g": "Fonctions et méthodes",
+"sig": "math.sqrt(x)",
+"d": "Racine carrée de x (le résultat est toujours un nombre à virgule).",
+"ex": [
+{
+"c": "import math",
+"e": "math.sqrt(81)",
+"r": "9.0",
+"p": 0
+}
+]
+},
+"m:math.radians": {
+"g": "Fonctions et méthodes",
+"sig": "math.radians(angle)",
+"d": "Convertit un angle en <b>degrés</b> en <b>radians</b> (180° = π ≈ 3,14159 rad). Les fonctions <code>sin</code>, <code>cos</code>… attendent des radians.",
+"ex": [
+{
+"c": "import math",
+"e": "math.radians(180)",
+"r": "3.141592653589793",
+"p": 0
+}
+]
+},
+"m:math.sin": {
+"g": "Fonctions et méthodes",
+"sig": "math.sin(x)",
+"d": "Sinus de l’angle x, <b>x en radians</b>.",
+"ex": [
+{
+"c": "import math",
+"e": "math.sin(math.radians(90))",
+"r": "1.0",
+"p": 0
+}
+]
+},
+"m:math.cos": {
+"g": "Fonctions et méthodes",
+"sig": "math.cos(x)",
+"d": "Cosinus de l’angle x, <b>x en radians</b>.",
+"ex": [
+{
+"c": "import math",
+"e": "math.cos(math.radians(180))",
+"r": "-1.0",
+"p": 0
+}
+]
+},
+"m:math.asin": {
+"g": "Fonctions et méthodes",
+"sig": "math.asin(x)",
+"d": "Arc sinus : l’<b>angle en radians</b> dont le sinus vaut x.",
+"ex": [
+{
+"c": "import math",
+"e": "math.asin(1)",
+"r": "1.5707963267948966",
+"p": 0
+}
+]
+},
+"m:math.atan2": {
+"g": "Fonctions et méthodes",
+"sig": "math.atan2(y, x)",
+"d": "Angle (en radians) du point (x, y).",
+"ex": [
+{
+"c": "import math",
+"e": "math.atan2(1, 1)",
+"r": "0.7853981633974483",
+"p": 0
+}
+]
+},
+"m:math.pi": {
+"g": "Fonctions et méthodes",
+"sig": "math.pi",
+"d": "La constante π ≈ 3,14159.",
+"ex": [
+{
+"c": "import math",
+"e": "math.pi",
+"r": "3.141592653589793",
+"p": 0
+}
+]
+},
+"s:def": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "def nom(paramètres): … return valeur",
+"d": "Définit une <b>fonction</b>. Les lignes <b>indentées</b> (décalées) en forment le corps. <code>return</code> <b>renvoie</b> le résultat et <b>arrête</b> aussitôt la fonction. Pour l’utiliser, on l’<b>appelle</b> : <code>nom(valeur)</code>.",
+"ex": [
+{
+"c": "def triple(x):\n    return 3 * x",
+"e": "triple(14)",
+"r": "42",
+"p": 0
+}
+]
+},
+"s:if": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "if / elif / else",
+"d": "<code>if condition:</code> exécute le bloc indenté si la condition est vraie ; <code>elif</code> = « sinon si » ; <code>else</code> = « sinon ». Dès qu’un bloc est exécuté, les suivants sont ignorés.",
+"ex": [
+{
+"c": "n = 8\nif n > 10:\n    r = \"grand\"\nelif n > 5:\n    r = \"moyen\"\nelse:\n    r = \"petit\"",
+"e": "r",
+"r": "'moyen'",
+"p": 0
+}
+]
+},
+"s:for": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "for x in …:",
+"d": "Répète le bloc indenté <b>pour chaque élément</b> d’une liste (ou chaque valeur d’un <code>range</code>) : x prend successivement chaque valeur.",
+"ex": [
+{
+"c": "t = 0\nfor x in [3, 5, 9]:\n    t = t + x",
+"e": "t",
+"r": "17",
+"p": 0
+}
+]
+},
+"s:unpack": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "for a, b in …:",
+"d": "Quand chaque élément est une <b>paire</b> (a, b), on peut récupérer ses deux morceaux d’un coup : a reçoit le premier, b le second.",
+"ex": [
+{
+"c": "t = 0\nfor a, b in [(1, 10), (2, 20)]:\n    t = t + a * b",
+"e": "t",
+"r": "50",
+"p": 0
+}
+]
+},
+"s:while": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "while condition:",
+"d": "Répète le bloc indenté <b>tant que</b> la condition est vraie (elle est testée avant chaque tour).",
+"ex": [
+{
+"c": "n = 1\nwhile n < 20:\n    n = n * 3",
+"e": "n",
+"r": "27",
+"p": 0
+}
+]
+},
+"s:lambda": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "lambda x: expression",
+"d": "Mini-fonction sans nom : elle renvoie l’expression calculée à partir de x. Souvent utilisée avec <code>key=</code> pour dire <b>selon quel critère</b> trier ou comparer.",
+"ex": [
+{
+"c": "f = lambda x: x * 10",
+"e": "f(4)",
+"r": "40",
+"p": 0
+},
+{
+"c": "",
+"e": "max([(1, 9), (2, 5)], key=lambda p: p[1])",
+"r": "(1, 9)",
+"p": 0
+}
+]
+},
+"s:comp": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "[expr for x in liste if condition]",
+"d": "<b>Liste en compréhension</b> : on parcourt la liste, on garde les x pour lesquels la condition est vraie (le <code>if</code> est facultatif) et on calcule <code>expr</code> pour chacun.",
+"ex": [
+{
+"c": "",
+"e": "[x * 2 for x in [1, 2, 3, 4] if x != 3]",
+"r": "[2, 4, 8]",
+"p": 0
+}
+]
+},
+"s:index": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "liste[i]",
+"d": "L’<b>indice</b> est le numéro de position, <b>à partir de 0</b> : <code>l[0]</code> premier élément, <code>l[1]</code> deuxième, <code>l[-1]</code> <b>dernier</b>. Fonctionne aussi sur un texte.",
+"ex": [
+{
+"c": "l = [\"a\", \"b\", \"c\"]",
+"e": "l[0]",
+"r": "'a'",
+"p": 0
+},
+{
+"c": "l = [\"a\", \"b\", \"c\"]",
+"e": "l[-1]",
+"r": "'c'",
+"p": 0
+}
+]
+},
+"s:slice": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "liste[a:b]",
+"d": "<b>Tranche</b> : éléments d’indice a (inclus) à b (<b>exclu</b>). <code>[:b]</code> part du début, <code>[a:]</code> va jusqu’à la fin, <code>[::-1]</code> inverse l’ordre. Fonctionne aussi sur un texte.",
+"ex": [
+{
+"c": "l = [10, 20, 30, 40, 50]",
+"e": "l[1:3]",
+"r": "[20, 30]",
+"p": 0
+},
+{
+"c": "l = [10, 20, 30, 40, 50]",
+"e": "l[:2]",
+"r": "[10, 20]",
+"p": 0
+},
+{
+"c": "",
+"e": "\"bonjour\"[::-1]",
+"r": "'ruojnob'",
+"p": 0
+}
+]
+},
+"s:dict": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "{clé: valeur, …}",
+"d": "Un <b>dictionnaire</b> associe une valeur à chaque clé. <code>d[clé]</code> donne la valeur (erreur <code>KeyError</code> si la clé n’existe pas) ; <code>d[clé] = v</code> ajoute ou modifie ; <code>clé in d</code> teste si la clé existe.",
+"ex": [
+{
+"c": "d = {\"nom\": \"Léa\", \"age\": 16}",
+"e": "d[\"age\"]",
+"r": "16",
+"p": 0
+},
+{
+"c": "d = {\"nom\": \"Léa\", \"age\": 16}",
+"e": "\"nom\" in d",
+"r": "True",
+"p": 0
+}
+]
+},
+"s:in": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "x in liste",
+"d": "Teste l’<b>appartenance</b> : <code>True</code> si x est dans la liste (ou dans le texte), <code>False</code> sinon ; <code>x not in liste</code> : le contraire.",
+"ex": [
+{
+"c": "",
+"e": "3 in [1, 2, 3]",
+"r": "True",
+"p": 0
+},
+{
+"c": "",
+"e": "\"ab\" in \"tableau\"",
+"r": "True",
+"p": 0
+}
+]
+},
+"s:logic": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "and / or / not",
+"d": "<code>a and b</code> : vrai si a <b>et</b> b sont vrais. <code>a or b</code> : vrai si l’un <b>au moins</b> est vrai. <code>not a</code> : l’inverse de a.",
+"ex": [
+{
+"c": "",
+"e": "(5 > 2) and (5 < 4)",
+"r": "False",
+"p": 0
+},
+{
+"c": "",
+"e": "(5 > 2) or (5 < 4)",
+"r": "True",
+"p": 0
+},
+{
+"c": "",
+"e": "not (5 < 4)",
+"r": "True",
+"p": 0
+}
+]
+},
+"s:iadd": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "x += n",
+"d": "Ajoute n à x : c’est la même chose que <code>x = x + n</code> (de même <code>-=</code>, <code>*=</code>).",
+"ex": [
+{
+"c": "x = 5\nx += 3",
+"e": "x",
+"r": "8",
+"p": 0
+}
+]
+},
+"s:cmp": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "==   !=   <=   >=",
+"d": "<code>==</code> teste l’<b>égalité</b> (à ne pas confondre avec <code>=</code> qui range une valeur dans une variable) ; <code>!=</code> : différent ; <code>&lt;=</code> et <code>&gt;=</code> : inférieur / supérieur ou égal. Le résultat est <code>True</code> ou <code>False</code>.",
+"ex": [
+{
+"c": "",
+"e": "7 == 7",
+"r": "True",
+"p": 0
+},
+{
+"c": "",
+"e": "4 != 4",
+"r": "False",
+"p": 0
+},
+{
+"c": "",
+"e": "6 <= 5",
+"r": "False",
+"p": 0
+}
+]
+},
+"s:floordiv": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a // b",
+"d": "<b>Quotient entier</b> de la division (sans virgule) : on cherche combien de fois b « rentre » dans a.",
+"ex": [
+{
+"c": "",
+"e": "23 // 5",
+"r": "4",
+"p": 0
+},
+{
+"c": "",
+"e": "9 // 2",
+"r": "4",
+"p": 0
+}
+]
+},
+"s:mod": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a % b",
+"d": "<b>Reste</b> de la division de a par b (« modulo »). Ex. : <code>n % 2 == 0</code> est vrai si n est pair.",
+"ex": [
+{
+"c": "",
+"e": "23 % 5",
+"r": "3",
+"p": 0
+},
+{
+"c": "",
+"e": "9 % 2",
+"r": "1",
+"p": 0
+}
+]
+},
+"s:div": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a / b",
+"d": "Division « normale » : le résultat est <b>toujours un nombre à virgule</b> (<code>8 / 2</code> donne <code>4.0</code>, pas <code>4</code>).",
+"ex": [
+{
+"c": "",
+"e": "9 / 2",
+"r": "4.5",
+"p": 0
+},
+{
+"c": "",
+"e": "12 / 4",
+"r": "3.0",
+"p": 0
+}
+]
+},
+"s:pow": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a ** b",
+"d": "<b>Puissance</b> : a multiplié b fois par lui-même.",
+"ex": [
+{
+"c": "",
+"e": "3 ** 4",
+"r": "81",
+"p": 0
+},
+{
+"c": "",
+"e": "2 ** 7",
+"r": "128",
+"p": 0
+}
+]
+},
+"s:and": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a & b  (ET bit à bit)",
+"d": "Compare les écritures <b>binaires</b> bit par bit : un bit du résultat vaut 1 seulement si les <b>deux</b> bits valent 1. Avec un <b>masque</b> (ex. <code>& 255</code> ou <code>& 0x0F</code>) on ne garde que certains bits.",
+"ex": [
+{
+"c": "",
+"e": "0b1100 & 0b1010",
+"r": "8",
+"p": 0
+},
+{
+"c": "",
+"e": "45 & 15",
+"r": "13",
+"p": 0
+}
+]
+},
+"s:or": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a | b  (OU bit à bit)",
+"d": "Un bit du résultat vaut 1 si <b>au moins un</b> des deux bits vaut 1.",
+"ex": [
+{
+"c": "",
+"e": "0b1100 | 0b1010",
+"r": "14",
+"p": 0
+}
+]
+},
+"s:xor": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a ^ b  (OU exclusif, XOR)",
+"d": "Un bit du résultat vaut 1 si les deux bits sont <b>différents</b> (0 si identiques).",
+"ex": [
+{
+"c": "",
+"e": "0b1100 ^ 0b1010",
+"r": "6",
+"p": 0
+}
+]
+},
+"s:shift": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "a >> n    a << n",
+"d": "<b>Décale</b> les bits de n rangs : <code>&gt;&gt;</code> vers la droite (revient à un quotient entier par 2ⁿ), <code>&lt;&lt;</code> vers la gauche (revient à multiplier par 2ⁿ).",
+"ex": [
+{
+"c": "",
+"e": "0b1100 >> 2",
+"r": "3",
+"p": 0
+},
+{
+"c": "",
+"e": "3 << 2",
+"r": "12",
+"p": 0
+}
+]
+},
+"s:not": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "~a",
+"d": "<b>Inverse tous les bits</b> de a. Pour les entiers Python, <code>~a</code> vaut −a − 1 ; avec <code>& 255</code> on se limite à 8 bits.",
+"ex": [
+{
+"c": "",
+"e": "~5",
+"r": "-6",
+"p": 0
+},
+{
+"c": "",
+"e": "(~5) & 255",
+"r": "250",
+"p": 0
+}
+]
+},
+"s:lit": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "0b…   0x…",
+"d": "Façon d’écrire un nombre directement dans le programme : <code>0b101</code> est écrit en <b>binaire</b>, <code>0x1F</code> en <b>hexadécimal</b>. Python les convertit en nombres entiers ordinaires.",
+"ex": [
+{
+"c": "",
+"e": "0b101",
+"r": "5",
+"p": 0
+},
+{
+"c": "",
+"e": "0x1F",
+"r": "31",
+"p": 0
+}
+]
+},
+"s:strops": {
+"g": "Mots-clés, opérateurs et notations",
+"sig": "texte + texte   texte * n",
+"d": "Sur les textes, <code>+</code> <b>colle</b> deux textes et <code>*</code> <b>répète</b> un texte n fois.",
+"ex": [
+{
+"c": "",
+"e": "\"ab\" + \"cd\"",
+"r": "'abcd'",
+"p": 0
+},
+{
+"c": "",
+"e": "\"ab\" * 3",
+"r": "'ababab'",
+"p": 0
+}
+]
+}
+};
+const MEMO_GROUPS = ['Fonctions et méthodes', 'Mots-clés, opérateurs et notations'];
+const MEMO_SYN = ['s:import', 's:def', 's:if', 's:for', 's:unpack', 's:while', 's:lambda', 's:comp', 's:index', 's:slice', 's:dict', 's:in', 's:logic', 's:iadd', 's:cmp', 's:div', 's:floordiv', 's:mod', 's:pow', 's:and', 's:or', 's:xor', 's:shift', 's:not', 's:lit', 's:strops'];
+const FSTR_RE = /\bf(["'])((?:(?!\1)[^\\\n]|\\.)*)\1/g;
+function splitSpec(e) { /* sépare « expression:format » au premier « : » hors parenthèses et guillemets */
+  let d = 0, q = null;
+  for (let i = 0; i < e.length; i++) {
+    const c = e[i];
+    if (q) { if (c === q) q = null; continue; }
+    if (c === '"' || c === "'") q = c; else if ('([{'.includes(c)) d++; else if (')]}'.includes(c)) d--; else if (c === ':' && d === 0) return { expr: e.slice(0, i), spec: e.slice(i + 1) };
+  }
+  return { expr: e, spec: '' };
+}
+function memoKeys(src) {
+  const exprs = [];
+  let t = String(src || '').replace(/#[^\n]*/g, '');
+  t = t.replace(FSTR_RE, (m, q, body) => { for (const mm of body.matchAll(/\{([^{}]*)\}/g)) exprs.push(splitSpec(mm[1]).expr); return '""'; });
+  t = t + '\n' + exprs.join('\n');
+  t = t.replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""');
+  const keys = [], add = k => { if (MEMO[k] && !keys.includes(k)) keys.push(k); };
+  const defs = new Set(Array.from(t.matchAll(/\bdef\s+(\w+)/g), m => m[1]));
+  for (const m of t.matchAll(/(?<![\w.])([A-Za-z_]\w*)\s*\(/g)) if (!defs.has(m[1])) add('f:' + m[1]);
+  for (const m of t.matchAll(/(\w+)\.(\w+)\s*\(/g)) add(m[1] === 'math' ? 'm:math.' + m[2] : 'm:' + m[2]);
+  for (const m of t.matchAll(/\bmath\.(pi)\b/g)) add('m:math.' + m[1]);
+  const T = (re, k) => { if (re.test(t)) add(k); };
+  T(/\bimport\s+math/, 's:import'); T(/\bdef\s/, 's:def'); T(/\b(if|elif|else)\b/, 's:if');
+  T(/(^|\n)\s*for\s+\w+\s+in\b/, 's:for'); T(/\bfor\s+\w+\s*,\s*\w+(\s*,\s*\w+)*\s+in\b/, 's:unpack');
+  T(/\bwhile\b/, 's:while'); T(/\blambda\b/, 's:lambda'); T(/\S\s+for\s+\w[\w\s,]*\s+in\s/, 's:comp');
+  T(/[\w)\]]\[\s*(-?\d+|[A-Za-z_]\w*(\s*[-+]\s*\d+)?)\s*\]/, 's:index');
+  T(/\[[^\]\[{}]*:[^\]\[{}]*\]/, 's:slice');
+  T(/\{\s*[^{}]*:[^{}]*\}|\{\s*\}|=\s*dict\(/, 's:dict');
+  if (/\bin\b/.test(t.replace(/\bfor\s+[\w\s,]+?\s+in\b/g, 'for'))) add('s:in');
+  T(/\b(and|or|not)\b/, 's:logic'); T(/(\+=|-=|\*=)/, 's:iadd'); T(/(==|!=|<=|>=)/, 's:cmp');
+  T(/(?<!\/)\/(?!\/)/, 's:div'); T(/\/\//, 's:floordiv'); T(/%/, 's:mod'); T(/\*\*/, 's:pow');
+  T(/(?<!&)&(?!&)/, 's:and'); T(/(?<!\|)\|(?!\|)/, 's:or'); T(/\^/, 's:xor'); T(/>>|<</, 's:shift'); T(/~/, 's:not');
+  T(/\b0[bBxX][0-9a-fA-F]+\b/, 's:lit'); T(/""\s*[+*]|[+*]\s*""/, 's:strops');
+  return keys;
+}
+const nsp = s => String(s).replace(/\s+/g, '');
+function memoEl(q, srcs) {
+  const keys = memoKeys(srcs.join('\n'));
+  if (!keys.length) return null;
+  const all = nsp(srcs.join('\n')), good = String(q.k === 'qcm' ? q.o[0] : (q.ans || '')).replace(/^'|'$/g, '');
+  const wrap = h('div', { class: 'memo-in' });
+  MEMO_GROUPS.forEach((g, gi) => {
+    const ks = keys.filter(k => MEMO[k].g === g).sort((a, b) => gi === 0 ? 0 : MEMO_SYN.indexOf(a) - MEMO_SYN.indexOf(b));
+    if (!ks.length) return;
+    wrap.append(h('h4', null, g));
+    ks.forEach(k => {
+      const m = MEMO[k];
+      /* exemples : on écarte ceux qui recopient la question ou dévoileraient la réponse */
+      const ex = m.ex.filter(x => { const full = nsp(x.c + x.e); return !all.includes(full) && !(nsp(x.e).length >= 7 && all.includes(nsp(x.e))) && !(good.length >= 3 && x.r.replace(/^'|'$/g, '') === good); }).slice(0, 3);
+      wrap.append(h('div', { class: 'mi' }, h('div', { class: 'mh' }, h('code', null, m.sig)), h('p', { html: m.d }),
+        ex.length ? h('div', { class: 'mx' }, ex.map(x => h('pre', { class: 'mex' }, h('span', { html: hlPy(x.c ? x.c + '\n' + x.e : x.e) }), h('span', { class: 'mar' }, (x.p ? '   affiche : ' : '   → ') + x.r)))) : null));
+    });
+  });
+  return h('details', { class: 'memo', open: true }, h('summary', null, 'Mémento : les outils Python utilisés dans cette question'), wrap);
+}
+function specText(sp) {
+  if (!sp) return '';
+  const m = /^(0)?(\d+)?(?:\.(\d+))?([bxXfd])?$/.exec(sp);
+  if (!m) return 'avec la mise en forme « ' + esc(sp) + ' »';
+  const p = [];
+  if (m[3] !== undefined && m[4] === 'f') p.push('arrondie à <b>' + m[3] + ' chiffre' + (m[3] > 1 ? 's' : '') + ' après la virgule</b>');
+  else if (m[4] === 'b') p.push('écrite en <b>binaire</b> (sans le préfixe 0b)');
+  else if (m[4] === 'x') p.push('écrite en <b>hexadécimal minuscule</b> (sans le préfixe 0x)');
+  else if (m[4] === 'X') p.push('écrite en <b>hexadécimal MAJUSCULE</b> (sans le préfixe 0x)');
+  if (m[2]) p.push(m[1] ? 'sur <b>' + m[2] + ' caractères</b>, complétés par des <b>0 à gauche</b> si besoin' : 'sur au moins ' + m[2] + ' caractères (complétés par des espaces)');
+  return p.join(', ');
+}
+function fBox(src) {
+  const seen = new Set(), items = [];
+  for (const f of String(src || '').matchAll(FSTR_RE)) for (const mm of f[2].matchAll(/\{([^{}]*)\}/g)) {
+    if (seen.has(mm[1])) continue; seen.add(mm[1]);
+    const { expr, spec } = splitSpec(mm[1]), e = expr.trim();
+    let what = /^[A-Za-zÀ-ſ_]\w*$/.test(e) ? 'la valeur de la variable <code>' + esc(e) + '</code>' : /^-?\d+(\.\d+)?$/.test(e) ? 'le nombre <code>' + esc(e) + '</code>' : 'le résultat du calcul <code>' + esc(e) + '</code>';
+    const st = specText(spec);
+    items.push(h('li', null, h('code', null, '{' + mm[1] + '}'), ' → ', h('span', { html: 'Python calcule ' + what + (st ? ', ' + st : '') + ', puis l’insère dans le texte.' })));
+  }
+  return h('div', { class: 'fstr-note' },
+    h('p', { class: 'ft', html: '<b>Comment lire un texte <code>f"…"</code> (appelé « f-string »)</b>' }),
+    h('ul', { class: 'fl' },
+      h('li', { html: 'Le <code>f</code> collé devant le guillemet signale un <b>modèle de texte</b>.' }),
+      h('li', { html: 'Ce qui est entre accolades <code>{ }</code> n’est <b>pas</b> affiché tel quel : Python le <b>calcule</b>, puis met le <b>résultat à la place</b> des accolades.' }),
+      h('li', { html: 'Tout le reste (lettres, espaces, symboles, balises…) est <b>recopié tel quel</b>.' }),
+      h('li', { html: 'Un <code>:</code> dans les accolades règle la <b>présentation</b> de la valeur, ex. <code>{x:.1f}</code> (1 chiffre après la virgule).' })),
+    items.length ? h('p', { class: 'ft' }, h('b', null, 'Dans ce programme :')) : null, items.length ? h('ul', { class: 'fl' }, items) : null);
+}
+/* Énoncés : contexte + question + consigne, présentés de la même façon pour toutes les questions */
+function parseAsk(q) {
+  const a = String(q.ask || '').replace(/\\'/g, "'");
+  const m = /^(.*?)\s*Qu['’]affiche ce programme(?:\s*\(([^)]*)\))?\s*\?$/.exec(a);
+  if (!m) return { ctx: '', task: a };
+  let ctx = (m[1] || '').trim();
+  if (m[2]) { const p = m[2].trim(); ctx = (ctx ? ctx + ' ' : '') + p.charAt(0).toUpperCase() + p.slice(1) + '.'; }
+  return { ctx, task: 'Qu’affiche ce programme ?' };
+}
+const KIND = { out: 'Prévoir l’affichage', qcm: 'QCM', code: 'Écrire une fonction' };
+const HOW = { out: 'Écrivez dans la zone ci-dessous exactement ce que le programme affiche à l’écran.', qcm: 'Une seule réponse est correcte : cochez-la.', code: 'Écrivez votre code dans la zone ci-dessous : il sera testé automatiquement.' };
+function fmtHelp(q) {
+  const a = q.ans || '', p = ['Recopiez l’affichage tel qu’il apparaît dans la console Python.'];
+  p.push('Un texte affiché par <code>print</code> s’écrit <b>sans guillemets</b>.');
+  if (/[\[\]{}()]/.test(a)) p.push('Les crochets, accolades, virgules et espaces d’une liste ou d’un dictionnaire font partie de l’affichage ; <b>à l’intérieur</b>, Python entoure les textes d’apostrophes <code>\'…\'</code>.');
+  if (/\n/.test(a)) p.push('Plusieurs <code>print</code> : écrivez <b>une ligne par affichage</b>.');
+  if (/\b(True|False)\b/.test(a)) p.push('Les valeurs logiques s’écrivent <code>True</code> / <code>False</code> (majuscule au début).');
+  if (/\d\.\d/.test(a)) p.push('Un nombre à virgule s’écrit avec un <b>point</b> (<code>2.5</code>).');
+  return p.join(' ');
+}
+const qLabel = q => { const p = parseAsk(q); const first = (q.code || '').split('\n')[0].trim(); return (p.ctx ? p.ctx.replace(/<[^>]+>/g, '') + ' ' : '') + p.task.replace(/<[^>]+>/g, '') + (first && q.k !== 'code' ? '  [' + (first.length > 42 ? first.slice(0, 42) + '…' : first) + ']' : ''); };
+
 /* ---------- affichage d'une question ---------- */
 function qView(i, o) {
-  o = o || {}; const q = i.q;
+  o = o || {}; const q = i.q, pa = parseAsk(q);
   const card = h('div', { class: 'qcard' }), fb = h('div', { class: 'qfb' });
-  card.append(h('div', { class: 'qh' }, o.num ? h('b', null, 'Question ' + o.num) : null, h('span', { class: 'lv l' + q.l, title: LVN[q.l] }, STAR[q.l]), h('span', { class: 'sc' }, SEC[q.s].c), h('span', { class: 'pts' }, PTS[q.l] + (PTS[q.l] > 1 ? ' points' : ' point'))));
-  card.append(h('p', { class: 'qask', html: q.ask }));
-  if (q.k !== 'code') card.append(codeEl(q.code));
-  const hasFstr = /\bf["']/.test(q.code || '') || /\bf["']/.test(q.sol || '');
-  if (hasFstr) {
-    card.append(h('div', { class: 'fstr-note', html: '<b>Note (hors programme SNT · niveau ★★★) :</b> ce code utilise une <i>f-string</i> (<code>f"..."</code>). En Python, le préfixe <code>f</code> permet d’insérer directement la valeur d’une variable ou d’un calcul entre accolades <code>{...}</code> à l’intérieur d’un texte.' }));
-  }
-  const locked = () => o.locked;
+  card.append(h('div', { class: 'qh' }, o.num ? h('b', null, 'Question ' + o.num) : null, h('span', { class: 'lv l' + q.l, title: LVN[q.l] }, STAR[q.l]), h('span', { class: 'sc' }, SEC[q.s].c), h('span', { class: 'kd' }, KIND[q.k]), h('span', { class: 'pts' }, PTS[q.l] + (PTS[q.l] > 1 ? ' points' : ' point'))));
+  if (pa.ctx) card.append(h('div', { class: 'qctx', html: '<b>Contexte :</b> ' + pa.ctx }));
+  card.append(h('p', { class: 'qask', html: pa.task }));
+  card.append(h('p', { class: 'qhow' }, HOW[q.k]));
+  if (q.k !== 'code' && q.code) { card.append(h('div', { class: 'qlbl' }, 'Programme')); card.append(codeEl(q.code)); }
+  const hasFstr = /\bf["']/.test(q.code || '');
+  if (hasFstr) card.append(fBox(q.code));
+  const mem = memoEl(q, q.k === 'code' ? [q.sol, q.start] : [q.code]);
+  if (mem) card.append(mem);
   let optEls = [];
+  card.append(h('div', { class: 'qlbl' }, q.k === 'qcm' ? 'Votre choix' : (q.k === 'code' ? 'Votre code' : 'Votre réponse')));
   if (q.k === 'qcm') {
     const box = h('div', { class: 'qopts', role: 'radiogroup', 'aria-label': 'Réponses possibles' });
     i.ord.forEach((oi, pos) => {
-      const inp = h('input', { type: 'radio', name: 'r-' + q.id + (o.uid || ''), disabled: locked() ? 'disabled' : null });
+      const inp = h('input', { type: 'radio', name: 'r-' + q.id + (o.uid || ''), disabled: o.locked ? 'disabled' : null });
       if (i.a === pos) inp.checked = true;
       inp.addEventListener('change', () => { i.a = pos; if (o.onChange) o.onChange(i); });
-      const lab = h('label', { class: 'opt' }, inp, h('span', { class: 'mono' }, q.o[oi])); optEls[pos] = lab; box.append(lab);
+      const lab = h('label', { class: 'opt' }, inp, h('span', { class: q.code ? 'mono' : '' }, q.o[oi])); optEls[pos] = lab; box.append(lab);
     });
     card.append(box);
   } else {
     const ta = h('textarea', { class: 'qin mono' + (q.k === 'code' ? ' ced' : ''), rows: q.k === 'code' ? Math.max(6, q.sol.split('\n').length + 2) : Math.max(1, q.ans.split('\n').length), spellcheck: 'false', autocomplete: 'off', autocapitalize: 'off', 'aria-label': q.k === 'code' ? 'Votre code Python' : 'Votre réponse', placeholder: q.k === 'code' ? '' : 'Ce que le programme affiche…' });
-    ta.value = i.a; if (locked()) ta.disabled = true;
+    ta.value = i.a; if (o.locked) ta.disabled = true;
     ta.addEventListener('input', () => { i.a = ta.value; if (o.onChange) o.onChange(i); });
     if (q.k === 'code') ta.addEventListener('keydown', e => { if (e.key === 'Tab') { e.preventDefault(); const s = ta.selectionStart; ta.value = ta.value.slice(0, s) + '    ' + ta.value.slice(ta.selectionEnd); ta.selectionStart = ta.selectionEnd = s + 4; i.a = ta.value; } });
     card.append(ta);
-    if (q.k === 'out') card.append(h('p', { class: 'small' }, 'Écrivez exactement ce que le programme affiche (sans guillemets autour du texte, sauf s’ils sont affichés).'));
+    card.append(h('p', { class: 'small qfmt', html: q.k === 'out' ? fmtHelp(q) : 'Pensez à l’indentation (4 espaces, ou la touche Tab) et à <code>return</code> pour renvoyer le résultat.' }));
   }
   card.append(fb);
-  /* retour */
   function show(kind) { /* kind : 'verify' | 'reveal' | 'review' */
     fb.innerHTML = '';
     const r = i.res = grade(i);
     if (kind !== 'reveal') fb.append(h('p', { class: 'verdict ' + (r.ok ? 'yes' : 'no') }, r.ok ? 'Bonne réponse !' : (answered(i) ? 'Réponse incorrecte.' : 'Pas de réponse.')));
     if (q.k === 'qcm') optEls.forEach((lab, pos) => { lab.classList.remove('good', 'bad'); if (i.ord[pos] === 0) lab.classList.add('good'); else if (i.a === pos) lab.classList.add('bad'); });
-    if (q.k === 'code' && r.tests && kind !== 'reveal') fb.append(h('ul', { class: 'tl2' }, r.tests.map(t => h('li', { class: t.ok ? 'tok' : 'tko' }, h('b', null, (t.ok ? '✓ ' : '✗ ') + t.label), t.detail ? h('pre', { class: 'small', style: 'margin:2px 0 0;white-space:pre-wrap' }, t.detail) : null))));
+    if (q.k === 'code' && r.tests && kind !== 'reveal' && answered(i)) fb.append(h('ul', { class: 'tl2' }, r.tests.map(t => h('li', { class: t.ok ? 'tok' : 'tko' }, h('b', null, (t.ok ? '✓ ' : '✗ ') + t.label), t.detail ? h('pre', { class: 'small', style: 'margin:2px 0 0;white-space:pre-wrap' }, t.detail) : null))));
     if (!r.ok || kind === 'reveal') {
       fb.append(h('p', { class: 'qlab' }, q.k === 'code' ? 'Une solution possible :' : 'Réponse attendue :'));
       fb.append(q.k === 'qcm' ? h('p', { class: 'mono exp' }, q.o[0]) : q.k === 'out' ? h('pre', { class: 'code exp' }, q.ans) : codeEl(q.sol));
+      if (q.k === 'code' && /\bf["']/.test(q.sol || '')) fb.append(fBox(q.sol));
     }
     fb.append(h('div', { class: 'expl' }, h('p', { class: 'qlab' }, 'Explication'), h('p', { html: q.e }), q.lien ? h('p', { class: 'lien' }, h('b', null, 'Lien avec la SNT : '), q.lien) : null));
-    if (hasFstr) {
-      fb.append(h('div', { class: 'fstr-note', html: '<b>Rappel sur la notation <code>f"..."</code> (hors programme SNT) :</b> tout ce qui est écrit entre <code>{</code> et <code>}</code> est évalué par Python puis converti en texte. S’il y a deux-points après l’expression (ex. <code>:.1f</code> ou <code>:08b</code>), cela précise le format d’affichage (arrondi ou base binaire/hexadécimale).' }));
-    }
     return r;
   }
   return { el: card, show, fb };
@@ -2045,7 +3541,7 @@ function trainEnd(root) {
   const byL = [1, 2, 3].map(l => { const t = S.list.filter(x => x.q.l === l); return t.length ? { l: STAR[l], r: t.filter(x => x.verified && x.res.ok).length + ' / ' + t.length } : null; }).filter(Boolean);
   root.append(tableEl(byL, ['l', 'r'], { l: 'Niveau', r: 'Réussies' }));
   root.append(h('div', { class: 'opts' }, ko.length ? h('button', { class: 'btn pri', type: 'button', onclick: () => { T.sess = { list: shuffle(ko.map(x => mkInst(x.q))), idx: 0 }; render(); } }, 'Refaire les ' + ko.length + ' à revoir') : null, h('button', { class: 'btn', type: 'button', onclick: () => { T.sess = null; render(); } }, 'Nouvelle séance'), h('button', { class: 'btn', type: 'button', onclick: () => { S.idx = 0; render(); } }, 'Relire la séance')));
-  if (ko.length) { root.append(h('h3', null, 'Questions à revoir')); root.append(h('ul', { class: 'revlist' }, ko.map(x => h('li', null, h('b', null, STAR[x.q.l] + ' ' + SEC[x.q.s].c + ' : '), x.q.ask.replace(/<[^>]+>/g, ''), ' ', h('button', { class: 'btn sm', type: 'button', onclick: () => { S.idx = S.list.indexOf(x); render(); } }, 'Ouvrir'))))); }
+  if (ko.length) { root.append(h('h3', null, 'Questions à revoir')); root.append(h('ul', { class: 'revlist' }, ko.map(x => h('li', null, h('b', null, STAR[x.q.l] + ' ' + SEC[x.q.s].c + ' : '), qLabel(x.q), ' ', h('button', { class: 'btn sm', type: 'button', onclick: () => { S.idx = S.list.indexOf(x); render(); } }, 'Ouvrir'))))); }
 }
 
 /* ---------- EXAMEN ---------- */
@@ -2165,6 +3661,7 @@ function openHelp() {
     h('p', null, h('b', null, 'Examen. '), 'Une feuille de questions avec chronomètre. À la fin, le bouton « Terminer et corriger » affiche, pour chaque question, si la réponse est juste. Les points valent 1, 2 ou 3 selon le niveau ; la note est ramenée sur 20.'),
     h('p', null, h('b', null, 'Types de questions. '), 'Choix multiple (QCM), « que affiche ce programme ? » (écrivez la sortie exacte) et « écrire une fonction » (votre code est testé automatiquement sur plusieurs cas).'),
     h('p', null, h('b', null, 'Python. '), 'Un interpréteur Python simplifié tourne dans la page, sans rien envoyer sur Internet. Il couvre le programme de seconde ; ce n’est pas un Python complet.'),
+    h('p', null, h('b', null, 'Mémento. '), 'Sous chaque question, un mémento rappelle les fonctions et opérateurs Python utilisés, avec un petit exemple. Aucune fonction Python n’est supposée connue : lisez-le avant de répondre. Les textes de la forme f"…" sont expliqués pas à pas.'),
     h('p', { class: 'small' }, 'Votre progression est conservée dans ce navigateur uniquement.')));
 }
 function init() {

@@ -1,22 +1,295 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Administration — Évaluation SNT</title>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Administration — Évaluation SNT</title>
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#182338;background:#f3f6fb}*{box-sizing:border-box}body{margin:0}.top{background:#183b67;color:white;padding:22px max(18px,calc((100% - 1050px)/2))}.top h1{margin:0;font-size:1.45rem}.wrap{max-width:1050px;margin:24px auto;padding:0 16px}.panel{background:white;border:1px solid #dce3ed;border-radius:13px;padding:20px;margin-bottom:16px}h2{font-size:1.08rem;margin:0 0 14px}.row{display:flex;align-items:end;gap:12px;flex-wrap:wrap}label{display:block;font-weight:650;font-size:.9rem}input{display:block;margin-top:6px;padding:10px;border:1px solid #bdc9d8;border-radius:8px;font:inherit;min-width:180px}button{border:0;border-radius:8px;padding:10px 15px;background:#205da0;color:white;font-weight:700;cursor:pointer}.secondary{background:#e7edf5;color:#183b67}.danger{background:#a83232}.muted{color:#607086;font-size:.9rem}.error{color:#b42318;font-weight:650}.good{color:#167247;font-weight:650}.code{font-size:1.55rem;font-weight:850;letter-spacing:.12em;color:#205da0}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:.88rem}th,td{text-align:left;padding:9px;border-bottom:1px solid #e4eaf1;white-space:nowrap}th{background:#f1f5fa}.hidden{display:none!important}
-</style></head><body><header class="top"><h1>Administration de l'évaluation SNT</h1></header><main class="wrap">
-<section class="panel"><h2>Connexion professeur</h2><p class="muted">Saisis le secret ADMIN_TOKEN enregistré dans Cloudflare. Il n'est pas enregistré dans le dépôt GitHub.</p><div class="row"><label>Jeton professeur<input id="token" type="password" autocomplete="off" style="min-width:min(440px,80vw)"></label><button id="connect">Se connecter</button></div><p id="msg" role="status"></p></section>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#182338;background:#f3f6fb}
+*{box-sizing:border-box}
+body{margin:0}
+.top{background:#183b67;color:white;padding:22px max(18px,calc((100% - 1050px)/2))}
+.top h1{margin:0;font-size:1.45rem}
+.wrap{max-width:1050px;margin:24px auto;padding:0 16px}
+.panel{background:white;border:1px solid #dce3ed;border-radius:13px;padding:20px;margin-bottom:16px}
+h2{font-size:1.08rem;margin:0 0 14px}
+h3{font-size:.98rem;margin:18px 0 10px}
+.row{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+label{display:block;font-weight:650;font-size:.9rem}
+input,select{display:block;margin-top:6px;padding:10px;border:1px solid #bdc9d8;border-radius:8px;font:inherit;min-width:180px;background:white;color:#182338}
+input[type=file]{max-width:100%;min-width:240px}
+button{border:0;border-radius:8px;padding:10px 15px;background:#205da0;color:white;font-weight:700;cursor:pointer}
+button:disabled{opacity:.55;cursor:wait}
+.secondary{background:#e7edf5;color:#183b67}
+.danger{background:#a83232}
+.muted{color:#607086;font-size:.9rem}
+.error{color:#b42318;font-weight:650}
+.good{color:#167247;font-weight:650}
+.code{font-size:1.55rem;font-weight:850;letter-spacing:.12em;color:#205da0}
+.tablewrap{overflow:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:9px;border-bottom:1px solid #e4eaf1;white-space:nowrap}
+th{background:#f1f5fa}
+.hidden{display:none!important}
+.subject-meta{margin:9px 0 0}
+.help{margin:8px 0 0}
+hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
+@media(max-width:600px){.panel{padding:15px}.row>*{max-width:100%}input,select{min-width:0;width:100%}.row label{width:100%}.row button{width:100%}}
+</style>
+</head>
+<body>
+<header class="top"><h1>Administration de l'évaluation SNT</h1></header>
+<main class="wrap">
+
+<section class="panel">
+<h2>Connexion professeur</h2>
+<p class="muted">Saisis le secret ADMIN_TOKEN enregistré dans Cloudflare. Il n'est pas enregistré dans le dépôt GitHub.</p>
+<div class="row">
+<label>Jeton professeur<input id="token" type="password" autocomplete="off" style="min-width:min(440px,80vw)"></label>
+<button id="connect">Se connecter</button>
+</div>
+<p id="msg" role="status" aria-live="polite"></p>
+</section>
+
 <div id="dash" class="hidden">
-<section class="panel"><h2>Créer une session</h2><div class="row"><label>Nom de l'évaluation<input id="title" value="Évaluation SNT Python" style="min-width:260px"></label><label>Durée (minutes)<input id="duration" type="number" min="1" max="180" value="45"></label><button id="create">Créer et ouvrir la session</button></div><p id="newSession"></p></section>
-<section class="panel"><h2>Résultats des élèves</h2><div class="row"><label>Code de session<input id="code" placeholder="CODE" autocapitalize="characters"></label><button id="refresh" class="secondary">Actualiser</button><button id="close" class="danger">Fermer la session</button><button id="csv">Exporter le CSV</button></div><p id="summary" class="muted"></p><div class="tablewrap"><table><thead><tr><th>Nom</th><th>Prénom</th><th>État</th><th>Note / 20</th><th>Alertes</th><th>Début</th><th>Fin</th></tr></thead><tbody id="rows"></tbody></table></div><p class="muted">Les changements d'onglet sont des alertes à examiner, pas une preuve automatique de fraude.</p></section>
-<section class="panel"><h2>Journal des événements</h2><div id="events" class="muted">Aucun événement chargé.</div></section>
-</div></main>
-<script src="config.js"></script><script>
-'use strict';const API=(window.SNT_API_BASE||'').replace(/\/$/,'');const $=id=>document.getElementById(id);let adminToken='';
-async function call(path,opts={}){if(!API)throw Error('Adresse API absente dans config.js.');const headers={'Content-Type':'application/json','X-Admin-Token':adminToken,...(opts.headers||{})};const r=await fetch(API+path,{...opts,headers});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||('Erreur HTTP '+r.status));return d}
-function msg(t,cls=''){ $('msg').className=cls;$('msg').textContent=t }
-$('connect').onclick=async()=>{adminToken=$('token').value;try{await call('/api/admin/check');$('dash').classList.remove('hidden');msg('Connexion réussie.','good')}catch(e){adminToken='';msg(e.message,'error')}};
-$('create').onclick=async()=>{try{const d=await call('/api/admin/create',{method:'POST',body:JSON.stringify({title:$('title').value,durationMinutes:Number($('duration').value)})});$('code').value=d.code;$('newSession').innerHTML='Session créée et ouverte : <span class="code">'+d.code+'</span> · '+d.durationMinutes+' min';await refresh()}catch(e){msg(e.message,'error')}};
-async function refresh(){const code=$('code').value.trim().toUpperCase();if(!code)return;try{const d=await call('/api/admin/results?code='+encodeURIComponent(code));$('rows').innerHTML=(d.attempts||[]).map(a=>'<tr><td>'+esc(a.last_name)+'</td><td>'+esc(a.first_name)+'</td><td>'+esc(a.status)+'</td><td>'+(a.grade??'—')+'</td><td>'+(a.incidents??0)+'</td><td>'+date(a.started_at)+'</td><td>'+date(a.finished_at)+'</td></tr>').join('');$('summary').textContent=(d.attempts||[]).length+' tentative(s) enregistrée(s).';$('events').innerHTML=(d.events||[]).map(e=>'<p><strong>'+esc(e.kind)+'</strong> · '+esc(e.identity_key)+' · '+date(e.created_at)+'</p>').join('')||'Aucun événement.'}catch(e){msg(e.message,'error')}}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function date(v){return v?new Date(v).toLocaleString('fr-FR'):'—'}
-$('refresh').onclick=refresh;$('close').onclick=async()=>{const code=$('code').value.trim().toUpperCase();if(!code)return;if(!confirm('Fermer cette session ? Les nouveaux élèves ne pourront plus commencer.'))return;try{await call('/api/admin/close',{method:'POST',body:JSON.stringify({code})});msg('Session fermée.','good');await refresh()}catch(e){msg(e.message,'error')}};
-$('csv').onclick=async()=>{const code=$('code').value.trim().toUpperCase();if(!code)return;try{const r=await fetch(API+'/api/admin/csv?code='+encodeURIComponent(code),{headers:{'X-Admin-Token':adminToken}});if(!r.ok){let d={};try{d=await r.json()}catch{}throw Error(d.error||'Export impossible')}const blob=await r.blob();const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='resultats_'+code+'.csv';a.click();URL.revokeObjectURL(url)}catch(e){msg(e.message,'error')}};
-</script></body></html>
+
+<section class="panel">
+<h2>Importer un nouveau sujet</h2>
+<p class="muted">Sélectionne le fichier JSON généré pour cette évaluation. Le sujet sera enregistré dans la base de données et pourra ensuite être réutilisé pour créer plusieurs sessions.</p>
+<div class="row">
+<label>Fichier du sujet (.json)<input id="subjectFile" type="file" accept=".json,application/json"></label>
+<button id="importSubject">Importer le sujet</button>
+</div>
+<p id="importMsg" role="status" aria-live="polite"></p>
+<div id="importPreview" class="muted"></div>
+<hr>
+<div class="row">
+<button id="reloadSubjects" class="secondary">Actualiser la liste des sujets</button>
+<span id="subjectCount" class="muted"></span>
+</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Sujet importé</th><th>Description</th><th>Importé le</th></tr></thead>
+<tbody id="subjectRows"><tr><td colspan="3" class="muted">Aucun sujet chargé.</td></tr></tbody>
+</table>
+</div>
+</section>
+
+<section class="panel">
+<h2>Créer une session</h2>
+<div class="row">
+<label>Sujet de l'évaluation
+<select id="subjectSelect" style="min-width:min(380px,85vw)">
+<option value="">Ancienne évaluation Python (banque intégrée)</option>
+</select>
+</label>
+<label>Nom de la session
+<input id="title" value="Évaluation SNT Python" style="min-width:260px">
+</label>
+<label>Durée (minutes)
+<input id="duration" type="number" min="1" max="240" value="45">
+</label>
+<button id="create">Créer et ouvrir la session</button>
+</div>
+<p id="selectedSubjectInfo" class="muted subject-meta">Le mode historique utilise l'ancienne banque de 20 questions.</p>
+<p id="newSession"></p>
+</section>
+
+<section class="panel">
+<h2>Résultats des élèves</h2>
+<div class="row">
+<label>Code de session<input id="code" placeholder="CODE" autocapitalize="characters"></label>
+<button id="refresh" class="secondary">Actualiser</button>
+<button id="close" class="danger">Fermer la session</button>
+<button id="csv">Exporter le CSV</button>
+</div>
+<p id="summary" class="muted"></p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Nom</th><th>Prénom</th><th>État</th><th>Note / 20</th><th>Alertes</th><th>Début</th><th>Fin</th></tr></thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+<p class="muted">Les changements d'onglet sont des alertes à examiner, pas une preuve automatique de fraude.</p>
+</section>
+
+<section class="panel">
+<h2>Journal des événements</h2>
+<div id="events" class="muted">Aucun événement chargé.</div>
+</section>
+
+</div>
+</main>
+
+<script src="config.js"></script>
+<script>
+'use strict';
+
+const API=(window.SNT_API_BASE||'').replace(/\/$/,'');
+const $=id=>document.getElementById(id);
+let adminToken='';
+let subjects=[];
+
+async function call(path,opts={}){
+  if(!API) throw Error('Adresse API absente dans config.js.');
+  const headers={'Content-Type':'application/json','X-Admin-Token':adminToken,...(opts.headers||{})};
+  const r=await fetch(API+path,{...opts,headers});
+  let d={};
+  try{d=await r.json()}catch{}
+  if(!r.ok) throw Error(d.error||('Erreur HTTP '+r.status));
+  return d;
+}
+
+function setMessage(element,text,cls=''){
+  element.className=cls;
+  element.textContent=text;
+}
+
+function esc(s){
+  return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function date(v){return v?new Date(v).toLocaleString('fr-FR'):'—';}
+
+$('connect').onclick=async()=>{
+  adminToken=$('token').value.trim();
+  $('connect').disabled=true;
+  try{
+    await call('/api/admin/check');
+    $('dash').classList.remove('hidden');
+    setMessage($('msg'),'Connexion réussie.','good');
+    await loadSubjects();
+  }catch(e){
+    adminToken='';
+    setMessage($('msg'),e.message,'error');
+  }finally{
+    $('connect').disabled=false;
+  }
+};
+
+async function loadSubjects(){
+  try{
+    const d=await call('/api/admin/subjects');
+    subjects=d.subjects||[];
+    const select=$('subjectSelect');
+    const previous=select.value;
+    select.innerHTML='<option value="">Ancienne évaluation Python (banque intégrée)</option>'+
+      subjects.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.title)+'</option>').join('');
+    if(subjects.some(s=>s.id===previous)) select.value=previous;
+    $('subjectRows').innerHTML=subjects.length
+      ?subjects.map(s=>'<tr><td><strong>'+esc(s.title)+'</strong></td><td>'+esc(s.description||'—')+'</td><td>'+date(s.created_at)+'</td></tr>').join('')
+      :'<tr><td colspan="3" class="muted">Aucun sujet importé pour le moment.</td></tr>';
+    $('subjectCount').textContent=subjects.length+' sujet(s) disponible(s).';
+    updateSelectedSubject();
+  }catch(e){
+    setMessage($('importMsg'),'Impossible de charger les sujets : '+e.message,'error');
+  }
+}
+
+function updateSelectedSubject(){
+  const selected=subjects.find(s=>s.id===$('subjectSelect').value);
+  if(selected){
+    $('title').value=selected.title;
+    $('selectedSubjectInfo').textContent='La session utilisera ce sujet importé. '+(selected.description||'');
+  }else{
+    $('selectedSubjectInfo').textContent='Le mode historique utilise l’ancienne banque de 20 questions.';
+  }
+}
+$('subjectSelect').onchange=updateSelectedSubject;
+$('reloadSubjects').onclick=loadSubjects;
+
+$('importSubject').onclick=async()=>{
+  const file=$('subjectFile').files[0];
+  if(!file){
+    setMessage($('importMsg'),'Choisis d’abord un fichier JSON.','error');
+    return;
+  }
+  $('importSubject').disabled=true;
+  setMessage($('importMsg'),'Lecture et vérification du fichier…');
+  $('importPreview').textContent='';
+  try{
+    const text=await file.text();
+    let subject;
+    try{subject=JSON.parse(text)}catch{throw Error('Le fichier ne contient pas un JSON valide.');}
+    if(!subject||typeof subject!=='object'||Array.isArray(subject)) throw Error('Le contenu JSON doit être un objet.');
+    const questionCount=Array.isArray(subject.questions)?subject.questions.length:0;
+    if(!subject.title||!questionCount) throw Error('Le fichier doit contenir un titre et un tableau questions non vide.');
+    $('importPreview').textContent='Fichier lu : « '+subject.title+' » — '+questionCount+' question(s). Envoi au serveur…';
+    const result=await call('/api/admin/import',{method:'POST',body:JSON.stringify({subject})});
+    setMessage($('importMsg'),'Sujet importé avec succès : '+result.title+' ('+result.questionCount+' questions).','good');
+    $('importPreview').textContent='Le sujet est maintenant enregistré dans la base de données.';
+    $('subjectFile').value='';
+    await loadSubjects();
+    $('subjectSelect').value=result.id;
+    updateSelectedSubject();
+  }catch(e){
+    setMessage($('importMsg'),e.message,'error');
+  }finally{
+    $('importSubject').disabled=false;
+  }
+};
+
+$('create').onclick=async()=>{
+  $('create').disabled=true;
+  try{
+    const duration=Number($('duration').value);
+    if(!Number.isInteger(duration)||duration<1||duration>240) throw Error('La durée doit être un nombre entier entre 1 et 240 minutes.');
+    const payload={
+      title:$('title').value.trim(),
+      durationMinutes:duration,
+      subjectId:$('subjectSelect').value||''
+    };
+    const d=await call('/api/admin/create',{method:'POST',body:JSON.stringify(payload)});
+    $('code').value=d.code;
+    $('newSession').innerHTML='Session créée et ouverte : <span class="code">'+esc(d.code)+'</span> · '+esc(d.durationMinutes)+' min'+(d.title?' · '+esc(d.title):'');
+    await refresh();
+  }catch(e){
+    setMessage($('msg'),e.message,'error');
+  }finally{
+    $('create').disabled=false;
+  }
+};
+
+async function refresh(){
+  const code=$('code').value.trim().toUpperCase();
+  if(!code)return;
+  try{
+    const d=await call('/api/admin/results?code='+encodeURIComponent(code));
+    $('rows').innerHTML=(d.attempts||[]).map(a=>'<tr><td>'+esc(a.last_name)+'</td><td>'+esc(a.first_name)+'</td><td>'+esc(a.status)+'</td><td>'+(a.grade??'—')+'</td><td>'+(a.incidents??0)+'</td><td>'+date(a.started_at)+'</td><td>'+date(a.finished_at)+'</td></tr>').join('');
+    $('summary').textContent=(d.attempts||[]).length+' tentative(s) enregistrée(s).';
+    $('events').innerHTML=(d.events||[]).map(e=>'<p><strong>'+esc(e.kind)+'</strong> · '+esc(e.identity_key)+' · '+date(e.created_at)+'</p>').join('')||'Aucun événement.';
+  }catch(e){
+    setMessage($('msg'),e.message,'error');
+  }
+}
+
+$('refresh').onclick=refresh;
+$('close').onclick=async()=>{
+  const code=$('code').value.trim().toUpperCase();
+  if(!code)return;
+  if(!confirm('Fermer cette session ? Les nouveaux élèves ne pourront plus commencer.'))return;
+  try{
+    await call('/api/admin/close',{method:'POST',body:JSON.stringify({code})});
+    setMessage($('msg'),'Session fermée.','good');
+    await refresh();
+  }catch(e){setMessage($('msg'),e.message,'error');}
+};
+
+$('csv').onclick=async()=>{
+  const code=$('code').value.trim().toUpperCase();
+  if(!code)return;
+  try{
+    const r=await fetch(API+'/api/admin/csv?code='+encodeURIComponent(code),{headers:{'X-Admin-Token':adminToken}});
+    if(!r.ok){
+      let d={};try{d=await r.json()}catch{}
+      throw Error(d.error||'Export impossible');
+    }
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='resultats_'+code+'.csv';a.click();
+    URL.revokeObjectURL(url);
+  }catch(e){setMessage($('msg'),e.message,'error');}
+};
+</script>
+</body>
+</html>

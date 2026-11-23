@@ -76,6 +76,9 @@
 
 💾 La progression (bilan, historique des examens) est enregistrée uniquement dans le navigateur de l'élève ; rien n'est envoyé sur Internet.
 
+🔗 Gestion professeur des TP notés : [Gestion Eval TP Professeur](https://siicpgeamansur.github.io/SNT/admin_evaluation.html)
+
+
 ---
 
 ## 🙏 Remerciements

@@ -31,6 +31,12 @@ table{border-collapse:collapse;width:100%;font-size:.88rem}
 th,td{text-align:left;padding:9px;border-bottom:1px solid #e4eaf1;white-space:nowrap}
 th{background:#f1f5fa}
 .hidden{display:none!important}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.tabs .tab{background:#e7edf5;color:#183b67}
+.tabs .tab.active{background:#205da0;color:white}
+[data-tab-panel].tab-hidden{display:none!important}
+.action-btn{padding:7px 10px;margin:2px;font-size:.82rem}
+
 .subject-meta{margin:9px 0 0}
 .help{margin:8px 0 0}
 hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
@@ -52,6 +58,12 @@ hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
 </section>
 
 <div id="dash" class="hidden">
+<nav class="tabs" aria-label="Navigation professeur">
+<button type="button" class="tab active" data-tab="database">Gestion de la base de données</button>
+<button type="button" class="tab" data-tab="subjects">Importer des sujets</button>
+<button type="button" class="tab" data-tab="create">Créer une session</button>
+<button type="button" class="tab" data-tab="results">Résultats</button>
+</nav>
 
 <section class="panel">
 <h2>Importer un nouveau sujet</h2>
@@ -96,6 +108,50 @@ hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
 </section>
 
 <section class="panel">
+<h2>Sessions créées</h2>
+<p class="muted">Retrouve ici tous les codes. Tu peux les copier, consulter les résultats ou rouvrir une session fermée.</p>
+<div class="row">
+<button id="reloadSessions" class="secondary">Actualiser les sessions</button>
+<span id="sessionCount" class="muted"></span>
+</div>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Sujet / session</th><th>Code</th><th>État</th><th>Créée le</th><th>Durée</th><th>Actions</th></tr></thead>
+<tbody id="sessionRows"><tr><td colspan="6" class="muted">Aucune session chargée.</td></tr></tbody>
+</table>
+</div>
+<p id="sessionMsg" role="status" aria-live="polite"></p>
+<hr>
+<h2>Gestion des sujets importés</h2>
+<p class="muted">Tu peux modifier le titre et la description d'un sujet. La suppression est refusée si une session y fait référence.</p>
+<div class="tablewrap">
+<table>
+<thead><tr><th>Sujet</th><th>Description</th><th>État</th><th>Actions</th></tr></thead>
+<tbody id="dbSubjectRows"><tr><td colspan="4" class="muted">Chargement…</td></tr></tbody>
+</table>
+</div>
+<hr>
+<h2>Repères pour gérer D1 dans Cloudflare</h2>
+<ul class="muted">
+<li>Ouvre <strong>Cloudflare → Storage & databases → D1 SQL Database → snt-evaluation → Console</strong>.</li>
+<li>Pour consulter les sessions : <code>SELECT * FROM sessions ORDER BY created_at DESC;</code></li>
+<li>Pour consulter les sujets : <code>SELECT id, title, description, is_active FROM subjects;</code></li>
+<li>Pour consulter les tentatives : <code>SELECT * FROM attempts ORDER BY started_at DESC;</code></li>
+<li>Pour compter les sessions : <code>SELECT COUNT(*) FROM sessions;</code></li>
+<li>Pour modifier le nom ou la durée d'une session (remplacer le code) :
+<pre><code>UPDATE sessions
+SET title = 'Nouveau nom',
+    duration_minutes = 50
+WHERE code = 'ABC123';</code></pre></li>
+<li>Pour désactiver un sujet sans le supprimer :
+<pre><code>UPDATE subjects
+SET is_active = 0
+WHERE id = 'IDENTIFIANT';</code></pre></li>
+</ul>
+<p class="muted"><strong>Conseil :</strong> privilégie les boutons de cette page. Avant toute requête SQL de modification ou suppression, vérifie la table et fais une copie de sauvegarde. Une suppression de session efface aussi ses tentatives et son journal d'événements.</p>
+</section>
+
+<section class="panel">
 <h2>Résultats des élèves</h2>
 <div class="row">
 <label>Code de session<input id="code" placeholder="CODE" autocapitalize="characters"></label>
@@ -129,6 +185,15 @@ const API=(window.SNT_API_BASE||'').replace(/\/$/,'');
 const $=id=>document.getElementById(id);
 let adminToken='';
 let subjects=[];
+let sessions=[];
+
+function activateTab(name){
+  document.querySelectorAll('[data-tab-panel]').forEach(p=>p.classList.toggle('tab-hidden',p.dataset.tabPanel!==name));
+  document.querySelectorAll('.tab[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  if(name==='database') loadDatabase();
+}
+document.querySelectorAll('.tab[data-tab]').forEach(b=>b.addEventListener('click',()=>activateTab(b.dataset.tab)));
+
 
 async function call(path,opts={}){
   if(!API) throw Error('Adresse API absente dans config.js.');
@@ -158,6 +223,7 @@ $('connect').onclick=async()=>{
     $('dash').classList.remove('hidden');
     setMessage($('msg'),'Connexion réussie.','good');
     await loadSubjects();
+    await loadDatabase();
   }catch(e){
     adminToken='';
     setMessage($('msg'),e.message,'error');
@@ -184,6 +250,35 @@ async function loadSubjects(){
     setMessage($('importMsg'),'Impossible de charger les sujets : '+e.message,'error');
   }
 }
+
+async function loadDatabase(){
+  try{
+    const [sd,subd]=await Promise.all([call('/api/admin/sessions'),call('/api/admin/subjects')]);
+    sessions=sd.sessions||[];
+    $('sessionRows').innerHTML=sessions.length?sessions.map(s=>`<tr>
+      <td><strong>${esc(s.subject_title||s.title)}</strong><br><span class="muted">${esc(s.title)}</span></td>
+      <td><span class="code">${esc(s.code)}</span> <button class="secondary action-btn" onclick="copySessionCode('${esc(s.code)}')">Copier</button></td>
+      <td>${s.is_open?'Ouverte':'Fermée'}</td><td>${date(s.created_at)}</td><td>${esc(s.duration_minutes)} min</td>
+      <td><button class="secondary action-btn" onclick="editSession('${esc(s.code)}',decodeURIComponent('${encodeURIComponent(s.title)}'),${Number(s.duration_minutes)||45})">Modifier</button>
+      ${s.is_open?`<button class="secondary action-btn" onclick="toggleSession('${esc(s.code)}',false)">Fermer</button>`:`<button class="secondary action-btn" onclick="toggleSession('${esc(s.code)}',true)">Rouvrir</button>`}
+      <button class="secondary action-btn" onclick="selectSession('${esc(s.code)}')">Résultats</button>
+      <button class="danger action-btn" onclick="deleteSession('${esc(s.code)}')">Supprimer</button></td></tr>`).join('')
+      :'<tr><td colspan="6" class="muted">Aucune session.</td></tr>';
+    $('sessionCount').textContent=sessions.length+' session(s).';
+    const list=subd.subjects||[];
+    $('dbSubjectRows').innerHTML=list.length?list.map(s=>`<tr><td><strong>${esc(s.title)}</strong><br><small>${esc(s.id)}</small></td><td>${esc(s.description||'—')}</td><td>${s.is_active?'Actif':'Désactivé'}</td><td>
+      <button class="secondary action-btn" onclick="editSubject('${esc(s.id)}',decodeURIComponent('${encodeURIComponent(s.title)}'),decodeURIComponent('${encodeURIComponent(s.description||'')}'))">Modifier</button>
+      <button class="danger action-btn" onclick="deleteSubject('${esc(s.id)}')">Supprimer</button></td></tr>`).join('')
+      :'<tr><td colspan="4" class="muted">Aucun sujet.</td></tr>';
+  }catch(e){setMessage($('sessionMsg'),'Erreur de chargement : '+e.message,'error');}
+}
+window.copySessionCode=async code=>{try{await navigator.clipboard.writeText(code);setMessage($('sessionMsg'),'Code '+code+' copié.','good');}catch{ $('code').value=code;setMessage($('sessionMsg'),'Code placé dans le champ Résultats.','good');}};
+window.selectSession=code=>{$('code').value=code;activateTab('results');refresh();};
+window.toggleSession=async(code,open)=>{try{await call(open?'/api/admin/open':'/api/admin/close',{method:'POST',body:JSON.stringify({code})});setMessage($('sessionMsg'),open?'Session rouverte.':'Session fermée.','good');await loadDatabase();}catch(e){setMessage($('sessionMsg'),e.message,'error');}};
+window.editSession=async(code,title,duration)=>{const t=prompt('Nom de la session :',title);if(t===null)return;const d=prompt('Durée en minutes (1 à 240) :',duration);if(d===null)return;try{await call('/api/admin/session-update',{method:'POST',body:JSON.stringify({code,title:t,durationMinutes:Number(d)})});setMessage($('sessionMsg'),'Session modifiée.','good');await loadDatabase();}catch(e){setMessage($('sessionMsg'),e.message,'error');}};
+window.deleteSession=async code=>{if(!confirm('Supprimer définitivement la session '+code+' ?'))return;if(!confirm('ATTENTION : cette action efface aussi toutes les tentatives, notes et événements de cette session. Continuer ?'))return;try{await call('/api/admin/session-delete',{method:'POST',body:JSON.stringify({code})});setMessage($('sessionMsg'),'Session et données associées supprimées.','good');await loadDatabase();}catch(e){setMessage($('sessionMsg'),e.message,'error');}};
+window.editSubject=async(id,title,description)=>{const t=prompt('Titre du sujet :',title);if(t===null)return;const d=prompt('Description :',description);if(d===null)return;try{await call('/api/admin/subject-update',{method:'POST',body:JSON.stringify({id,title:t,description:d})});setMessage($('sessionMsg'),'Sujet modifié.','good');await loadDatabase();await loadSubjects();}catch(e){setMessage($('sessionMsg'),e.message,'error');}};
+window.deleteSubject=async id=>{if(!confirm('Supprimer ce sujet ? La suppression est impossible s’il est lié à une session.'))return;try{await call('/api/admin/subject-delete',{method:'POST',body:JSON.stringify({id})});setMessage($('sessionMsg'),'Sujet supprimé.','good');await loadDatabase();await loadSubjects();}catch(e){setMessage($('sessionMsg'),e.message,'error');}};
 
 function updateSelectedSubject(){
   const selected=subjects.find(s=>s.id===$('subjectSelect').value);
@@ -242,12 +337,64 @@ $('create').onclick=async()=>{
     $('code').value=d.code;
     $('newSession').innerHTML='Session créée et ouverte : <span class="code">'+esc(d.code)+'</span> · '+esc(d.durationMinutes)+' min'+(d.title?' · '+esc(d.title):'');
     await refresh();
+    await loadDatabase();
   }catch(e){
     setMessage($('msg'),e.message,'error');
   }finally{
     $('create').disabled=false;
   }
 };
+
+
+async function loadSessions(){
+  try{
+    const d=await call('/api/admin/sessions');
+    const sessions=d.sessions||[];
+    $('sessionCount').textContent=sessions.length+' session(s) enregistrée(s).';
+    $('sessionRows').innerHTML=sessions.length?sessions.map(s=>{
+      const state=s.is_open?'<span class="good">Ouverte</span>':'<span class="muted">Fermée</span>';
+      const toggle=s.is_open
+        ?'<button class="danger" data-action="close" data-code="'+esc(s.code)+'">Fermer</button>'
+        :'<button data-action="open" data-code="'+esc(s.code)+'">Rouvrir</button>';
+      return '<tr><td><strong>'+esc(s.subject_title||s.title||'Évaluation historique')+'</strong><br><span class="muted">'+esc(s.title||'')+'</span></td>'+
+        '<td><span class="code" style="font-size:1.05rem">'+esc(s.code)+'</span></td><td>'+state+'</td>'+
+        '<td>'+date(s.created_at)+'</td><td>'+esc(s.duration_minutes)+' min</td>'+
+        '<td><div class="row" style="align-items:center;gap:6px">'+
+        '<button class="secondary" data-action="copy" data-code="'+esc(s.code)+'">Copier</button>'+
+        '<button class="secondary" data-action="results" data-code="'+esc(s.code)+'">Résultats</button>'+toggle+'</div></td></tr>';
+    }).join(''):'<tr><td colspan="6" class="muted">Aucune session créée pour le moment.</td></tr>';
+  }catch(e){setMessage($('sessionMsg'),'Impossible de charger les sessions : '+e.message,'error');}
+}
+$('reloadSessions').onclick=loadDatabase;
+$('sessionRows').addEventListener('click',async event=>{
+  const button=event.target.closest('button[data-action]');
+  if(!button)return;
+  const code=button.dataset.code, action=button.dataset.action;
+  try{
+    if(action==='copy'){
+      await navigator.clipboard.writeText(code);
+      setMessage($('sessionMsg'),'Code '+code+' copié.','good');
+      return;
+    }
+    if(action==='results'){
+      $('code').value=code;
+      await refresh();
+      $('summary').scrollIntoView({behavior:'smooth',block:'center'});
+      return;
+    }
+    if(action==='close'){
+      if(!confirm('Fermer la session '+code+' ?'))return;
+      await call('/api/admin/close',{method:'POST',body:JSON.stringify({code})});
+      setMessage($('sessionMsg'),'Session '+code+' fermée.','good');
+    }
+    if(action==='open'){
+      if(!confirm('Rouvrir la session '+code+' avec son ancien code ? Les tentatives déjà enregistrées seront conservées.'))return;
+      await call('/api/admin/open',{method:'POST',body:JSON.stringify({code})});
+      setMessage($('sessionMsg'),'Session '+code+' rouverte.','good');
+    }
+    await loadDatabase();
+  }catch(e){setMessage($('sessionMsg'),e.message,'error');}
+});
 
 async function refresh(){
   const code=$('code').value.trim().toUpperCase();
@@ -271,6 +418,7 @@ $('close').onclick=async()=>{
     await call('/api/admin/close',{method:'POST',body:JSON.stringify({code})});
     setMessage($('msg'),'Session fermée.','good');
     await refresh();
+    await loadDatabase();
   }catch(e){setMessage($('msg'),e.message,'error');}
 };
 

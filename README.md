@@ -41,7 +41,9 @@
 
 | Activité | Description |
 |---|---|
-| ✅ [Entraînement et interro SNT en Python](https://siicpgeamansur.github.io/SNT/entrainement_snt_interro_ds.html) | 108 questions Python qui illustrent les notions de chaque thème, sur 3 niveaux (★, ★★, ★★★). **Mode entraînement** avec corrigés et explications détaillées, **mode examen** chronométré avec correction finale et note sur 20, et **bilan** de progression |
+| [✅ [Entraînement et interro SNT en Python](https://siicpgeamansur.github.io/SNT/entrainement_snt_interro_ds.html) | 108 questions Python qui illustrent les notions de chaque thème, sur 3 niveaux (★, ★★, ★★★). **Mode entraînement** avec corrigés et explications détaillées, **mode examen** chronométré avec correction finale et note sur 20, et **bilan** de progression |
+| [Lien évaluation TP](https://siicpgeamansur.github.io/SNT/evaluation_snt_python.html) | Evaluation notée de TP : le code de session vous sera donné par le professeur |
+
 
 ### 🎮 Bonus
 

@@ -63,9 +63,10 @@ hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
 <button type="button" class="tab" data-tab="subjects">Importer des sujets</button>
 <button type="button" class="tab" data-tab="create">Créer une session</button>
 <button type="button" class="tab" data-tab="results">Résultats</button>
+<button type="button" class="tab" data-tab="help">Mode d’emploi</button>
 </nav>
 
-<section class="panel">
+<section class="panel" data-tab-panel="subjects">
 <h2>Importer un nouveau sujet</h2>
 <p class="muted">Sélectionne le fichier JSON généré pour cette évaluation. Le sujet sera enregistré dans la base de données et pourra ensuite être réutilisé pour créer plusieurs sessions.</p>
 <div class="row">
@@ -87,7 +88,7 @@ hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
 </div>
 </section>
 
-<section class="panel">
+<section class="panel" data-tab-panel="create">
 <h2>Créer une session</h2>
 <div class="row">
 <label>Sujet de l'évaluation
@@ -101,13 +102,20 @@ hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
 <label>Durée (minutes)
 <input id="duration" type="number" min="1" max="240" value="45">
 </label>
+<label>Ordre des questions
+<select id="shuffleQuestions">
+<option value="1" selected>Aléatoire (interrogation)</option>
+<option value="0">Ordre du sujet (TP noté)</option>
+</select>
+</label>
 <button id="create">Créer et ouvrir la session</button>
 </div>
 <p id="selectedSubjectInfo" class="muted subject-meta">Le mode historique utilise l'ancienne banque de 20 questions.</p>
+<p class="muted help">Ce réglage concerne l’ordre des questions. Les propositions des QCM restent mélangées indépendamment.</p>
 <p id="newSession"></p>
 </section>
 
-<section class="panel">
+<section class="panel" data-tab-panel="database">
 <h2>Sessions créées</h2>
 <p class="muted">Retrouve ici tous les codes. Tu peux les copier, consulter les résultats ou rouvrir une session fermée.</p>
 <div class="row">
@@ -116,8 +124,8 @@ hr{border:0;border-top:1px solid #e4eaf1;margin:18px 0}
 </div>
 <div class="tablewrap">
 <table>
-<thead><tr><th>Sujet / session</th><th>Code</th><th>État</th><th>Créée le</th><th>Durée</th><th>Actions</th></tr></thead>
-<tbody id="sessionRows"><tr><td colspan="6" class="muted">Aucune session chargée.</td></tr></tbody>
+<thead><tr><th>Sujet / session</th><th>Code</th><th>État</th><th>Créée le</th><th>Durée</th><th>Ordre des questions</th><th>Actions</th></tr></thead>
+<tbody id="sessionRows"><tr><td colspan="7" class="muted">Aucune session chargée.</td></tr></tbody>
 </table>
 </div>
 <p id="sessionMsg" role="status" aria-live="polite"></p>
@@ -151,7 +159,7 @@ WHERE id = 'IDENTIFIANT';</code></pre></li>
 <p class="muted"><strong>Conseil :</strong> privilégie les boutons de cette page. Avant toute requête SQL de modification ou suppression, vérifie la table et fais une copie de sauvegarde. Une suppression de session efface aussi ses tentatives et son journal d'événements.</p>
 </section>
 
-<section class="panel">
+<section class="panel" data-tab-panel="results">
 <h2>Résultats des élèves</h2>
 <div class="row">
 <label>Code de session<input id="code" placeholder="CODE" autocapitalize="characters"></label>
@@ -167,11 +175,36 @@ WHERE id = 'IDENTIFIANT';</code></pre></li>
 </table>
 </div>
 <p class="muted">Les changements d'onglet sont des alertes à examiner, pas une preuve automatique de fraude.</p>
-</section>
-
-<section class="panel">
+<hr>
 <h2>Journal des événements</h2>
 <div id="events" class="muted">Aucun événement chargé.</div>
+</section>
+
+<section class="panel" data-tab-panel="help">
+<h2>Mode d’emploi — gérer les interrogations et les TP notés</h2>
+<h3>1. Importer un sujet</h3>
+<p>Dans « Importer des sujets », sélectionne le fichier JSON préparé pour le TP ou l’interrogation, puis importe-le. Le sujet est conservé dans la base et peut servir à créer plusieurs sessions. Il n’est pas nécessaire de le réimporter pour chaque classe ou date.</p>
+<h3>2. Créer une session</h3>
+<p>Choisis le sujet, donne un nom à la session et fixe la durée. Le réglage « Ordre des questions » permet de choisir :</p>
+<ul>
+<li><strong>Aléatoire (interrogation)</strong> : l’ordre des questions est mélangé individuellement pour chaque élève.</li>
+<li><strong>Ordre du sujet (TP noté)</strong> : tous les élèves retrouvent les questions dans l’ordre du fichier JSON.</li>
+</ul>
+<p>Le mélange des propositions d’un QCM reste indépendant : les options peuvent être présentées dans un ordre différent selon les élèves. Le choix d’ordre des questions est enregistré pour la session et ne modifie pas le sujet importé.</p>
+<h3>3. Distribuer le code et gérer plusieurs demi-classes</h3>
+<p>La session est ouverte dès sa création. Communique le code aux élèves uniquement lorsque tu souhaites commencer. Pour deux demi-classes passant à des dates différentes, tu peux utiliser la même session : ferme-la après la première demi-classe, puis rouvre-la le jour de la seconde. Les tentatives déjà enregistrées sont conservées et les nouveaux élèves utilisent le même code.</p>
+<p><strong>Attention :</strong> fermer une session empêche les nouveaux élèves de commencer, mais n’interrompt pas de force les tentatives déjà en cours. Si tu souhaites des résultats séparés par demi-classe, crée plutôt deux sessions distinctes à partir du même sujet.</p>
+<h3>4. Consulter les résultats</h3>
+<p>Dans « Résultats », saisis le code de session, puis actualise. Tu peux consulter les notes, les états, les alertes et le journal des événements, ou exporter les résultats au format CSV.</p>
+<h3>5. Fermer, rouvrir ou supprimer</h3>
+<ul>
+<li><strong>Fermer / Rouvrir</strong> : bloque ou autorise les nouvelles connexions. Cela ne supprime aucune donnée.</li>
+<li><strong>Modifier</strong> : permet de changer le titre et la durée de la session. La modification de durée ne change pas le délai déjà attribué aux élèves ayant commencé.</li>
+<li><strong>Supprimer</strong> : efface définitivement la session, les tentatives, les notes et les événements associés. Cette action est irréversible.</li>
+</ul>
+<h3>6. Gérer les sujets et la base D1</h3>
+<p>Dans « Gestion de la base de données », tu peux modifier les titres/descriptions des sujets. La suppression d’un sujet est refusée tant qu’une session lui est associée. Pour les opérations directes dans Cloudflare D1, privilégie les consultations SQL ; avant toute modification ou suppression, réalise une sauvegarde et vérifie soigneusement la requête.</p>
+<p>Le jeton <code>ADMIN_TOKEN</code> doit rester confidentiel : ne le place jamais dans le dépôt GitHub ni dans un fichier distribué aux élèves.</p>
 </section>
 
 </div>
@@ -223,6 +256,7 @@ $('connect').onclick=async()=>{
     $('dash').classList.remove('hidden');
     setMessage($('msg'),'Connexion réussie.','good');
     await loadSubjects();
+    activateTab('database');
     await loadDatabase();
   }catch(e){
     adminToken='';
@@ -255,15 +289,20 @@ async function loadDatabase(){
   try{
     const [sd,subd]=await Promise.all([call('/api/admin/sessions'),call('/api/admin/subjects')]);
     sessions=sd.sessions||[];
-    $('sessionRows').innerHTML=sessions.length?sessions.map(s=>`<tr>
+    $('sessionRows').innerHTML=sessions.length?sessions.map(s=>{
+      const isOpen = s.is_open === true || Number(s.is_open) === 1;
+      const orderLabel = Number(s.shuffle_questions ?? 1) === 1 ? 'Aléatoire' : 'Ordre du sujet';
+      return `<tr>
       <td><strong>${esc(s.subject_title||s.title)}</strong><br><span class="muted">${esc(s.title)}</span></td>
       <td><span class="code">${esc(s.code)}</span> <button class="secondary action-btn" onclick="copySessionCode('${esc(s.code)}')">Copier</button></td>
-      <td>${s.is_open?'Ouverte':'Fermée'}</td><td>${date(s.created_at)}</td><td>${esc(s.duration_minutes)} min</td>
+      <td>${isOpen?'Ouverte':'Fermée'}</td><td>${date(s.created_at)}</td><td>${esc(s.duration_minutes)} min</td>
+      <td>${orderLabel}</td>
       <td><button class="secondary action-btn" onclick="editSession('${esc(s.code)}',decodeURIComponent('${encodeURIComponent(s.title)}'),${Number(s.duration_minutes)||45})">Modifier</button>
-      ${s.is_open?`<button class="secondary action-btn" onclick="toggleSession('${esc(s.code)}',false)">Fermer</button>`:`<button class="secondary action-btn" onclick="toggleSession('${esc(s.code)}',true)">Rouvrir</button>`}
+      ${isOpen?`<button class="secondary action-btn" onclick="toggleSession('${esc(s.code)}',false)">Fermer</button>`:`<button class="secondary action-btn" onclick="toggleSession('${esc(s.code)}',true)">Rouvrir</button>`}
       <button class="secondary action-btn" onclick="selectSession('${esc(s.code)}')">Résultats</button>
-      <button class="danger action-btn" onclick="deleteSession('${esc(s.code)}')">Supprimer</button></td></tr>`).join('')
-      :'<tr><td colspan="6" class="muted">Aucune session.</td></tr>';
+      <button class="danger action-btn" onclick="deleteSession('${esc(s.code)}')">Supprimer</button></td></tr>`;
+    }).join('')
+      :'<tr><td colspan="7" class="muted">Aucune session.</td></tr>';
     $('sessionCount').textContent=sessions.length+' session(s).';
     const list=subd.subjects||[];
     $('dbSubjectRows').innerHTML=list.length?list.map(s=>`<tr><td><strong>${esc(s.title)}</strong><br><small>${esc(s.id)}</small></td><td>${esc(s.description||'—')}</td><td>${s.is_active?'Actif':'Désactivé'}</td><td>
@@ -331,7 +370,8 @@ $('create').onclick=async()=>{
     const payload={
       title:$('title').value.trim(),
       durationMinutes:duration,
-      subjectId:$('subjectSelect').value||''
+      subjectId:$('subjectSelect').value||'',
+      shuffleQuestions:$('shuffleQuestions').value === '1'
     };
     const d=await call('/api/admin/create',{method:'POST',body:JSON.stringify(payload)});
     $('code').value=d.code;
@@ -345,56 +385,6 @@ $('create').onclick=async()=>{
   }
 };
 
-
-async function loadSessions(){
-  try{
-    const d=await call('/api/admin/sessions');
-    const sessions=d.sessions||[];
-    $('sessionCount').textContent=sessions.length+' session(s) enregistrée(s).';
-    $('sessionRows').innerHTML=sessions.length?sessions.map(s=>{
-      const state=s.is_open?'<span class="good">Ouverte</span>':'<span class="muted">Fermée</span>';
-      const toggle=s.is_open
-        ?'<button class="danger" data-action="close" data-code="'+esc(s.code)+'">Fermer</button>'
-        :'<button data-action="open" data-code="'+esc(s.code)+'">Rouvrir</button>';
-      return '<tr><td><strong>'+esc(s.subject_title||s.title||'Évaluation historique')+'</strong><br><span class="muted">'+esc(s.title||'')+'</span></td>'+
-        '<td><span class="code" style="font-size:1.05rem">'+esc(s.code)+'</span></td><td>'+state+'</td>'+
-        '<td>'+date(s.created_at)+'</td><td>'+esc(s.duration_minutes)+' min</td>'+
-        '<td><div class="row" style="align-items:center;gap:6px">'+
-        '<button class="secondary" data-action="copy" data-code="'+esc(s.code)+'">Copier</button>'+
-        '<button class="secondary" data-action="results" data-code="'+esc(s.code)+'">Résultats</button>'+toggle+'</div></td></tr>';
-    }).join(''):'<tr><td colspan="6" class="muted">Aucune session créée pour le moment.</td></tr>';
-  }catch(e){setMessage($('sessionMsg'),'Impossible de charger les sessions : '+e.message,'error');}
-}
-$('reloadSessions').onclick=loadDatabase;
-$('sessionRows').addEventListener('click',async event=>{
-  const button=event.target.closest('button[data-action]');
-  if(!button)return;
-  const code=button.dataset.code, action=button.dataset.action;
-  try{
-    if(action==='copy'){
-      await navigator.clipboard.writeText(code);
-      setMessage($('sessionMsg'),'Code '+code+' copié.','good');
-      return;
-    }
-    if(action==='results'){
-      $('code').value=code;
-      await refresh();
-      $('summary').scrollIntoView({behavior:'smooth',block:'center'});
-      return;
-    }
-    if(action==='close'){
-      if(!confirm('Fermer la session '+code+' ?'))return;
-      await call('/api/admin/close',{method:'POST',body:JSON.stringify({code})});
-      setMessage($('sessionMsg'),'Session '+code+' fermée.','good');
-    }
-    if(action==='open'){
-      if(!confirm('Rouvrir la session '+code+' avec son ancien code ? Les tentatives déjà enregistrées seront conservées.'))return;
-      await call('/api/admin/open',{method:'POST',body:JSON.stringify({code})});
-      setMessage($('sessionMsg'),'Session '+code+' rouverte.','good');
-    }
-    await loadDatabase();
-  }catch(e){setMessage($('sessionMsg'),e.message,'error');}
-});
 
 async function refresh(){
   const code=$('code').value.trim().toUpperCase();
